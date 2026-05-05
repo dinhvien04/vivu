@@ -3,8 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import helmet from '@fastify/helmet';
 import { AppModule } from './app.module';
+import { applySecurityHeaders } from './common/security-headers';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -12,7 +12,7 @@ async function bootstrap() {
     new FastifyAdapter({ trustProxy: true }),
   );
 
-  await app.register(helmet);
+  applySecurityHeaders(app.getHttpAdapter().getInstance());
 
   const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
     .split(',')
