@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: vivu-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vivu
+      POSTGRES_PASSWORD: vivu
+      POSTGRES_DB: vivu
+    ports:
+      - '5432:5432'
+    volumes:
+      - vivu_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: vivu-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+
+volumes:
+  vivu_db_data:

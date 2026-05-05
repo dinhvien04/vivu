@@ -1,0 +1,189 @@
+// Prisma schema for Vivu API
+// Note: PostGIS-specific types (geometry/geography) are not first-class in Prisma.
+// We store lat/lng as Float for now; later we can add a raw migration to attach
+// a geography(Point, 4326) column + GIST index to the `places` table.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  editor
+  admin
+}
+
+enum PlaceStatus {
+  draft
+  published
+  archived
+}
+
+enum ReviewStatus {
+  visible
+  hidden
+  reported
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  role         Role     @default(user)
+  locale       String   @default("vi")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reviews     Review[]
+  collections Collection[]
+  favorites   Favorite[]
+  questions   Question[]
+  answers     Answer[]
+}
+
+model Region {
+  id       String   @id @default(cuid())
+  slug     String   @unique
+  nameVi   String
+  nameEn   String
+  parentId String?
+  parent   Region?  @relation("RegionParent", fields: [parentId], references: [id])
+  children Region[] @relation("RegionParent")
+  places   Place[]
+}
+
+model Category {
+  id     String         @id @default(cuid())
+  slug   String         @unique
+  nameVi String
+  nameEn String
+  icon   String?
+  places PlaceCategory[]
+}
+
+model Place {
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  titleVi        String
+  titleEn        String?
+  summaryVi      String?
+  summaryEn      String?
+  descriptionVi  String?
+  descriptionEn  String?
+  regionId       String
+  region         Region      @relation(fields: [regionId], references: [id])
+  address        String?
+  lat            Float?
+  lng            Float?
+  bestSeasons    String[]    @default([])
+  status         PlaceStatus @default(draft)
+  heroImageUrl   String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  categories  PlaceCategory[]
+  reviews     Review[]
+  questions   Question[]
+  favorites   Favorite[]
+  collectionItems CollectionItem[]
+
+  @@index([regionId, status])
+  @@index([status, updatedAt])
+}
+
+model PlaceCategory {
+  placeId    String
+  categoryId String
+  place      Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([placeId, categoryId])
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  placeId   String
+  userId    String
+  rating    Int
+  content   String
+  status    ReviewStatus @default(visible)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+  likes ReviewLike[]
+
+  @@index([placeId, createdAt])
+}
+
+model ReviewLike {
+  reviewId String
+  userId   String
+  createdAt DateTime @default(now())
+  review   Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@id([reviewId, userId])
+}
+
+model Question {
+  id        String   @id @default(cuid())
+  placeId   String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+  answers   Answer[]
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  content    String
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  coverUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  items       CollectionItem[]
+}
+
+model CollectionItem {
+  collectionId String
+  placeId      String
+  position     Int     @default(0)
+  note         String?
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  place        Place      @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, placeId])
+}
+
+model Favorite {
+  userId    String
+  placeId   String
+  createdAt DateTime @default(now())
+  user      User  @relation(fields: [userId], references: [id])
+  place     Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, placeId])
+}
