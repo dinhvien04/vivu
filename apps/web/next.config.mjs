@@ -8,7 +8,9 @@ const nextConfig = {
     ],
   },
   experimental: {
-    typedRoutes: true,
+    // typedRoutes disabled while routes are still being scaffolded.
+    // Re-enable once route inventory stabilises.
+    typedRoutes: false,
   },
 };
 
