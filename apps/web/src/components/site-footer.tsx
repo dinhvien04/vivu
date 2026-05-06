@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Icon } from './icon';
 
@@ -31,14 +32,14 @@ export function SiteFooter() {
     <footer className="border-t border-outline-variant bg-surface-container">
       <div className="mx-auto flex w-full max-w-container-max flex-col items-start justify-between gap-12 px-margin-mobile py-section-gap md:flex-row md:px-margin-desktop">
         <div className="max-w-sm space-y-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-on-primary"
-            >
-              <span className="font-display text-sm font-extrabold tracking-tight">V</span>
-            </span>
-            <span className="font-display text-h3 font-bold text-primary">Vivu</span>
+          <Link href="/" className="flex items-center" aria-label="Vivu">
+            <Image
+              src="/vivu-logo.png"
+              alt="Vivu"
+              width={708}
+              height={274}
+              className="h-8 w-auto object-contain"
+            />
           </Link>
           <p className="font-sans leading-relaxed text-on-secondary-fixed-variant">
             © 2024 Vivu. Khám phá vẻ đẹp Việt Nam qua lăng kính bản địa. Chúng tôi cung cấp dữ liệu
