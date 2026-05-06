@@ -43,10 +43,7 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-6">
           <div className="relative hidden lg:block">
-            <Icon
-              name="search"
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-            />
+            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
             <input
               type="text"
               placeholder="Tìm kiếm địa danh..."

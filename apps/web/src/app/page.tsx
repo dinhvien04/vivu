@@ -146,8 +146,8 @@ export default function HomePage() {
               </div>
               <h3 className="mb-4 font-h3 text-h3">Sổ tay cá nhân</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">
-                Lưu trữ địa điểm yêu thích, tạo bộ sưu tập theo lịch trình riêng và chia sẻ đánh
-                giá thực tế với cộng đồng du lịch.
+                Lưu trữ địa điểm yêu thích, tạo bộ sưu tập theo lịch trình riêng và chia sẻ đánh giá
+                thực tế với cộng đồng du lịch.
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {[

@@ -41,8 +41,8 @@ export function SiteFooter() {
             <span className="font-display text-h3 font-bold text-primary">Vivu</span>
           </Link>
           <p className="font-sans leading-relaxed text-on-secondary-fixed-variant">
-            © 2024 Vivu. Khám phá vẻ đẹp Việt Nam qua lăng kính bản địa. Chúng tôi cung cấp dữ
-            liệu tra cứu thuần túy để bạn tự do thiết kế hành trình của mình.
+            © 2024 Vivu. Khám phá vẻ đẹp Việt Nam qua lăng kính bản địa. Chúng tôi cung cấp dữ liệu
+            tra cứu thuần túy để bạn tự do thiết kế hành trình của mình.
           </p>
         </div>
 
