@@ -11,7 +11,13 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push --skip-generate --accept-data-loss",
+    "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
+    "seed:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-images.ts"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts"
   },
   "dependencies": {
     "@fastify/static": "^7.0.4",
@@ -25,6 +31,7 @@
     "@vivu/types": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "cloudinary": "^2.10.0",
     "fastify": "^4.28.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

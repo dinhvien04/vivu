@@ -88,14 +88,34 @@ model Place {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
-  categories  PlaceCategory[]
-  reviews     Review[]
-  questions   Question[]
-  favorites   Favorite[]
+  photos          Photo[]
+  categories      PlaceCategory[]
+  reviews         Review[]
+  questions       Question[]
+  favorites       Favorite[]
   collectionItems CollectionItem[]
 
   @@index([regionId, status])
   @@index([status, updatedAt])
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  placeId   String
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  // Public URL on Cloudinary (or any CDN). Resize/format params should be
+  // appended on the client via the helper in apps/web.
+  url       String
+  // Cloudinary public_id, used for transformations + deletes.
+  publicId  String?
+  width     Int?
+  height    Int?
+  alt       String?
+  position  Int      @default(0)
+  isCover   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([placeId, position])
 }
 
 model PlaceCategory {
