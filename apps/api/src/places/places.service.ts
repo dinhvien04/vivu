@@ -1,94 +1,128 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import type {
+  Place as PrismaPlace,
+  Photo as PrismaPhoto,
+  Region as PrismaRegion,
+} from '@prisma/client';
 import type { Paginated, Place } from '@vivu/types';
+import { PrismaService } from '../prisma/prisma.service';
 import { ListPlacesQueryDto } from './dto/list-places.query.dto';
 
-const NOW = new Date('2026-01-01T00:00:00.000Z').toISOString();
+type PlaceWithRelations = PrismaPlace & {
+  region: PrismaRegion;
+  photos: PrismaPhoto[];
+  categories: {
+    category: { id: string; slug: string; nameVi: string; nameEn: string; icon: string | null };
+  }[];
+};
 
-const SEED_PLACES: Place[] = [
-  {
-    id: 'p_001',
-    slug: 'vinh-ha-long',
-    titleVi: 'Vịnh Hạ Long',
-    titleEn: 'Ha Long Bay',
-    summaryVi: 'Di sản thiên nhiên thế giới với hàng nghìn đảo đá vôi.',
-    summaryEn: 'A UNESCO world heritage site with thousands of limestone islands.',
-    descriptionVi: null,
-    descriptionEn: null,
-    regionId: 'r_quang_ninh',
-    address: 'Quảng Ninh',
-    geo: { lat: 20.9101, lng: 107.1839 },
-    bestSeasons: ['spring', 'autumn'],
-    status: 'published',
-    heroImageUrl: null,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: 'p_002',
-    slug: 'da-lat',
-    titleVi: 'Đà Lạt',
-    titleEn: 'Da Lat',
-    summaryVi: 'Thành phố ngàn hoa, khí hậu mát mẻ quanh năm.',
-    summaryEn: 'The city of a thousand flowers with cool weather year-round.',
-    descriptionVi: null,
-    descriptionEn: null,
-    regionId: 'r_lam_dong',
-    address: 'Lâm Đồng',
-    geo: { lat: 11.9404, lng: 108.4583 },
-    bestSeasons: ['winter', 'spring'],
-    status: 'published',
-    heroImageUrl: null,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: 'p_003',
-    slug: 'pho-co-hoi-an',
-    titleVi: 'Phố cổ Hội An',
-    titleEn: 'Hoi An Ancient Town',
-    summaryVi: 'Phố cổ ven sông với đèn lồng và kiến trúc giao thoa Đông – Tây.',
-    summaryEn: 'A riverside ancient town famous for lanterns and east-west architecture.',
-    descriptionVi: null,
-    descriptionEn: null,
-    regionId: 'r_quang_nam',
-    address: 'Quảng Nam',
-    geo: { lat: 15.8801, lng: 108.338 },
-    bestSeasons: ['spring', 'autumn'],
-    status: 'published',
-    heroImageUrl: null,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
+function toApiPlace(p: PlaceWithRelations): Place {
+  return {
+    id: p.id,
+    slug: p.slug,
+    titleVi: p.titleVi,
+    titleEn: p.titleEn,
+    summaryVi: p.summaryVi,
+    summaryEn: p.summaryEn,
+    descriptionVi: p.descriptionVi,
+    descriptionEn: p.descriptionEn,
+    regionId: p.regionId,
+    region: {
+      id: p.region.id,
+      slug: p.region.slug,
+      nameVi: p.region.nameVi,
+      nameEn: p.region.nameEn,
+      parentId: p.region.parentId,
+    },
+    address: p.address,
+    geo: p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null,
+    bestSeasons: p.bestSeasons,
+    status: p.status,
+    heroImageUrl: p.heroImageUrl,
+    photos: p.photos.map((ph) => ({
+      id: ph.id,
+      url: ph.url,
+      publicId: ph.publicId,
+      width: ph.width,
+      height: ph.height,
+      alt: ph.alt,
+      position: ph.position,
+      isCover: ph.isCover,
+    })),
+    categories: p.categories.map((c) => ({
+      id: c.category.id,
+      slug: c.category.slug,
+      nameVi: c.category.nameVi,
+      nameEn: c.category.nameEn,
+      icon: c.category.icon,
+    })),
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  };
+}
 
 @Injectable()
 export class PlacesService {
-  list(query: ListPlacesQueryDto): Paginated<Place> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async list(query: ListPlacesQueryDto): Promise<Paginated<Place>> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
-    const q = query.q?.toLowerCase().trim();
+    const skip = (page - 1) * pageSize;
 
-    let filtered = SEED_PLACES;
-    if (q) {
-      filtered = filtered.filter(
-        (p) =>
-          p.titleVi.toLowerCase().includes(q) ||
-          (p.titleEn?.toLowerCase().includes(q) ?? false) ||
-          (p.summaryVi?.toLowerCase().includes(q) ?? false),
-      );
+    const where: Prisma.PlaceWhereInput = {
+      status: 'published',
+    };
+
+    if (query.q) {
+      const q = query.q.trim();
+      where.OR = [
+        { titleVi: { contains: q, mode: 'insensitive' } },
+        { titleEn: { contains: q, mode: 'insensitive' } },
+        { summaryVi: { contains: q, mode: 'insensitive' } },
+      ];
     }
+
     if (query.region) {
-      filtered = filtered.filter((p) => p.regionId === query.region);
+      where.region = { slug: query.region };
     }
 
-    const total = filtered.length;
-    const start = (page - 1) * pageSize;
-    const data = filtered.slice(start, start + pageSize);
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.place.findMany({
+        where,
+        skip,
+        take: pageSize,
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          region: true,
+          photos: { orderBy: { position: 'asc' } },
+          categories: { include: { category: true } },
+        },
+      }),
+      this.prisma.place.count({ where }),
+    ]);
 
-    return { data, meta: { page, pageSize, total } };
+    return {
+      data: rows.map((p) => toApiPlace(p as PlaceWithRelations)),
+      meta: { page, pageSize, total },
+    };
   }
 
-  findBySlug(slug: string): Place | undefined {
-    return SEED_PLACES.find((p) => p.slug === slug);
+  async findBySlug(slug: string): Promise<Place | null> {
+    const place = await this.prisma.place.findUnique({
+      where: { slug },
+      include: {
+        region: true,
+        photos: { orderBy: { position: 'asc' } },
+        categories: { include: { category: true } },
+      },
+    });
+
+    if (!place || place.status !== 'published') {
+      return null;
+    }
+
+    return toApiPlace(place as PlaceWithRelations);
   }
 }

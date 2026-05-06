@@ -16,8 +16,8 @@ export class PlacesController {
 
   @Get(':slug')
   @ApiOkResponse({ description: 'Chi tiết một địa điểm theo slug.' })
-  detail(@Param('slug') slug: string) {
-    const place = this.placesService.findBySlug(slug);
+  async detail(@Param('slug') slug: string) {
+    const place = await this.placesService.findBySlug(slug);
     if (!place) {
       throw new NotFoundException(`Không tìm thấy địa điểm: ${slug}`);
     }

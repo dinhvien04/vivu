@@ -25,6 +25,17 @@ export interface Category {
   icon: string | null;
 }
 
+export interface Photo {
+  id: string;
+  url: string;
+  publicId: string | null;
+  width: number | null;
+  height: number | null;
+  alt: string | null;
+  position: number;
+  isCover: boolean;
+}
+
 export interface Place {
   id: string;
   slug: string;
@@ -35,11 +46,14 @@ export interface Place {
   descriptionVi: string | null;
   descriptionEn: string | null;
   regionId: string;
+  region?: Region;
   address: string | null;
   geo: GeoPoint | null;
   bestSeasons: string[];
   status: PlaceStatus;
   heroImageUrl: string | null;
+  photos?: Photo[];
+  categories?: Category[];
   createdAt: string;
   updatedAt: string;
 }
