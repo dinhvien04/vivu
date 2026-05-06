@@ -14,7 +14,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push --skip-generate --accept-data-loss",
     "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
-    "seed:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-images.ts"
+    "seed:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-images.ts",
+    "promote:admin": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/promote-admin.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts"
@@ -24,15 +25,20 @@
     "@nestjs/common": "^10.4.13",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^10.4.13",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-fastify": "^10.4.13",
     "@nestjs/swagger": "^8.0.7",
     "@nestjs/throttler": "^6.3.0",
     "@prisma/client": "^5.22.0",
     "@vivu/types": "workspace:*",
+    "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cloudinary": "^2.10.0",
     "fastify": "^4.28.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -40,8 +46,10 @@
     "@nestjs/cli": "^10.4.8",
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.13",
+    "@types/bcrypt": "^6.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.9",
+    "@types/passport-jwt": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.1",

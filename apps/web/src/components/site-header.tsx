@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { HeaderAccount } from './header-account';
 import { Icon } from './icon';
 
 const NAV_ITEMS = [
@@ -101,13 +102,7 @@ export function SiteHeader() {
               <Icon name="search" />
             </button>
 
-            <button
-              type="button"
-              aria-label="Tài khoản"
-              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container"
-            >
-              <Icon name="person" />
-            </button>
+            <HeaderAccount />
 
             {/* Hamburger — mobile only */}
             <button
@@ -179,7 +174,7 @@ export function SiteHeader() {
           </button>
         </div>
 
-        <nav className="px-margin-mobile py-6">
+        <nav className="flex flex-col gap-6 px-margin-mobile py-6">
           <ul className="space-y-1 text-body-lg">
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
@@ -200,6 +195,15 @@ export function SiteHeader() {
               );
             })}
           </ul>
+          <div className="border-t border-outline-variant/30 pt-4">
+            <Link
+              href="/dang-nhap"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container"
+            >
+              <Icon name="login" size={20} />
+              Đăng nhập / Đăng ký
+            </Link>
+          </div>
         </nav>
       </aside>
     </>
