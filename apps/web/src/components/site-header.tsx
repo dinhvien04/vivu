@@ -1,43 +1,59 @@
-/* eslint-disable @next/next/no-img-element */
+'use client';
+
+import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Icon } from './icon';
 
 const NAV_ITEMS = [
-  { label: 'Khám phá', href: '/', active: true },
+  { label: 'Khám phá', href: '/' },
   { label: 'Điểm đến', href: '/diem-den' },
   { label: 'Lưu trú', href: '/luu-tru' },
   { label: 'Cẩm nang', href: '/cam-nang' },
 ];
 
+function isActive(pathname: string, href: string): boolean {
+  if (href === '/') {
+    return pathname === '/' || pathname === '/kham-pha';
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteHeader() {
+  const pathname = usePathname() ?? '/';
+
   return (
     <header className="sticky top-0 z-50 w-full bg-surface/90 shadow-sm backdrop-blur-md">
       <nav className="mx-auto flex h-20 max-w-container-max items-center justify-between px-margin-mobile py-unit md:px-margin-desktop">
         <div className="flex items-center gap-10">
-          <Link href="/" className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-on-primary"
-            >
-              <span className="font-display text-lg font-extrabold tracking-tight">V</span>
-            </span>
-            <span className="font-display text-h3 font-bold tracking-tight text-primary">Vivu</span>
+          <Link href="/" className="flex items-center" aria-label="Vivu">
+            <Image
+              src="/vivu-logo.png"
+              alt="Vivu"
+              width={708}
+              height={274}
+              priority
+              className="h-10 w-auto object-contain"
+            />
           </Link>
           <ul className="hidden items-center gap-8 text-body-md md:flex">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  className={
-                    item.active
-                      ? 'border-b-2 border-primary pb-1 font-semibold text-primary'
-                      : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
-                  }
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className={
+                      active
+                        ? 'border-b-2 border-primary pb-1 font-semibold text-primary'
+                        : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
+                    }
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
