@@ -2,11 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: 'Inter', system-ui, sans-serif;
-}
-
 html,
 body {
-  @apply bg-white text-slate-900 antialiased;
+  @apply bg-surface text-on-surface antialiased;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Material Symbols Outlined — used for inline icons matching Stitch design */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: #d7e3ff; /* primary-fixed */
+  color: #001b3e; /* on-primary-fixed */
 }
