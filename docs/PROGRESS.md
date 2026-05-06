@@ -21,41 +21,41 @@
 
 ## 2. Trang public
 
-| Màn hình thiết kế | Đường dẫn dự kiến | Trạng thái |
-| --- | --- | --- |
-| `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ) | `/` | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer |
-| `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list) | `/kham-pha` | 🟡 [x] danh sách + tab vùng miền + skeleton; [ ] sidebar lọc Danh mục/Mùa/Rating; [ ] dropdown sort Phổ biến/Mới nhất; [ ] chip filter chủ đề; [ ] switch sang Map view |
-| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm) | `/dia-diem/[slug]` | [ ] Chưa có page (link từ home và header đang ra 404) |
-| `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác) | `/ban-do` | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình) |
-| `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới) | `/tim-kiem?q=` | [ ] Chưa có |
-| `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ) | `/tim-kiem?q=&view=ban-do` | [ ] Chưa có |
-| `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list` | [ ] Chưa có |
-| `vivu_kh_ng_t_m_th_y_k_t_qu` (No results) | `/tim-kiem?q=…` (state empty) | [ ] Chưa có (có thể reuse `<EmptyState />`) |
-| `vivu_s_tay_c_a_t_i` (Sổ tay danh sách) | `/so-tay` | [ ] Chưa có |
-| `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay) | `/so-tay/[slug]` | [ ] Chưa có |
-| `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá) | `/dia-diem/[slug]/danh-gia/moi` | [ ] Chưa có |
-| `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list) | `/hoi-dap` | [ ] Chưa có |
-| `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail) | `/hoi-dap/[id]` | [ ] Chưa có |
-| `vivu_trang_c_nh_n` (Trang cá nhân) | `/u/[username]` hoặc `/tai-khoan` | [ ] Chưa có |
-| `vivu_c_i_t_t_i_kho_n` (Cài đặt tài khoản) | `/tai-khoan/cai-dat` | [ ] Chưa có (mới có API `/auth/change-password`) |
-| `vivu_logo` | (asset) | [x] `apps/web/public/vivu-logo.png` |
+| Màn hình thiết kế                                             | Đường dẫn dự kiến                 | Trạng thái                                                                                                                                                              |
+| ------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                  |
+| `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền + skeleton; [ ] sidebar lọc Danh mục/Mùa/Rating; [ ] dropdown sort Phổ biến/Mới nhất; [ ] chip filter chủ đề; [ ] switch sang Map view |
+| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | [ ] Chưa có page (link từ home và header đang ra 404)                                                                                                                   |
+| `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình)                                                                                   |
+| `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=`                    | [ ] Chưa có                                                                                                                                                             |
+| `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=ban-do`        | [ ] Chưa có                                                                                                                                                             |
+| `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [ ] Chưa có                                                                                                                                                             |
+| `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [ ] Chưa có (có thể reuse `<EmptyState />`)                                                                                                                             |
+| `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [ ] Chưa có                                                                                                                                                             |
+| `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[slug]`                  | [ ] Chưa có                                                                                                                                                             |
+| `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [ ] Chưa có                                                                                                                                                             |
+| `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [ ] Chưa có                                                                                                                                                             |
+| `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [ ] Chưa có                                                                                                                                                             |
+| `vivu_trang_c_nh_n` (Trang cá nhân)                           | `/u/[username]` hoặc `/tai-khoan` | [ ] Chưa có                                                                                                                                                             |
+| `vivu_c_i_t_t_i_kho_n` (Cài đặt tài khoản)                    | `/tai-khoan/cai-dat`              | [ ] Chưa có (mới có API `/auth/change-password`)                                                                                                                        |
+| `vivu_logo`                                                   | (asset)                           | [x] `apps/web/public/vivu-logo.png`                                                                                                                                     |
 
 ## 3. Trang xác thực
 
-| Màn hình thiết kế | Đường dẫn | Trạng thái |
-| --- | --- | --- |
-| `vivu_ng_nh_p` | `/dang-nhap` | 🟡 [x] form email/password; [ ] nút "Tiếp tục với Google" |
-| `vivu_ng_k_t_i_kho_n` | `/dang-ky` | 🟡 [x] form đăng ký; [ ] nút Google |
-| `vivu_qu_n_m_t_kh_u` | `/quen-mat-khau` + `/dat-lai-mat-khau` | [x] Đủ 2 bước |
+| Màn hình thiết kế     | Đường dẫn                              | Trạng thái                                                |
+| --------------------- | -------------------------------------- | --------------------------------------------------------- |
+| `vivu_ng_nh_p`        | `/dang-nhap`                           | 🟡 [x] form email/password; [ ] nút "Tiếp tục với Google" |
+| `vivu_ng_k_t_i_kho_n` | `/dang-ky`                             | 🟡 [x] form đăng ký; [ ] nút Google                       |
+| `vivu_qu_n_m_t_kh_u`  | `/quen-mat-khau` + `/dat-lai-mat-khau` | [x] Đủ 2 bước                                             |
 
 ## 4. Khu admin
 
-| Màn hình thiết kế | Đường dẫn | Trạng thái |
-| --- | --- | --- |
-| `vivu_admin_t_ng_quan` | `/admin` | 🟡 [x] thẻ stat (Tổng địa điểm + Phân bố theo vùng + Recent places); [ ] khối "Hoạt động Gần đây" (audit log); [ ] khối "Sức khoẻ Hệ thống" (băng thông/dung lượng/API status); [ ] khối "Thao tác nhanh"; [ ] nút "Xuất báo cáo"; [ ] số liệu Đánh giá / Người dùng tích cực |
-| `vivu_admin_qu_n_l_a_i_m` | `/admin/dia-diem` | 🟡 [x] bảng + tabs vùng + form tìm; [ ] route `/admin/dia-diem/new` (đang 404); [ ] thao tác delete/publish/unpublish |
-| `vivu_admin_ch_nh_s_a_a_i_m` | `/admin/dia-diem/[slug]` | 🟡 [x] form chỉ-đọc; [ ] bật form (PATCH); [ ] upload ảnh hero; [ ] chọn region/category/best season |
-| `vivu_admin_ki_m_duy_t_nh_gi` | `/admin/danh-gia` | 🟡 [x] layout; [ ] gắn dữ liệu thật (đang dùng mock cứng); [ ] tabs Đã duyệt/Đã từ chối hoạt động; [ ] nút duyệt/từ chối |
+| Màn hình thiết kế             | Đường dẫn                | Trạng thái                                                                                                                                                                                                                                                                    |
+| ----------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vivu_admin_t_ng_quan`        | `/admin`                 | 🟡 [x] thẻ stat (Tổng địa điểm + Phân bố theo vùng + Recent places); [ ] khối "Hoạt động Gần đây" (audit log); [ ] khối "Sức khoẻ Hệ thống" (băng thông/dung lượng/API status); [ ] khối "Thao tác nhanh"; [ ] nút "Xuất báo cáo"; [ ] số liệu Đánh giá / Người dùng tích cực |
+| `vivu_admin_qu_n_l_a_i_m`     | `/admin/dia-diem`        | 🟡 [x] bảng + tabs vùng + form tìm; [ ] route `/admin/dia-diem/new` (đang 404); [ ] thao tác delete/publish/unpublish                                                                                                                                                         |
+| `vivu_admin_ch_nh_s_a_a_i_m`  | `/admin/dia-diem/[slug]` | 🟡 [x] form chỉ-đọc; [ ] bật form (PATCH); [ ] upload ảnh hero; [ ] chọn region/category/best season                                                                                                                                                                          |
+| `vivu_admin_ki_m_duy_t_nh_gi` | `/admin/danh-gia`        | 🟡 [x] layout; [ ] gắn dữ liệu thật (đang dùng mock cứng); [ ] tabs Đã duyệt/Đã từ chối hoạt động; [ ] nút duyệt/từ chối                                                                                                                                                      |
 
 ## 5. Trạng thái hệ thống
 
