@@ -41,11 +41,45 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  reviews     Review[]
-  collections Collection[]
-  favorites   Favorite[]
-  questions   Question[]
-  answers     Answer[]
+  reviews        Review[]
+  collections    Collection[]
+  favorites      Favorite[]
+  questions      Question[]
+  answers        Answer[]
+  refreshTokens  RefreshToken[]
+  resetTokens    PasswordResetToken[]
+}
+
+// Stored hash of a refresh token. We rotate refresh tokens on each /auth/refresh
+// call: the old row is marked revoked and a new one is inserted. This catches
+// stolen-token reuse (if an old hash is used after rotation, we revoke the
+// entire chain for that user).
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, revokedAt])
+}
+
+// Single-use password reset token, stored as a hash. Plaintext value is sent to
+// the user via email (stub for now — logged to server console).
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, usedAt])
 }
 
 model Region {

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { AdminGuard } from '@/components/admin-guard';
 import { Icon } from '@/components/icon';
 
 interface AdminLayoutProps {
@@ -68,7 +69,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
       </header>
       <main className="mx-auto w-full max-w-container-max flex-1 px-margin-mobile py-8 md:px-margin-desktop">
-        {children}
+        <AdminGuard>{children}</AdminGuard>
       </main>
     </div>
   );
