@@ -25,7 +25,7 @@
 | ------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                  |
 | `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền + skeleton; [ ] sidebar lọc Danh mục/Mùa/Rating; [ ] dropdown sort Phổ biến/Mới nhất; [ ] chip filter chủ đề; [ ] switch sang Map view |
-| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | [ ] Chưa có page (link từ home và header đang ra 404)                                                                                                                   |
+| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | 🟡 [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + related places; [ ] gallery slider, JSON-LD, viết đánh giá thật, Q&A, weather widget |
 | `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình)                                                                                   |
 | `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=`                    | [ ] Chưa có                                                                                                                                                             |
 | `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=ban-do`        | [ ] Chưa có                                                                                                                                                             |
@@ -130,7 +130,7 @@
 
 ### Sprint kế tiếp (MVP còn thiếu)
 
-- [ ] `/dia-diem/[slug]` — page chi tiết. Đây là page link đích từ home + `/kham-pha`, hiện 404 → ưu tiên cao nhất.
+- [x] `/dia-diem/[slug]` — page chi tiết bản đầu (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, "Địa điểm khác trong vùng"). Còn TODO: gallery slider, JSON-LD, weather widget, viết đánh giá thật, Q&A.
 - [ ] API filter `category` + `season` + `sort` cho `GET /places`.
 - [ ] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
 - [ ] `/ban-do` — Leaflet + OSM tile + cluster.
@@ -156,4 +156,5 @@
 
 - [x] Đã có (~30%): hạ tầng monorepo, design system khớp `DESIGN.md`, schema DB đầy đủ, hệ thống auth chắc chắn (rotate refresh token + reset password), một luồng đọc places (list + detail), bộ trạng thái lỗi hoàn chỉnh, 4 trang admin (read-only).
 - [ ] Còn thiếu (~70%): tất cả các luồng người dùng cốt lõi (chi tiết địa điểm, bản đồ, sổ tay, review, Q&A, profile, search), khoảng 21/30 endpoint backend, i18n, SEO, search, dark mode, Google OAuth.
-- [ ] Việc cần làm ngay để demo end-to-end: page `/dia-diem/[slug]` + API regions/categories + filter `/kham-pha` + nút Favorite. Bốn việc này mở khoá ~5 màn hình thiết kế còn lại.
+- [x] ~~Page `/dia-diem/[slug]`~~ — đã làm xong vòng đầu (xem dòng đầu mục 8).
+- [ ] Còn lại để demo end-to-end: API regions/categories + filter `/kham-pha` + nút Favorite trên detail page. Ba việc này mở khoá ~5 màn hình thiết kế còn lại.
