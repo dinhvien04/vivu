@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro, Inter } from 'next/font/google';
 import { AuthProvider } from '../components/auth-provider';
