@@ -14,7 +14,7 @@ const COLLECTIONS = [
   {
     region: 'MIỀN BẮC',
     title: 'Vịnh Hạ Long: Kỳ quan thế giới',
-    href: '/dia-diem/ha-long',
+    href: '/dia-diem/vinh-ha-long',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuB66G7dUE2E3o6OgyNEqiXkykjAhI4jOPSJk7QMDUWQNdD5fyykhIGh7q-bwkhU3fQb7z23uYfN0tPLCoyA9G_0jvOXeEnb1OC-zEkkWRd-X87pvoEdfFQsXTv3W6AypANebz4lDUfyN2DKedd_iARPfL-j_pyxMiSDztP7wszCmZcrTMpDaFeCFakoo4AI_oUMeLUU57FcURUPZLqDFdFucg3TQgd4liGnikHysN4nMXKbFn_MAuqTnWBRTMJZHPUQUa41JyQ_NlHB',
     alt: 'Vịnh Hạ Long lúc hoàng hôn',
@@ -22,7 +22,7 @@ const COLLECTIONS = [
   {
     region: 'MIỀN TRUNG',
     title: 'Hội An: Phố cổ đèn lồng',
-    href: '/dia-diem/hoi-an',
+    href: '/dia-diem/pho-co-hoi-an',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAf3iucRPjsC1Dr3Z63IlZyYduut1SfkeXlmuz1yPQmSqClo0Rbt-ClZCQa9KzjPBNlx3903oXDem1b2-EqpBGRhWlXn-tNbBFSvPSG7TRDa2ZRqngx_jp0o1h6HZ6EuIynjeHJI048X5VMrXdPSMS_tZCaxEbGM9KDzjHQZZSLoh1su7aT-uy7K6kDr85wk1QVkVSezDXRlpK8nTzeAJrx7S3hke9ThrHA0zzsTV4PZibtm6R_J6cJUYvH4Vt91ENyeEnMpUvyxoRr',
     alt: 'Hội An đèn lồng đêm',
@@ -30,7 +30,7 @@ const COLLECTIONS = [
   {
     region: 'MIỀN NAM',
     title: 'Sài Gòn: Nhịp sống hiện đại',
-    href: '/dia-diem/sai-gon',
+    href: '/dia-diem/sai-gon-ben-thanh',
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuBjTwzsOLF8uUwqq8qoCJR_ef4P1_avnxbuZozP9DdRp879-7k1G7NkbLCexO9FQVE_ErF5nTiDnkzk-kb8QeGSHfNjLw3kZO0dSE05ORXwy1G3gXvyeT53b8kN8cYiNESBK-FyKj-aUSK3y3COchGsP81sQs7iv8OkE5Qf3rTAh81BVCHbN1TLOuq-WT0up0sZLDnynb_esLadRGE_s0ddsivXtbEZx75N5D8_F9ss-dEfpUI2AqEAuuagIWnYeRmkSYGwH5KpYIC9',
     alt: 'Skyline Sài Gòn lúc bình minh',

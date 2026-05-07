@@ -5,3 +5,7 @@ build
 .turbo
 coverage
 pnpm-lock.yaml
+# Test workspace ships its own tsconfig + jest setup with TS+JSX in .ts files
+# which Prettier (using the .ts parser) cannot handle. Format is enforced via
+# the test runner instead.
+test
