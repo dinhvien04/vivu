@@ -18,6 +18,9 @@ export interface AuthenticatedUser {
   name: string;
   role: string;
   avatarUrl: string | null;
+  bio: string | null;
+  location: string | null;
+  createdAt: Date;
 }
 
 @Injectable()
@@ -46,6 +49,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         name: true,
         role: true,
         avatarUrl: true,
+        bio: true,
+        location: true,
+        createdAt: true,
       },
     });
     if (!user) {

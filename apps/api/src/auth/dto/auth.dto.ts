@@ -1,4 +1,12 @@
-import { IsEmail, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -63,4 +71,33 @@ export class ChangePasswordDto {
   @MaxLength(128)
   @Matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
   newPassword!: string;
+}
+
+export class UpdateProfileDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2, { message: 'Tên cần tối thiểu 2 ký tự' })
+  @MaxLength(80)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500, { message: 'Giới thiệu tối đa 500 ký tự' })
+  bio?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  location?: string;
+
+  @IsOptional()
+  @IsUrl({ require_protocol: true }, { message: 'URL ảnh không hợp lệ' })
+  @MaxLength(500)
+  avatarUrl?: string;
+}
+
+export class DeleteAccountDto {
+  @IsString()
+  @MaxLength(128)
+  password!: string;
 }

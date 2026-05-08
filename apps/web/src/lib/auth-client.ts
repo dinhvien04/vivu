@@ -5,6 +5,15 @@ export interface AuthUser {
   name: string;
   role: string;
   avatarUrl: string | null;
+  bio?: string | null;
+  location?: string | null;
+  createdAt?: string;
+}
+
+export interface AuthStats {
+  reviews: number;
+  favorites: number;
+  collections: number;
 }
 
 export interface AuthSession {
@@ -131,5 +140,61 @@ export async function changePassword(
       /* */
     }
     throw new AuthError(pickMessage(data, 'Đổi mật khẩu thất bại'), res.status);
+  }
+}
+
+export async function updateProfile(
+  accessToken: string,
+  patch: { name?: string; bio?: string; location?: string; avatarUrl?: string },
+): Promise<AuthUser> {
+  const res = await fetch('/api/auth/me', {
+    method: 'PATCH',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(patch),
+    cache: 'no-store',
+  });
+  let data: unknown = null;
+  try {
+    data = await res.json();
+  } catch {
+    /* */
+  }
+  if (!res.ok) {
+    throw new AuthError(pickMessage(data, 'Cập nhật hồ sơ thất bại'), res.status);
+  }
+  return data as AuthUser;
+}
+
+export async function fetchStats(accessToken: string): Promise<AuthStats | null> {
+  const res = await fetch('/api/auth/me/stats', {
+    method: 'GET',
+    headers: { authorization: `Bearer ${accessToken}` },
+    cache: 'no-store',
+  });
+  if (!res.ok) return null;
+  return (await res.json()) as AuthStats;
+}
+
+export async function deleteAccount(accessToken: string, password: string): Promise<void> {
+  const res = await fetch('/api/auth/me', {
+    method: 'DELETE',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ password }),
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    let data: unknown = null;
+    try {
+      data = await res.json();
+    } catch {
+      /* */
+    }
+    throw new AuthError(pickMessage(data, 'Xoá tài khoản thất bại'), res.status);
   }
 }
