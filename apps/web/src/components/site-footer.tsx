@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { Icon } from './icon';
-import { useTranslations } from './locale-provider';
 
 export function SiteFooter() {
   const t = useTranslations();
@@ -23,7 +23,7 @@ export function SiteFooter() {
             />
           </Link>
           <p className="font-sans leading-relaxed text-on-secondary-fixed-variant">
-            {t('footer.tagline')}
+            {t('footer.tagline', { year })}
           </p>
         </div>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from './auth-provider';
 import { Icon } from './icon';
@@ -14,6 +15,8 @@ import { Icon } from './icon';
  */
 export function NotificationsButton() {
   const { user } = useAuth();
+  const t = useTranslations('notifications');
+  const tCommon = useTranslations('common');
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -40,7 +43,7 @@ export function NotificationsButton() {
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        aria-label="Thông báo"
+        aria-label={tCommon('notifications')}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((s) => !s)}
@@ -51,18 +54,18 @@ export function NotificationsButton() {
       {open && (
         <div
           role="dialog"
-          aria-label="Hộp thư thông báo"
+          aria-label={t('title')}
           className="absolute right-0 top-12 z-50 w-80 rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-xl"
         >
           <div className="flex items-center justify-between border-b border-outline-variant/40 px-4 py-3">
-            <h3 className="font-h4 text-h4 text-on-surface">Thông báo</h3>
+            <h3 className="font-h4 text-h4 text-on-surface">{t('title')}</h3>
             <button
               type="button"
               disabled
               className="text-label-md text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-60"
-              title="Sắp ra mắt"
+              title={t('markReadComingSoon')}
             >
-              Đánh dấu đã đọc
+              {t('markRead')}
             </button>
           </div>
           <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
@@ -71,10 +74,8 @@ export function NotificationsButton() {
               className="!text-3xl text-outline"
               style={{ fontVariationSettings: "'FILL' 1" }}
             />
-            <p className="text-body-md font-semibold text-on-surface">Chưa có thông báo mới</p>
-            <p className="text-body-sm text-on-surface-variant">
-              Vivu sẽ gửi thông báo khi có hoạt động liên quan tới tài khoản của bạn.
-            </p>
+            <p className="text-body-md font-semibold text-on-surface">{t('empty')}</p>
+            <p className="text-body-sm text-on-surface-variant">{t('emptyHint')}</p>
           </div>
         </div>
       )}

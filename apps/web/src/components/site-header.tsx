@@ -1,23 +1,23 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
+import { Link, usePathname } from '@/i18n/navigation';
 import { HeaderAccount } from './header-account';
 import { Icon } from './icon';
 import { LocaleToggle } from './locale-toggle';
-import { useTranslations } from './locale-provider';
 import { NotificationsButton } from './notifications-button';
 import { SearchHero } from './search-hero';
 import { ThemeToggle } from './theme-toggle';
-import type { MessageKey } from '../i18n/messages';
 
-const NAV_ITEMS: { labelKey: MessageKey; href: string }[] = [
-  { labelKey: 'nav.home', href: '/' },
-  { labelKey: 'nav.explore', href: '/kham-pha' },
-  { labelKey: 'nav.map', href: '/ban-do' },
-  { labelKey: 'nav.qa', href: '/hoi-dap' },
+type NavKey = 'home' | 'explore' | 'map' | 'qa';
+
+const NAV_ITEMS: { labelKey: NavKey; href: '/' | '/kham-pha' | '/ban-do' | '/hoi-dap' }[] = [
+  { labelKey: 'home', href: '/' },
+  { labelKey: 'explore', href: '/kham-pha' },
+  { labelKey: 'map', href: '/ban-do' },
+  { labelKey: 'qa', href: '/hoi-dap' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -84,7 +84,7 @@ export function SiteHeader() {
                           : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
                       }
                     >
-                      {t(item.labelKey)}
+                      {t(`nav.${item.labelKey}`)}
                     </Link>
                   </li>
                 );
@@ -95,7 +95,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-2 md:gap-6">
             {/* Desktop search input */}
             <div className="hidden w-64 lg:block">
-              <SearchHero compact placeholder="Tìm địa danh..." />
+              <SearchHero compact placeholder={t('common.searchPlaceholder')} />
             </div>
 
             {/* Mobile/Tablet search button */}
@@ -132,7 +132,7 @@ export function SiteHeader() {
         {/* Mobile search row — slides down when active */}
         {searchOpen && (
           <div className="border-t border-outline-variant/30 px-margin-mobile py-3 lg:hidden">
-            <SearchHero compact placeholder="Tìm địa danh..." />
+            <SearchHero compact placeholder={t('common.searchPlaceholder')} />
           </div>
         )}
       </header>
@@ -188,7 +188,7 @@ export function SiteHeader() {
                         : 'font-medium text-on-surface hover:bg-surface-container'
                     }`}
                   >
-                    {t(item.labelKey)}
+                    {t(`nav.${item.labelKey}`)}
                     <Icon name="chevron_right" className="text-outline" />
                   </Link>
                 </li>
