@@ -126,7 +126,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
             if (e.target === e.currentTarget && status !== 'busy') setOpen(false);
           }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+          <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest shadow-xl">
             <div className="flex items-center justify-between border-b border-outline-variant px-5 py-4">
               <div>
                 <h3 className="font-h4 text-h4 text-on-surface">Thêm vào sổ tay</h3>
@@ -175,7 +175,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                     onChange={(e) => setNewName(e.target.value)}
                     maxLength={120}
                     placeholder="Ví dụ: Đi Đà Nẵng tháng 7"
-                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                   <div className="flex items-center gap-2">
                     <button

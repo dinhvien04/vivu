@@ -148,7 +148,7 @@ export default function SoTayListPage() {
                   onChange={(e) => setName(e.target.value)}
                   maxLength={120}
                   placeholder="Ví dụ: Đi miền Trung mùa hè 2026"
-                  className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
@@ -161,7 +161,7 @@ export default function SoTayListPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   maxLength={500}
                   rows={3}
-                  className="w-full resize-y rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full resize-y rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <button

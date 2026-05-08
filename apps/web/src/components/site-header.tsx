@@ -3,15 +3,21 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { HeaderAccount } from './header-account';
 import { Icon } from './icon';
+import { LocaleToggle } from './locale-toggle';
+import { useTranslations } from './locale-provider';
+import { NotificationsButton } from './notifications-button';
 import { SearchHero } from './search-hero';
+import { ThemeToggle } from './theme-toggle';
+import type { MessageKey } from '../i18n/messages';
 
-const NAV_ITEMS = [
-  { label: 'Trang chủ', href: '/' },
-  { label: 'Khám phá', href: '/kham-pha' },
-  { label: 'Hỏi đáp', href: '/hoi-dap' },
+const NAV_ITEMS: { labelKey: MessageKey; href: string }[] = [
+  { labelKey: 'nav.home', href: '/' },
+  { labelKey: 'nav.explore', href: '/kham-pha' },
+  { labelKey: 'nav.map', href: '/ban-do' },
+  { labelKey: 'nav.qa', href: '/hoi-dap' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -23,8 +29,16 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteHeader() {
   const pathname = usePathname() ?? '/';
+  const t = useTranslations();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // The notifications bell is only relevant in authenticated surfaces; we
+  // surface it on `/admin/*` and `/so-tay/*` to match the spec in PROGRESS.md.
+  const showNotifications = useMemo(
+    () => pathname.startsWith('/admin') || pathname.startsWith('/so-tay'),
+    [pathname],
+  );
 
   // Close drawer on route change.
   useEffect(() => {
@@ -61,7 +75,7 @@ export function SiteHeader() {
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
                 return (
-                  <li key={item.label}>
+                  <li key={item.href}>
                     <Link
                       href={item.href}
                       className={
@@ -70,7 +84,7 @@ export function SiteHeader() {
                           : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
                       }
                     >
-                      {item.label}
+                      {t(item.labelKey)}
                     </Link>
                   </li>
                 );
@@ -87,19 +101,24 @@ export function SiteHeader() {
             {/* Mobile/Tablet search button */}
             <button
               type="button"
-              aria-label="Tìm kiếm"
+              aria-label={t('common.search')}
               onClick={() => setSearchOpen((s) => !s)}
               className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden"
             >
               <Icon name="search" />
             </button>
 
+            {showNotifications && <NotificationsButton />}
+
+            <ThemeToggle />
+            <LocaleToggle />
+
             <HeaderAccount />
 
             {/* Hamburger — mobile only */}
             <button
               type="button"
-              aria-label="Mở menu"
+              aria-label={t('common.openMenu')}
               aria-expanded={drawerOpen}
               aria-controls="mobile-drawer"
               onClick={() => setDrawerOpen(true)}
@@ -147,7 +166,7 @@ export function SiteHeader() {
           </Link>
           <button
             type="button"
-            aria-label="Đóng menu"
+            aria-label={t('common.closeMenu')}
             onClick={() => setDrawerOpen(false)}
             className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container"
           >
@@ -160,7 +179,7 @@ export function SiteHeader() {
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
               return (
-                <li key={item.label}>
+                <li key={item.href}>
                   <Link
                     href={item.href}
                     className={`flex items-center justify-between rounded-lg px-3 py-3 transition-colors ${
@@ -169,20 +188,24 @@ export function SiteHeader() {
                         : 'font-medium text-on-surface hover:bg-surface-container'
                     }`}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                     <Icon name="chevron_right" className="text-outline" />
                   </Link>
                 </li>
               );
             })}
           </ul>
+          <div className="flex items-center gap-2 border-t border-outline-variant/30 pt-4">
+            <ThemeToggle />
+            <LocaleToggle />
+          </div>
           <div className="border-t border-outline-variant/30 pt-4">
             <Link
               href="/dang-nhap"
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container"
             >
               <Icon name="login" size={20} />
-              Đăng nhập / Đăng ký
+              {t('common.signIn')} / {t('common.signUp')}
             </Link>
           </div>
         </nav>

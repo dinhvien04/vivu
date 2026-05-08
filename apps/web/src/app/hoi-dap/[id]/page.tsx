@@ -295,7 +295,7 @@ export default function HoiDapDetailPage() {
                 rows={4}
                 maxLength={2000}
                 placeholder="Chia sẻ kinh nghiệm hoặc kiến thức của bạn (tối thiểu 5 ký tự)…"
-                className="w-full resize-y rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full resize-y rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <button
                 type="submit"

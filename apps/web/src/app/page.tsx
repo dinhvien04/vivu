@@ -129,7 +129,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 gap-gutter md:grid-cols-3">
             {/* Card 1: Tìm kiếm nhanh */}
-            <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-white p-8 shadow-premium transition-all hover:shadow-hover">
+            <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-8 shadow-premium transition-all hover:shadow-hover">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
                 <Icon name="search" className="text-3xl" />
               </div>
@@ -142,7 +142,7 @@ export default async function HomePage() {
                 {SEARCH_FILTERS.map((f) => (
                   <div
                     key={f.label}
-                    className="flex items-center gap-2 rounded-md border border-outline-variant/10 bg-white px-3 py-2 shadow-sm"
+                    className="flex items-center gap-2 rounded-md border border-outline-variant/10 bg-surface-container-lowest px-3 py-2 shadow-sm"
                   >
                     <Icon name={f.icon} className="scale-75 text-primary" />
                     <span className="text-label-caps text-on-surface-variant">{f.label}</span>
@@ -152,7 +152,7 @@ export default async function HomePage() {
             </article>
 
             {/* Card 2: Bản đồ tương tác */}
-            <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-white p-8 shadow-premium transition-all hover:shadow-hover">
+            <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-8 shadow-premium transition-all hover:shadow-hover">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
                 <Icon name="map" className="text-3xl" />
               </div>
@@ -174,7 +174,7 @@ export default async function HomePage() {
             </article>
 
             {/* Card 3: Sổ tay cá nhân */}
-            <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-white p-8 shadow-premium transition-all hover:shadow-hover">
+            <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-8 shadow-premium transition-all hover:shadow-hover">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
                 <Icon name="book" className="text-3xl" />
               </div>

@@ -85,7 +85,7 @@ function RegisterForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nguyễn Văn A"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-white focus:ring-2 focus:ring-primary"
+            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -102,7 +102,7 @@ function RegisterForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@gmail.com"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-white focus:ring-2 focus:ring-primary"
+            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -120,7 +120,7 @@ function RegisterForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-white focus:ring-2 focus:ring-primary"
+            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
           />
           <p className="text-body-sm text-on-surface-variant/80">
             Tối thiểu 8 ký tự, có cả chữ và số.
@@ -140,7 +140,7 @@ function RegisterForm() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="••••••••"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-white focus:ring-2 focus:ring-primary"
+            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
           />
         </div>
 

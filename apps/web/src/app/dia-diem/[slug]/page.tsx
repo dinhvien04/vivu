@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -6,15 +5,16 @@ import { AddToCollectionButton } from '@/components/add-to-collection-button';
 import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
 import { PlaceCard } from '@/components/place-card';
+import { PlaceGallery } from '@/components/place-gallery';
 import { QaSection } from '@/components/qa-section';
 import { ReviewsSection } from '@/components/reviews-section';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { listPlaces, getPlaceBySlug } from '@/lib/api';
-import { transformCloudinary } from '@/lib/image';
 import { listQuestionsForPlace } from '@/lib/qa-client';
 import { listReviewsForPlace } from '@/lib/reviews-client';
 import { formatSeasonMonths } from '@/lib/season';
+import { absoluteUrl } from '@/lib/site-url';
 import type { Question, Review } from '@vivu/types';
 
 interface PageProps {
@@ -77,19 +77,51 @@ export default async function PlaceDetailPage({ params }: PageProps) {
     }
   }
 
-  const heroSrc = place.heroImageUrl
-    ? (transformCloudinary(place.heroImageUrl, { width: 1600, height: 700 }) ?? place.heroImageUrl)
-    : null;
   const photos = place.photos ?? [];
-  const galleryPhotos = photos.length > 0 ? photos : null;
 
   const categoriesText =
     place.categories && place.categories.length > 0
       ? place.categories.map((c) => c.nameVi).join(', ')
       : 'Chưa phân loại';
 
+  // JSON-LD TouristAttraction — surfaces the place to search engines and helps
+  // them render rich results. Average rating is included only when at least
+  // one visible review exists.
+  const jsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristAttraction',
+    name: place.titleVi,
+    description: place.summaryVi ?? place.descriptionVi ?? undefined,
+    url: absoluteUrl(`/dia-diem/${place.slug}`),
+    image: place.heroImageUrl ? [place.heroImageUrl] : undefined,
+    address: place.address
+      ? { '@type': 'PostalAddress', streetAddress: place.address, addressCountry: 'VN' }
+      : undefined,
+    geo: place.geo
+      ? { '@type': 'GeoCoordinates', latitude: place.geo.lat, longitude: place.geo.lng }
+      : undefined,
+    touristType: place.categories?.map((c) => c.nameVi) ?? undefined,
+    aggregateRating:
+      place.rating && place.rating.count > 0
+        ? {
+            '@type': 'AggregateRating',
+            ratingValue: place.rating.average,
+            reviewCount: place.rating.count,
+            bestRating: 5,
+            worstRating: 1,
+          }
+        : undefined,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // The metadata is generated server-side and contains no user input that
+        // wasn't already escaped by `JSON.stringify`. Inline JSON-LD is the
+        // canonical pattern recommended by Google.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">
         {/* Breadcrumb */}
@@ -141,7 +173,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                 type="button"
                 aria-label="Chia sẻ (sắp ra mắt)"
                 disabled
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-md transition-transform disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest text-primary shadow-md transition-transform disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Icon name="share" />
               </button>
@@ -151,45 +183,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
         {/* Hero gallery */}
         <section className="mb-12">
-          <div className="relative aspect-[16/7] overflow-hidden rounded-xl shadow-lg">
-            {heroSrc ? (
-              <Image
-                src={heroSrc}
-                alt={place.titleVi}
-                fill
-                priority
-                sizes="(max-width: 1280px) 100vw, 1280px"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center bg-surface-container text-outline">
-                <Icon name="image" className="!text-5xl" />
-              </div>
-            )}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-          </div>
-          {galleryPhotos && galleryPhotos.length > 1 && (
-            <ul className="mt-4 flex gap-3 overflow-x-auto pb-2">
-              {galleryPhotos.slice(0, 8).map((photo) => {
-                const thumbSrc =
-                  transformCloudinary(photo.url, { width: 240, height: 160 }) ?? photo.url;
-                return (
-                  <li
-                    key={photo.id}
-                    className="relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg border border-outline-variant"
-                  >
-                    <Image
-                      src={thumbSrc}
-                      alt={photo.alt ?? place.titleVi}
-                      fill
-                      sizes="128px"
-                      className="object-cover"
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={place.titleVi} />
         </section>
 
         <div className="grid grid-cols-1 gap-gutter lg:grid-cols-12">
@@ -270,7 +264,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           <aside className="lg:col-span-4">
             <div className="sticky top-24 space-y-6">
               {/* Best season summary */}
-              <div className="rounded-xl border border-outline-variant/30 bg-white p-6 shadow-sm">
+              <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="font-h4 text-h4 text-on-surface">Thời điểm lý tưởng</h3>
                   <Icon name="wb_sunny" className="text-primary" />
@@ -284,7 +278,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               </div>
 
               {/* Action buttons */}
-              <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-white p-6 shadow-sm">
+              <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
                 <FavoriteButton placeId={place.id} />
                 <AddToCollectionButton placeId={place.id} placeTitle={place.titleVi} />
                 <button
@@ -309,7 +303,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
               {/* Categories */}
               {place.categories && place.categories.length > 0 && (
-                <div className="rounded-xl border border-outline-variant/30 bg-white p-6 shadow-sm">
+                <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
                   <h3 className="mb-3 font-h4 text-h4 text-on-surface">Chủ đề</h3>
                   <ul className="flex flex-wrap gap-2">
                     {place.categories.map((c) => (
@@ -358,7 +352,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
 function MetaCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center rounded-xl border border-outline-variant/30 bg-white p-6 text-center shadow-sm">
+    <div className="flex flex-col items-center rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 text-center shadow-sm">
       <Icon name={icon} className="!text-3xl text-primary" />
       <span className="mt-3 text-overline uppercase tracking-overline text-on-surface-variant">
         {label}

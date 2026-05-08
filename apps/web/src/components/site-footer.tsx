@@ -1,33 +1,14 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Icon } from './icon';
-
-const COLUMNS = [
-  {
-    title: 'Sản phẩm',
-    items: [
-      { label: 'Về chúng tôi', href: '#' },
-      { label: 'Cẩm nang', href: '#' },
-      { label: 'Điểm đến', href: '#' },
-    ],
-  },
-  {
-    title: 'Pháp lý',
-    items: [
-      { label: 'Điều khoản', href: '#' },
-      { label: 'Bảo mật', href: '#' },
-    ],
-  },
-  {
-    title: 'Hỗ trợ',
-    items: [
-      { label: 'Liên hệ', href: '#' },
-      { label: 'Trợ giúp', href: '#' },
-    ],
-  },
-];
+import { useTranslations } from './locale-provider';
 
 export function SiteFooter() {
+  const t = useTranslations();
+  const year = new Date().getFullYear();
+
   return (
     <footer className="border-t border-outline-variant bg-surface-container">
       <div className="mx-auto flex w-full max-w-container-max flex-col items-start justify-between gap-12 px-margin-mobile py-section-gap md:flex-row md:px-margin-desktop">
@@ -42,29 +23,74 @@ export function SiteFooter() {
             />
           </Link>
           <p className="font-sans leading-relaxed text-on-secondary-fixed-variant">
-            © 2024 Vivu. Khám phá vẻ đẹp Việt Nam qua lăng kính bản địa. Chúng tôi cung cấp dữ liệu
-            tra cứu thuần túy để bạn tự do thiết kế hành trình của mình.
+            {t('footer.tagline')}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-3">
-          {COLUMNS.map((col) => (
-            <div key={col.title} className="space-y-4">
-              <h5 className="text-label-caps font-bold text-primary">{col.title}</h5>
-              <ul className="space-y-2">
-                {col.items.map((item) => (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="space-y-4">
+            <h5 className="text-label-caps font-bold text-primary">{t('footer.about')}</h5>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/kham-pha"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('nav.explore')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/ban-do"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('nav.map')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/hoi-dap"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('nav.qa')}
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h5 className="text-label-caps font-bold text-primary">{t('footer.terms')}</h5>
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('footer.terms')}
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('footer.privacy')}
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h5 className="text-label-caps font-bold text-primary">{t('footer.contact')}</h5>
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('footer.contact')}
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -92,7 +118,7 @@ export function SiteFooter() {
             <Icon name="smart_display" />
           </a>
         </div>
-        <p className="text-[12px] text-outline">Thiết kế bởi Vivu Team · 2024</p>
+        <p className="text-[12px] text-outline">{t('footer.copyright', { year })}</p>
       </div>
     </footer>
   );

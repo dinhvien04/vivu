@@ -50,7 +50,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
         <Link
           href={`/dang-nhap?next=${encodeURIComponent(typeof window === 'undefined' ? '/' : window.location.pathname)}`}
           aria-label="Đăng nhập để lưu yêu thích"
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-error shadow-md transition-transform hover:scale-105"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest text-error shadow-md transition-transform hover:scale-105"
         >
           <Icon name="favorite_border" />
         </Link>
@@ -101,7 +101,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
         aria-pressed={favorited ?? false}
         aria-label={favorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
         title={error ?? undefined}
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-error shadow-md transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest text-error shadow-md transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Icon name={favorited ? 'favorite' : 'favorite_border'} />
       </button>

@@ -106,7 +106,7 @@ export default function WriteReviewPage({ params }: PageProps) {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Bạn cảm nhận như thế nào về địa điểm này? Có gì đáng nhớ, có gì cần lưu ý..."
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
               <span className="mt-1 block text-body-sm text-outline">
                 Tối thiểu 5 ký tự, tối đa 2000.

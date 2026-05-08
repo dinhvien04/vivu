@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { Icon } from '@/components/icon';
+import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { PlaceCard } from '@/components/place-card';
 import { SearchHero } from '@/components/search-hero';
 import { SiteFooter } from '@/components/site-footer';
@@ -318,7 +319,7 @@ export default async function TimKiemPage({ searchParams }: PageProps) {
                     href={buildHref(sp, { view: opt.v })}
                     className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-label-md transition-colors ${
                       view === opt.v
-                        ? 'bg-white font-semibold text-primary shadow-sm'
+                        ? 'bg-surface-container-lowest font-semibold text-primary shadow-sm'
                         : 'text-on-surface-variant hover:text-on-surface'
                     }`}
                   >
@@ -424,39 +425,15 @@ export default async function TimKiemPage({ searchParams }: PageProps) {
                 })}
               </ul>
             ) : view === 'map' ? (
-              <div className="overflow-hidden rounded-2xl border border-outline-variant bg-surface">
-                <div className="relative aspect-video bg-surface-container">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-on-surface-variant">
-                    <Icon name="map" className="!text-5xl" />
-                    <p className="text-body-md">
-                      Bản đồ tương tác đang được phát triển — mời quay lại sớm.
-                    </p>
-                    <Link
-                      href={buildHref(sp, { view: 'grid' })}
-                      className="text-label-md font-semibold text-primary hover:underline"
-                    >
-                      Quay về xem dạng lưới
-                    </Link>
-                  </div>
-                </div>
-                <div className="border-t border-outline-variant px-4 py-3 text-label-md text-on-surface-variant">
-                  {places.length} địa điểm có toạ độ:{' '}
-                  {places
-                    .filter((p) => p.geo)
-                    .slice(0, 6)
-                    .map((p, i, arr) => (
-                      <span key={p.id}>
-                        <Link
-                          href={`/dia-diem/${p.slug}`}
-                          className="font-medium text-on-surface hover:text-primary"
-                        >
-                          {p.titleVi}
-                        </Link>
-                        {i < arr.length - 1 && ', '}
-                      </span>
-                    ))}
-                  {places.filter((p) => p.geo).length > 6 && '…'}
-                </div>
+              <div className="space-y-3">
+                <PlacesMapLoader places={places} height="65vh" />
+                <p className="text-body-sm text-on-surface-variant">
+                  Hiển thị <strong>{places.filter((p) => p.geo).length}</strong> / {places.length}{' '}
+                  kết quả có toạ độ. Cần xem toàn bộ bản đồ?{' '}
+                  <Link href="/ban-do" className="font-semibold text-primary hover:underline">
+                    Mở /ban-do →
+                  </Link>
+                </p>
               </div>
             ) : (
               <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
