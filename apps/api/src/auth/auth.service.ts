@@ -22,7 +22,21 @@ export interface PublicUser {
   name: string;
   role: string;
   avatarUrl: string | null;
+  bio?: string | null;
+  location?: string | null;
+  createdAt?: Date;
 }
+
+const USER_PUBLIC_SELECT = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  avatarUrl: true,
+  bio: true,
+  location: true,
+  createdAt: true,
+} as const;
 
 @Injectable()
 export class AuthService {
@@ -54,13 +68,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
     const user = await this.prisma.user.create({
       data: { email, name: input.name.trim(), passwordHash },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        avatarUrl: true,
-      },
+      select: USER_PUBLIC_SELECT,
     });
     const tokens = await this.issueTokens(user);
     return { user, tokens };
@@ -85,6 +93,9 @@ export class AuthService {
       name: found.name,
       role: found.role,
       avatarUrl: found.avatarUrl,
+      bio: found.bio,
+      location: found.location,
+      createdAt: found.createdAt,
     };
     const tokens = await this.issueTokens(user);
     return { user, tokens };
@@ -113,13 +124,7 @@ export class AuthService {
     }
     const user = await this.prisma.user.findUnique({
       where: { id: row.userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        avatarUrl: true,
-      },
+      select: USER_PUBLIC_SELECT,
     });
     if (!user) {
       throw new UnauthorizedException('Tài khoản không tồn tại');
@@ -214,6 +219,70 @@ export class AuthService {
         data: { revokedAt: new Date() },
       }),
     ]);
+  }
+
+  async getProfile(userId: string): Promise<PublicUser> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: USER_PUBLIC_SELECT,
+    });
+    if (!user) {
+      throw new UnauthorizedException('Tài khoản không tồn tại');
+    }
+    return user;
+  }
+
+  async updateProfile(
+    userId: string,
+    input: { name?: string; bio?: string; location?: string; avatarUrl?: string },
+  ): Promise<PublicUser> {
+    const data: {
+      name?: string;
+      bio?: string | null;
+      location?: string | null;
+      avatarUrl?: string | null;
+    } = {};
+    if (input.name !== undefined) data.name = input.name.trim();
+    if (input.bio !== undefined) data.bio = input.bio.trim() || null;
+    if (input.location !== undefined) data.location = input.location.trim() || null;
+    if (input.avatarUrl !== undefined) data.avatarUrl = input.avatarUrl.trim() || null;
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: USER_PUBLIC_SELECT,
+    });
+    return user;
+  }
+
+  async deleteAccount(userId: string, password: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('Tài khoản không tồn tại');
+    }
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) {
+      throw new UnauthorizedException('Mật khẩu không đúng');
+    }
+    // Cascade is set on most relations; fall back to manual cleanup for the few
+    // that aren't (RefreshToken, PasswordResetToken).
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.deleteMany({ where: { userId } }),
+      this.prisma.passwordResetToken.deleteMany({ where: { userId } }),
+      this.prisma.user.delete({ where: { id: userId } }),
+    ]);
+  }
+
+  async getStats(userId: string): Promise<{
+    reviews: number;
+    favorites: number;
+    collections: number;
+  }> {
+    const [reviews, favorites, collections] = await this.prisma.$transaction([
+      this.prisma.review.count({ where: { userId, status: 'visible' } }),
+      this.prisma.favorite.count({ where: { userId } }),
+      this.prisma.collection.count({ where: { userId } }),
+    ]);
+    return { reviews, favorites, collections };
   }
 
   private async issueTokens(user: PublicUser): Promise<AuthTokens> {

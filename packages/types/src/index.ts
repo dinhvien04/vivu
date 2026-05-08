@@ -114,6 +114,38 @@ export interface Collection {
   updatedAt: string;
 }
 
+export interface QuestionAuthor {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
+export interface Answer {
+  id: string;
+  questionId: string;
+  content: string;
+  createdAt: string;
+  user: QuestionAuthor;
+}
+
+export interface Question {
+  id: string;
+  placeId: string;
+  content: string;
+  createdAt: string;
+  user: QuestionAuthor;
+  /** Optional preview of the place this question belongs to. */
+  place?: {
+    id: string;
+    slug: string;
+    titleVi: string;
+  };
+  /** Total number of answers — included in list responses. */
+  answersCount: number;
+  /** Detailed list of answers — only present on detail responses. */
+  answers?: Answer[];
+}
+
 export interface Paginated<T> {
   data: T[];
   meta: {

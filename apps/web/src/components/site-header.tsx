@@ -6,10 +6,12 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { HeaderAccount } from './header-account';
 import { Icon } from './icon';
+import { SearchHero } from './search-hero';
 
 const NAV_ITEMS = [
   { label: 'Trang chủ', href: '/' },
   { label: 'Khám phá', href: '/kham-pha' },
+  { label: 'Hỏi đáp', href: '/hoi-dap' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -78,16 +80,8 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-2 md:gap-6">
             {/* Desktop search input */}
-            <div className="relative hidden lg:block">
-              <Icon
-                name="search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-              />
-              <input
-                type="text"
-                placeholder="Tìm kiếm địa danh..."
-                className="w-64 rounded-full border-none bg-surface-container py-2 pl-10 pr-4 text-body-md transition-all focus:bg-white focus:ring-2 focus:ring-primary"
-              />
+            <div className="hidden w-64 lg:block">
+              <SearchHero compact placeholder="Tìm địa danh..." />
             </div>
 
             {/* Mobile/Tablet search button */}
@@ -119,18 +113,7 @@ export function SiteHeader() {
         {/* Mobile search row — slides down when active */}
         {searchOpen && (
           <div className="border-t border-outline-variant/30 px-margin-mobile py-3 lg:hidden">
-            <div className="relative">
-              <Icon
-                name="search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-              />
-              <input
-                type="text"
-                autoFocus
-                placeholder="Tìm kiếm địa danh..."
-                className="w-full rounded-full border-none bg-surface-container py-2 pl-10 pr-4 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
-              />
-            </div>
+            <SearchHero compact placeholder="Tìm địa danh..." />
           </div>
         )}
       </header>

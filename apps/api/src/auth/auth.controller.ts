@@ -1,16 +1,28 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
 import {
   ChangePasswordDto,
+  DeleteAccountDto,
   ForgotPasswordDto,
   LoginDto,
   RefreshDto,
   RegisterDto,
   ResetPasswordDto,
+  UpdateProfileDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedUser } from './strategies/jwt.strategy';
@@ -82,5 +94,37 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   me(@CurrentUser() user: AuthenticatedUser): AuthenticatedUser {
     return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/profile')
+  @ApiBearerAuth()
+  async getProfile(@CurrentUser() user: AuthenticatedUser) {
+    return this.auth.getProfile(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  @ApiBearerAuth()
+  async updateProfile(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateProfileDto) {
+    return this.auth.updateProfile(user.id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/stats')
+  @ApiBearerAuth()
+  async getStats(@CurrentUser() user: AuthenticatedUser) {
+    return this.auth.getStats(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteAccount(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: DeleteAccountDto,
+  ): Promise<void> {
+    await this.auth.deleteAccount(user.id, dto.password);
   }
 }
