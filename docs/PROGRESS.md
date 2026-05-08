@@ -27,10 +27,10 @@
 | `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền (động) + skeleton + chip danh mục + filter mùa + sort recent/name; [ ] sidebar lọc Rating; [ ] switch sang Map view                    |
 | `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | 🟡 [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + related places; [ ] gallery slider, JSON-LD, viết đánh giá thật, Q&A, weather widget |
 | `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình)                                                                                   |
-| `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=`                    | [ ] Chưa có                                                                                                                                                             |
-| `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=ban-do`        | [ ] Chưa có                                                                                                                                                             |
-| `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [ ] Chưa có                                                                                                                                                             |
-| `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [ ] Chưa có (có thể reuse `<EmptyState />`)                                                                                                                             |
+| `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=&view=grid`          | [x] Lưới 3 cột + sidebar filter (region/category/season) + sort (recent/name)                                                                                           |
+| `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=map`           | 🟡 [x] view=map placeholder + list địa điểm có toạ độ; [ ] Leaflet thật (sau khi làm `/ban-do`)                                                                         |
+| `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [x] List row layout (thumbnail + title + summary + categories)                                                                                                          |
+| `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [x] EmptyState + gợi ý "Xem tất cả địa điểm"                                                                                                                            |
 | `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [x] List sổ tay của tôi, tạo mới inline, xoá, auth-gated                                                                                                                |
 | `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[id]`                    | [x] Chi tiết + grid place card, bỏ place khỏi sổ tay, edit name/desc/public                                                                                             |
 | `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [x] Form viết đánh giá (rating 1-5 + content), auth-gated, redirect về detail sau khi gửi                                                                               |
@@ -142,7 +142,7 @@
 
 - [x] Reviews API + UI write-review + admin moderation thật (thay mock).
 - [x] Collections / Sổ tay (list + detail + add/remove item) — **PR #19**.
-- [ ] Search results page + MeiliSearch + typeahead trong header.
+- [x] Search results page (`/tim-kiem`) với 3 view (grid/list/map placeholder) + sidebar filter; header search input đã redirect tới `/tim-kiem?q=`. Còn thiếu: MeiliSearch + typeahead suggest.
 - [ ] i18n vi/en (FE next-intl + BE đã sẵn dữ liệu).
 - [ ] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction` cho place detail.
 - [ ] Google OAuth.
