@@ -1,65 +1,21 @@
-import { EmptyState } from '@/components/empty-state';
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { adminHideReview, adminListReviews, adminRestoreReview } from '@/lib/reviews-client';
+import type { Review, ReviewStatus } from '@vivu/types';
 
-export const metadata = { title: 'Kiểm duyệt đánh giá' };
-
-interface MockReview {
-  id: string;
-  author: { name: string; initials: string };
-  placeTitle: string;
-  rating: number;
-  body: string;
-  createdAt: string;
-  status: 'pending' | 'approved' | 'rejected';
-  reportCount: number;
-}
-
-const MOCK_REVIEWS: MockReview[] = [
-  {
-    id: 'r1',
-    author: { name: 'Trần Anh', initials: 'TA' },
-    placeTitle: 'Phố cổ Hội An',
-    rating: 5,
-    body: 'Phố cổ rất đẹp, đèn lồng buổi tối lung linh. Đồ ăn ngon, người dân thân thiện. Sẽ quay lại!',
-    createdAt: '2 giờ trước',
-    status: 'pending',
-    reportCount: 0,
-  },
-  {
-    id: 'r2',
-    author: { name: 'Minh Nguyễn', initials: 'MN' },
-    placeTitle: 'Vịnh Hạ Long',
-    rating: 4,
-    body: 'Cảnh đẹp ngoài sức tưởng tượng. Tour 2 ngày 1 đêm trên du thuyền rất đáng tiền. Chỉ tiếc thời tiết hơi mưa.',
-    createdAt: '5 giờ trước',
-    status: 'pending',
-    reportCount: 0,
-  },
-  {
-    id: 'r3',
-    author: { name: 'User-anonymous', initials: 'A' },
-    placeTitle: 'Đà Lạt',
-    rating: 1,
-    body: 'Nội dung tục tĩu, quảng cáo tour của bên cạnh tranh.',
-    createdAt: '1 ngày trước',
-    status: 'pending',
-    reportCount: 3,
-  },
-];
-
-const TABS: { key: 'pending' | 'approved' | 'rejected'; label: string; count: number }[] = [
-  {
-    key: 'pending',
-    label: 'Chờ duyệt',
-    count: MOCK_REVIEWS.filter((r) => r.status === 'pending').length,
-  },
-  { key: 'approved', label: 'Đã duyệt', count: 0 },
-  { key: 'rejected', label: 'Đã từ chối', count: 0 },
+const TABS: { key: ReviewStatus; label: string }[] = [
+  { key: 'reported', label: 'Bị báo cáo' },
+  { key: 'visible', label: 'Đang hiển thị' },
+  { key: 'hidden', label: 'Đã ẩn' },
 ];
 
 function StarRow({ value }: { value: number }) {
   return (
-    <div className="flex items-center gap-0.5 text-primary">
+    <div className="flex items-center gap-0.5 text-secondary">
       {Array.from({ length: 5 }).map((_, i) => (
         <Icon key={i} name={i < value ? 'star' : 'star_border'} className="!text-base" />
       ))}
@@ -67,8 +23,83 @@ function StarRow({ value }: { value: number }) {
   );
 }
 
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default function AdminReviewsPage() {
-  const pending = MOCK_REVIEWS.filter((r) => r.status === 'pending');
+  const { getAccessToken, user, loading } = useAuth();
+  const [activeTab, setActiveTab] = useState<ReviewStatus>('reported');
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [counts, setCounts] = useState<Record<ReviewStatus, number>>({
+    visible: 0,
+    hidden: 0,
+    reported: 0,
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const initials = useMemo(
+    () => (name: string) =>
+      name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(-2)
+        .map((s) => s.charAt(0).toUpperCase())
+        .join(''),
+    [],
+  );
+
+  const fetchAll = async (focus: ReviewStatus): Promise<void> => {
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      const [main, vis, hid, rep] = await Promise.all([
+        adminListReviews(token, { status: focus, pageSize: 50 }),
+        adminListReviews(token, { status: 'visible', pageSize: 1 }),
+        adminListReviews(token, { status: 'hidden', pageSize: 1 }),
+        adminListReviews(token, { status: 'reported', pageSize: 1 }),
+      ]);
+      setReviews(main.data);
+      setCounts({
+        visible: vis.meta.total,
+        hidden: hid.meta.total,
+        reported: rep.meta.total,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+    }
+  };
+
+  useEffect(() => {
+    if (loading || !user) return;
+    void fetchAll(activeTab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, user, activeTab]);
+
+  const action = async (id: string, op: 'hide' | 'restore'): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (op === 'hide') await adminHideReview(id, token);
+      else await adminRestoreReview(id, token);
+      await fetchAll(activeTab);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <>
@@ -79,101 +110,121 @@ export default function AdminReviewsPage() {
           </p>
           <h1 className="mt-1 font-h2 text-h2 text-on-surface">Kiểm duyệt đánh giá</h1>
           <p className="mt-2 max-w-xl text-body-md text-on-surface-variant">
-            Phê duyệt hoặc từ chối đánh giá do người dùng gửi. Đánh giá có cờ báo cáo sẽ được ưu
-            tiên hiển thị đầu danh sách.
+            Theo dõi đánh giá người dùng. Ẩn các đánh giá không phù hợp, khôi phục khi cần thiết.
           </p>
         </div>
       </header>
 
-      <div className="mb-6 rounded-lg border border-tertiary/30 bg-tertiary-container/40 px-4 py-3 text-body-sm text-on-tertiary-container">
-        <Icon name="info" className="mr-1 align-middle text-base" />
-        Đây là dữ liệu mẫu. Đánh giá thật sẽ kết nối khi tính năng &quot;Cộng đồng&quot; được triển
-        khai.
-      </div>
-
       <nav className="mb-6 flex flex-wrap gap-2 border-b border-outline-variant pb-2">
         {TABS.map((tab) => {
-          const active = tab.key === 'pending';
+          const active = tab.key === activeTab;
           return (
             <button
               key={tab.key}
               type="button"
-              disabled={!active}
+              onClick={() => setActiveTab(tab.key)}
               className={
                 active
                   ? 'rounded-full bg-primary px-4 py-1.5 text-body-sm font-semibold text-white'
-                  : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant disabled:cursor-not-allowed'
+                  : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-secondary-container'
               }
             >
-              {tab.label} ({tab.count})
+              {tab.label} ({counts[tab.key]})
             </button>
           );
         })}
       </nav>
 
-      {pending.length === 0 ? (
-        <EmptyState
-          icon="task_alt"
-          title="Đã xử lý hết!"
-          description="Không có đánh giá nào đang chờ duyệt. Hãy quay lại sau khi có đánh giá mới từ người dùng."
-        />
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-error/40 bg-error-container px-4 py-3 text-body-md text-on-error-container"
+        >
+          {error}
+        </div>
+      )}
+
+      {reviews.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-outline-variant bg-surface-container/40 p-10 text-center">
+          <Icon name="task_alt" className="!text-3xl text-outline" />
+          <h3 className="mt-2 font-h4 text-h4 text-on-surface">
+            {activeTab === 'reported'
+              ? 'Không có đánh giá nào bị báo cáo'
+              : activeTab === 'hidden'
+                ? 'Chưa có đánh giá nào bị ẩn'
+                : 'Chưa có đánh giá nào hiển thị'}
+          </h3>
+          <p className="mt-1 text-body-md text-on-surface-variant">
+            Bảng sẽ tự cập nhật khi có thay đổi.
+          </p>
+        </div>
       ) : (
         <ul className="space-y-4">
-          {pending.map((r) => (
+          {reviews.map((r) => (
             <li
               key={r.id}
               className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm"
             >
-              <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-container font-bold text-on-primary-container">
-                    {r.author.initials}
+                    {r.user.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={r.user.avatarUrl}
+                        alt={r.user.name}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      initials(r.user.name)
+                    )}
                   </div>
                   <div>
-                    <p className="font-semibold text-on-surface">{r.author.name}</p>
+                    <p className="font-semibold text-on-surface">{r.user.name}</p>
                     <p className="text-body-sm text-on-surface-variant">
-                      Đánh giá <span className="font-semibold text-primary">{r.placeTitle}</span> ·{' '}
-                      {r.createdAt}
+                      Đánh giá{' '}
+                      {r.place ? (
+                        <Link
+                          href={`/dia-diem/${r.place.slug}`}
+                          target="_blank"
+                          className="font-semibold text-primary hover:underline"
+                        >
+                          {r.place.titleVi}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold text-primary">(địa điểm)</span>
+                      )}{' '}
+                      · {formatDate(r.createdAt)}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <StarRow value={r.rating} />
-                  {r.reportCount > 0 && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-error-container px-2 py-0.5 text-body-sm text-on-error-container">
-                      <Icon name="flag" className="!text-sm" />
-                      {r.reportCount} báo cáo
-                    </span>
-                  )}
-                </div>
+                <StarRow value={r.rating} />
               </div>
-              <p className="mt-4 whitespace-pre-line text-body-md text-on-surface">{r.body}</p>
-              <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-outline-variant/30 pt-4">
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-lg border border-outline-variant px-3 py-1.5 text-body-sm font-medium text-on-surface-variant"
-                  title="Sẽ kích hoạt khi có Auth admin"
-                >
-                  <Icon name="visibility" className="!text-sm" />
-                  Xem địa điểm
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-lg border border-error/40 bg-error-container/40 px-3 py-1.5 text-body-sm font-semibold text-on-error-container"
-                >
-                  <Icon name="close" className="!text-sm" />
-                  Từ chối
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex cursor-not-allowed items-center gap-1 rounded-lg bg-primary/60 px-3 py-1.5 text-body-sm font-semibold text-white"
-                >
-                  <Icon name="check" className="!text-sm" />
-                  Duyệt
-                </button>
+              <p className="mt-4 whitespace-pre-line text-body-md leading-relaxed text-on-surface">
+                {r.content}
+              </p>
+              <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+                {r.status !== 'hidden' ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => action(r.id, 'hide')}
+                    className="inline-flex items-center gap-1 rounded-lg border border-error/40 px-3 py-2 text-body-sm font-medium text-error hover:bg-error-container/30 disabled:opacity-60"
+                  >
+                    <Icon name="visibility_off" className="!text-base" />
+                    Ẩn
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => action(r.id, 'restore')}
+                    className="inline-flex items-center gap-1 rounded-lg bg-tertiary px-3 py-2 text-body-sm font-semibold text-on-tertiary hover:bg-tertiary/90 disabled:opacity-60"
+                  >
+                    <Icon name="visibility" className="!text-base" />
+                    Khôi phục
+                  </button>
+                )}
               </div>
             </li>
           ))}

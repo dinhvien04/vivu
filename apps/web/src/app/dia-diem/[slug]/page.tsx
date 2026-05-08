@@ -6,11 +6,14 @@ import { EmptyState } from '@/components/empty-state';
 import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
 import { PlaceCard } from '@/components/place-card';
+import { ReviewsSection } from '@/components/reviews-section';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { listPlaces, getPlaceBySlug } from '@/lib/api';
 import { transformCloudinary } from '@/lib/image';
+import { listReviewsForPlace } from '@/lib/reviews-client';
 import { formatSeasonMonths } from '@/lib/season';
+import type { Review } from '@vivu/types';
 
 interface PageProps {
   params: { slug: string };
@@ -39,6 +42,16 @@ export default async function PlaceDetailPage({ params }: PageProps) {
     place = await getPlaceBySlug(params.slug);
   } catch {
     notFound();
+  }
+
+  let initialReviews: Review[] = [];
+  let initialReviewsTotal = 0;
+  try {
+    const r = await listReviewsForPlace(params.slug, { pageSize: 20 });
+    initialReviews = r.data;
+    initialReviewsTotal = r.meta.total;
+  } catch {
+    /* ignore */
   }
 
   // Lấy tối đa 6 địa điểm cùng vùng để gợi ý.
@@ -226,17 +239,12 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             </section>
 
             {/* Reviews */}
-            <section className="mb-12">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="font-h2 text-h2 text-on-surface">Đánh giá từ cộng đồng</h2>
-              </div>
-              <EmptyState
-                compact
-                icon="rate_review"
-                title="Chưa có đánh giá"
-                description="Hãy là người đầu tiên chia sẻ trải nghiệm thực tế của bạn về địa điểm này."
-              />
-            </section>
+            <ReviewsSection
+              placeSlug={place.slug}
+              initialReviews={initialReviews}
+              initialTotal={initialReviewsTotal}
+              initialAverage={place.rating?.average ?? 0}
+            />
 
             {/* Q&A */}
             <section className="mb-12">

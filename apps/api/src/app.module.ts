@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AdminPlacesModule } from './admin-places/admin-places.module';
+import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
@@ -10,6 +11,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RegionsModule } from './regions/regions.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { RegionsModule } from './regions/regions.module';
     RegionsModule,
     CategoriesModule,
     FavoritesModule,
+    ReviewsModule,
     AdminPlacesModule,
+    AdminReviewsModule,
   ],
   controllers: [HealthController],
 })

@@ -54,8 +54,41 @@ export interface Place {
   heroImageUrl: string | null;
   photos?: Photo[];
   categories?: Category[];
+  /** Optional rating summary aggregated from visible reviews. */
+  rating?: PlaceRatingSummary;
   createdAt: string;
   updatedAt: string;
+}
+
+export type ReviewStatus = 'visible' | 'hidden' | 'reported';
+
+export interface ReviewAuthor {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
+export interface Review {
+  id: string;
+  placeId: string;
+  rating: number;
+  content: string;
+  status: ReviewStatus;
+  createdAt: string;
+  updatedAt: string;
+  user: ReviewAuthor;
+  /** Optional preview of the place this review belongs to (admin / me views). */
+  place?: {
+    id: string;
+    slug: string;
+    titleVi: string;
+  };
+}
+
+export interface PlaceRatingSummary {
+  count: number;
+  /** Average from 1.00 to 5.00 (rounded to 2 decimals). 0 if no reviews. */
+  average: number;
 }
 
 export interface Paginated<T> {

@@ -136,6 +136,16 @@ export class PlacesService {
       return null;
     }
 
-    return toApiPlace(place as PlaceWithRelations);
+    const agg = await this.prisma.review.aggregate({
+      where: { placeId: place.id, status: 'visible' },
+      _count: { _all: true },
+      _avg: { rating: true },
+    });
+    const out = toApiPlace(place as PlaceWithRelations);
+    out.rating = {
+      count: agg._count._all,
+      average: agg._avg.rating ? Math.round(agg._avg.rating * 100) / 100 : 0,
+    };
+    return out;
   }
 }
