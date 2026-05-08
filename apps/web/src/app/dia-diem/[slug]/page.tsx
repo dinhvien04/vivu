@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
+import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
 import { PlaceCard } from '@/components/place-card';
 import { SiteFooter } from '@/components/site-footer';
@@ -110,15 +111,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               )}
             </div>
             <div className="flex gap-3">
-              {/* Disabled until Favorites + Share APIs land — see docs/PROGRESS.md */}
-              <button
-                type="button"
-                aria-label="Yêu thích (sắp ra mắt)"
-                disabled
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-error shadow-md transition-transform disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Icon name="favorite_border" />
-              </button>
+              <FavoriteButton placeId={place.id} variant="icon" />
               <button
                 type="button"
                 aria-label="Chia sẻ (sắp ra mắt)"
@@ -276,15 +269,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
               {/* Action buttons */}
               <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-white p-6 shadow-sm">
-                <button
-                  type="button"
-                  disabled
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-bold text-white transition-all disabled:cursor-not-allowed disabled:opacity-60"
-                  aria-label="Thêm vào sổ tay (sắp ra mắt)"
-                >
-                  <Icon name="bookmark_add" className="!text-base" />
-                  <span>Thêm vào sổ tay</span>
-                </button>
+                <FavoriteButton placeId={place.id} />
                 <button
                   type="button"
                   disabled

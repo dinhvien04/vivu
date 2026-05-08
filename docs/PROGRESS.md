@@ -94,8 +94,9 @@
 
 ### User actions
 
-- [ ] `POST/DELETE /api/v1/places/:id/favorite`
-- [ ] `GET /api/v1/me/favorites`
+- [x] `POST/DELETE /api/v1/places/:id/favorite` (idempotent; 401 nếu chưa auth)
+- [x] `GET /api/v1/places/:id/favorite` — status check (auth required)
+- [x] `GET /api/v1/me/favorites` — list địa điểm đã lưu (auth required)
 - [ ] `POST /api/v1/places/:id/reviews`
 - [ ] `PATCH/DELETE /api/v1/reviews/:id`
 - [ ] `GET/POST/PATCH/DELETE /api/v1/me/collections[/:id][/items]`
@@ -134,7 +135,7 @@
 - [x] API filter `category` + `season` + `sort` cho `GET /places`.
 - [x] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
 - [ ] `/ban-do` — Leaflet + OSM tile + cluster.
-- [ ] Favorites — model đã có; cần controller + nút "Thêm vào sổ tay" trên detail page.
+- [x] Favorites — backend (POST/DELETE/GET status + GET /me/favorites) + nút "Thêm vào sổ tay" optimistic trên `/dia-diem/[slug]` + page `/tai-khoan/yeu-thich`.
 - [ ] Admin CRUD places — bật form edit, upload ảnh hero qua Cloudinary, tạo `/admin/dia-diem/new`.
 
 ### v1

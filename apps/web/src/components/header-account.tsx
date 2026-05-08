@@ -99,6 +99,16 @@ export function HeaderAccount() {
             </li>
             <li>
               <Link
+                href="/tai-khoan/yeu-thich"
+                className="flex items-center gap-3 px-4 py-2 text-body-md text-on-surface transition-colors hover:bg-surface-container-low"
+                role="menuitem"
+              >
+                <Icon name="favorite" size={20} className="text-outline" />
+                Yêu thích
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/tai-khoan/cai-dat"
                 className="flex items-center gap-3 px-4 py-2 text-body-md text-on-surface transition-colors hover:bg-surface-container-low"
                 role="menuitem"

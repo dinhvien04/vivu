@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { HealthController } from './common/health.controller';
+import { FavoritesModule } from './favorites/favorites.module';
 import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RegionsModule } from './regions/regions.module';
@@ -24,6 +25,7 @@ import { RegionsModule } from './regions/regions.module';
     PlacesModule,
     RegionsModule,
     CategoriesModule,
+    FavoritesModule,
   ],
   controllers: [HealthController],
 })
