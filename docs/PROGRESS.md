@@ -115,8 +115,8 @@
 
 ## 7. Quan sát chi tiết & rủi ro nhỏ cần fix sớm
 
-- [ ] Header `apps/web/src/components/site-header.tsx` link `/diem-den`, `/luu-tru`, `/cam-nang` — 3/4 link đang 404. Nên trỏ "Điểm đến" → `/kham-pha` và ẩn 2 mục còn lại tới khi có content.
-- [ ] Trang chủ dùng URL ảnh `lh3.googleusercontent.com/aida-public/...` cứng trong `apps/web/src/app/page.tsx`. Cần chuyển sang Cloudinary và đọc từ DB.
+- [x] Header `apps/web/src/components/site-header.tsx` — đã đơn giản NAV_ITEMS thành `Trang chủ` + `Khám phá` (ẩn `/diem-den`, `/luu-tru`, `/cam-nang` cho đến khi có content).
+- [x] Trang chủ đã chuyển sang server component, fetch top 1 place / mỗi vùng và rút `heroImageUrl` từ DB (Cloudinary). Hắn URL `lh3.googleusercontent.com/aida-public/...` đã loại bỏ.
 - [x] Bật "Lưu thay đổi" cho `apps/web/src/app/admin/dia-diem/[slug]/page.tsx` (PATCH).
 - [x] Thay mock review trong `apps/web/src/app/admin/danh-gia/page.tsx` bằng `/admin/reviews?status=`.
 - [ ] i18n: schema có sẵn `titleEn`, `summaryEn`, ... — frontend mới chỉ dùng `*Vi`. Cần `next-intl` hoặc `app/[locale]` segment.

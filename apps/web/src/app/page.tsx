@@ -3,47 +3,17 @@ import Link from 'next/link';
 import { Icon } from '@/components/icon';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { listPlaces, type Place } from '@/lib/api';
+import { transformCloudinary } from '@/lib/image';
 
-const HERO_IMAGE =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuAwaZ0BhaWfCpjlhSDOMbezOXKT2O_4eEQK_l61RPuiGABVVGPijN5f2tXDS0oD8Zc55DBhnvZMaN39I8uI6xLoESvG26-5BY5VQJMo_4e11VufVCjO-6Jt3Yux_G_4-FXiqVgcWM-Nf3pcmsmPimgMAOdJQ7PjqfRWTOa4rTUQ9SdddTLVX8k0TzbZ-y30dB24zU5rh3-2s8dks6Yfwiu3efrbprbNGhhXe2m52rCnBcQxEtI3o8v_aM_jjH3J8VNmfYrS4--VMHgY';
+const REGION_LABEL: Record<string, string> = {
+  'mien-bac': 'MIỀN BẮC',
+  'mien-trung': 'MIỀN TRUNG',
+  'mien-nam': 'MIỀN NAM',
+  'tay-nguyen': 'TÂY NGUYÊN',
+};
 
-const MAP_IMAGE =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuC86tYWLpX2D_OQK0fLQtBD6hI2_h9dc82S4RQZdDRB6LEtN4fC0NzZYECxZYusDPmAutGWibufWekEYziZ0j4Zd-I4KSKSvfh7pTGKCZ5PjCpObCd01EADupOKgFpCcnJ4aylh1dNO7l_UTHuXe6ldq7aXG-7HR57yF-Hvs5OxMiQzsNzWIeZfuvK-ZLetHkyeK9vXqkFzIwSaGaXDySAfoqntAw2DQSxU3qFk3u-WRCM2KNJjo0rnvZAh8SDbjUuTbzGQQm0-DLhS';
-
-const COLLECTIONS = [
-  {
-    region: 'MIỀN BẮC',
-    title: 'Vịnh Hạ Long: Kỳ quan thế giới',
-    href: '/dia-diem/vinh-ha-long',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuB66G7dUE2E3o6OgyNEqiXkykjAhI4jOPSJk7QMDUWQNdD5fyykhIGh7q-bwkhU3fQb7z23uYfN0tPLCoyA9G_0jvOXeEnb1OC-zEkkWRd-X87pvoEdfFQsXTv3W6AypANebz4lDUfyN2DKedd_iARPfL-j_pyxMiSDztP7wszCmZcrTMpDaFeCFakoo4AI_oUMeLUU57FcURUPZLqDFdFucg3TQgd4liGnikHysN4nMXKbFn_MAuqTnWBRTMJZHPUQUa41JyQ_NlHB',
-    alt: 'Vịnh Hạ Long lúc hoàng hôn',
-  },
-  {
-    region: 'MIỀN TRUNG',
-    title: 'Hội An: Phố cổ đèn lồng',
-    href: '/dia-diem/pho-co-hoi-an',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAf3iucRPjsC1Dr3Z63IlZyYduut1SfkeXlmuz1yPQmSqClo0Rbt-ClZCQa9KzjPBNlx3903oXDem1b2-EqpBGRhWlXn-tNbBFSvPSG7TRDa2ZRqngx_jp0o1h6HZ6EuIynjeHJI048X5VMrXdPSMS_tZCaxEbGM9KDzjHQZZSLoh1su7aT-uy7K6kDr85wk1QVkVSezDXRlpK8nTzeAJrx7S3hke9ThrHA0zzsTV4PZibtm6R_J6cJUYvH4Vt91ENyeEnMpUvyxoRr',
-    alt: 'Hội An đèn lồng đêm',
-  },
-  {
-    region: 'MIỀN NAM',
-    title: 'Sài Gòn: Nhịp sống hiện đại',
-    href: '/dia-diem/sai-gon-ben-thanh',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBjTwzsOLF8uUwqq8qoCJR_ef4P1_avnxbuZozP9DdRp879-7k1G7NkbLCexO9FQVE_ErF5nTiDnkzk-kb8QeGSHfNjLw3kZO0dSE05ORXwy1G3gXvyeT53b8kN8cYiNESBK-FyKj-aUSK3y3COchGsP81sQs7iv8OkE5Qf3rTAh81BVCHbN1TLOuq-WT0up0sZLDnynb_esLadRGE_s0ddsivXtbEZx75N5D8_F9ss-dEfpUI2AqEAuuagIWnYeRmkSYGwH5KpYIC9',
-    alt: 'Skyline Sài Gòn lúc bình minh',
-  },
-  {
-    region: 'TÂY NGUYÊN',
-    title: 'Đà Lạt: Thành phố ngàn hoa',
-    href: '/dia-diem/da-lat',
-    image:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCQ1xOUZNQCDdgRxYUDzveKWknPR7hABCTdMm0nPCAaKowzJYv2Yu_ssF1qkeovUbBxSmn2FAcdvbGlWj5eBp-1EL8kCNLJTDYi1NzObKx1iGhvaMhols28X6UW7gQUNqE5luLvNtIuxgzGUrmPUnkkDhtj8EN0wZ-jCgf92JPhW9jJZVGH0sJBG_3t-8wosQGKorynao9_bs13kdZtDv_Tlv1anbjR-xyOF539F7TVXedJvxNu4mRXZwnJA-cBrTMi6KP8jtNmubNd',
-    alt: 'Đồi chè Đà Lạt sương sớm',
-  },
-];
+const FEATURED_REGIONS = ['mien-bac', 'mien-trung', 'mien-nam', 'tay-nguyen'];
 
 const SEARCH_FILTERS = [
   { icon: 'location_on', label: 'Vùng miền: Miền Trung' },
@@ -51,7 +21,58 @@ const SEARCH_FILTERS = [
   { icon: 'calendar_month', label: 'Mùa: Mùa Hè' },
 ];
 
-export default function HomePage() {
+interface FeaturedCollection {
+  region: string;
+  title: string;
+  href: string;
+  image: string | null;
+  alt: string;
+}
+
+async function loadHomeData(): Promise<{
+  hero: Place | null;
+  collections: FeaturedCollection[];
+}> {
+  // Fetch one published place per region in parallel.
+  const results = await Promise.allSettled(
+    FEATURED_REGIONS.map((slug) => listPlaces({ region: slug, pageSize: 1 })),
+  );
+
+  const collections: FeaturedCollection[] = [];
+  let hero: Place | null = null;
+
+  results.forEach((r, i) => {
+    if (r.status !== 'fulfilled') return;
+    const place = r.value.data[0];
+    if (!place) return;
+    if (!hero) hero = place;
+    const slug = FEATURED_REGIONS[i];
+    collections.push({
+      region: (slug && REGION_LABEL[slug]) ?? '',
+      title: place.titleVi,
+      href: `/dia-diem/${place.slug}`,
+      image: transformCloudinary(place.heroImageUrl, {
+        width: 600,
+        height: 800,
+        crop: 'fill',
+      }),
+      alt: place.titleVi,
+    });
+  });
+
+  return { hero, collections };
+}
+
+export default async function HomePage() {
+  const { hero, collections } = await loadHomeData();
+  const heroImage = transformCloudinary(hero?.heroImageUrl ?? null, {
+    width: 1200,
+    height: 900,
+    crop: 'fill',
+  });
+  const heroAlt = hero?.titleVi ?? 'Phong cảnh Việt Nam';
+  const heroHref = hero ? `/dia-diem/${hero.slug}` : '/kham-pha';
+
   return (
     <>
       <SiteHeader />
@@ -74,14 +95,29 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-xl shadow-premium">
+          <Link
+            href={heroHref}
+            className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-xl shadow-premium"
+          >
             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-primary/20 to-transparent" />
-            <img
-              src={HERO_IMAGE}
-              alt="Ruộng bậc thang Mù Cang Chải mùa lúa chín"
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-          </div>
+            {heroImage ? (
+              <img
+                src={heroImage}
+                alt={heroAlt}
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
+                <Icon name="travel_explore" className="!text-6xl text-primary" />
+              </div>
+            )}
+            {hero && (
+              <div className="absolute bottom-4 left-4 right-4 z-20 rounded-lg bg-black/40 px-4 py-2 text-white backdrop-blur-sm">
+                <p className="text-label-caps uppercase">Gợi ý của tuần</p>
+                <p className="font-h4 text-h4">{hero.titleVi}</p>
+              </div>
+            )}
+          </Link>
         </section>
 
         {/* Feature cards */}
@@ -125,15 +161,13 @@ export default function HomePage() {
                 Trực quan hóa lộ trình với cụm điểm đến (POI clusters), xem mật độ đánh giá và lọc
                 nhanh ngay trên giao diện bản đồ.
               </p>
-              <div className="relative h-32 w-full overflow-hidden rounded-lg border border-outline-variant/30">
-                <img
-                  src={MAP_IMAGE}
-                  alt="Bản đồ tương tác Việt Nam"
-                  className="h-full w-full object-cover"
-                />
+              <div className="relative h-32 w-full overflow-hidden rounded-lg border border-outline-variant/30 bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Icon name="map" className="!text-6xl text-primary opacity-40" />
+                </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
                   <span className="rounded-full bg-white/90 px-4 py-1 text-label-caps text-primary shadow-sm backdrop-blur-sm">
-                    Xem bản đồ
+                    Sắp ra mắt
                   </span>
                 </div>
               </div>
@@ -155,16 +189,16 @@ export default function HomePage() {
                   { icon: 'collections_bookmark', label: 'Sưu tập' },
                   { icon: 'rate_review', label: 'Review' },
                 ].map((q) => (
-                  <button
+                  <Link
                     key={q.label}
-                    type="button"
+                    href="/tai-khoan/yeu-thich"
                     className="group flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg bg-surface-container transition-colors hover:bg-primary-fixed"
                   >
                     <Icon name={q.icon} className="text-primary" />
                     <span className="text-[10px] font-bold uppercase text-on-surface-variant">
                       {q.label}
                     </span>
-                  </button>
+                  </Link>
                 ))}
               </div>
             </article>
@@ -172,38 +206,46 @@ export default function HomePage() {
         </section>
 
         {/* Featured Collections */}
-        <section className="border-t border-outline-variant/20 py-section-gap">
-          <div className="mb-10 flex items-end justify-between">
-            <div>
-              <span className="text-label-caps uppercase text-primary">Gợi ý hôm nay</span>
-              <h2 className="mt-2 font-h2 text-h2 text-on-surface">Cảm hứng lên đường</h2>
-            </div>
-            <Link
-              href="/kham-pha"
-              className="hidden font-semibold text-primary hover:underline sm:inline"
-            >
-              Xem tất cả địa điểm →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:grid-cols-4">
-            {COLLECTIONS.map((c) => (
-              <Link key={c.title} href={c.href} className="group cursor-pointer">
-                <div className="mb-4 aspect-[3/4] overflow-hidden rounded-xl shadow-sm transition-all group-hover:shadow-premium">
-                  <img
-                    src={c.image}
-                    alt={c.alt}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <p className="mb-1 text-label-caps text-on-surface-variant">{c.region}</p>
-                <h4 className="font-h3 text-xl font-bold transition-colors group-hover:text-primary">
-                  {c.title}
-                </h4>
+        {collections.length > 0 && (
+          <section className="border-t border-outline-variant/20 py-section-gap">
+            <div className="mb-10 flex items-end justify-between">
+              <div>
+                <span className="text-label-caps uppercase text-primary">Gợi ý hôm nay</span>
+                <h2 className="mt-2 font-h2 text-h2 text-on-surface">Cảm hứng lên đường</h2>
+              </div>
+              <Link
+                href="/kham-pha"
+                className="hidden font-semibold text-primary hover:underline sm:inline"
+              >
+                Xem tất cả địa điểm →
               </Link>
-            ))}
-          </div>
-        </section>
+            </div>
+
+            <div className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:grid-cols-4">
+              {collections.map((c) => (
+                <Link key={c.title} href={c.href} className="group cursor-pointer">
+                  <div className="mb-4 aspect-[3/4] overflow-hidden rounded-xl bg-surface-container shadow-sm transition-all group-hover:shadow-premium">
+                    {c.image ? (
+                      <img
+                        src={c.image}
+                        alt={c.alt}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-container to-tertiary-container">
+                        <Icon name="image" className="!text-4xl text-primary opacity-50" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="mb-1 text-label-caps text-on-surface-variant">{c.region}</p>
+                  <h4 className="font-h3 text-xl font-bold transition-colors group-hover:text-primary">
+                    {c.title}
+                  </h4>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <SiteFooter />
     </>

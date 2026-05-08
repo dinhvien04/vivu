@@ -8,15 +8,13 @@ import { HeaderAccount } from './header-account';
 import { Icon } from './icon';
 
 const NAV_ITEMS = [
-  { label: 'Khám phá', href: '/' },
-  { label: 'Điểm đến', href: '/diem-den' },
-  { label: 'Lưu trú', href: '/luu-tru' },
-  { label: 'Cẩm nang', href: '/cam-nang' },
+  { label: 'Trang chủ', href: '/' },
+  { label: 'Khám phá', href: '/kham-pha' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
   if (href === '/') {
-    return pathname === '/' || pathname === '/kham-pha';
+    return pathname === '/';
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
