@@ -10,6 +10,7 @@ import { Icon } from './icon';
 const NAV_ITEMS = [
   { label: 'Trang chủ', href: '/' },
   { label: 'Khám phá', href: '/kham-pha' },
+  { label: 'Hỏi đáp', href: '/hoi-dap' },
 ];
 
 function isActive(pathname: string, href: string): boolean {

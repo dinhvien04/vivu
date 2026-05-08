@@ -3,18 +3,19 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { AddToCollectionButton } from '@/components/add-to-collection-button';
-import { EmptyState } from '@/components/empty-state';
 import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
 import { PlaceCard } from '@/components/place-card';
+import { QaSection } from '@/components/qa-section';
 import { ReviewsSection } from '@/components/reviews-section';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { listPlaces, getPlaceBySlug } from '@/lib/api';
 import { transformCloudinary } from '@/lib/image';
+import { listQuestionsForPlace } from '@/lib/qa-client';
 import { listReviewsForPlace } from '@/lib/reviews-client';
 import { formatSeasonMonths } from '@/lib/season';
-import type { Review } from '@vivu/types';
+import type { Question, Review } from '@vivu/types';
 
 interface PageProps {
   params: { slug: string };
@@ -51,6 +52,16 @@ export default async function PlaceDetailPage({ params }: PageProps) {
     const r = await listReviewsForPlace(params.slug, { pageSize: 20 });
     initialReviews = r.data;
     initialReviewsTotal = r.meta.total;
+  } catch {
+    /* ignore */
+  }
+
+  let initialQuestions: Question[] = [];
+  let initialQuestionsTotal = 0;
+  try {
+    const r = await listQuestionsForPlace(params.slug, { pageSize: 10 });
+    initialQuestions = r.data;
+    initialQuestionsTotal = r.meta.total;
   } catch {
     /* ignore */
   }
@@ -248,15 +259,11 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             />
 
             {/* Q&A */}
-            <section className="mb-12">
-              <h2 className="mb-6 font-h2 text-h2 text-on-surface">Hỏi đáp</h2>
-              <EmptyState
-                compact
-                icon="forum"
-                title="Chưa có câu hỏi"
-                description="Bạn đang phân vân điều gì? Đặt câu hỏi để cộng đồng cùng giải đáp."
-              />
-            </section>
+            <QaSection
+              placeSlug={place.slug}
+              initialQuestions={initialQuestions}
+              initialTotal={initialQuestionsTotal}
+            />
           </div>
 
           {/* Right sidebar */}
