@@ -33,7 +33,7 @@
 | `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [ ] Chưa có (có thể reuse `<EmptyState />`)                                                                                                                             |
 | `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [ ] Chưa có                                                                                                                                                             |
 | `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[slug]`                  | [ ] Chưa có                                                                                                                                                             |
-| `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [ ] Chưa có                                                                                                                                                             |
+| `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [x] Form viết đánh giá (rating 1-5 + content), auth-gated, redirect về detail sau khi gửi                                                                              |
 | `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [ ] Chưa có                                                                                                                                                             |
 | `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [ ] Chưa có                                                                                                                                                             |
 | `vivu_trang_c_nh_n` (Trang cá nhân)                           | `/u/[username]` hoặc `/tai-khoan` | [ ] Chưa có                                                                                                                                                             |
@@ -55,7 +55,7 @@
 | `vivu_admin_t_ng_quan`        | `/admin`                 | 🟡 [x] thẻ stat (Tổng địa điểm + Phân bố theo vùng + Recent places); [ ] khối "Hoạt động Gần đây" (audit log); [ ] khối "Sức khoẻ Hệ thống" (băng thông/dung lượng/API status); [ ] khối "Thao tác nhanh"; [ ] nút "Xuất báo cáo"; [ ] số liệu Đánh giá / Người dùng tích cực |
 | `vivu_admin_qu_n_l_a_i_m`     | `/admin/dia-diem`        | [x] bảng + tabs vùng + form tìm; [x] route `/admin/dia-diem/new`; [x] thao tác delete/publish/unpublish trên từng dòng                                                                                                                                                        |
 | `vivu_admin_ch_nh_s_a_a_i_m`  | `/admin/dia-diem/[slug]` | 🟡 [x] form đầy đủ (PATCH); [x] chọn region/category/best season; [ ] upload trực tiếp ảnh hero (hiện dán URL); [x] nút publish/unpublish/xoá                                                                                                                                 |
-| `vivu_admin_ki_m_duy_t_nh_gi` | `/admin/danh-gia`        | 🟡 [x] layout; [ ] gắn dữ liệu thật (đang dùng mock cứng); [ ] tabs Đã duyệt/Đã từ chối hoạt động; [ ] nút duyệt/từ chối                                                                                                                                                      |
+| `vivu_admin_ki_m_duy_t_nh_gi` | `/admin/danh-gia`        | [x] gắn API thật; [x] tabs theo status (Bị báo cáo/Đang hiển thị/Đã ẩn) với count động; [x] nút Ẩn/Khôi phục                                                                                                                                                                |
 
 ## 5. Trạng thái hệ thống
 
@@ -74,7 +74,7 @@
 
 - [x] `GET /api/v1/places` — hỗ trợ `q`, `region`, `category`, `season`, `sort`, `page`, `pageSize`
 - [x] `GET /api/v1/places/:slug`
-- [ ] `GET /api/v1/places/:slug/reviews`
+- [x] `GET /api/v1/places/:slug/reviews`
 - [ ] `GET /api/v1/places/nearby?lat=&lng=&radius=`
 - [x] `GET /api/v1/categories`
 - [x] `GET /api/v1/regions`
@@ -97,8 +97,8 @@
 - [x] `POST/DELETE /api/v1/places/:id/favorite` (idempotent; 401 nếu chưa auth)
 - [x] `GET /api/v1/places/:id/favorite` — status check (auth required)
 - [x] `GET /api/v1/me/favorites` — list địa điểm đã lưu (auth required)
-- [ ] `POST /api/v1/places/:id/reviews`
-- [ ] `PATCH/DELETE /api/v1/reviews/:id`
+- [x] `POST /api/v1/places/:id/reviews`
+- [x] `PATCH/DELETE /api/v1/reviews/:id` + `GET /me/reviews`
 - [ ] `GET/POST/PATCH/DELETE /api/v1/me/collections[/:id][/items]`
 - [ ] Q&A endpoints (`questions`, `answers`)
 
@@ -110,7 +110,7 @@
 
 - [x] `POST/PATCH/DELETE /api/v1/admin/places[/:id]`
 - [x] `POST /api/v1/admin/places/:id/publish` + `unpublish`
-- [ ] `GET /api/v1/admin/reviews?status=reported`
+- [x] `GET /api/v1/admin/reviews?status=` + `POST /admin/reviews/:id/hide` / `restore` / `report` + `DELETE /admin/reviews/:id`
 - [ ] Moderate review endpoints (approve / hide)
 
 ## 7. Quan sát chi tiết & rủi ro nhỏ cần fix sớm
@@ -118,7 +118,7 @@
 - [ ] Header `apps/web/src/components/site-header.tsx` link `/diem-den`, `/luu-tru`, `/cam-nang` — 3/4 link đang 404. Nên trỏ "Điểm đến" → `/kham-pha` và ẩn 2 mục còn lại tới khi có content.
 - [ ] Trang chủ dùng URL ảnh `lh3.googleusercontent.com/aida-public/...` cứng trong `apps/web/src/app/page.tsx`. Cần chuyển sang Cloudinary và đọc từ DB.
 - [x] Bật "Lưu thay đổi" cho `apps/web/src/app/admin/dia-diem/[slug]/page.tsx` (PATCH).
-- [ ] Thay mock review trong `apps/web/src/app/admin/danh-gia/page.tsx` bằng `/admin/reviews?status=reported`.
+- [x] Thay mock review trong `apps/web/src/app/admin/danh-gia/page.tsx` bằng `/admin/reviews?status=`.
 - [ ] i18n: schema có sẵn `titleEn`, `summaryEn`, ... — frontend mới chỉ dùng `*Vi`. Cần `next-intl` hoặc `app/[locale]` segment.
 - [ ] SEO: `app/layout.tsx` chưa khai báo `sitemap`, `robots`, hoặc JSON-LD `TouristAttraction` cho place detail.
 - [ ] Search: chưa thêm MeiliSearch service vào `docker-compose.yml`. Có thể dùng `pg_trgm` trước theo charter.
@@ -140,7 +140,7 @@
 
 ### v1
 
-- [ ] Reviews API + UI write-review + admin moderation thật (thay mock).
+- [x] Reviews API + UI write-review + admin moderation thật (thay mock).
 - [ ] Collections / Sổ tay (list + detail + add/remove item).
 - [ ] Search results page + MeiliSearch + typeahead trong header.
 - [ ] i18n vi/en (FE next-intl + BE đã sẵn dữ liệu).
