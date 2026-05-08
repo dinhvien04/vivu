@@ -31,8 +31,8 @@
 | `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=ban-do`        | [ ] Chưa có                                                                                                                                                             |
 | `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [ ] Chưa có                                                                                                                                                             |
 | `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [ ] Chưa có (có thể reuse `<EmptyState />`)                                                                                                                             |
-| `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [ ] Chưa có                                                                                                                                                             |
-| `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[slug]`                  | [ ] Chưa có                                                                                                                                                             |
+| `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [x] List sổ tay của tôi, tạo mới inline, xoá, auth-gated                                                                                                                              |
+| `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[id]`                    | [x] Chi tiết + grid place card, bỏ place khỏi sổ tay, edit name/desc/public                                                                                                                |
 | `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [x] Form viết đánh giá (rating 1-5 + content), auth-gated, redirect về detail sau khi gửi                                                                               |
 | `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [ ] Chưa có                                                                                                                                                             |
 | `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [ ] Chưa có                                                                                                                                                             |
@@ -99,7 +99,7 @@
 - [x] `GET /api/v1/me/favorites` — list địa điểm đã lưu (auth required)
 - [x] `POST /api/v1/places/:id/reviews`
 - [x] `PATCH/DELETE /api/v1/reviews/:id` + `GET /me/reviews`
-- [ ] `GET/POST/PATCH/DELETE /api/v1/me/collections[/:id][/items]`
+- [x] `GET/POST/PATCH/DELETE /api/v1/me/collections[/:id][/items]`
 - [ ] Q&A endpoints (`questions`, `answers`)
 
 ### Media
@@ -141,7 +141,7 @@
 ### v1
 
 - [x] Reviews API + UI write-review + admin moderation thật (thay mock).
-- [ ] Collections / Sổ tay (list + detail + add/remove item).
+- [x] Collections / Sổ tay (list + detail + add/remove item) — **PR #19**.
 - [ ] Search results page + MeiliSearch + typeahead trong header.
 - [ ] i18n vi/en (FE next-intl + BE đã sẵn dữ liệu).
 - [ ] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction` cho place detail.

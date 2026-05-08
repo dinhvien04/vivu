@@ -6,6 +6,7 @@ import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CollectionsModule } from './collections/collections.module';
 import { HealthController } from './common/health.controller';
 import { FavoritesModule } from './favorites/favorites.module';
 import { PlacesModule } from './places/places.module';
@@ -30,6 +31,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     CategoriesModule,
     FavoritesModule,
     ReviewsModule,
+    CollectionsModule,
     AdminPlacesModule,
     AdminReviewsModule,
   ],

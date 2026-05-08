@@ -91,6 +91,29 @@ export interface PlaceRatingSummary {
   average: number;
 }
 
+export interface CollectionItem {
+  placeId: string;
+  position: number;
+  note: string | null;
+  /** Place preview attached when listing items. */
+  place?: Place;
+}
+
+export interface Collection {
+  id: string;
+  userId: string;
+  name: string;
+  description: string | null;
+  isPublic: boolean;
+  coverUrl: string | null;
+  /** Number of places saved in this collection. */
+  itemsCount: number;
+  /** Optional list of items (only present on detail responses). */
+  items?: CollectionItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Paginated<T> {
   data: T[];
   meta: {

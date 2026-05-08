@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { AddToCollectionButton } from '@/components/add-to-collection-button';
 import { EmptyState } from '@/components/empty-state';
 import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
@@ -278,10 +279,11 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               {/* Action buttons */}
               <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-white p-6 shadow-sm">
                 <FavoriteButton placeId={place.id} />
+                <AddToCollectionButton placeId={place.id} placeTitle={place.titleVi} />
                 <button
                   type="button"
                   disabled
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary py-3 font-bold text-primary transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant py-3 font-bold text-on-surface-variant transition-all disabled:cursor-not-allowed disabled:opacity-60"
                   aria-label="Chia sẻ địa điểm (sắp ra mắt)"
                 >
                   <Icon name="share" className="!text-base" />
