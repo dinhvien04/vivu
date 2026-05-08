@@ -34,8 +34,8 @@
 | `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [x] List sổ tay của tôi, tạo mới inline, xoá, auth-gated                                                                                                                |
 | `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[id]`                    | [x] Chi tiết + grid place card, bỏ place khỏi sổ tay, edit name/desc/public                                                                                             |
 | `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [x] Form viết đánh giá (rating 1-5 + content), auth-gated, redirect về detail sau khi gửi                                                                               |
-| `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [ ] Chưa có                                                                                                                                                             |
-| `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [ ] Chưa có                                                                                                                                                             |
+| `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [x] List câu hỏi mới nhất, link tới detail, link "Tìm địa điểm để hỏi"                                                                                                  |
+| `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [x] Chi tiết câu hỏi + answers list + form trả lời + xoá (owner)                                                                                                        |
 | `vivu_trang_c_nh_n` (Trang cá nhân)                           | `/u/[username]` hoặc `/tai-khoan` | [x] Hồ sơ + stats + tabs (đánh giá / sổ tay / yêu thích) — `/tai-khoan`                                                                                                 |
 | `vivu_c_i_t_t_i_kho_n` (Cài đặt tài khoản)                    | `/tai-khoan/cai-dat`              | [x] Cập nhật hồ sơ + đổi mật khẩu + xoá tài khoản; 2FA / xuất dữ liệu / OAuth là placeholder                                                                            |
 | `vivu_logo`                                                   | (asset)                           | [x] `apps/web/public/vivu-logo.png`                                                                                                                                     |
@@ -100,7 +100,7 @@
 - [x] `POST /api/v1/places/:id/reviews`
 - [x] `PATCH/DELETE /api/v1/reviews/:id` + `GET /me/reviews`
 - [x] `GET/POST/PATCH/DELETE /api/v1/me/collections[/:id][/items]`
-- [ ] Q&A endpoints (`questions`, `answers`)
+- [x] Q&A endpoints (`GET /questions`, `POST /places/:id/questions`, `GET/DELETE /questions/:id`, `POST /questions/:id/answers`, `DELETE /answers/:id`, public list status visible)
 
 ### Media
 
@@ -131,7 +131,7 @@
 
 ### Sprint kế tiếp (MVP còn thiếu)
 
-- [x] `/dia-diem/[slug]` — page chi tiết bản đầu (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, "Địa điểm khác trong vùng"). Còn TODO: gallery slider, JSON-LD, weather widget, viết đánh giá thật, Q&A.
+- [x] `/dia-diem/[slug]` — page chi tiết bản đầu (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, "Địa điểm khác trong vùng", QaSection inline). Còn TODO: gallery slider, JSON-LD, weather widget.
 - [x] API filter `category` + `season` + `sort` cho `GET /places`.
 - [x] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
 - [ ] `/ban-do` — Leaflet + OSM tile + cluster.
@@ -149,7 +149,7 @@
 
 ### v1.x
 
-- [ ] Q&A list + detail + post answer.
+- [x] Q&A list + detail + post answer.
 - [ ] Trang cá nhân + cài đặt tài khoản (2FA, ngắt liên kết Google, lịch sử đăng nhập, xoá tài khoản).
 - [ ] AuditLog model + admin "Hoạt động Gần đây".
 

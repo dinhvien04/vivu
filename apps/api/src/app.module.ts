@@ -11,6 +11,7 @@ import { HealthController } from './common/health.controller';
 import { FavoritesModule } from './favorites/favorites.module';
 import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { QaModule } from './qa/qa.module';
 import { RegionsModule } from './regions/regions.module';
 import { ReviewsModule } from './reviews/reviews.module';
 
@@ -32,6 +33,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     FavoritesModule,
     ReviewsModule,
     CollectionsModule,
+    QaModule,
     AdminPlacesModule,
     AdminReviewsModule,
   ],
