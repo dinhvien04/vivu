@@ -88,12 +88,25 @@ export class PlacesService {
       where.region = { slug: query.region };
     }
 
+    if (query.category) {
+      where.categories = {
+        some: { category: { slug: query.category } },
+      };
+    }
+
+    if (query.season) {
+      where.bestSeasons = { has: query.season };
+    }
+
+    const orderBy: Prisma.PlaceOrderByWithRelationInput =
+      query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };
+
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.place.findMany({
         where,
         skip,
         take: pageSize,
-        orderBy: { updatedAt: 'desc' },
+        orderBy,
         include: {
           region: true,
           photos: { orderBy: { position: 'asc' } },

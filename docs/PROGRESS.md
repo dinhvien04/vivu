@@ -24,7 +24,7 @@
 | Màn hình thiết kế                                             | Đường dẫn dự kiến                 | Trạng thái                                                                                                                                                              |
 | ------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                  |
-| `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền + skeleton; [ ] sidebar lọc Danh mục/Mùa/Rating; [ ] dropdown sort Phổ biến/Mới nhất; [ ] chip filter chủ đề; [ ] switch sang Map view |
+| `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền (động) + skeleton + chip danh mục + filter mùa + sort recent/name; [ ] sidebar lọc Rating; [ ] switch sang Map view                    |
 | `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | 🟡 [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + related places; [ ] gallery slider, JSON-LD, viết đánh giá thật, Q&A, weather widget |
 | `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình)                                                                                   |
 | `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=`                    | [ ] Chưa có                                                                                                                                                             |
@@ -72,12 +72,12 @@
 
 ### Public
 
-- 🟡 `GET /api/v1/places` — [x] hỗ trợ `q`, `region`, `page`, `pageSize`; [ ] thiếu `category`, `season`, `sort`
+- [x] `GET /api/v1/places` — hỗ trợ `q`, `region`, `category`, `season`, `sort`, `page`, `pageSize`
 - [x] `GET /api/v1/places/:slug`
 - [ ] `GET /api/v1/places/:slug/reviews`
 - [ ] `GET /api/v1/places/nearby?lat=&lng=&radius=`
-- [ ] `GET /api/v1/categories`
-- [ ] `GET /api/v1/regions`
+- [x] `GET /api/v1/categories`
+- [x] `GET /api/v1/regions`
 - [ ] `GET /api/v1/search/suggest?q=` (typeahead)
 
 ### Auth
@@ -131,8 +131,8 @@
 ### Sprint kế tiếp (MVP còn thiếu)
 
 - [x] `/dia-diem/[slug]` — page chi tiết bản đầu (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, "Địa điểm khác trong vùng"). Còn TODO: gallery slider, JSON-LD, weather widget, viết đánh giá thật, Q&A.
-- [ ] API filter `category` + `season` + `sort` cho `GET /places`.
-- [ ] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
+- [x] API filter `category` + `season` + `sort` cho `GET /places`.
+- [x] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
 - [ ] `/ban-do` — Leaflet + OSM tile + cluster.
 - [ ] Favorites — model đã có; cần controller + nút "Thêm vào sổ tay" trên detail page.
 - [ ] Admin CRUD places — bật form edit, upload ảnh hero qua Cloudinary, tạo `/admin/dia-diem/new`.
