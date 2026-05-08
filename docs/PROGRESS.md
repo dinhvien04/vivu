@@ -53,8 +53,8 @@
 | Màn hình thiết kế             | Đường dẫn                | Trạng thái                                                                                                                                                                                                                                                                    |
 | ----------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vivu_admin_t_ng_quan`        | `/admin`                 | 🟡 [x] thẻ stat (Tổng địa điểm + Phân bố theo vùng + Recent places); [ ] khối "Hoạt động Gần đây" (audit log); [ ] khối "Sức khoẻ Hệ thống" (băng thông/dung lượng/API status); [ ] khối "Thao tác nhanh"; [ ] nút "Xuất báo cáo"; [ ] số liệu Đánh giá / Người dùng tích cực |
-| `vivu_admin_qu_n_l_a_i_m`     | `/admin/dia-diem`        | 🟡 [x] bảng + tabs vùng + form tìm; [ ] route `/admin/dia-diem/new` (đang 404); [ ] thao tác delete/publish/unpublish                                                                                                                                                         |
-| `vivu_admin_ch_nh_s_a_a_i_m`  | `/admin/dia-diem/[slug]` | 🟡 [x] form chỉ-đọc; [ ] bật form (PATCH); [ ] upload ảnh hero; [ ] chọn region/category/best season                                                                                                                                                                          |
+| `vivu_admin_qu_n_l_a_i_m`     | `/admin/dia-diem`        | [x] bảng + tabs vùng + form tìm; [x] route `/admin/dia-diem/new`; [x] thao tác delete/publish/unpublish trên từng dòng                                                                                                                                                        |
+| `vivu_admin_ch_nh_s_a_a_i_m`  | `/admin/dia-diem/[slug]` | 🟡 [x] form đầy đủ (PATCH); [x] chọn region/category/best season; [ ] upload trực tiếp ảnh hero (hiện dán URL); [x] nút publish/unpublish/xoá                                                                                                                                 |
 | `vivu_admin_ki_m_duy_t_nh_gi` | `/admin/danh-gia`        | 🟡 [x] layout; [ ] gắn dữ liệu thật (đang dùng mock cứng); [ ] tabs Đã duyệt/Đã từ chối hoạt động; [ ] nút duyệt/từ chối                                                                                                                                                      |
 
 ## 5. Trạng thái hệ thống
@@ -108,8 +108,8 @@
 
 ### Admin
 
-- [ ] `POST/PATCH/DELETE /api/v1/admin/places[/:id]`
-- [ ] `POST /api/v1/admin/places/:id/publish`
+- [x] `POST/PATCH/DELETE /api/v1/admin/places[/:id]`
+- [x] `POST /api/v1/admin/places/:id/publish` + `unpublish`
 - [ ] `GET /api/v1/admin/reviews?status=reported`
 - [ ] Moderate review endpoints (approve / hide)
 
@@ -117,7 +117,7 @@
 
 - [ ] Header `apps/web/src/components/site-header.tsx` link `/diem-den`, `/luu-tru`, `/cam-nang` — 3/4 link đang 404. Nên trỏ "Điểm đến" → `/kham-pha` và ẩn 2 mục còn lại tới khi có content.
 - [ ] Trang chủ dùng URL ảnh `lh3.googleusercontent.com/aida-public/...` cứng trong `apps/web/src/app/page.tsx`. Cần chuyển sang Cloudinary và đọc từ DB.
-- [ ] Bật "Lưu thay đổi" cho `apps/web/src/app/admin/dia-diem/[slug]/page.tsx` sau khi có endpoint `PATCH /admin/places/:id`.
+- [x] Bật "Lưu thay đổi" cho `apps/web/src/app/admin/dia-diem/[slug]/page.tsx` (PATCH).
 - [ ] Thay mock review trong `apps/web/src/app/admin/danh-gia/page.tsx` bằng `/admin/reviews?status=reported`.
 - [ ] i18n: schema có sẵn `titleEn`, `summaryEn`, ... — frontend mới chỉ dùng `*Vi`. Cần `next-intl` hoặc `app/[locale]` segment.
 - [ ] SEO: `app/layout.tsx` chưa khai báo `sitemap`, `robots`, hoặc JSON-LD `TouristAttraction` cho place detail.
@@ -136,7 +136,7 @@
 - [x] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
 - [ ] `/ban-do` — Leaflet + OSM tile + cluster.
 - [x] Favorites — backend (POST/DELETE/GET status + GET /me/favorites) + nút "Thêm vào sổ tay" optimistic trên `/dia-diem/[slug]` + page `/tai-khoan/yeu-thich`.
-- [ ] Admin CRUD places — bật form edit, upload ảnh hero qua Cloudinary, tạo `/admin/dia-diem/new`.
+- [x] Admin CRUD places — backend POST/PATCH/DELETE/publish/unpublish (auth + role admin/editor) + bật form edit + tạo `/admin/dia-diem/new` + nút delete/publish/unpublish trên list. (🟡 còn upload trực tiếp ảnh hero qua Cloudinary, tạm thời dán URL.)
 
 ### v1
 

@@ -34,12 +34,12 @@ export async function callApi(
   path: string,
   init: { method?: string; body?: unknown; bearer?: string } = {},
 ): Promise<{ status: number; body: unknown }> {
+  const headers: Record<string, string> = {};
+  if (init.body !== undefined) headers['content-type'] = 'application/json';
+  if (init.bearer) headers.authorization = `Bearer ${init.bearer}`;
   const res = await fetch(`${API_BASE}${API_PREFIX}${path}`, {
     method: init.method ?? 'POST',
-    headers: {
-      'content-type': 'application/json',
-      ...(init.bearer ? { authorization: `Bearer ${init.bearer}` } : {}),
-    },
+    headers,
     body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
     cache: 'no-store',
   });

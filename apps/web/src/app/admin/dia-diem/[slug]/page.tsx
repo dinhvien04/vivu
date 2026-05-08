@@ -1,29 +1,136 @@
+'use client';
+
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { PlaceForm } from '@/components/admin/place-form';
+import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
-import { getPlaceBySlug } from '@/lib/api';
+import {
+  adminDeletePlace,
+  adminGetPlace,
+  adminPublishPlace,
+  adminUnpublishPlace,
+} from '@/lib/admin-places-client';
+import { listCategories, listRegions } from '@/lib/api';
+import type { Category, Place, Region } from '@vivu/types';
 
 interface PageProps {
   params: { slug: string };
 }
 
-export async function generateMetadata({ params }: PageProps) {
-  return { title: `Sửa: ${params.slug}` };
-}
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Bản nháp',
+  published: 'Đã xuất bản',
+  archived: 'Đã lưu trữ',
+};
 
-export default async function AdminPlaceEdit({ params }: PageProps) {
-  let place: Awaited<ReturnType<typeof getPlaceBySlug>> | null = null;
-  try {
-    place = await getPlaceBySlug(params.slug);
-  } catch {
-    notFound();
+export default function AdminPlaceEdit({ params }: PageProps) {
+  const router = useRouter();
+  const { getAccessToken, user, loading } = useAuth();
+  const [place, setPlace] = useState<Place | null>(null);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (loading || !user) return;
+    let cancelled = false;
+    (async () => {
+      setError(null);
+      setNotFound(false);
+      try {
+        const token = await getAccessToken();
+        if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+        const [p, rs, cs] = await Promise.all([
+          adminGetPlace(params.slug, token),
+          listRegions().catch(() => [] as Region[]),
+          listCategories().catch(() => [] as Category[]),
+        ]);
+        if (cancelled) return;
+        setPlace(p);
+        setRegions(rs);
+        setCategories(cs);
+      } catch (e) {
+        if (cancelled) return;
+        const msg = e instanceof Error ? e.message : 'Có lỗi xảy ra';
+        if (msg.toLowerCase().includes('không tìm thấy')) setNotFound(true);
+        else setError(msg);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, user, getAccessToken, params.slug]);
+
+  const handleStatus = async (action: 'publish' | 'unpublish'): Promise<void> => {
+    if (!place) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      const updated =
+        action === 'publish'
+          ? await adminPublishPlace(place.id, token)
+          : await adminUnpublishPlace(place.id, token);
+      setPlace(updated);
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDelete = async (): Promise<void> => {
+    if (!place) return;
+    const ok = window.confirm(`Xoá "${place.titleVi}"? Hành động này không thể hoàn tác.`);
+    if (!ok) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      await adminDeletePlace(place.id, token);
+      router.push('/admin/dia-diem');
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setBusy(false);
+    }
+  };
+
+  if (notFound) {
+    return (
+      <div className="mx-auto flex min-h-[40vh] max-w-md flex-col items-center justify-center gap-3 text-center">
+        <h1 className="font-h3 text-h3 text-on-surface">Không tìm thấy địa điểm</h1>
+        <p className="text-body-md text-on-surface-variant">
+          Slug <code>{params.slug}</code> không khớp địa điểm nào.
+        </p>
+        <Link
+          href="/admin/dia-diem"
+          className="rounded-lg bg-primary px-4 py-2 font-semibold text-white"
+        >
+          Về danh sách
+        </Link>
+      </div>
+    );
   }
 
-  if (!place) notFound();
+  if (!place) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
+        {error ?? 'Đang tải địa điểm…'}
+      </div>
+    );
+  }
 
   return (
     <>
-      <header className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+      <header className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
         <div>
           <nav
             aria-label="Đường dẫn"
@@ -40,212 +147,78 @@ export default async function AdminPlaceEdit({ params }: PageProps) {
             <span className="text-primary">Chỉnh sửa</span>
           </nav>
           <h1 className="font-h2 text-h2 text-on-surface">{place.titleVi}</h1>
-          <p className="mt-1 text-body-sm text-on-surface-variant">
-            Slug: <code className="rounded bg-surface-container px-1.5 py-0.5">{place.slug}</code>
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-body-sm text-on-surface-variant">
+            <span>
+              Slug: <code className="rounded bg-surface-container px-1.5 py-0.5">{place.slug}</code>
+            </span>
+            <span>·</span>
+            <span
+              className={
+                place.status === 'published'
+                  ? 'inline-flex items-center gap-1 rounded-full bg-secondary-container px-2 py-0.5 text-on-secondary-container'
+                  : 'inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-0.5'
+              }
+            >
+              <Icon
+                name={place.status === 'published' ? 'check_circle' : 'edit_note'}
+                className="!text-sm"
+              />
+              {STATUS_LABEL[place.status] ?? place.status}
+            </span>
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/dia-diem"
-            className="rounded-lg border border-outline-variant px-4 py-2 font-semibold text-on-surface-variant hover:bg-surface-container"
-          >
-            Hủy
-          </Link>
+        <div className="flex flex-wrap items-center gap-2">
           <button
-            type="submit"
-            form="place-edit-form"
-            disabled
-            className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-primary/60 px-4 py-2 font-semibold text-white"
-            title="Chức năng lưu sẽ kích hoạt khi có Auth admin"
+            type="button"
+            onClick={handleDelete}
+            disabled={busy}
+            className="inline-flex items-center gap-1 rounded-lg border border-error/40 px-3 py-2 text-body-sm font-medium text-error hover:bg-error-container/30 disabled:opacity-60"
           >
-            <Icon name="save" className="text-base" />
-            Lưu thay đổi
+            <Icon name="delete" className="!text-base" />
+            Xoá
           </button>
+          {place.status === 'published' ? (
+            <button
+              type="button"
+              onClick={() => handleStatus('unpublish')}
+              disabled={busy}
+              className="inline-flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-2 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container disabled:opacity-60"
+            >
+              <Icon name="visibility_off" className="!text-base" />
+              Hủy xuất bản
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleStatus('publish')}
+              disabled={busy}
+              className="inline-flex items-center gap-1 rounded-lg bg-tertiary px-3 py-2 text-body-sm font-semibold text-on-tertiary hover:bg-tertiary/90 disabled:opacity-60"
+            >
+              <Icon name="rocket_launch" className="!text-base" />
+              Xuất bản
+            </button>
+          )}
+          <Link
+            href={`/dia-diem/${place.slug}`}
+            target="_blank"
+            className="inline-flex items-center gap-1 rounded-lg border border-outline-variant px-3 py-2 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container"
+          >
+            <Icon name="open_in_new" className="!text-base" />
+            Xem trang
+          </Link>
         </div>
       </header>
 
-      <div className="mb-6 rounded-lg border border-tertiary/30 bg-tertiary-container/40 px-4 py-3 text-body-sm text-on-tertiary-container">
-        <Icon name="info" className="mr-1 align-middle text-base" />
-        Form đang ở chế độ chỉ xem. Chức năng lưu sẽ kích hoạt khi có hệ thống đăng nhập admin.
-      </div>
-
-      <form id="place-edit-form" className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
-          <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-            <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">Thông tin cơ bản</legend>
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                  Tên (tiếng Việt)
-                </span>
-                <input
-                  type="text"
-                  defaultValue={place.titleVi}
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-white focus:ring-2 focus:ring-primary"
-                />
-              </label>
-              <label className="block">
-                <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                  Tên (English)
-                </span>
-                <input
-                  type="text"
-                  defaultValue={place.titleEn ?? ''}
-                  placeholder="Tên tiếng Anh (tuỳ chọn)"
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-white focus:ring-2 focus:ring-primary"
-                />
-              </label>
-              <label className="block">
-                <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                  Tóm tắt
-                </span>
-                <textarea
-                  rows={3}
-                  defaultValue={place.summaryVi ?? ''}
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
-                />
-              </label>
-              <label className="block">
-                <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                  Địa chỉ
-                </span>
-                <input
-                  type="text"
-                  defaultValue={place.address ?? ''}
-                  placeholder="Tỉnh, thành phố, địa danh..."
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
-                />
-              </label>
-            </div>
-          </fieldset>
-
-          <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-            <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">Mô tả chi tiết</legend>
-            <textarea
-              rows={12}
-              defaultValue={place.descriptionVi ?? ''}
-              placeholder="Viết mô tả chi tiết về địa điểm: lịch sử, đặc trưng, điểm nổi bật..."
-              className="w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-white focus:ring-2 focus:ring-primary"
-            />
-            <p className="mt-2 text-body-sm text-outline">
-              Hỗ trợ Markdown cơ bản (in đậm, in nghiêng, danh sách, link).
-            </p>
-          </fieldset>
-
-          <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-            <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">
-              Hình ảnh ({place.photos?.length ?? 0})
-            </legend>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {(place.photos ?? []).map((photo) => (
-                <div
-                  key={photo.id}
-                  className="relative aspect-square overflow-hidden rounded-lg bg-surface-container"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photo.url}
-                    alt={photo.alt ?? ''}
-                    className="h-full w-full object-cover"
-                  />
-                  {photo.isCover && (
-                    <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-body-sm font-semibold text-white">
-                      Cover
-                    </span>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                disabled
-                className="flex aspect-square cursor-not-allowed items-center justify-center rounded-lg border-2 border-dashed border-outline-variant bg-surface-container/30 text-outline"
-                title="Sẽ kết nối Cloudinary upload sau"
-              >
-                <span className="flex flex-col items-center gap-1">
-                  <Icon name="add_photo_alternate" className="!text-2xl" />
-                  <span className="text-body-sm">Thêm ảnh</span>
-                </span>
-              </button>
-            </div>
-          </fieldset>
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-error/40 bg-error-container px-4 py-3 text-body-md text-on-error-container"
+        >
+          {error}
         </div>
+      )}
 
-        <aside className="space-y-6 lg:col-span-4">
-          <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-            <h3 className="mb-4 font-h4 text-h4 text-on-surface">Trạng thái</h3>
-            <label className="block">
-              <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Hiển thị
-              </span>
-              <select
-                defaultValue={place.status}
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
-              >
-                <option value="draft">Bản nháp</option>
-                <option value="published">Đã xuất bản</option>
-                <option value="archived">Đã lưu trữ</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-            <h3 className="mb-4 font-h4 text-h4 text-on-surface">Vị trí</h3>
-            <label className="mb-4 block">
-              <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Vùng
-              </span>
-              <input
-                type="text"
-                defaultValue={place.region?.nameVi ?? ''}
-                disabled
-                className="mt-1 w-full cursor-not-allowed rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md text-on-surface-variant"
-              />
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                  Vĩ độ
-                </span>
-                <input
-                  type="number"
-                  step="0.000001"
-                  defaultValue={place.geo?.lat ?? ''}
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
-                />
-              </label>
-              <label className="block">
-                <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                  Kinh độ
-                </span>
-                <input
-                  type="number"
-                  step="0.000001"
-                  defaultValue={place.geo?.lng ?? ''}
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-            <h3 className="mb-4 font-h4 text-h4 text-on-surface">Chuyên mục</h3>
-            {place.categories && place.categories.length > 0 ? (
-              <ul className="flex flex-wrap gap-2">
-                {place.categories.map((c) => (
-                  <li
-                    key={c.id}
-                    className="rounded-full bg-secondary-container px-3 py-1 text-body-sm text-on-secondary-container"
-                  >
-                    {c.nameVi}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-body-sm text-on-surface-variant">Chưa gắn chuyên mục.</p>
-            )}
-          </div>
-        </aside>
-      </form>
+      <PlaceForm mode="edit" initialPlace={place} regions={regions} categories={categories} />
     </>
   );
 }
