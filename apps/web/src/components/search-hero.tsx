@@ -47,7 +47,7 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
         placeholder={placeholder ?? 'Tìm địa điểm, vùng miền, chủ đề…'}
         className={
           compact
-            ? 'w-full rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
+            ? 'w-full rounded-full border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-4 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
             : 'flex-1 bg-transparent px-4 py-3 text-body-lg text-on-surface focus:outline-none'
         }
       />

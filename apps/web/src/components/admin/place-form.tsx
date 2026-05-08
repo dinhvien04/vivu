@@ -194,7 +194,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.titleVi}
                 onChange={(e) => set('titleVi', e.target.value)}
                 required
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
@@ -206,7 +206,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.titleEn}
                 onChange={(e) => set('titleEn', e.target.value)}
                 placeholder="Tên tiếng Anh (tuỳ chọn)"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
@@ -220,7 +220,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 required
                 pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
                 placeholder="vinh-ha-long"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
               <span className="mt-1 block text-body-sm text-outline">
                 Chỉ chữ thường, số, dấu gạch ngang. Ví dụ: <code>vinh-ha-long</code>.
@@ -234,7 +234,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 rows={3}
                 value={state.summaryVi}
                 onChange={(e) => set('summaryVi', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
@@ -245,7 +245,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 rows={3}
                 value={state.summaryEn}
                 onChange={(e) => set('summaryEn', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
@@ -257,7 +257,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.address}
                 onChange={(e) => set('address', e.target.value)}
                 placeholder="Tỉnh, thành phố, địa danh..."
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
           </div>
@@ -274,7 +274,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               value={state.descriptionVi}
               onChange={(e) => set('descriptionVi', e.target.value)}
               placeholder="Viết mô tả chi tiết: lịch sử, đặc trưng, điểm nổi bật..."
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-white focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>
           <label className="mt-4 block">
@@ -286,7 +286,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               value={state.descriptionEn}
               onChange={(e) => set('descriptionEn', e.target.value)}
               placeholder="English description (optional)"
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-white focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>
           <p className="mt-2 text-body-sm text-outline">
@@ -309,7 +309,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.lat}
                 onChange={(e) => set('lat', e.target.value)}
                 placeholder="20.9101"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
@@ -324,7 +324,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.lng}
                 onChange={(e) => set('lng', e.target.value)}
                 placeholder="107.1839"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
           </div>
@@ -341,7 +341,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
             <select
               value={state.status}
               onChange={(e) => set('status', e.target.value as FormState['status'])}
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             >
               {STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -357,7 +357,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
           <select
             value={state.regionId}
             onChange={(e) => set('regionId', e.target.value)}
-            className="w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+            className="w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
           >
             {regions.length === 0 && <option value="">Đang tải vùng…</option>}
             {parentRegions.map((r) => (
@@ -431,7 +431,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               value={state.heroImageUrl}
               onChange={(e) => set('heroImageUrl', e.target.value)}
               placeholder="https://res.cloudinary.com/..."
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>
           {state.heroImageUrl && (

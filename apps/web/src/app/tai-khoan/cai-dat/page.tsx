@@ -251,7 +251,7 @@ function ProfileSection() {
       >
         <div className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-low p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest shadow-sm">
               <Icon name="account_circle" size={28} className="text-on-surface-variant" />
             </div>
             <div>
@@ -393,7 +393,7 @@ function SecuritySection() {
             aria-pressed="false"
             className="relative h-6 w-11 rounded-full bg-surface-container-highest disabled:opacity-50"
           >
-            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow" />
+            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-surface-container-lowest shadow" />
           </button>
         </div>
       </SectionCard>
@@ -544,7 +544,7 @@ function NotificationsSection() {
               className="relative h-6 w-11 rounded-full bg-surface-container-highest disabled:opacity-50"
               aria-pressed="false"
             >
-              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow" />
+              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-surface-container-lowest shadow" />
             </button>
           </li>
         ))}
@@ -585,7 +585,7 @@ function PrivacySection() {
               className="relative h-6 w-11 rounded-full bg-surface-container-highest disabled:opacity-50"
               aria-pressed="false"
             >
-              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow" />
+              <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-surface-container-lowest shadow" />
             </button>
           </li>
         ))}

@@ -101,7 +101,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             rows={3}
             maxLength={1000}
             placeholder="Bạn muốn hỏi gì về địa điểm này? (5–1000 ký tự)"
-            className="w-full resize-y rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full resize-y rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
             <p className="text-label-caps text-on-surface-variant">{content.trim().length}/1000</p>

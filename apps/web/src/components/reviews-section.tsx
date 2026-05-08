@@ -140,7 +140,7 @@ export function ReviewsSection({
             return (
               <li
                 key={r.id}
-                className="rounded-xl border border-outline-variant/40 bg-white p-5 shadow-sm"
+                className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
