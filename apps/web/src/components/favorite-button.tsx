@@ -64,8 +64,8 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
           'flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-bold text-white transition-all hover:bg-primary/90'
         }
       >
-        <Icon name="bookmark_add" className="!text-base" />
-        <span>Đăng nhập để lưu</span>
+        <Icon name="favorite_border" className="!text-base" />
+        <span>Đăng nhập để yêu thích</span>
       </Link>
     );
   }
@@ -122,8 +122,8 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
             : 'flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-bold text-white transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60')
         }
       >
-        <Icon name={favorited ? 'bookmark_added' : 'bookmark_add'} className="!text-base" />
-        <span>{favorited ? 'Đã lưu vào sổ tay' : 'Thêm vào sổ tay'}</span>
+        <Icon name={favorited ? 'favorite' : 'favorite_border'} className="!text-base" />
+        <span>{favorited ? 'Đã yêu thích' : 'Thêm vào yêu thích'}</span>
       </button>
       {error && (
         <p role="alert" className="text-body-sm text-error">

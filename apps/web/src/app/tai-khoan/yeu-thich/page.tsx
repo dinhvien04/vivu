@@ -79,7 +79,7 @@ export default function YeuThichPage() {
           <EmptyState
             icon="favorite_border"
             title="Chưa có địa điểm yêu thích"
-            description="Khám phá các điểm đến và bấm 'Thêm vào sổ tay' để lưu lại tại đây."
+            description="Khám phá các điểm đến và bấm trái tim để lưu lại tại đây."
             action={{ label: 'Khám phá ngay', href: '/kham-pha' }}
           />
         ) : (
