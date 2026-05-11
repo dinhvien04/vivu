@@ -15,29 +15,39 @@ PR này — trước đó repo chưa có test nào.
 
 | Hạng mục          | Giá trị             |
 | ----------------- | ------------------- |
-| **Test suites**   | **7 / 7 passed**    |
-| **Test cases**    | **76 / 76 passed**  |
+| **Test suites**   | **11 / 11 passed**  |
+| **Test cases**    | **94 / 94 passed**  |
 | **Failed**        | 0                   |
-| **Time**          | ~0.85 s             |
+| **Time**          | ~1.0 s              |
 | **Snapshots**     | 0                   |
 | **Typecheck**     | passed (tsc clean)  |
 
+> _Cập nhật:_ PR sau bổ sung **4 controller suites** (18 tests) — xem mục 4.7.
+
 ## 2. Tổng quan từng suite
 
-| # | File                                                                | Module                       | Tests | Trạng thái |
-| - | ------------------------------------------------------------------- | ---------------------------- | ----- | ---------- |
-| 1 | `src/search/search.service.spec.ts`                                 | `SearchService.suggest`      | 11    | ✓ pass     |
-| 2 | `src/search/search-index.service.spec.ts`                           | `SearchIndexService`         | 20    | ✓ pass     |
-| 3 | `src/search/dto/suggest.query.dto.spec.ts`                          | `SuggestQueryDto` validation | 9     | ✓ pass     |
-| 4 | `src/audit-logs/audit-logs.service.spec.ts`                         | `AuditLogsService`           | 12    | ✓ pass     |
-| 5 | `src/audit-logs/dto/list-audit-logs.query.dto.spec.ts`              | `ListAuditLogsQueryDto`      | 8     | ✓ pass     |
-| 6 | `src/admin-stats/admin-stats.service.spec.ts`                       | `AdminStatsService.snapshot` | 7     | ✓ pass     |
-| 7 | `src/places/places.service.spec.ts`                                 | `PlacesService.listNearby`   | 9     | ✓ pass     |
+| #  | File                                                       | Module                       | Tests | Trạng thái |
+| -- | ---------------------------------------------------------- | ---------------------------- | ----- | ---------- |
+|  1 | `src/search/search.service.spec.ts`                        | `SearchService.suggest`      | 11    | ✓ pass     |
+|  2 | `src/search/search-index.service.spec.ts`                  | `SearchIndexService`         | 20    | ✓ pass     |
+|  3 | `src/search/dto/suggest.query.dto.spec.ts`                 | `SuggestQueryDto` validation | 9     | ✓ pass     |
+|  4 | `src/audit-logs/audit-logs.service.spec.ts`                | `AuditLogsService`           | 12    | ✓ pass     |
+|  5 | `src/audit-logs/dto/list-audit-logs.query.dto.spec.ts`     | `ListAuditLogsQueryDto`      | 8     | ✓ pass     |
+|  6 | `src/admin-stats/admin-stats.service.spec.ts`              | `AdminStatsService.snapshot` | 7     | ✓ pass     |
+|  7 | `src/places/places.service.spec.ts`                        | `PlacesService.listNearby`   | 9     | ✓ pass     |
+|  8 | `src/search/search.controller.spec.ts`                     | `SearchController`           | 5     | ✓ pass     |
+|  9 | `src/audit-logs/audit-logs.controller.spec.ts`             | `AuditLogsController`        | 4     | ✓ pass     |
+| 10 | `src/admin-stats/admin-stats.controller.spec.ts`           | `AdminStatsController`       | 3     | ✓ pass     |
+| 11 | `src/places/places.controller.spec.ts`                     | `PlacesController`           | 6     | ✓ pass     |
 
 ## 3. Coverage (file đã có test)
 
 | File                                              | Stmts   | Branch  | Funcs   | Lines   |
 | ------------------------------------------------- | ------- | ------- | ------- | ------- |
+| `src/search/search.controller.ts`                 | 100 %   | 75 %    | 100 %   | 100 %   |
+| `src/audit-logs/audit-logs.controller.ts`         | 100 %   | 75 %    | 100 %   | 100 %   |
+| `src/admin-stats/admin-stats.controller.ts`       | 100 %   | 75 %    | 100 %   | 100 %   |
+| `src/places/places.controller.ts`                 | 100 %   | 82.4 %  | 100 %   | 100 %   |
 | `src/search/search.service.ts`                    | 100 %   | 81.8 %  | 100 %   | 100 %   |
 | `src/search/search-index.service.ts`              | 80.5 %  | 75 %    | 83.3 %  | 80.3 %  |
 | `src/audit-logs/audit-logs.service.ts`            | 100 %   | 88.2 %  | 100 %   | 100 %   |
@@ -142,6 +152,40 @@ PR này — trước đó repo chưa có test nào.
 - ✓ activeUsers = distinct union giữa 3 nguồn
 - ✓ window 30 ngày (`since` ≈ now - 30d) truyền xuống Prisma
 - ✓ dùng `distinct: ['userId']` khi findMany
+
+### 4.7 Controller layer
+
+4 suites mới, 18 tests, dùng `Test.createTestingModule` (NestJS) để bootstrap module ảo:
+
+**`SearchController`** — 5 tests:
+
+- ✓ delegate `service.suggest(q, limit)` với đúng arg
+- ✓ forward `limit = undefined` xuống service (service tự áp default)
+- ✓ bọc result trong `{ data }`
+- ✓ bọc empty result thành `{ data: [] }`
+- ✓ propagate error từ service
+
+**`AuditLogsController`** — 4 tests (override `JwtAuthGuard` + `RolesGuard`):
+
+- ✓ delegate `service.list({ page, pageSize })` nguyên xi
+- ✓ forward empty query (service áp default)
+- ✓ trả result verbatim (không reshape)
+- ✓ propagate error
+
+**`AdminStatsController`** — 3 tests:
+
+- ✓ delegate `service.snapshot()` không arg
+- ✓ bọc kết quả thành `{ data }`
+- ✓ propagate error
+
+**`PlacesController`** — 6 tests (3 endpoint):
+
+- ✓ `GET /places` delegate `service.list(query)` nguyên xi
+- ✓ `GET /places/nearby` áp default `radius=50`, `limit=8` khi không truyền
+- ✓ `GET /places/nearby` tôn trọng radius + limit + excludeSlug khi có
+- ✓ `GET /places/nearby` bọc result `{ data }`
+- ✓ `GET /places/:slug` trả `{ data }` khi tìm thấy
+- ✓ `GET /places/:slug` throw `NotFoundException` (msg tiếng Việt) khi miss
 
 ### 4.6 DTO validation
 
