@@ -6,12 +6,15 @@ PR này — trước đó repo chưa có test nào.
 > **Cách chạy:**
 >
 > ```bash
-> pnpm --filter @vivu/api test                # chạy tất cả
+> pnpm --filter @vivu/api test                # unit (94 tests, không cần DB)
+> pnpm --filter @vivu/api test:int            # integration (30 tests, cần Docker)
 > pnpm --filter @vivu/api test -- search      # filter theo tên file
 > pnpm --filter @vivu/api jest --coverage     # kèm coverage
 > ```
 
 ## 1. Tóm tắt kết quả
+
+**Unit tests** (`pnpm test`)
 
 | Hạng mục          | Giá trị             |
 | ----------------- | ------------------- |
@@ -22,7 +25,19 @@ PR này — trước đó repo chưa có test nào.
 | **Snapshots**     | 0                   |
 | **Typecheck**     | passed (tsc clean)  |
 
-> _Cập nhật:_ PR sau bổ sung **4 controller suites** (18 tests) — xem mục 4.7.
+**Integration tests** (`pnpm test:int` — cần Docker)
+
+| Hạng mục          | Giá trị                                          |
+| ----------------- | ------------------------------------------------ |
+| **Test suites**   | **4 / 4 passed**                                 |
+| **Test cases**    | **30 / 30 passed**                               |
+| **Time**          | ~12 s (lần đầu ~30 s do pull image)               |
+| **Container**     | `postgis/postgis:15-3.4` qua `testcontainers`    |
+| **DB schema**     | `prisma db push` + PostGIS extensions/trigger/index |
+
+> _Combined total:_ **124 tests** (94 unit + 30 integration).
+>
+> _Cập nhật:_ PR sau bổ sung **4 controller suites** (18 tests) và **4 integration suites** (30 tests) — xem mục 4.7 và mục 5.
 
 ## 2. Tổng quan từng suite
 
@@ -57,6 +72,74 @@ PR này — trước đó repo chưa có test nào.
 > `places.service.ts` tổng thể coverage thấp vì test PR này chỉ tập trung vào
 > `listNearby` (PostGIS path mới). Hàm `list()` và `findBySlug()` đã ổn định
 > qua nhiều PR trước, sẽ bổ sung test ở PR sau nếu cần.
+
+## 5. Integration tests (Postgres + PostGIS)
+
+Từng được bổ sung ở PR riêng — spin lên container `postgis/postgis:15-3.4`
+qua [`testcontainers-node`](https://node.testcontainers.org/), áp schema bằng
+`prisma db push` + PostGIS-specific bootstrap (extensions, trigger, GIST/GIN
+index). Từ đó chạy thật với DB để verify SQL hiểu một cách chuẩn.
+
+**Config:** `apps/api/jest.int.config.js` (testRegex chỉ match `*.int.spec.ts`,
+`globalSetup` start container, `globalTeardown` stop, `--runInBand`).
+
+**Helper:** `apps/api/test/integration/prisma-helper.ts` cung cấp
+`getPrisma()` + `truncateAll()` (TRUNCATE CASCADE 16 bảng để cô lập test).
+
+| #  | Suite                                            | Tests | Trạng thái |
+| -- | ------------------------------------------------ | ----- | ---------- |
+|  1 | `test/integration/places-listNearby.int.spec.ts` | 10    | ✓ pass     |
+|  2 | `test/integration/search-pgTrgm.int.spec.ts`     | 8     | ✓ pass     |
+|  3 | `test/integration/audit-logs.int.spec.ts`        | 6     | ✓ pass     |
+|  4 | `test/integration/admin-stats.int.spec.ts`       | 6     | ✓ pass     |
+
+### 5.1 `PlacesService.listNearby` (PostGIS real)
+
+Seed 4 địa điểm thật quanh Hà Nội + 1 draft. Cross-check distance với
+Haversine reference. Tập test:
+
+- ✓ trả places trong bán kính, sort distance ASC
+- ✓ distance khop Haversine (sai số <2% cho điểm >5km)
+- ✓ loại `status != 'published'`
+- ✓ respect `radiusKm` (3km không trả Hồ Tây 5km)
+- ✓ bán kính 200km trả Vịnh Hạ Long cuối list
+- ✓ `excludeSlug` loại đúng row
+- ✓ respect `limit`
+- ✓ clamp `limit=0 → 1`
+- ✓ trigger `place_geo_sync` cập nhật `geo` khi UPDATE lat/lng
+
+### 5.2 `SearchService.suggest` fallback pg_trgm
+
+Mock `SearchIndexService.suggest` trả null để force pg_trgm path. Seed 5
+places với tên tiếng Việt (Vịnh Hạ Long, Vịnh Lan Hạ, Hà Nội, Hà Giang, Đà Nẵng).
+
+- ✓ `q < 2` trả `[]`
+- ✓ exact substring titleVi match đầu list
+- ✓ match titleEn khi titleVi miễn
+- ✓ rank similarity DESC (Hạ/Hà đứng trước Đà)
+- ✓ loại `status != 'published'`
+- ✓ respect limit
+- ✓ clamp `limit=100 → 20`
+- ✓ verify Meili-disabled path gọi `index.suggest()` 1 lần
+
+### 5.3 `AuditLogsService` (record + list)
+
+- ✓ `record()` tạo row với actor full + metadata JSON
+- ✓ `record({actorId: null})` tạo row hệ thống (actor=null)
+- ✓ `list()` sort `createdAt DESC`
+- ✓ `list({page:2, pageSize:2})` phân trang đúng
+- ✓ `record({actorId: 'invalid'})` swallow + không tạo row (best-effort)
+- ✓ xóa actor → list() vẫn trả row với actor=null (ON DELETE SET NULL)
+
+### 5.4 `AdminStatsService.snapshot` (counting logic)
+
+- ✓ DB rỗng → zero
+- ✓ `totalPlaces` đếm cả draft/published/archived
+- ✓ `activeUsers` dedupe khi 1 user có nhiều activity
+- ✓ `activeUsers` hợp 3 nguồn (review + question + answer) → tập duy nhất
+- ✓ `activeUsers` loại activity ngoài cửa sổ 30 ngày
+- ✓ `totalReviews` đếm cả visible/hidden/reported
+
 
 ## 4. Chi tiết theo suite
 

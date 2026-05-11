@@ -69,3 +69,30 @@ jobs:
 
       - name: Jest
         run: pnpm --filter @vivu/api test
+
+  test-int:
+    name: API integration tests (Postgres + PostGIS via testcontainers)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Generate Prisma client
+        run: pnpm --filter @vivu/api prisma:generate
+
+      - name: Jest (integration — spins up postgis/postgis:15-3.4 via testcontainers)
+        run: pnpm --filter @vivu/api test:int
