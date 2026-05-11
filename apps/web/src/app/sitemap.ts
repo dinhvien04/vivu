@@ -47,12 +47,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
-  // Pull as many published places as we can in a single request. The API caps
-  // pageSize but anything above the current catalog returns the full list.
+  // Pull as many published places as we can. The API caps pageSize at 100
+  // so we loop through pages until we've collected every published place.
   let placesEntries: MetadataRoute.Sitemap = [];
   try {
-    const result = await listPlaces({ pageSize: 200 });
-    placesEntries = result.data.flatMap((p) => {
+    const all: Awaited<ReturnType<typeof listPlaces>>['data'] = [];
+    let page = 1;
+    for (let i = 0; i < 20; i++) {
+      const r = await listPlaces({ page, pageSize: 100 });
+      all.push(...r.data);
+      if (page * r.meta.pageSize >= r.meta.total) break;
+      page += 1;
+    }
+    placesEntries = all.flatMap((p) => {
       const path = `/dia-diem/${p.slug}`;
       const lastModified = p.updatedAt ? new Date(p.updatedAt) : now;
       return routing.locales.map((locale) => ({
