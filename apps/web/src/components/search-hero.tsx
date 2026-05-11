@@ -3,8 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
+import { getSuggest, type SuggestPlace } from '@/lib/search-client';
 import { Icon } from './icon';
-import type { Place } from '@vivu/types';
 
 interface Props {
   initialQuery?: string;
@@ -13,12 +13,7 @@ interface Props {
   placeholder?: string;
 }
 
-interface PlacesResponse {
-  data: Place[];
-  meta: { total: number; page: number; pageSize: number };
-}
-
-function placeTitle(p: Place): string {
+function placeTitle(p: SuggestPlace): string {
   return p.titleVi || p.titleEn || p.slug;
 }
 
@@ -26,7 +21,7 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
   const t = useTranslations('common');
   const router = useRouter();
   const [q, setQ] = useState(initialQuery);
-  const [suggestions, setSuggestions] = useState<Place[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestPlace[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(-1);
@@ -43,16 +38,13 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
       return;
     }
     let cancelled = false;
+    const controller = new AbortController();
     const handle = window.setTimeout(async () => {
       setLoading(true);
       try {
-        const r = await fetch(`/api/places?q=${encodeURIComponent(trimmed)}&pageSize=6`, {
-          cache: 'no-store',
-        });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const json = (await r.json()) as PlacesResponse;
+        const data = await getSuggest(trimmed, { limit: 6, signal: controller.signal });
         if (cancelled) return;
-        setSuggestions(json.data ?? []);
+        setSuggestions(data);
         setOpen(true);
         setActive(-1);
       } catch {
@@ -65,6 +57,7 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
     }, 200);
     return () => {
       cancelled = true;
+      controller.abort();
       window.clearTimeout(handle);
     };
   }, [q, compact]);
@@ -197,12 +190,6 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
                             </p>
                           )}
                         </div>
-                        {p.rating && p.rating.count > 0 && (
-                          <span className="flex flex-shrink-0 items-center gap-1 text-body-sm text-on-surface-variant">
-                            <Icon name="star" className="!text-base text-amber-500" />
-                            {p.rating.average.toFixed(1)}
-                          </span>
-                        )}
                       </Link>
                     </li>
                   );
