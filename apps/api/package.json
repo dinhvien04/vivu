@@ -15,7 +15,8 @@
     "prisma:push": "prisma db push --skip-generate --accept-data-loss",
     "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
     "seed:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-images.ts",
-    "promote:admin": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/promote-admin.ts"
+    "promote:admin": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/promote-admin.ts",
+    "reindex:meili": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/reindex-meili.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts"
@@ -37,6 +38,7 @@
     "class-validator": "^0.14.1",
     "cloudinary": "^2.10.0",
     "fastify": "^4.28.1",
+    "meilisearch": "^0.46.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
