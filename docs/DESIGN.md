@@ -93,6 +93,59 @@ Infrastructure    Prisma repository, search client, S3 client, queue
 
 ## 4. Frontend design
 
+### 4.0 Visual design language (tokens)
+
+> **Source of truth**: `apps/web/tailwind.config.ts` + `apps/web/src/app/globals.css`. Bộ token này khớp với `vivu_discovery/DESIGN.md` (file thiết kế từ Stitch). Đổi token → đổi cả hai file đồng thời.
+
+**Brand & style.** Personality: _curated, energetic, reliable_. Phong cách: **Minimalism + Corporate Modern** — whitespace nhiều, grid chặt, typography contrast cao, ảnh chất lượng cao làm chủ đạo. Primary "Brand Blue" `#0066CC` chỉ dùng cho CTA / active / brand marks để giữ uy lực chức năng.
+
+**Color (Material Design 3, palette Vivu Discovery)** — biến CSS ở `globals.css`, alias Tailwind ở `tailwind.config.ts`. Light mode neutrals:
+
+| Vai trò                | Hex       | Token Tailwind                 |
+| ---------------------- | --------- | ------------------------------ |
+| Background / Surface 0 | `#f8f9fa` | `bg-surface` / `bg-background` |
+| Surface 1 (cards)      | `#ffffff` | `bg-surface-container-lowest`  |
+| Surface 2              | `#f3f4f5` | `bg-surface-container-low`     |
+| Primary (CTA)          | `#0066cc` | `bg-primary-container`         |
+| Primary (brand mark)   | `#004e9f` | `bg-primary`                   |
+| On-surface (text)      | `#191c1d` | `text-on-surface`              |
+| On-surface variant     | `#414753` | `text-on-surface-variant`      |
+| Outline                | `#727784` | `border-outline`               |
+| Error                  | `#ba1a1a` | `bg-error`                     |
+
+Dark mode hoán đổi toàn bộ qua `class="dark"` trên `<html>` — cùng utility, không refactor markup.
+
+**Typography (1.25 scale, dual-font).**
+
+| Style        | Font           | Size | Weight | Line-height | Letter-spacing | Tailwind          |
+| ------------ | -------------- | ---- | ------ | ----------- | -------------- | ----------------- |
+| `h1`         | Be Vietnam Pro | 48px | 700    | 1.2         | -0.02em        | `font-h1 text-h1` |
+| `h2`         | Be Vietnam Pro | 32px | 700    | 1.3         | -0.01em        | `font-h2 text-h2` |
+| `h3`         | Be Vietnam Pro | 24px | 600    | 1.4         | 0              | `font-h3 text-h3` |
+| `body-lg`    | Inter          | 18px | 400    | 1.6         | 0              | `text-body-lg`    |
+| `body-md`    | Inter          | 16px | 400    | 1.6         | 0              | `text-body-md`    |
+| `label-caps` | Inter          | 12px | 600    | 1.0         | 0.05em         | `text-label-caps` |
+
+**Be Vietnam Pro** cho headlines (đặc trưng Việt, tinh tế), **Inter** cho body + UI (legibility cao, neutral). Both via `next/font` (zero CLS).
+
+**Layout & spacing.** Nhịp 8px. `container-max = 1280px`, gutter 24px, mobile margin 16px, desktop margin 40px, `section-gap = 80px` ("breathable" minimalist).
+
+**Elevation.** Không dùng border mạnh — dùng ambient shadow blue-tinted: `shadow-premium` (`0 4px 20px rgba(0, 102, 204, 0.15)`) cho cards, `shadow-hover` (`0 8px 30px rgba(0, 102, 204, 0.2)` + scale 1.02) cho hover.
+
+**Shape (border radius).** 4px (sm), 8px (DEFAULT, buttons/inputs), 12px (md), 16px (lg, content cards), 24px (xl), full (pill, search bar).
+
+**Components.**
+
+- **Button primary**: `bg-primary-container text-on-primary` solid, no border, rounded-DEFAULT (8px).
+- **Button secondary**: transparent + 1px border primary.
+- **Button ghost**: blue text only — dùng cho action ít quan trọng (e.g. "Xem bản đồ").
+- **Card**: top-heavy layout với ảnh full-bleed, title h3, label/meta `text-label-caps`, `rounded-lg` (16px) + `shadow-premium`.
+- **Input**: soft gray fill `bg-surface-container-low` không border ở idle, focus → bg trắng + border 2px primary.
+- **Chip**: pill 100px-radius, `bg-primary-fixed` + `text-on-primary-fixed` cho category tags.
+- **Search bar**: pill-shaped (rounded-full), backdrop-blur 20px khi sticky.
+
+> Khi cần đổi token, sửa `globals.css` (CSS vars) cho cả light + dark đồng thời. Tailwind config chỉ là alias.
+
 ### 4.1 Routing (App Router)
 
 ```
