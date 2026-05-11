@@ -4,11 +4,16 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LayersControl, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { useTranslations } from 'next-intl';
 import type { Place } from '@vivu/types';
 import { useTheme } from '../theme-provider';
+import { placeRegionName, placeTitle } from '@/i18n/place';
+import type { Locale } from '@/i18n/routing';
 
 interface PlacesMapProps {
   places: Place[];
+  /** Active locale — controls popup labels and place text. */
+  locale: Locale;
   /** Initial map centre (lat, lng). Defaults to mid-Vietnam. */
   center?: [number, number];
   /** Initial zoom. */
@@ -22,28 +27,31 @@ interface PlacesMapProps {
 const VIETNAM_CENTER: [number, number] = [16.05, 107.54];
 const DEFAULT_ZOOM = 6;
 
-const TILE_LAYERS = {
+interface TileLayerSpec {
+  url: string;
+  attribution: string;
+  maxZoom: number;
+}
+
+const TILE_LAYERS: Record<'standard' | 'satellite' | 'terrain', TileLayerSpec> = {
   standard: {
-    label: 'Chuẩn',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   },
   satellite: {
-    label: 'Vệ tinh',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution:
       'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
     maxZoom: 19,
   },
   terrain: {
-    label: 'Địa hình',
     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
     attribution:
       'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>, SRTM | Tiles &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
     maxZoom: 17,
   },
-} as const;
+};
 
 /** Build the default Leaflet pin icon without relying on bundled image paths. */
 function makeDefaultIcon(): L.Icon {
@@ -60,6 +68,9 @@ function makeDefaultIcon(): L.Icon {
 
 interface ClusterProps {
   places: Place[];
+  locale: Locale;
+  popupViewLabel: string;
+  detailHrefPrefix: string;
   onSelect(place: Place): void;
 }
 
@@ -67,7 +78,13 @@ interface ClusterProps {
  * Renders all place markers inside a `leaflet.markercluster` group.
  * Lives inside MapContainer so it can call `useMap()`.
  */
-function MarkerCluster({ places, onSelect }: ClusterProps) {
+function MarkerCluster({
+  places,
+  locale,
+  popupViewLabel,
+  detailHrefPrefix,
+  onSelect,
+}: ClusterProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -82,12 +99,13 @@ function MarkerCluster({ places, onSelect }: ClusterProps) {
       if (!place.geo) continue;
       const marker = L.marker([place.geo.lat, place.geo.lng], { icon });
       marker.on('click', () => onSelect(place));
-      // Minimal popup with link — keeps interaction consistent with React popups.
+      const title = placeTitle(place, locale);
+      const region = place.region ? placeRegionName(place.region, locale) : null;
       marker.bindPopup(
         `<div class="leaflet-place-popup">
-           <strong>${escapeHtml(place.titleVi)}</strong>
-           ${place.region ? `<div class="leaflet-place-popup__meta">${escapeHtml(place.region.nameVi)}</div>` : ''}
-           <a class="leaflet-place-popup__link" href="/dia-diem/${encodeURIComponent(place.slug)}">Xem chi tiết →</a>
+           <strong>${escapeHtml(title)}</strong>
+           ${region ? `<div class="leaflet-place-popup__meta">${escapeHtml(region)}</div>` : ''}
+           <a class="leaflet-place-popup__link" href="${detailHrefPrefix}/dia-diem/${encodeURIComponent(place.slug)}">${escapeHtml(popupViewLabel)}</a>
          </div>`,
       );
       cluster.addLayer(marker);
@@ -98,7 +116,7 @@ function MarkerCluster({ places, onSelect }: ClusterProps) {
       map.removeLayer(cluster);
       cluster.clearLayers();
     };
-  }, [map, places, onSelect]);
+  }, [map, places, locale, popupViewLabel, detailHrefPrefix, onSelect]);
 
   return null;
 }
@@ -143,21 +161,26 @@ function FitBounds({ places, enabled }: FitBoundsProps) {
  */
 export function PlacesMap({
   places,
+  locale,
   center = VIETNAM_CENTER,
   zoom = DEFAULT_ZOOM,
   fitToMarkers = true,
   height = '70vh',
 }: PlacesMapProps) {
   const { theme } = useTheme();
-  // Memoise places-with-geo so child effects only run when the actual set changes.
+  const t = useTranslations('map');
   const geoPlaces = useMemo(() => places.filter((p) => p.geo), [places]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Show a per-marker React popup on the most recently selected place. Used
-  // mostly for keyboard / external selection — Leaflet draws its own popup
-  // when a marker is clicked.
   const selected = geoPlaces.find((p) => p.id === selectedId) ?? null;
+  const detailHrefPrefix = locale === 'en' ? '/en' : '';
+  const popupViewLabel = t('popupViewDetails');
+  const layerLabels = {
+    standard: t('layer.standard'),
+    satellite: t('layer.satellite'),
+    terrain: t('layer.terrain'),
+  };
 
   return (
     <div
@@ -175,21 +198,21 @@ export function PlacesMap({
         style={{ background: 'rgb(var(--color-surface-container))' }}
       >
         <LayersControl position="topright">
-          <LayersControl.BaseLayer checked name={TILE_LAYERS.standard.label}>
+          <LayersControl.BaseLayer checked name={layerLabels.standard}>
             <TileLayer
               url={TILE_LAYERS.standard.url}
               attribution={TILE_LAYERS.standard.attribution}
               maxZoom={TILE_LAYERS.standard.maxZoom}
             />
           </LayersControl.BaseLayer>
-          <LayersControl.BaseLayer name={TILE_LAYERS.satellite.label}>
+          <LayersControl.BaseLayer name={layerLabels.satellite}>
             <TileLayer
               url={TILE_LAYERS.satellite.url}
               attribution={TILE_LAYERS.satellite.attribution}
               maxZoom={TILE_LAYERS.satellite.maxZoom}
             />
           </LayersControl.BaseLayer>
-          <LayersControl.BaseLayer name={TILE_LAYERS.terrain.label}>
+          <LayersControl.BaseLayer name={layerLabels.terrain}>
             <TileLayer
               url={TILE_LAYERS.terrain.url}
               attribution={TILE_LAYERS.terrain.attribution}
@@ -198,7 +221,13 @@ export function PlacesMap({
           </LayersControl.BaseLayer>
         </LayersControl>
 
-        <MarkerCluster places={geoPlaces} onSelect={(p) => setSelectedId(p.id)} />
+        <MarkerCluster
+          places={geoPlaces}
+          locale={locale}
+          popupViewLabel={popupViewLabel}
+          detailHrefPrefix={detailHrefPrefix}
+          onSelect={(p) => setSelectedId(p.id)}
+        />
         <FitBounds places={geoPlaces} enabled={fitToMarkers} />
 
         {selected && selected.geo && (
@@ -211,12 +240,17 @@ export function PlacesMap({
           >
             <Popup>
               <div className="space-y-1">
-                <strong>{selected.titleVi}</strong>
+                <strong>{placeTitle(selected, locale)}</strong>
                 {selected.region && (
-                  <div className="text-xs text-on-surface-variant">{selected.region.nameVi}</div>
+                  <div className="text-xs text-on-surface-variant">
+                    {placeRegionName(selected.region, locale)}
+                  </div>
                 )}
-                <a className="text-primary hover:underline" href={`/dia-diem/${selected.slug}`}>
-                  Xem chi tiết →
+                <a
+                  className="text-primary hover:underline"
+                  href={`${detailHrefPrefix}/dia-diem/${selected.slug}`}
+                >
+                  {popupViewLabel}
                 </a>
               </div>
             </Popup>
@@ -226,7 +260,7 @@ export function PlacesMap({
 
       {geoPlaces.length === 0 && (
         <div className="pointer-events-none absolute inset-x-4 top-4 z-[400] rounded-lg bg-surface-container-lowest/90 px-4 py-3 text-body-sm text-on-surface-variant shadow-md backdrop-blur">
-          Không có địa điểm nào có toạ độ trong tập kết quả này.
+          {t('noGeoPlaces')}
         </div>
       )}
     </div>

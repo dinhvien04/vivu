@@ -1,9 +1,11 @@
 'use client';
 
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
+import type { Locale } from '@/i18n/routing';
 import { deleteReview, listReviewsForPlace } from '@/lib/reviews-client';
 import type { Review } from '@vivu/types';
 
@@ -15,10 +17,18 @@ interface Props {
   initialAverage?: number;
 }
 
-function Stars({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' }) {
+function Stars({
+  rating,
+  size = 'sm',
+  label,
+}: {
+  rating: number;
+  size?: 'sm' | 'md';
+  label: string;
+}) {
   const cls = size === 'md' ? '!text-lg' : '!text-base';
   return (
-    <span className="inline-flex items-center" aria-label={`${rating} sao`}>
+    <span className="inline-flex items-center" aria-label={label}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Icon
           key={i}
@@ -30,9 +40,13 @@ function Stars({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' }) 
   );
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: Locale): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  return d.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
 }
 
 export function ReviewsSection({
@@ -41,6 +55,8 @@ export function ReviewsSection({
   initialTotal,
   initialAverage = 0,
 }: Props) {
+  const t = useTranslations('reviewsSection');
+  const locale = useLocale() as Locale;
   const { user, getAccessToken } = useAuth();
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [total, setTotal] = useState(initialTotal);
@@ -55,7 +71,7 @@ export function ReviewsSection({
       const sum = r.data.reduce((acc, x) => acc + x.rating, 0);
       setAverage(r.data.length > 0 ? Math.round((sum / r.data.length) * 100) / 100 : 0);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Lỗi tải đánh giá');
+      setError(e instanceof Error ? e.message : t('loadFailed'));
     }
   };
 
@@ -66,17 +82,17 @@ export function ReviewsSection({
   }, [placeSlug]);
 
   const handleDelete = async (id: string): Promise<void> => {
-    const ok = window.confirm('Xoá đánh giá này?');
+    const ok = window.confirm(t('deleteConfirm'));
     if (!ok) return;
     setError(null);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('sessionExpired'));
       await deleteReview(id, token);
       setReviews((rs) => rs.filter((r) => r.id !== id));
-      setTotal((t) => Math.max(0, t - 1));
+      setTotal((n) => Math.max(0, n - 1));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Không xoá được đánh giá');
+      setError(e instanceof Error ? e.message : t('deleteFailed'));
     }
   };
 
@@ -86,13 +102,17 @@ export function ReviewsSection({
     <section className="mb-12">
       <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <h2 className="font-h2 text-h2 text-on-surface">Đánh giá từ cộng đồng</h2>
+          <h2 className="font-h2 text-h2 text-on-surface">{t('title')}</h2>
           {total > 0 && (
             <p className="mt-1 flex items-center gap-2 text-body-md text-on-surface-variant">
-              <Stars rating={Math.round(average)} size="md" />
+              <Stars
+                rating={Math.round(average)}
+                size="md"
+                label={t('starsAria', { rating: Math.round(average) })}
+              />
               <span>
                 <strong className="text-on-surface">{average.toFixed(1)}</strong>/5 ·{' '}
-                <span>{total} đánh giá</span>
+                <span>{t('totalSuffix', { total })}</span>
               </span>
             </p>
           )}
@@ -103,7 +123,7 @@ export function ReviewsSection({
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary/90"
           >
             <Icon name="rate_review" className="!text-base" />
-            Viết đánh giá
+            {t('writeBtn')}
           </Link>
         ) : (
           <Link
@@ -111,7 +131,7 @@ export function ReviewsSection({
             className="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-medium text-on-surface-variant hover:bg-surface-container"
           >
             <Icon name="login" className="!text-base" />
-            Đăng nhập để đánh giá
+            {t('signInBtn')}
           </Link>
         )}
       </div>
@@ -128,10 +148,8 @@ export function ReviewsSection({
       {reviews.length === 0 ? (
         <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container/40 p-8 text-center">
           <Icon name="rate_review" className="!text-3xl text-outline" />
-          <h3 className="mt-2 font-h4 text-h4 text-on-surface">Chưa có đánh giá</h3>
-          <p className="mt-1 text-body-md text-on-surface-variant">
-            Hãy là người đầu tiên chia sẻ trải nghiệm thực tế của bạn về địa điểm này.
-          </p>
+          <h3 className="mt-2 font-h4 text-h4 text-on-surface">{t('emptyTitle')}</h3>
+          <p className="mt-1 text-body-md text-on-surface-variant">{t('emptyLead')}</p>
         </div>
       ) : (
         <ul className="space-y-4">
@@ -158,10 +176,10 @@ export function ReviewsSection({
                     </div>
                     <div>
                       <p className="font-semibold text-on-surface">{r.user.name}</p>
-                      <p className="text-body-sm text-outline">{formatDate(r.createdAt)}</p>
+                      <p className="text-body-sm text-outline">{formatDate(r.createdAt, locale)}</p>
                     </div>
                   </div>
-                  <Stars rating={r.rating} />
+                  <Stars rating={r.rating} label={t('starsAria', { rating: r.rating })} />
                 </div>
                 <p className="mt-3 whitespace-pre-line text-body-md leading-relaxed text-on-surface">
                   {r.content}
@@ -174,7 +192,7 @@ export function ReviewsSection({
                       className="inline-flex items-center gap-1 rounded-lg px-3 py-1 text-body-sm text-error hover:bg-error-container/40"
                     >
                       <Icon name="delete" className="!text-sm" />
-                      Xoá
+                      {t('deleteBtn')}
                     </button>
                   </div>
                 )}

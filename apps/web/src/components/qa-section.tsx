@@ -1,10 +1,11 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { EmptyState } from '@/components/empty-state';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
 import { createQuestion } from '@/lib/qa-client';
 import type { Question } from '@vivu/types';
 
@@ -14,20 +15,25 @@ interface Props {
   initialTotal: number;
 }
 
-function formatRelative(iso: string): string {
-  const d = new Date(iso);
-  const diffMs = Date.now() - d.getTime();
-  const min = Math.floor(diffMs / 60000);
-  if (min < 1) return 'Vừa xong';
-  if (min < 60) return `${min} phút trước`;
-  const h = Math.floor(min / 60);
-  if (h < 24) return `${h} giờ trước`;
-  const day = Math.floor(h / 24);
-  if (day < 30) return `${day} ngày trước`;
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function useFormatRelative() {
+  const t = useTranslations('qaSection');
+  return (iso: string): string => {
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1) return t('justNow');
+    if (min < 60) return t('minutesAgo', { count: min });
+    const h = Math.floor(min / 60);
+    if (h < 24) return t('hoursAgo', { count: h });
+    const day = Math.floor(h / 24);
+    if (day < 30) return t('daysAgo', { count: day });
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
 }
 
 export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) {
+  const t = useTranslations('qaSection');
+  const formatRelative = useFormatRelative();
   const { user, getAccessToken } = useAuth();
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [total, setTotal] = useState(initialTotal);
@@ -40,20 +46,20 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
     e.preventDefault();
     setError(null);
     if (content.trim().length < 5) {
-      setError('Câu hỏi cần ít nhất 5 ký tự.');
+      setError(t('tooShort'));
       return;
     }
     setSubmitting(true);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Vui lòng đăng nhập');
+      if (!token) throw new Error(t('signInRequired'));
       const created = await createQuestion(placeSlug, content.trim(), token);
       setQuestions((qs) => [created, ...qs]);
-      setTotal((t) => t + 1);
+      setTotal((n) => n + 1);
       setContent('');
       setShowForm(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('genericError'));
     } finally {
       setSubmitting(false);
     }
@@ -63,10 +69,10 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
     <section className="mb-12">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-h2 text-h2 text-on-surface">
-          Hỏi đáp
+          {t('title')}
           {total > 0 && (
             <span className="ml-2 text-body-md font-normal text-on-surface-variant">
-              ({total} câu hỏi)
+              {t('totalSuffix', { total })}
             </span>
           )}
         </h2>
@@ -77,7 +83,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-label-md font-semibold text-primary transition-colors hover:bg-primary-container"
           >
             <Icon name={showForm ? 'close' : 'help_outline'} className="!text-base" />
-            {showForm ? 'Huỷ' : 'Đặt câu hỏi'}
+            {showForm ? t('cancelBtn') : t('askBtn')}
           </button>
         ) : (
           <Link
@@ -85,7 +91,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-label-md font-semibold text-primary transition-colors hover:bg-primary-container"
           >
             <Icon name="login" className="!text-base" />
-            Đăng nhập để hỏi
+            {t('signInBtn')}
           </Link>
         )}
       </div>
@@ -100,7 +106,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             onChange={(e) => setContent(e.target.value)}
             rows={3}
             maxLength={1000}
-            placeholder="Bạn muốn hỏi gì về địa điểm này? (5–1000 ký tự)"
+            placeholder={t('placeholder')}
             className="w-full resize-y rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
@@ -111,7 +117,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Icon name="send" className="!text-base" />
-              {submitting ? 'Đang gửi…' : 'Gửi câu hỏi'}
+              {submitting ? t('submittingBtn') : t('submitBtn')}
             </button>
           </div>
         </form>
@@ -127,12 +133,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
       )}
 
       {questions.length === 0 ? (
-        <EmptyState
-          compact
-          icon="forum"
-          title="Chưa có câu hỏi"
-          description="Bạn đang phân vân điều gì? Đặt câu hỏi để cộng đồng cùng giải đáp."
-        />
+        <EmptyState compact icon="forum" title={t('emptyTitle')} description={t('emptyLead')} />
       ) : (
         <ul className="space-y-3">
           {questions.slice(0, 5).map((q) => (
@@ -149,7 +150,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
                 <p className="font-sans text-body-md text-on-surface line-clamp-2">{q.content}</p>
                 <p className="mt-2 inline-flex items-center gap-1 text-label-md text-secondary">
                   <Icon name="comment" className="!text-base" />
-                  {q.answersCount} câu trả lời
+                  {t('answersCount', { count: q.answersCount })}
                 </p>
               </Link>
             </li>
@@ -160,7 +161,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
                 href={`/hoi-dap?placeSlug=${placeSlug}`}
                 className="inline-flex items-center gap-1 text-label-md font-semibold text-primary hover:underline"
               >
-                Xem tất cả {total} câu hỏi
+                {t('viewAll', { total })}
                 <Icon name="arrow_forward" className="!text-base" />
               </Link>
             </li>

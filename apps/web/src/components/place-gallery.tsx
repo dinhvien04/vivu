@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from './icon';
 import { transformCloudinary } from '../lib/image';
@@ -37,6 +38,7 @@ const LIGHTBOX_TRANSFORM = { width: 1920, height: 1080, crop: 'fit' as const };
  * array keeps bundle size small and avoids hydration mismatches.
  */
 export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps) {
+  const t = useTranslations('gallery');
   const slides = useMemo<Slide[]>(() => {
     const list: Slide[] = [];
     const seen = new Set<string>();
@@ -111,13 +113,13 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
         className="group relative aspect-[16/7] overflow-hidden rounded-xl shadow-lg"
         role={showControls ? 'group' : undefined}
         aria-roledescription={showControls ? 'carousel' : undefined}
-        aria-label={showControls ? `Thư viện ảnh ${title}` : undefined}
+        aria-label={showControls ? t('carouselAria', { title }) : undefined}
       >
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
           className="absolute inset-0 cursor-zoom-in"
-          aria-label={`Mở ảnh lớn: ${current.alt}`}
+          aria-label={t('openLargeAria', { alt: current.alt })}
         >
           <Image
             key={current.id}
@@ -136,7 +138,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
             <button
               type="button"
               onClick={goPrev}
-              aria-label="Ảnh trước"
+              aria-label={t('prev')}
               className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-surface/80 p-2 text-on-surface shadow-md backdrop-blur transition-opacity hover:bg-surface md:left-4"
             >
               <Icon name="chevron_left" />
@@ -144,7 +146,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
             <button
               type="button"
               onClick={goNext}
-              aria-label="Ảnh tiếp theo"
+              aria-label={t('next')}
               className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-surface/80 p-2 text-on-surface shadow-md backdrop-blur transition-opacity hover:bg-surface md:right-4"
             >
               <Icon name="chevron_right" />
@@ -169,7 +171,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
       </div>
 
       {showControls && (
-        <ul className="mt-4 flex gap-3 overflow-x-auto pb-2" aria-label="Chọn ảnh thu nhỏ">
+        <ul className="mt-4 flex gap-3 overflow-x-auto pb-2" aria-label={t('thumbsAria')}>
           {slides.map((slide, i) => {
             const thumbSrc = transformCloudinary(slide.url, THUMB_TRANSFORM) ?? slide.url;
             const isActive = i === safeIndex;
@@ -178,7 +180,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
                 <button
                   type="button"
                   onClick={() => setActiveIndex(i)}
-                  aria-label={`Xem ảnh ${i + 1}`}
+                  aria-label={t('viewThumbAria', { index: i + 1 })}
                   aria-current={isActive ? 'true' : undefined}
                   className={`relative block h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg border transition-all ${
                     isActive
@@ -213,7 +215,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
           <button
             type="button"
             onClick={() => setLightboxOpen(false)}
-            aria-label="Đóng"
+            aria-label={t('close')}
             className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
           >
             <Icon name="close" />
@@ -223,7 +225,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
               <button
                 type="button"
                 onClick={goPrev}
-                aria-label="Ảnh trước"
+                aria-label={t('prev')}
                 className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20"
               >
                 <Icon name="chevron_left" />
@@ -231,7 +233,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
               <button
                 type="button"
                 onClick={goNext}
-                aria-label="Ảnh tiếp theo"
+                aria-label={t('next')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20"
               >
                 <Icon name="chevron_right" />
