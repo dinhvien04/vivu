@@ -101,23 +101,50 @@ export class PlacesService {
     const orderBy: Prisma.PlaceOrderByWithRelationInput =
       query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };
 
-    const [rows, total] = await this.prisma.$transaction([
-      this.prisma.place.findMany({
-        where,
-        skip,
-        take: pageSize,
-        orderBy,
-        include: {
-          region: true,
-          photos: { orderBy: { position: 'asc' } },
-          categories: { include: { category: true } },
-        },
-      }),
-      this.prisma.place.count({ where }),
-    ]);
+    // Fetch the rows for the page (pre-rating filter) then aggregate ratings + apply minRating.
+    const rows = await this.prisma.place.findMany({
+      where,
+      orderBy,
+      include: {
+        region: true,
+        photos: { orderBy: { position: 'asc' } },
+        categories: { include: { category: true } },
+      },
+    });
+
+    const placeIds = rows.map((p) => p.id);
+    const ratingByPlaceId = new Map<string, { count: number; average: number }>();
+    if (placeIds.length > 0) {
+      const grouped = await this.prisma.review.groupBy({
+        by: ['placeId'],
+        where: { placeId: { in: placeIds }, status: 'visible' },
+        _count: { _all: true },
+        _avg: { rating: true },
+      });
+      for (const g of grouped) {
+        ratingByPlaceId.set(g.placeId, {
+          count: g._count._all,
+          average: g._avg.rating ? Math.round(g._avg.rating * 100) / 100 : 0,
+        });
+      }
+    }
+
+    let enriched = rows.map((p) => {
+      const out = toApiPlace(p as PlaceWithRelations);
+      out.rating = ratingByPlaceId.get(p.id) ?? { count: 0, average: 0 };
+      return out;
+    });
+
+    if (query.minRating !== undefined) {
+      const threshold = query.minRating;
+      enriched = enriched.filter((p) => (p.rating?.average ?? 0) >= threshold);
+    }
+
+    const total = enriched.length;
+    const paged = enriched.slice(skip, skip + pageSize);
 
     return {
-      data: rows.map((p) => toApiPlace(p as PlaceWithRelations)),
+      data: paged,
       meta: { page, pageSize, total },
     };
   }

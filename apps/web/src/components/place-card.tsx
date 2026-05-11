@@ -43,9 +43,18 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
-        {regionName && (
-          <p className="text-overline uppercase tracking-overline text-secondary">{regionName}</p>
-        )}
+        <div className="flex items-center justify-between gap-2">
+          {regionName && (
+            <p className="text-overline uppercase tracking-overline text-secondary">{regionName}</p>
+          )}
+          {place.rating && place.rating.count > 0 && (
+            <span className="inline-flex items-center gap-1 text-body-sm font-semibold text-on-surface">
+              <Icon name="star" className="!text-base text-amber-500" />
+              {place.rating.average.toFixed(1)}
+              <span className="font-normal text-on-surface-variant">({place.rating.count})</span>
+            </span>
+          )}
+        </div>
         <h3 className="font-h4 text-h4 text-on-surface">{title}</h3>
         {summary && (
           <p className="mt-1 line-clamp-2 text-body-sm text-on-surface-variant">{summary}</p>

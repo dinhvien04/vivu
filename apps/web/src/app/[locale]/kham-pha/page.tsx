@@ -27,6 +27,7 @@ interface PageProps {
     season?: string;
     sort?: string;
     q?: string;
+    minRating?: string;
   }>;
 }
 
@@ -64,9 +65,14 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
   const season = isPlaceSeason(sp.season) ? sp.season : undefined;
   const sort = isPlaceSort(sp.sort) ? sp.sort : 'recent';
   const q = sp.q;
+  const minRatingRaw = sp.minRating ? Number(sp.minRating) : NaN;
+  const minRating =
+    Number.isFinite(minRatingRaw) && minRatingRaw >= 1 && minRatingRaw <= 5
+      ? minRatingRaw
+      : undefined;
 
   const [placesResult, regions, categories] = await Promise.all([
-    listPlaces({ region, category, season, sort, q, pageSize: 50 }).catch((e) => ({
+    listPlaces({ region, category, season, sort, q, minRating, pageSize: 50 }).catch((e) => ({
       _error: e instanceof Error ? e.message : 'unknown',
     })),
     listRegions().catch(() => []),
@@ -90,6 +96,12 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
     { slug: 'name', label: t('sort.name') },
   ];
 
+  const RATING_OPTIONS: { value: string; label: string }[] = [
+    { value: '', label: t('explore.ratingAny') },
+    { value: '4', label: t('explore.ratingFour') },
+    { value: '3', label: t('explore.ratingThree') },
+  ];
+
   const regionTabs = [
     { slug: '', name: t('common.all') },
     ...regions
@@ -100,7 +112,7 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
       })),
   ];
 
-  const activeFilterCount = [region, category, season].filter(Boolean).length;
+  const activeFilterCount = [region, category, season, minRating].filter(Boolean).length;
 
   return (
     <>
@@ -221,6 +233,30 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
               })}
             </div>
           </div>
+        </div>
+
+        {/* Rating row */}
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-overline uppercase tracking-overline text-on-surface-variant">
+            {t('explore.ratingTab')}
+          </span>
+          {RATING_OPTIONS.map((r) => {
+            const active = (minRating ? String(minRating) : '') === r.value;
+            return (
+              <Link
+                key={r.value || 'any-rating'}
+                href={buildHref(sp, { minRating: r.value })}
+                className={
+                  active
+                    ? 'inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-body-sm font-semibold text-amber-900'
+                    : 'inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1 text-body-sm text-on-surface-variant transition-colors hover:border-primary hover:text-primary'
+                }
+              >
+                {r.value && <Icon name="star" className="!text-base text-amber-500" />}
+                {r.label}
+              </Link>
+            );
+          })}
         </div>
 
         {activeFilterCount > 0 && (
