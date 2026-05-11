@@ -601,6 +601,27 @@
     "recentActivity": "Recent activity",
     "recentActivityError": "Could not load recent activity.",
     "activityReview": "{rating}/5 star review",
+    "auditActorSystem": "System",
+    "auditAction": {
+      "place": {
+        "create": "{actor} created place {target}",
+        "update": "{actor} updated place {target}",
+        "publish": "{actor} published place {target}",
+        "unpublish": "{actor} unpublished place {target}",
+        "delete": "{actor} deleted place {target}",
+        "photo": {
+          "add": "{actor} added a photo to place {target}",
+          "remove": "{actor} removed a photo from place {target}"
+        }
+      },
+      "review": {
+        "hide": "{actor} hid review {target}",
+        "restore": "{actor} restored review {target}",
+        "report": "{actor} flagged review {target}",
+        "delete": "{actor} deleted review {target}"
+      },
+      "fallback": "{actor} performed {target}"
+    },
     "systemHealth": "System health",
     "healthApi": "API server",
     "healthDb": "Database",

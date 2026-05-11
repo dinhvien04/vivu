@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AdminPlacesModule } from './admin-places/admin-places.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AdminStatsModule } from './admin-stats/admin-stats.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
@@ -36,6 +37,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     ReviewsModule,
     CollectionsModule,
     QaModule,
+    AuditLogsModule,
     AdminPlacesModule,
     AdminReviewsModule,
     AdminStatsModule,
