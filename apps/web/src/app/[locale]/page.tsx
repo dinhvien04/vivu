@@ -55,11 +55,7 @@ async function loadHomeData(locale: Locale): Promise<{
   return { hero, collections };
 }
 
-export default async function HomePage({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}) {
+export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale });

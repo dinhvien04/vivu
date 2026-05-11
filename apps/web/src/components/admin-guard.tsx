@@ -49,15 +49,10 @@ export function AdminGuard({ children, allowedRoles = ['admin', 'editor'] }: Adm
         </div>
         <h1 className="font-h2 text-h2 text-on-surface">{t('guardForbiddenTitle')}</h1>
         <p className="text-body-md text-on-surface-variant">{t('guardForbiddenLead')}</p>
-        <p
-          className="text-body-sm text-on-surface-variant/80"
-          dangerouslySetInnerHTML={{
-            __html: t.raw('guardForbiddenAccount', {
-              email: user.email,
-              role: user.role,
-            }) as string,
-          }}
-        />
+        <p className="text-body-sm text-on-surface-variant/80">
+          {t('guardForbiddenAccountPrefix')} <strong>{user.email}</strong>{' '}
+          {t('guardForbiddenAccountSeparator')} <strong>{user.role}</strong>
+        </p>
         <Link
           href="/"
           className="mt-2 rounded-full bg-primary px-6 py-2 font-semibold text-on-primary transition-colors hover:bg-primary-container"

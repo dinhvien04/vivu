@@ -110,10 +110,9 @@ export default function AdminPlaceEdit({ params }: PageProps) {
     return (
       <div className="mx-auto flex min-h-[40vh] max-w-md flex-col items-center justify-center gap-3 text-center">
         <h1 className="font-h3 text-h3 text-on-surface">{t('notFoundTitle')}</h1>
-        <p
-          className="text-body-md text-on-surface-variant"
-          dangerouslySetInnerHTML={{ __html: t.raw('notFoundLead', { slug: params.slug }) as string }}
-        />
+        <p className="text-body-md text-on-surface-variant">
+          {t('notFoundLeadPrefix')} <code>{params.slug}</code> {t('notFoundLeadSuffix')}
+        </p>
         <Link
           href="/admin/dia-diem"
           className="rounded-lg bg-primary px-4 py-2 font-semibold text-white"

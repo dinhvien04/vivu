@@ -38,10 +38,7 @@ export default async function AdminPlaceNew({ params }: AdminPlaceNewProps) {
             {t('placesList')}
           </Link>
           <h1 className="mt-2 font-h2 text-h2 text-on-surface">{t('newPlaceTitle')}</h1>
-          <p
-            className="mt-1 max-w-xl text-body-md text-on-surface-variant"
-            dangerouslySetInnerHTML={{ __html: t.raw('newPlaceLead') as string }}
-          />
+          <p className="mt-1 max-w-xl text-body-md text-on-surface-variant">{t('newPlaceLead')}</p>
         </div>
       </header>
       <PlaceForm mode="create" regions={regions} categories={categories} />

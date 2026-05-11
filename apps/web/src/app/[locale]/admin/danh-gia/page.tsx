@@ -10,7 +10,10 @@ import type { Locale } from '@/i18n/routing';
 import { adminHideReview, adminListReviews, adminRestoreReview } from '@/lib/reviews-client';
 import type { Review, ReviewStatus } from '@vivu/types';
 
-const TABS: { key: ReviewStatus; labelKey: 'reviewsTabReported' | 'reviewsTabVisible' | 'reviewsTabHidden' }[] = [
+const TABS: {
+  key: ReviewStatus;
+  labelKey: 'reviewsTabReported' | 'reviewsTabVisible' | 'reviewsTabHidden';
+}[] = [
   { key: 'reported', labelKey: 'reviewsTabReported' },
   { key: 'visible', labelKey: 'reviewsTabVisible' },
   { key: 'hidden', labelKey: 'reviewsTabHidden' },

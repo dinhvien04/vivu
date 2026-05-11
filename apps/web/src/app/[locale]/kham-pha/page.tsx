@@ -92,10 +92,12 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
 
   const regionTabs = [
     { slug: '', name: t('common.all') },
-    ...regions.filter((r) => r.parentId === null).map((r) => ({
-      slug: r.slug,
-      name: locale === 'en' && r.nameEn ? r.nameEn : r.nameVi,
-    })),
+    ...regions
+      .filter((r) => r.parentId === null)
+      .map((r) => ({
+        slug: r.slug,
+        name: locale === 'en' && r.nameEn ? r.nameEn : r.nameVi,
+      })),
   ];
 
   const activeFilterCount = [region, category, season].filter(Boolean).length;
@@ -109,9 +111,7 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
             {t('explore.title')}
           </p>
           <h1 className="mt-2 font-h1 text-h1 text-on-surface">{t('explore.headline')}</h1>
-          <p className="mt-3 font-sans text-body-lg text-on-surface-variant">
-            {t('explore.lead')}
-          </p>
+          <p className="mt-3 font-sans text-body-lg text-on-surface-variant">{t('explore.lead')}</p>
         </header>
 
         {/* Region tabs */}

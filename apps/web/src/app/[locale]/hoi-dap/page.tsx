@@ -127,7 +127,7 @@ export default function HoiDapListPage() {
                       <span>•</span>
                       <span>{q.user.name}</span>
                       <span>•</span>
-                      <span>{formatRelative(q.createdAt, locale)}</span>
+                      <span>{formatRelative(q.createdAt)}</span>
                     </div>
                     <p className="font-h3 text-h3 text-on-surface line-clamp-3 group-hover:text-primary">
                       {q.content}

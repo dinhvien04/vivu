@@ -55,10 +55,7 @@ interface PageProps {
 
 type SearchParamsShape = NonNullable<Awaited<NonNullable<PageProps['searchParams']>>>;
 
-function buildHref(
-  current: SearchParamsShape,
-  override: Partial<SearchParamsShape>,
-): string {
+function buildHref(current: SearchParamsShape, override: Partial<SearchParamsShape>): string {
   const params = new URLSearchParams();
   const next = { ...current, ...override };
   for (const [key, value] of Object.entries(next)) {
@@ -118,9 +115,7 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
               className="rounded-2xl border border-outline-variant bg-surface px-6 py-6 transition-all hover:border-primary/40 hover:shadow-premium"
             >
               <Icon name="beach_access" className="!text-3xl text-primary" />
-              <h3 className="mt-3 font-h4 text-h4 text-on-surface">
-                {t('search.cardBeachTitle')}
-              </h3>
+              <h3 className="mt-3 font-h4 text-h4 text-on-surface">{t('search.cardBeachTitle')}</h3>
               <p className="mt-1 text-body-sm text-on-surface-variant">
                 {t('search.cardBeachBody')}
               </p>
@@ -200,9 +195,7 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
             <p className="mt-4 font-sans text-body-lg text-on-surface-variant">
               {t.rich('search.totalFiltered', {
                 total,
-                strong: (chunks) => (
-                  <span className="font-semibold text-on-surface">{chunks}</span>
-                ),
+                strong: (chunks) => <span className="font-semibold text-on-surface">{chunks}</span>,
               })}
             </p>
           )}
@@ -415,11 +408,7 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
                         <div className="relative h-32 w-40 flex-shrink-0 bg-surface-container sm:h-36 sm:w-56">
                           {heroSrc ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={heroSrc}
-                              alt={title}
-                              className="h-full w-full object-cover"
-                            />
+                            <img src={heroSrc} alt={title} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full items-center justify-center text-outline">
                               <Icon name="image" />

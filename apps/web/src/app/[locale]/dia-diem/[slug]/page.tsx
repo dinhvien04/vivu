@@ -224,11 +224,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                 label={t('place.bestSeason')}
                 value={formatSeasonMonths(place.bestSeasons, locale)}
               />
-              <MetaCard
-                icon="explore"
-                label={t('place.region')}
-                value={regionName ?? '—'}
-              />
+              <MetaCard icon="explore" label={t('place.region')} value={regionName ?? '—'} />
               <MetaCard icon="category" label={t('place.category')} value={categoriesText} />
             </div>
 

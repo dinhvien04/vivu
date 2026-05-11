@@ -47,16 +47,20 @@ export default function YeuThichPage() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, user, router, getAccessToken]);
+  }, [authLoading, user, router, getAccessToken, t]);
 
   return (
     <>
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">
         <header className="mb-8 max-w-3xl">
-          <p className="text-overline uppercase tracking-overline text-secondary">{tCommon('account')}</p>
+          <p className="text-overline uppercase tracking-overline text-secondary">
+            {tCommon('account')}
+          </p>
           <h1 className="mt-2 font-h1 text-h1 text-on-surface">{t('favoritesTitle')}</h1>
-          <p className="mt-3 font-sans text-body-lg text-on-surface-variant">{t('favoritesLead')}</p>
+          <p className="mt-3 font-sans text-body-lg text-on-surface-variant">
+            {t('favoritesLead')}
+          </p>
         </header>
 
         {error && (
@@ -87,7 +91,9 @@ export default function YeuThichPage() {
           />
         ) : (
           <>
-            <p className="mb-4 text-body-sm text-on-surface-variant">{t('placeCount', { count: places.length })}</p>
+            <p className="mb-4 text-body-sm text-on-surface-variant">
+              {t('placeCount', { count: places.length })}
+            </p>
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {places.map((place) => (
                 <li key={place.id}>

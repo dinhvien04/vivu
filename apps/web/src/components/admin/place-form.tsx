@@ -188,7 +188,9 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
     <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       <div className="space-y-6 lg:col-span-8">
         <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">{t('formBasicInfo')}</legend>
+          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">
+            {t('formBasicInfo')}
+          </legend>
           <div className="space-y-4">
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
@@ -227,10 +229,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 placeholder={t('formSlugPlaceholder')}
                 className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
-              <span
-                className="mt-1 block text-body-sm text-outline"
-                dangerouslySetInnerHTML={{ __html: t.raw('formSlugHint') as string }}
-              />
+              <span className="mt-1 block text-body-sm text-outline">{t('formSlugHint')}</span>
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
@@ -270,7 +269,9 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
         </fieldset>
 
         <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">{t('formDescription')}</legend>
+          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">
+            {t('formDescription')}
+          </legend>
           <label className="block">
             <span className="text-overline uppercase tracking-overline text-on-surface-variant">
               {t('formDescVi')}
@@ -401,7 +402,9 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
           <p className="mb-3 text-body-sm text-outline">{t('formCategoriesHint')}</p>
           <div className="flex flex-wrap gap-2">
             {categories.length === 0 && (
-              <span className="text-body-sm text-on-surface-variant">{t('formCategoriesLoading')}</span>
+              <span className="text-body-sm text-on-surface-variant">
+                {t('formCategoriesLoading')}
+              </span>
             )}
             {categories.map((c) => {
               const active = state.categoryIds.includes(c.id);
@@ -441,7 +444,11 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
           {state.heroImageUrl && (
             <div className="mt-3 overflow-hidden rounded-lg border border-outline-variant/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={state.heroImageUrl} alt={t('formHeroPreviewAlt')} className="h-32 w-full object-cover" />
+              <img
+                src={state.heroImageUrl}
+                alt={t('formHeroPreviewAlt')}
+                className="h-32 w-full object-cover"
+              />
             </div>
           )}
           <p className="mt-2 text-body-sm text-outline">{t('formHeroHint')}</p>

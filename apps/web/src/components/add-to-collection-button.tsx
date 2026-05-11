@@ -47,7 +47,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
     return () => {
       cancelled = true;
     };
-  }, [open, user, getAccessToken]);
+  }, [open, user, getAccessToken, t]);
 
   if (!authLoading && !user) {
     return (

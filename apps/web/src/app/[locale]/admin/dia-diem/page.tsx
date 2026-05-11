@@ -210,102 +210,102 @@ export default function AdminPlacesList() {
               places.map((p) => {
                 const title = placeTitle(p, locale);
                 return (
-                <tr key={p.id} className="hover:bg-surface-container/30">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md bg-surface-container">
-                        {p.heroImageUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={p.heroImageUrl}
-                            alt={title}
-                            className="h-full w-full object-cover"
-                          />
+                  <tr key={p.id} className="hover:bg-surface-container/30">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md bg-surface-container">
+                          {p.heroImageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.heroImageUrl}
+                              alt={title}
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-on-surface">{title}</p>
+                          <p className="truncate text-body-sm text-on-surface-variant">
+                            {p.address ?? t('noAddress')}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="hidden px-4 py-3 md:table-cell">
+                      <span className="text-body-sm text-on-surface-variant">
+                        {p.region ? placeRegionName(p.region, locale) : '—'}
+                      </span>
+                    </td>
+                    <td className="hidden px-4 py-3 lg:table-cell">
+                      <div className="flex flex-wrap gap-1">
+                        {(p.categories ?? []).slice(0, 2).map((c) => (
+                          <span
+                            key={c.id}
+                            className="rounded-full bg-secondary-container px-2 py-0.5 text-body-sm text-on-secondary-container"
+                          >
+                            {placeCategoryName(c, locale)}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={
+                          p.status === 'published'
+                            ? 'inline-flex items-center gap-1 rounded-full bg-secondary-container px-2 py-0.5 text-body-sm text-on-secondary-container'
+                            : 'inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-0.5 text-body-sm text-on-surface-variant'
+                        }
+                      >
+                        <Icon
+                          name={p.status === 'published' ? 'check_circle' : 'edit_note'}
+                          className="!text-sm"
+                        />
+                        {STATUS_LABEL[p.status] ?? p.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {p.status === 'published' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleAction('unpublish', p)}
+                            disabled={busyId === p.id}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container disabled:opacity-60"
+                          >
+                            <Icon name="visibility_off" className="!text-sm" />
+                            {t('unpublishShort')}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleAction('publish', p)}
+                            disabled={busyId === p.id}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-tertiary hover:bg-tertiary-container/40 disabled:opacity-60"
+                          >
+                            <Icon name="rocket_launch" className="!text-sm" />
+                            {t('publish')}
+                          </button>
                         )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-on-surface">{title}</p>
-                        <p className="truncate text-body-sm text-on-surface-variant">
-                          {p.address ?? t('noAddress')}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="hidden px-4 py-3 md:table-cell">
-                    <span className="text-body-sm text-on-surface-variant">
-                      {p.region ? placeRegionName(p.region, locale) : '—'}
-                    </span>
-                  </td>
-                  <td className="hidden px-4 py-3 lg:table-cell">
-                    <div className="flex flex-wrap gap-1">
-                      {(p.categories ?? []).slice(0, 2).map((c) => (
-                        <span
-                          key={c.id}
-                          className="rounded-full bg-secondary-container px-2 py-0.5 text-body-sm text-on-secondary-container"
+                        <Link
+                          href={`/admin/dia-diem/${p.slug}`}
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-semibold text-primary hover:bg-primary-container/40"
                         >
-                          {placeCategoryName(c, locale)}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={
-                        p.status === 'published'
-                          ? 'inline-flex items-center gap-1 rounded-full bg-secondary-container px-2 py-0.5 text-body-sm text-on-secondary-container'
-                          : 'inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-0.5 text-body-sm text-on-surface-variant'
-                      }
-                    >
-                      <Icon
-                        name={p.status === 'published' ? 'check_circle' : 'edit_note'}
-                        className="!text-sm"
-                      />
-                      {STATUS_LABEL[p.status] ?? p.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {p.status === 'published' ? (
+                          <Icon name="edit" className="!text-sm" />
+                          {t('edit')}
+                        </Link>
                         <button
                           type="button"
-                          onClick={() => handleAction('unpublish', p)}
+                          onClick={() => handleAction('delete', p)}
                           disabled={busyId === p.id}
-                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container disabled:opacity-60"
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-error hover:bg-error-container/30 disabled:opacity-60"
                         >
-                          <Icon name="visibility_off" className="!text-sm" />
-                          {t('unpublishShort')}
+                          <Icon name="delete" className="!text-sm" />
+                          {t('delete')}
                         </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleAction('publish', p)}
-                          disabled={busyId === p.id}
-                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-tertiary hover:bg-tertiary-container/40 disabled:opacity-60"
-                        >
-                          <Icon name="rocket_launch" className="!text-sm" />
-                          {t('publish')}
-                        </button>
-                      )}
-                      <Link
-                        href={`/admin/dia-diem/${p.slug}`}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-semibold text-primary hover:bg-primary-container/40"
-                      >
-                        <Icon name="edit" className="!text-sm" />
-                        {t('edit')}
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => handleAction('delete', p)}
-                        disabled={busyId === p.id}
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-error hover:bg-error-container/30 disabled:opacity-60"
-                      >
-                        <Icon name="delete" className="!text-sm" />
-                        {t('delete')}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
+                      </div>
+                    </td>
+                  </tr>
+                );
               })
             )}
           </tbody>
