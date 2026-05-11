@@ -20,6 +20,9 @@
 -- Bật trigram để hỗ trợ search ILIKE / similarity (charter `docs/overview.md`).
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+-- Bật PostGIS để dùng kiểu geography(Point, 4326) + ST_DWithin cho /places/nearby.
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('user', 'editor', 'admin');
 
@@ -339,3 +342,36 @@ ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_actorId_fkey" FOREIGN KEY ("acto
 
 CREATE INDEX IF NOT EXISTS "Place_titleVi_trgm_idx"
     ON "Place" USING GIN ("titleVi" gin_trgm_ops);
+
+-- =============================================================================
+-- PostGIS — cột geography(Point, 4326) + GIST index cho /places/nearby.
+-- Cột "geo" được giữ đồng bộ với (lat, lng) qua trigger; service truy vấn
+-- ST_DWithin trên cột này (nhanh hơn Haversine khi dataset lớn).
+-- =============================================================================
+
+ALTER TABLE "Place"
+    ADD COLUMN IF NOT EXISTS "geo" geography(Point, 4326);
+
+CREATE INDEX IF NOT EXISTS "Place_geo_gist_idx"
+    ON "Place" USING GIST ("geo");
+
+CREATE OR REPLACE FUNCTION place_sync_geo() RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.lat IS NOT NULL AND NEW.lng IS NOT NULL THEN
+        NEW.geo := ST_SetSRID(ST_MakePoint(NEW.lng, NEW.lat), 4326)::geography;
+    ELSE
+        NEW.geo := NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS place_geo_sync ON "Place";
+CREATE TRIGGER place_geo_sync
+    BEFORE INSERT OR UPDATE OF "lat", "lng" ON "Place"
+    FOR EACH ROW EXECUTE FUNCTION place_sync_geo();
+
+-- Backfill cột "geo" cho các row đã có lat/lng từ trước.
+UPDATE "Place"
+SET "geo" = ST_SetSRID(ST_MakePoint("lng", "lat"), 4326)::geography
+WHERE "lat" IS NOT NULL AND "lng" IS NOT NULL AND "geo" IS NULL;

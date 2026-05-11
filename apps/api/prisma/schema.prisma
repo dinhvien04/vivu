@@ -1,7 +1,9 @@
 // Prisma schema for Vivu API
 // Note: PostGIS-specific types (geometry/geography) are not first-class in Prisma.
-// We store lat/lng as Float for now; later we can add a raw migration to attach
-// a geography(Point, 4326) column + GIST index to the `places` table.
+// Place table also has a `geo geography(Point, 4326)` column + GIST index +
+// `place_geo_sync` trigger, declared in apps/api/prisma/schema.sql.
+// It is kept in sync from (lat, lng) by the trigger and queried via $queryRaw
+// (PlacesService.listNearby) — Prisma client is intentionally unaware of it.
 
 generator client {
   provider = "prisma-client-js"
