@@ -447,7 +447,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               placeholder={t('formHeroPlaceholder')}
               className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
-          </label>
+          </details>
           {state.heroImageUrl && (
             <div className="mt-3 overflow-hidden rounded-lg border border-outline-variant/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
