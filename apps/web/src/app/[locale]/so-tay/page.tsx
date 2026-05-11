@@ -1,18 +1,19 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { EmptyState } from '@/components/empty-state';
 import { Icon } from '@/components/icon';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { Link, useRouter } from '@/i18n/navigation';
+import type { Locale } from '@/i18n/routing';
 import { createCollection, deleteCollection, listMyCollections } from '@/lib/collections-client';
 import type { Collection } from '@vivu/types';
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('vi-VN', {
+function formatDate(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-US' : 'vi-VN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -20,6 +21,8 @@ function formatDate(iso: string): string {
 }
 
 export default function SoTayListPage() {
+  const t = useTranslations('collections');
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const { user, loading: authLoading, getAccessToken } = useAuth();
   const [collections, setCollections] = useState<Collection[] | null>(null);
@@ -47,7 +50,7 @@ export default function SoTayListPage() {
         if (!cancelled) setCollections(data);
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+          setError(e instanceof Error ? e.message : t('errorGeneric'));
           setCollections([]);
         }
       }
@@ -55,19 +58,19 @@ export default function SoTayListPage() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, user, router, getAccessToken]);
+  }, [authLoading, user, router, getAccessToken, t]);
 
   const handleCreate = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError(null);
     if (name.trim().length === 0) {
-      setError('Vui lòng nhập tên sổ tay.');
+      setError(t('errorNameRequired'));
       return;
     }
     setCreating(true);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errorSessionExpired'));
       const created = await createCollection(
         { name: name.trim(), description: description.trim() || undefined },
         token,
@@ -77,23 +80,23 @@ export default function SoTayListPage() {
       setDescription('');
       setShowForm(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('errorGeneric'));
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDelete = async (id: string, name: string): Promise<void> => {
-    const ok = window.confirm(`Xoá sổ tay "${name}"?`);
+  const handleDelete = async (id: string, collectionName: string): Promise<void> => {
+    const ok = window.confirm(t('deleteConfirmName', { name: collectionName }));
     if (!ok) return;
     setError(null);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errorSessionExpired'));
       await deleteCollection(id, token);
       setCollections((cs) => (cs ?? []).filter((c) => c.id !== id));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('errorGeneric'));
     }
   };
 
@@ -103,12 +106,11 @@ export default function SoTayListPage() {
       <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl">
-            <p className="text-overline uppercase tracking-overline text-secondary">Tài khoản</p>
-            <h1 className="mt-2 font-h1 text-h1 text-on-surface">Sổ tay của bạn</h1>
-            <p className="mt-3 font-sans text-body-lg text-on-surface-variant">
-              Tạo các sổ tay theo lịch trình hoặc chủ đề và sắp xếp địa điểm theo cách của riêng
-              bạn.
+            <p className="text-overline uppercase tracking-overline text-secondary">
+              {t('listOverline')}
             </p>
+            <h1 className="mt-2 font-h1 text-h1 text-on-surface">{t('listTitle')}</h1>
+            <p className="mt-3 font-sans text-body-lg text-on-surface-variant">{t('listLead')}</p>
           </div>
           {collections && collections.length > 0 && (
             <button
@@ -117,7 +119,7 @@ export default function SoTayListPage() {
               className="inline-flex items-center gap-2 self-start rounded-lg bg-primary px-4 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
             >
               <Icon name={showForm ? 'close' : 'add'} className="!text-base" />
-              {showForm ? 'Huỷ' : 'Tạo sổ tay mới'}
+              {showForm ? t('cancel') : t('createNew')}
             </button>
           )}
         </header>
@@ -139,7 +141,7 @@ export default function SoTayListPage() {
             <div className="space-y-4">
               <div>
                 <label htmlFor="coll-name" className="mb-1 block text-label-md text-on-surface">
-                  Tên sổ tay <span className="text-error">*</span>
+                  {t('fieldName')} <span className="text-error">*</span>
                 </label>
                 <input
                   id="coll-name"
@@ -147,13 +149,13 @@ export default function SoTayListPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={120}
-                  placeholder="Ví dụ: Đi miền Trung mùa hè 2026"
+                  placeholder={t('fieldNameExample')}
                   className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
               <div>
                 <label htmlFor="coll-desc" className="mb-1 block text-label-md text-on-surface">
-                  Mô tả ngắn (tuỳ chọn)
+                  {t('fieldDescription')}
                 </label>
                 <textarea
                   id="coll-desc"
@@ -169,7 +171,7 @@ export default function SoTayListPage() {
                 disabled={creating}
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2 font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {creating ? 'Đang tạo…' : 'Tạo sổ tay'}
+                {creating ? t('creating') : t('create')}
               </button>
             </div>
           </form>
@@ -188,9 +190,9 @@ export default function SoTayListPage() {
         ) : collections.length === 0 ? (
           <EmptyState
             icon="collections_bookmark"
-            title="Chưa có sổ tay nào"
-            description="Tạo sổ tay đầu tiên để gom các địa điểm theo từng lịch trình hoặc chủ đề bạn quan tâm."
-            action={{ label: 'Tạo sổ tay đầu tiên', onClick: () => setShowForm(true) }}
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
+            action={{ label: t('emptyAction'), onClick: () => setShowForm(true) }}
           />
         ) : (
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -203,15 +205,15 @@ export default function SoTayListPage() {
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary-container px-3 py-1 text-label-caps text-on-primary-container">
                       <Icon name="collections_bookmark" className="!text-sm" />
-                      {c.itemsCount} địa điểm
+                      {t('itemsCount', { count: c.itemsCount })}
                     </span>
                     {c.isPublic && (
                       <span
                         className="inline-flex items-center gap-1 rounded-full border border-tertiary/40 bg-tertiary-container px-2 py-0.5 text-label-caps text-on-tertiary-container"
-                        title="Công khai"
+                        title={t('public')}
                       >
                         <Icon name="public" className="!text-sm" />
-                        Công khai
+                        {t('public')}
                       </span>
                     )}
                   </div>
@@ -224,13 +226,13 @@ export default function SoTayListPage() {
                     </p>
                   )}
                   <p className="mt-auto text-label-caps text-on-surface-variant">
-                    Cập nhật {formatDate(c.updatedAt)}
+                    {t('updatedOn', { date: formatDate(c.updatedAt, locale) })}
                   </p>
                 </Link>
                 <button
                   type="button"
                   onClick={() => handleDelete(c.id, c.name)}
-                  aria-label={`Xoá ${c.name}`}
+                  aria-label={t('deleteAriaLabel', { name: c.name })}
                   className="absolute right-3 top-3 rounded-full bg-white/0 p-2 text-on-surface-variant opacity-0 transition-all hover:bg-error-container hover:text-on-error-container group-hover:opacity-100"
                 >
                   <Icon name="delete" className="!text-base" />

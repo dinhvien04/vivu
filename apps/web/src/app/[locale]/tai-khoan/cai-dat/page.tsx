@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { Link, useRouter } from '@/i18n/navigation';
 import {
   AuthError,
   changePassword as apiChangePassword,
@@ -16,14 +16,17 @@ import {
 
 type Section = 'tai-khoan' | 'mat-khau' | 'thong-bao' | 'rieng-tu';
 
-const SECTIONS: Array<{ id: Section; label: string; icon: string }> = [
-  { id: 'tai-khoan', label: 'Tài khoản', icon: 'person' },
-  { id: 'mat-khau', label: 'Bảo mật', icon: 'lock' },
-  { id: 'thong-bao', label: 'Thông báo', icon: 'notifications' },
-  { id: 'rieng-tu', label: 'Quyền riêng tư', icon: 'shield' },
+type SectionDef = { id: Section; labelKey: string; icon: string };
+
+const SECTIONS: SectionDef[] = [
+  { id: 'tai-khoan', labelKey: 'secAccount', icon: 'person' },
+  { id: 'mat-khau', labelKey: 'secSecurity', icon: 'lock' },
+  { id: 'thong-bao', labelKey: 'secNotifications', icon: 'notifications' },
+  { id: 'rieng-tu', labelKey: 'secPrivacy', icon: 'shield' },
 ];
 
 export default function CaiDatPage() {
+  const t = useTranslations('account');
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [section, setSection] = useState<Section>('tai-khoan');
@@ -52,9 +55,9 @@ export default function CaiDatPage() {
       <main className="mx-auto max-w-container-max px-margin-mobile py-10 md:px-margin-desktop md:py-16">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[260px_1fr]">
           <aside>
-            <h2 className="mb-1 font-h3 text-h3 text-primary">Cài đặt</h2>
+            <h2 className="mb-1 font-h3 text-h3 text-primary">{t('settingsHeading')}</h2>
             <p className="mb-6 text-body-md text-on-surface-variant">{user.email}</p>
-            <nav aria-label="Mục cài đặt" className="flex flex-col gap-1">
+            <nav aria-label={t('settingsMenuAria')} className="flex flex-col gap-1">
               {SECTIONS.map((s) => {
                 const active = s.id === section;
                 return (
@@ -69,7 +72,7 @@ export default function CaiDatPage() {
                     }`}
                   >
                     <Icon name={s.icon} size={20} />
-                    {s.label}
+                    {t(s.labelKey)}
                   </button>
                 );
               })}
@@ -78,7 +81,7 @@ export default function CaiDatPage() {
 
           <div className="space-y-8">
             <h1 className="font-h1 text-h1 text-on-surface">
-              {SECTIONS.find((s) => s.id === section)?.label}
+              {t(SECTIONS.find((s) => s.id === section)?.labelKey ?? 'secAccount')}
             </h1>
 
             {section === 'tai-khoan' && <ProfileSection />}
@@ -120,6 +123,7 @@ function SectionCard({
 }
 
 function ProfileSection() {
+  const t = useTranslations('account');
   const { user, getAccessToken, reloadUser } = useAuth();
   const [name, setName] = useState(user?.name ?? '');
   const [bio, setBio] = useState(user?.bio ?? '');
@@ -143,7 +147,7 @@ function ProfileSection() {
     setSuccess(null);
     const token = await getAccessToken();
     if (!token) {
-      setError('Phiên đã hết hạn. Đăng nhập lại để tiếp tục.');
+      setError(t('errSessionExpired'));
       return;
     }
     setSaving(true);
@@ -155,9 +159,9 @@ function ProfileSection() {
         avatarUrl: avatarUrl.trim(),
       });
       await reloadUser();
-      setSuccess('Đã lưu thay đổi.');
+      setSuccess(t('saveSuccess'));
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Cập nhật thất bại');
+      setError(e instanceof Error ? e.message : t('saveFail'));
     } finally {
       setSaving(false);
     }
@@ -165,9 +169,9 @@ function ProfileSection() {
 
   return (
     <>
-      <SectionCard title="Thông tin cơ bản" description="Cách bạn xuất hiện với cộng đồng Vivu.">
+      <SectionCard title={t('profileBasicTitle')} description={t('profileBasicDesc')}>
         <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={onSubmit}>
-          <Field label="Email" hint="Email không thay đổi được trong phiên bản này.">
+          <Field label={t('fieldEmail')} hint={t('fieldEmailHint')}>
             <input
               type="email"
               value={user?.email ?? ''}
@@ -175,7 +179,7 @@ function ProfileSection() {
               className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-body-md text-on-surface-variant"
             />
           </Field>
-          <Field label="Họ và tên">
+          <Field label={t('fieldName')}>
             <input
               type="text"
               value={name}
@@ -184,33 +188,33 @@ function ProfileSection() {
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none"
             />
           </Field>
-          <Field label="Địa điểm" className="md:col-span-1">
+          <Field label={t('fieldLocation')} className="md:col-span-1">
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               maxLength={120}
-              placeholder="Hà Nội, Việt Nam"
+              placeholder={t('fieldLocationPlaceholder')}
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none"
             />
           </Field>
-          <Field label="Ảnh đại diện (URL)" className="md:col-span-1">
+          <Field label={t('fieldAvatar')} className="md:col-span-1">
             <input
               type="url"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               maxLength={500}
-              placeholder="https://res.cloudinary.com/.../avatar.jpg"
+              placeholder={t('fieldAvatarPlaceholder')}
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none"
             />
           </Field>
-          <Field label="Giới thiệu" className="md:col-span-2">
+          <Field label={t('fieldBio')} className="md:col-span-2">
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               maxLength={500}
               rows={4}
-              placeholder="Vài dòng về sở thích du lịch, vùng miền yêu thích…"
+              placeholder={t('fieldBioPlaceholder')}
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none"
             />
             <p className="mt-1 text-right text-body-sm text-on-surface-variant">{bio.length}/500</p>
@@ -239,24 +243,21 @@ function ProfileSection() {
               disabled={saving}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50"
             >
-              {saving ? 'Đang lưu…' : 'Lưu thay đổi'}
+              {saving ? t('saving') : t('btnSave')}
             </button>
           </div>
         </form>
       </SectionCard>
 
-      <SectionCard
-        title="Tài khoản liên kết"
-        description="Liên kết với các tài khoản bên ngoài để đăng nhập nhanh hơn (sắp ra mắt)."
-      >
+      <SectionCard title={t('linkedTitle')} description={t('linkedDesc')}>
         <div className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-low p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest shadow-sm">
               <Icon name="account_circle" size={28} className="text-on-surface-variant" />
             </div>
             <div>
-              <p className="font-semibold text-on-surface">Google</p>
-              <p className="text-body-sm text-on-surface-variant">Chưa liên kết</p>
+              <p className="font-semibold text-on-surface">{t('linkedGoogle')}</p>
+              <p className="text-body-sm text-on-surface-variant">{t('linkedNotConnected')}</p>
             </div>
           </div>
           <button
@@ -264,7 +265,7 @@ function ProfileSection() {
             disabled
             className="font-semibold text-on-surface-variant disabled:opacity-50"
           >
-            Sắp ra mắt
+            {t('comingSoon')}
           </button>
         </div>
       </SectionCard>
@@ -273,6 +274,7 @@ function ProfileSection() {
 }
 
 function SecuritySection() {
+  const t = useTranslations('account');
   const { getAccessToken } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -286,27 +288,27 @@ function SecuritySection() {
     setError(null);
     setSuccess(null);
     if (newPassword !== confirm) {
-      setError('Mật khẩu mới và xác nhận không khớp.');
+      setError(t('errPasswordMismatch'));
       return;
     }
     if (newPassword.length < 8) {
-      setError('Mật khẩu mới cần tối thiểu 8 ký tự.');
+      setError(t('errPasswordTooShort'));
       return;
     }
     const token = await getAccessToken();
     if (!token) {
-      setError('Phiên đã hết hạn. Đăng nhập lại để tiếp tục.');
+      setError(t('errSessionExpired'));
       return;
     }
     setBusy(true);
     try {
       await apiChangePassword(token, currentPassword, newPassword);
-      setSuccess('Đã đổi mật khẩu. Phiên đăng nhập khác đã bị thu hồi.');
+      setSuccess(t('passwordChangedSuccess'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirm('');
     } catch (e) {
-      setError(e instanceof AuthError ? e.message : 'Đổi mật khẩu thất bại');
+      setError(e instanceof AuthError ? e.message : t('passwordChangeFail'));
     } finally {
       setBusy(false);
     }
@@ -314,12 +316,9 @@ function SecuritySection() {
 
   return (
     <>
-      <SectionCard
-        title="Đổi mật khẩu"
-        description="Sau khi đổi, các thiết bị khác sẽ phải đăng nhập lại."
-      >
+      <SectionCard title={t('passwordChangeTitle')} description={t('passwordChangeDesc')}>
         <form className="space-y-4" onSubmit={onSubmit}>
-          <Field label="Mật khẩu hiện tại">
+          <Field label={t('fieldCurrentPassword')}>
             <input
               type="password"
               required
@@ -328,7 +327,7 @@ function SecuritySection() {
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none"
             />
           </Field>
-          <Field label="Mật khẩu mới" hint="Tối thiểu 8 ký tự, có chữ và số.">
+          <Field label={t('fieldNewPassword')} hint={t('fieldNewPasswordHint')}>
             <input
               type="password"
               required
@@ -338,7 +337,7 @@ function SecuritySection() {
               className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none"
             />
           </Field>
-          <Field label="Nhập lại mật khẩu mới">
+          <Field label={t('fieldConfirmPassword')}>
             <input
               type="password"
               required
@@ -370,22 +369,17 @@ function SecuritySection() {
               disabled={busy}
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-on-primary transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-50"
             >
-              {busy ? 'Đang xử lý…' : 'Đổi mật khẩu'}
+              {busy ? t('btnProcessing') : t('btnChangePassword')}
             </button>
           </div>
         </form>
       </SectionCard>
 
-      <SectionCard
-        title="Xác thực hai bước (2FA)"
-        description="Bảo vệ tài khoản bằng mã OTP — sắp ra mắt."
-      >
+      <SectionCard title={t('twoFactorTitle')} description={t('twoFactorDesc')}>
         <div className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-low p-4">
           <div>
-            <p className="font-semibold text-on-surface">Tắt</p>
-            <p className="text-body-sm text-on-surface-variant">
-              Khi bật, bạn cần nhập mã OTP mỗi lần đăng nhập trên thiết bị mới.
-            </p>
+            <p className="font-semibold text-on-surface">{t('twoFactorOff')}</p>
+            <p className="text-body-sm text-on-surface-variant">{t('twoFactorOffDesc')}</p>
           </div>
           <button
             type="button"
@@ -404,6 +398,7 @@ function SecuritySection() {
 }
 
 function DangerZone() {
+  const t = useTranslations('account');
   const { getAccessToken, logout } = useAuth();
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
@@ -416,7 +411,7 @@ function DangerZone() {
     setError(null);
     const token = await getAccessToken();
     if (!token) {
-      setError('Phiên đã hết hạn. Đăng nhập lại để tiếp tục.');
+      setError(t('errSessionExpired'));
       return;
     }
     setBusy(true);
@@ -425,17 +420,13 @@ function DangerZone() {
       await logout();
       router.replace('/');
     } catch (e) {
-      setError(e instanceof AuthError ? e.message : 'Xoá tài khoản thất bại');
+      setError(e instanceof AuthError ? e.message : t('deleteFail'));
       setBusy(false);
     }
   }
 
   return (
-    <SectionCard
-      tone="danger"
-      title="Quản lý dữ liệu"
-      description="Xuất bản sao dữ liệu hoặc xoá vĩnh viễn tài khoản. Hành động này không thể hoàn tác."
-    >
+    <SectionCard tone="danger" title={t('dangerTitle')} description={t('dangerDesc')}>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <button
           type="button"
@@ -444,11 +435,9 @@ function DangerZone() {
         >
           <span className="inline-flex items-center gap-2 font-semibold text-on-surface">
             <Icon name="download" size={18} />
-            Xuất dữ liệu của tôi
+            {t('exportMyData')}
           </span>
-          <span className="text-body-sm text-on-surface-variant">
-            Sắp ra mắt — gửi qua email dưới dạng JSON.
-          </span>
+          <span className="text-body-sm text-on-surface-variant">{t('exportMyDataDesc')}</span>
         </button>
 
         <button
@@ -458,11 +447,9 @@ function DangerZone() {
         >
           <span className="inline-flex items-center gap-2 font-semibold text-error">
             <Icon name="delete_forever" size={18} />
-            Xoá tài khoản
+            {t('deleteAccountBtn')}
           </span>
-          <span className="text-body-sm text-on-surface-variant">
-            Xoá vĩnh viễn tài khoản, đánh giá, sổ tay, yêu thích.
-          </span>
+          <span className="text-body-sm text-on-surface-variant">{t('deleteAccountDesc')}</span>
         </button>
       </div>
 
@@ -472,10 +459,9 @@ function DangerZone() {
           onSubmit={onConfirmDelete}
         >
           <p className="text-body-md text-on-surface">
-            Nhập mật khẩu để xác nhận xoá tài khoản.{' '}
-            <strong>Hành động này không thể hoàn tác.</strong>
+            {t('deleteConfirmIntro')} <strong>{t('deleteIrreversible')}</strong>
           </p>
-          <Field label="Mật khẩu">
+          <Field label={t('fieldPassword')}>
             <input
               type="password"
               required
@@ -502,14 +488,14 @@ function DangerZone() {
               }}
               className="rounded-lg border border-outline-variant px-6 py-3 font-semibold text-on-surface transition-colors hover:bg-surface-container"
             >
-              Huỷ
+              {t('btnCancel')}
             </button>
             <button
               type="submit"
               disabled={busy}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-error px-6 py-3 font-semibold text-on-error transition-all hover:bg-error/90 disabled:opacity-50"
             >
-              {busy ? 'Đang xoá…' : 'Xác nhận xoá tài khoản'}
+              {busy ? t('btnDeleting') : t('btnConfirmDelete')}
             </button>
           </div>
         </form>
@@ -519,17 +505,16 @@ function DangerZone() {
 }
 
 function NotificationsSection() {
+  const t = useTranslations('account');
+  const rows = [
+    { label: t('notifNewPlacesLabel'), desc: t('notifNewPlacesDesc') },
+    { label: t('notifRepliesLabel'), desc: t('notifRepliesDesc') },
+    { label: t('notifNewsletterLabel'), desc: t('notifNewsletterDesc') },
+  ];
   return (
-    <SectionCard
-      title="Thông báo"
-      description="Lựa chọn email và thông báo trong ứng dụng — sắp ra mắt."
-    >
+    <SectionCard title={t('notifTitle')} description={t('notifDesc')}>
       <ul className="space-y-3">
-        {[
-          { label: 'Thông báo địa điểm mới gần bạn', desc: 'Email hàng tuần.' },
-          { label: 'Trả lời cho câu hỏi/đánh giá của bạn', desc: 'Trong ứng dụng + email.' },
-          { label: 'Bản tin Vivu', desc: 'Mẹo du lịch hàng tháng.' },
-        ].map((row) => (
+        {rows.map((row) => (
           <li
             key={row.label}
             className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-low p-4"
@@ -554,23 +539,16 @@ function NotificationsSection() {
 }
 
 function PrivacySection() {
+  const t = useTranslations('account');
+  const rows = [
+    { label: t('privacyPublicProfileLabel'), desc: t('privacyPublicProfileDesc') },
+    { label: t('privacyPublicCollectionsLabel'), desc: t('privacyPublicCollectionsDesc') },
+    { label: t('privacyAllowTagLabel'), desc: t('privacyAllowTagDesc') },
+  ];
   return (
-    <SectionCard
-      title="Quyền riêng tư"
-      description="Kiểm soát ai xem được hồ sơ và hoạt động của bạn — sắp ra mắt."
-    >
+    <SectionCard title={t('privacyTitle')} description={t('privacyDesc')}>
       <ul className="space-y-3">
-        {[
-          { label: 'Hồ sơ công khai', desc: 'Cho phép người khác xem trang cá nhân.' },
-          {
-            label: 'Hiển thị sổ tay công khai',
-            desc: 'Sổ tay đánh dấu công khai sẽ hiển thị trên hồ sơ.',
-          },
-          {
-            label: 'Cho phép tag tên',
-            desc: 'Người khác có thể nhắc tên bạn trong câu hỏi/đánh giá.',
-          },
-        ].map((row) => (
+        {rows.map((row) => (
           <li
             key={row.label}
             className="flex items-center justify-between rounded-xl border border-outline-variant bg-surface-container-low p-4"
@@ -596,7 +574,7 @@ function PrivacySection() {
           className="inline-flex items-center gap-2 text-body-md font-semibold text-error hover:underline"
         >
           <Icon name="logout" size={18} />
-          Đăng xuất khỏi tất cả thiết bị
+          {t('logoutAllDevices')}
         </Link>
       </div>
     </SectionCard>

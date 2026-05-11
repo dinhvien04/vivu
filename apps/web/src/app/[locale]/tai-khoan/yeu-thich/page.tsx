@@ -1,19 +1,20 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { EmptyState } from '@/components/empty-state';
 import { PlaceCard } from '@/components/place-card';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { useRouter } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { Place } from '@/lib/api';
 import { listMyFavorites } from '@/lib/favorites-client';
 
 export default function YeuThichPage() {
-  const t = useTranslations();
+  const t = useTranslations('account');
+  const tCommon = useTranslations('common');
   const locale = useLocale() as Locale;
   const router = useRouter();
   const { user, loading: authLoading, getAccessToken } = useAuth();
@@ -38,7 +39,7 @@ export default function YeuThichPage() {
         if (!cancelled) setPlaces(data);
       } catch (e) {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+          setError(e instanceof Error ? e.message : t('favoritesLoadFailed'));
           setPlaces([]);
         }
       }
@@ -53,11 +54,9 @@ export default function YeuThichPage() {
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">
         <header className="mb-8 max-w-3xl">
-          <p className="text-overline uppercase tracking-overline text-secondary">Tài khoản</p>
-          <h1 className="mt-2 font-h1 text-h1 text-on-surface">Địa điểm yêu thích</h1>
-          <p className="mt-3 font-sans text-body-lg text-on-surface-variant">
-            Những nơi bạn đã lưu để ghé thăm sau này.
-          </p>
+          <p className="text-overline uppercase tracking-overline text-secondary">{tCommon('account')}</p>
+          <h1 className="mt-2 font-h1 text-h1 text-on-surface">{t('favoritesTitle')}</h1>
+          <p className="mt-3 font-sans text-body-lg text-on-surface-variant">{t('favoritesLead')}</p>
         </header>
 
         {error && (
@@ -82,13 +81,13 @@ export default function YeuThichPage() {
         ) : places.length === 0 ? (
           <EmptyState
             icon="favorite_border"
-            title="Chưa có địa điểm yêu thích"
-            description="Khám phá các điểm đến và bấm trái tim để lưu lại tại đây."
-            action={{ label: 'Khám phá ngay', href: '/kham-pha' }}
+            title={t('favoritesEmpty')}
+            description={t('favoritesEmptyHint')}
+            action={{ label: t('favoritesEmptyAction'), href: '/kham-pha' }}
           />
         ) : (
           <>
-            <p className="mb-4 text-body-sm text-on-surface-variant">{places.length} địa điểm</p>
+            <p className="mb-4 text-body-sm text-on-surface-variant">{t('placeCount', { count: places.length })}</p>
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {places.map((place) => (
                 <li key={place.id}>
