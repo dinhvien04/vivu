@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Icon } from '@/components/icon';
+import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { PlaceCard } from '@/components/place-card';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
@@ -12,6 +13,13 @@ import {
   type PlaceSeason,
   type PlaceSort,
 } from '@/lib/api';
+
+const EXPLORE_VIEWS = ['grid', 'map'] as const;
+type ExploreView = (typeof EXPLORE_VIEWS)[number];
+
+function isExploreView(value: string | undefined): value is ExploreView {
+  return value === 'grid' || value === 'map';
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
@@ -28,6 +36,7 @@ interface PageProps {
     sort?: string;
     q?: string;
     minRating?: string;
+    view?: string;
   }>;
 }
 
@@ -70,9 +79,13 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
     Number.isFinite(minRatingRaw) && minRatingRaw >= 1 && minRatingRaw <= 5
       ? minRatingRaw
       : undefined;
+  const view: ExploreView = isExploreView(sp.view) ? sp.view : 'grid';
+  // Map view needs every published place with coordinates within the active
+  // filters; bump pageSize so we don't paginate the map.
+  const pageSize = view === 'map' ? 200 : 50;
 
   const [placesResult, regions, categories] = await Promise.all([
-    listPlaces({ region, category, season, sort, q, minRating, pageSize: 50 }).catch((e) => ({
+    listPlaces({ region, category, season, sort, q, minRating, pageSize }).catch((e) => ({
       _error: e instanceof Error ? e.message : 'unknown',
     })),
     listRegions().catch(() => []),
@@ -285,7 +298,53 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
           </div>
         )}
 
-        {result && result.data.length > 0 && (
+        {/* View toggle */}
+        <div className="mb-4 flex items-center justify-between">
+          <div
+            className="inline-flex rounded-lg border border-outline-variant bg-surface-container p-1"
+            role="tablist"
+            aria-label={t('explore.title')}
+          >
+            {(
+              [
+                { v: 'grid' as const, icon: 'grid_view', key: 'viewGrid' as const },
+                { v: 'map' as const, icon: 'map', key: 'viewMap' as const },
+              ] as const
+            ).map((opt) => {
+              const active = view === opt.v;
+              return (
+                <Link
+                  key={opt.v}
+                  href={buildHref(sp, { view: opt.v === 'grid' ? '' : opt.v })}
+                  className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-label-md transition-colors ${
+                    active
+                      ? 'bg-surface-container-lowest font-semibold text-primary shadow-sm'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                  role="tab"
+                  aria-selected={active}
+                >
+                  <Icon name={opt.icon} className="!text-base" />
+                  <span className="hidden sm:inline">{t(`explore.${opt.key}`)}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {result && result.data.length > 0 && view === 'map' && (
+          <div className="space-y-3">
+            <p className="text-body-sm text-on-surface-variant">
+              {t('explore.mapHint', {
+                geo: result.data.filter((p) => p.geo).length,
+                total: result.data.length,
+              })}
+            </p>
+            <PlacesMapLoader places={result.data} height="65vh" locale={locale} />
+          </div>
+        )}
+
+        {result && result.data.length > 0 && view === 'grid' && (
           <>
             <p className="mb-4 text-body-sm text-on-surface-variant">
               {t('explore.totalPlaces', { total: result.meta.total })}

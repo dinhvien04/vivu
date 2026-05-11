@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AdminLiveStats } from '@/components/admin/admin-live-stats';
 import { AdminQuickActions } from '@/components/admin/admin-quick-actions';
 import { AdminRecentActivity } from '@/components/admin/admin-recent-activity';
 import { AdminSystemHealth } from '@/components/admin/admin-system-health';
@@ -115,22 +116,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
           iconBg="bg-secondary-container"
           iconColor="text-primary"
         />
-        <StatCard
-          label={t('statTotalReviews')}
-          value={0}
-          hint={t('statTotalReviewsHint')}
-          icon="reviews"
-          iconBg="bg-tertiary-container/40"
-          iconColor="text-tertiary"
-        />
-        <StatCard
-          label={t('statActiveUsers')}
-          value="—"
-          hint={t('statActiveUsersHint')}
-          icon="group"
-          iconBg="bg-primary-container/40"
-          iconColor="text-primary"
-        />
+        <AdminLiveStats />
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">

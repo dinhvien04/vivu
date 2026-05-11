@@ -145,7 +145,11 @@
     "empty": "Không tìm thấy địa điểm phù hợp",
     "emptyHint": "Thử bỏ bớt bộ lọc để mở rộng kết quả.",
     "errorTitle": "Không tải được danh sách địa điểm",
-    "errorHint": "Hãy thử lại sau ít phút hoặc kiểm tra kết nối."
+    "errorHint": "Hãy thử lại sau ít phút hoặc kiểm tra kết nối.",
+    "viewGrid": "Lưới",
+    "viewMap": "Bản đồ",
+    "mapHint": "Đang hiển thị {geo}/{total} địa điểm có toạ độ.",
+    "mapEmpty": "Chưa có địa điểm nào trên bản đồ. Hãy thử bỏ bớt bộ lọc."
   },
   "place": {
     "breadcrumbHome": "Trang chủ",
