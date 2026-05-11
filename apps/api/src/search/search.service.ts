@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { SearchIndexService } from './search-index.service';
 
 export interface SuggestPlace {
   id: string;
@@ -22,13 +23,16 @@ interface SuggestRow {
 
 @Injectable()
 export class SearchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly index: SearchIndexService,
+  ) {}
 
   /**
-   * Typeahead suggestions. Uses pg_trgm `similarity()` to rank — the
-   * `Place_titleVi_trgm_idx` GIN index makes this fast even on the title
-   * column. Falls back implicitly to ILIKE-style matching when trigram
-   * similarity is zero (e.g. very short queries).
+   * Typeahead suggestions. If MeiliSearch is configured + reachable, ranks
+   * via Meili (typo-tolerant, weighted). Otherwise falls back to pg_trgm
+   * `similarity()` ranking + ILIKE matching using the
+   * `Place_titleVi_trgm_idx` GIN index.
    *
    * Always restricts to `status = 'published'` and returns a small projection
    * (no relations) — caller renders dropdown rows so we keep the payload
@@ -39,8 +43,15 @@ export class SearchService {
     if (trimmed.length < 2) return [];
 
     const safeLimit = Math.min(Math.max(limit, 1), 20);
-    const pattern = `%${trimmed}%`;
 
+    const fromMeili = await this.index.suggest(trimmed, safeLimit);
+    if (fromMeili !== null) return fromMeili;
+
+    return this.suggestFromPgTrgm(trimmed, safeLimit);
+  }
+
+  private async suggestFromPgTrgm(trimmed: string, safeLimit: number): Promise<SuggestPlace[]> {
+    const pattern = `%${trimmed}%`;
     const rows = await this.prisma.$queryRaw<SuggestRow[]>(Prisma.sql`
       SELECT
         "id",

@@ -19,5 +19,19 @@ services:
     ports:
       - '6379:6379'
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    container_name: vivu-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: development
+      # Đổi sang giá trị ngẫu nhiên ≥ 16 ký tự cho production.
+      MEILI_MASTER_KEY: vivu_dev_master_key_change_me
+    ports:
+      - '7700:7700'
+    volumes:
+      - vivu_meili_data:/meili_data
+
 volumes:
   vivu_db_data:
+  vivu_meili_data:

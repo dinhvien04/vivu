@@ -14,6 +14,7 @@ import type { Paginated, Photo, Place } from '@vivu/types';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { ListPlacesQueryDto } from '../places/dto/list-places.query.dto';
+import { SearchIndexService } from '../search/search-index.service';
 import { AddPhotoDto } from './dto/add-photo.dto';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
@@ -82,6 +83,7 @@ export class AdminPlacesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinary: CloudinaryService,
+    private readonly index: SearchIndexService,
   ) {}
 
   async list(query: ListPlacesQueryDto): Promise<Paginated<Place>> {
@@ -162,6 +164,7 @@ export class AdminPlacesService {
         },
         include: FULL_INCLUDE,
       });
+      await this.index.indexPlace(created.id);
       return toApiPlace(created as PlaceWithRelations);
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -218,6 +221,7 @@ export class AdminPlacesService {
           include: FULL_INCLUDE,
         });
       });
+      await this.index.indexPlace(updated.id);
       return toApiPlace(updated as PlaceWithRelations);
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -230,6 +234,7 @@ export class AdminPlacesService {
   async remove(id: string): Promise<void> {
     try {
       await this.prisma.place.delete({ where: { id } });
+      await this.index.removePlace(id);
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
         throw new NotFoundException('Không tìm thấy địa điểm');
@@ -245,6 +250,11 @@ export class AdminPlacesService {
         data: { status },
         include: FULL_INCLUDE,
       });
+      if (status === 'published') {
+        await this.index.indexPlace(p.id);
+      } else {
+        await this.index.removePlace(p.id);
+      }
       return toApiPlace(p as PlaceWithRelations);
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {

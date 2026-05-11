@@ -77,6 +77,9 @@ importers:
       fastify:
         specifier: 4.29.1
         version: 4.29.1
+      meilisearch:
+        specifier: ^0.46.0
+        version: 0.46.0
       passport:
         specifier: ^0.7.0
         version: 0.7.0
@@ -3161,6 +3164,9 @@ packages:
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
+
+  meilisearch@0.46.0:
+    resolution: {integrity: sha512-bx0tei1B+Ke0Y02pCoqmcwfpkwuDf+/ZkQDVDvb+ZfGDpWaxq9Z7sE5kc3o8zWvP6wJE7e3PoU3Oy6WINqq5bw==}
 
   memfs@3.5.3:
     resolution: {integrity: sha512-UERzLsxzllchadvbPs5aolHh65ISpKpM+ccLbOJ8/vvpBKmAWf+la7dXFy7Mr0ySHbdHrFv5kGFCUHHe6GFEmw==}
@@ -7972,6 +7978,8 @@ snapshots:
       tmpl: 1.0.5
 
   math-intrinsics@1.1.0: {}
+
+  meilisearch@0.46.0: {}
 
   memfs@3.5.3:
     dependencies:
