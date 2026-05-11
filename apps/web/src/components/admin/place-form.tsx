@@ -14,6 +14,7 @@ import {
   type PlaceUpdatePayload,
 } from '@/lib/admin-places-client';
 import type { Category, Place, Region } from '@vivu/types';
+import { CloudinaryUpload, type UploadedImage } from './cloudinary-upload';
 
 const SEASONS = [
   { value: 'spring', labelKey: 'seasonSpring' },
@@ -428,11 +429,17 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
         </div>
 
         <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <h3 className="mb-3 font-h4 text-h4 text-on-surface">{t('formHero')}</h3>
-          <label className="block">
-            <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-              {t('formHeroUrl')}
-            </span>
+          <h3 className="mb-3 font-h4 text-h4 text-on-surface">Ảnh đại diện</h3>
+          <CloudinaryUpload
+            currentUrl={state.heroImageUrl || null}
+            folder="vivu/places"
+            onUploaded={(img: UploadedImage) => set('heroImageUrl', img.url)}
+            buttonLabel={state.heroImageUrl ? 'Thay ảnh hero' : 'Tải ảnh hero'}
+          />
+          <details className="mt-3">
+            <summary className="cursor-pointer text-body-sm text-outline hover:text-on-surface">
+              Hoặc dán URL ảnh sẵn
+            </summary>
             <input
               type="url"
               value={state.heroImageUrl}

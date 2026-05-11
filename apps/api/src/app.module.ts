@@ -9,6 +9,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CollectionsModule } from './collections/collections.module';
 import { HealthController } from './common/health.controller';
 import { FavoritesModule } from './favorites/favorites.module';
+import { MediaModule } from './media/media.module';
 import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { QaModule } from './qa/qa.module';
@@ -36,6 +37,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     QaModule,
     AdminPlacesModule,
     AdminReviewsModule,
+    MediaModule,
   ],
   controllers: [HealthController],
 })

@@ -12,12 +12,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import type { Paginated, Place } from '@vivu/types';
+import type { Paginated, Photo, Place } from '@vivu/types';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ListPlacesQueryDto } from '../places/dto/list-places.query.dto';
 import { AdminPlacesService } from './admin-places.service';
+import { AddPhotoDto } from './dto/add-photo.dto';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 
@@ -69,5 +70,18 @@ export class AdminPlacesController {
   async unpublish(@Param('id') id: string): Promise<{ data: Place }> {
     const data = await this.svc.setStatus(id, 'draft');
     return { data };
+  }
+
+  @Post(':id/photos')
+  @HttpCode(HttpStatus.CREATED)
+  async addPhoto(@Param('id') id: string, @Body() dto: AddPhotoDto): Promise<{ data: Photo }> {
+    const data = await this.svc.addPhoto(id, dto);
+    return { data };
+  }
+
+  @Delete(':id/photos/:photoId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removePhoto(@Param('id') id: string, @Param('photoId') photoId: string): Promise<void> {
+    await this.svc.removePhoto(id, photoId);
   }
 }
