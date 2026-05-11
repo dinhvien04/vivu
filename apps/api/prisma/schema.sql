@@ -310,6 +310,28 @@ ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_userId_fkey" FOREIGN KEY ("userI
 -- AddForeignKey
 ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_placeId_fkey" FOREIGN KEY ("placeId") REFERENCES "Place"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
+-- CreateTable
+CREATE TABLE "AuditLog" (
+    "id" TEXT NOT NULL,
+    "actorId" TEXT,
+    "action" TEXT NOT NULL,
+    "entityType" TEXT NOT NULL,
+    "entityId" TEXT,
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AuditLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "AuditLog_createdAt_idx" ON "AuditLog"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "AuditLog_entityType_entityId_idx" ON "AuditLog"("entityType", "entityId");
+
+-- AddForeignKey
+ALTER TABLE "AuditLog" ADD CONSTRAINT "AuditLog_actorId_fkey" FOREIGN KEY ("actorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
 -- =============================================================================
 -- Index phụ (không nằm trong Prisma schema) — phục vụ search title bằng pg_trgm.
 -- Có thể bỏ nếu bạn dùng MeiliSearch.

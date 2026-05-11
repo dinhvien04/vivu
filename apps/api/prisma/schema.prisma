@@ -50,6 +50,7 @@ model User {
   answers        Answer[]
   refreshTokens  RefreshToken[]
   resetTokens    PasswordResetToken[]
+  auditLogs      AuditLog[]           @relation("AuditActor")
 }
 
 // Stored hash of a refresh token. We rotate refresh tokens on each /auth/refresh
@@ -242,4 +243,24 @@ model Favorite {
   place     Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@id([userId, placeId])
+}
+
+// AuditLog — records administrative actions for the admin "Hoạt động Gần đây"
+// feed. `actorId` may be null when the actor was deleted (User FK is SET NULL).
+// `entityType` + `entityId` describe the target resource (e.g. "place" / cuid,
+// "review" / cuid). `action` is a short verb-noun like "place.publish",
+// "review.hide", "place.create", etc. `metadata` is free-form JSON for any
+// extra context (old slug, status transition, etc.).
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
 }

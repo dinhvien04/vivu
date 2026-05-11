@@ -601,6 +601,27 @@
     "recentActivity": "Hoạt động gần đây",
     "recentActivityError": "Không tải được hoạt động gần đây.",
     "activityReview": "Đánh giá {rating}/5 sao",
+    "auditActorSystem": "Hệ thống",
+    "auditAction": {
+      "place": {
+        "create": "{actor} đã tạo địa điểm {target}",
+        "update": "{actor} đã chỉnh sửa địa điểm {target}",
+        "publish": "{actor} đã xuất bản địa điểm {target}",
+        "unpublish": "{actor} đã đưa địa điểm {target} về bản nháp",
+        "delete": "{actor} đã xoá địa điểm {target}",
+        "photo": {
+          "add": "{actor} đã thêm ảnh cho địa điểm {target}",
+          "remove": "{actor} đã gỡ ảnh khỏi địa điểm {target}"
+        }
+      },
+      "review": {
+        "hide": "{actor} đã ẩn đánh giá {target}",
+        "restore": "{actor} đã khôi phục đánh giá {target}",
+        "report": "{actor} đã đánh dấu vi phạm đánh giá {target}",
+        "delete": "{actor} đã xoá đánh giá {target}"
+      },
+      "fallback": "{actor} đã thực hiện {target}"
+    },
     "systemHealth": "Sức khoẻ hệ thống",
     "healthApi": "Máy chủ API",
     "healthDb": "Cơ sở dữ liệu",
