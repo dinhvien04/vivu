@@ -13,13 +13,10 @@ export async function DELETE(
     ? auth.slice('bearer '.length)
     : undefined;
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
-  const { status, body } = await callApi(
-    `/admin/places/${params.id}/photos/${params.photoId}`,
-    {
-      method: 'DELETE',
-      bearer,
-    },
-  );
+  const { status, body } = await callApi(`/admin/places/${params.id}/photos/${params.photoId}`, {
+    method: 'DELETE',
+    bearer,
+  });
   // 204 returns no body
   if (status === 204) return new NextResponse(null, { status });
   return NextResponse.json(body, { status });
