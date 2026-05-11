@@ -9,36 +9,36 @@
 - [x] Hạ tầng monorepo (pnpm + Turborepo + Next.js 14 + NestJS 10 + Prisma + Docker compose)
 - [x] Design system (Tailwind tokens khớp `docs/DESIGN.md`: màu, font Be Vietnam Pro + Inter, spacing 8px, container 1280px)
 - [x] Database schema theo `docs/overview.md` (User, Place, Region, Category, Photo, Review, Question, Answer, Collection, Favorite, RefreshToken, PasswordResetToken)
-- [ ] Database — `AuditLog` model (cần cho admin "Hoạt động Gần đây")
-- [ ] PostGIS migration (`geography(Point, 4326)` + GIST index) — hiện dùng Haversine ở `places/nearby`
+- [x] Database — `AuditLog` model + `GET /admin/audit-logs` + admin "Hoạt động Gần đây" wire qua audit logs thật
+- [x] PostGIS migration (`geography(Point, 4326)` + GIST index + trigger đồng bộ `lat`/`lng`) + `places/nearby` chuyển sang `ST_DWithin` (xem `apps/api/prisma/schema.sql`)
 - [x] PG `pg_trgm` extension + GIN index trên `Place.titleVi` (xem `apps/api/prisma/schema.sql`)
 - [x] CI / quality gates (`.github/workflows/ci.yml`: lint + typecheck + build + format)
 - [x] i18n vi/en cho frontend (`next-intl` + segment `app/[locale]/` + `apps/web/messages/{vi,en}.json` + locale-aware sitemap với `hreflang`)
 - [x] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction`
-- 🟡 MeiliSearch + typeahead — [x] typeahead UI ở header search (debounce 200ms, keyboard nav) dùng `/places?q=`; [ ] chưa có MeiliSearch service / endpoint `search/suggest` riêng
+- [x] MeiliSearch + typeahead — service `meilisearch` trong `docker-compose.yml`, `SearchIndexService` tự đồng bộ qua admin-places mutations, endpoint `GET /search/suggest` opt-in Meili (fallback `pg_trgm` khi không đặt `MEILI_HOST`); FE header search wire qua `/api/search/suggest`
 - [ ] Google OAuth (UI đã có nút "Tiếp tục với Google" trong `/dang-nhap` + `/dang-ky`, chưa wire `passport-google`)
 - [x] Dark mode (`ThemeProvider` + `ThemeToggle` + preflight script chống FOUC; site-header đã wire)
 
 ## 2. Trang public
 
-| Màn hình thiết kế                                             | Đường dẫn dự kiến                 | Trạng thái                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
-| `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                                                                                                                         |
-| `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | [x] danh sách + tab vùng miền (động) + skeleton + chip danh mục + filter mùa + sort recent/name + filter rating + rating trên PlaceCard + **switch Map view** (`view=grid                                                                                                      | map`dùng`PlacesMapLoader`) |
-| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + nearby places (Haversine) + weather widget (Open-Meteo) + viết đánh giá + Q&A + JSON-LD `TouristAttraction` + **gallery slider** (`PlaceGallery`: hero + thumbnails + lightbox + keyboard nav) |
-| `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [x] Leaflet + marker cluster + filter chip vung/chủ đề + chuyển nền Chuẩn/Vệ tinh/Địa hình, popup mini-card + link sang chi tiết                                                                                                                                               |
-| `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=&view=grid`          | [x] Lưới 3 cột + sidebar filter (region/category/season) + sort (recent/name)                                                                                                                                                                                                  |
-| `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=map`           | [x] view=map Leaflet thật qua `PlacesMapLoader` (cùng component với `/ban-do`) + hint số địa điểm có toạ độ                                                                                                                                                                    |
-| `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [x] List row layout (thumbnail + title + summary + categories)                                                                                                                                                                                                                 |
-| `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [x] EmptyState + gợi ý "Xem tất cả địa điểm"                                                                                                                                                                                                                                   |
-| `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [x] List sổ tay của tôi, tạo mới inline, xoá, auth-gated                                                                                                                                                                                                                       |
-| `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[id]`                    | [x] Chi tiết + grid place card, bỏ place khỏi sổ tay, edit name/desc/public                                                                                                                                                                                                    |
-| `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [x] Form viết đánh giá (rating 1-5 + content), auth-gated, redirect về detail sau khi gửi                                                                                                                                                                                      |
-| `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [x] List câu hỏi mới nhất, link tới detail, link "Tìm địa điểm để hỏi"                                                                                                                                                                                                         |
-| `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [x] Chi tiết câu hỏi + answers list + form trả lời + xoá (owner)                                                                                                                                                                                                               |
-| `vivu_trang_c_nh_n` (Trang cá nhân)                           | `/u/[username]` hoặc `/tai-khoan` | [x] Hồ sơ + stats + tabs (đánh giá / sổ tay / yêu thích) — `/tai-khoan`                                                                                                                                                                                                        |
-| `vivu_c_i_t_t_i_kho_n` (Cài đặt tài khoản)                    | `/tai-khoan/cai-dat`              | [x] Cập nhật hồ sơ + đổi mật khẩu + xoá tài khoản + placeholder 2FA + Tài khoản đã liên kết (Google) + Xuất dữ liệu (JSON/CSV)                                                                                                                                                 |
-| `vivu_logo`                                                   | (asset)                           | [x] `apps/web/public/vivu-logo.png`                                                                                                                                                                                                                                            |
+| Màn hình thiết kế                                             | Đường dẫn dự kiến                 | Trạng thái                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                                                                                                                                    |
+| `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | [x] danh sách + tab vùng miền (động) + skeleton + chip danh mục + filter mùa + sort recent/name + filter rating + rating trên PlaceCard + **switch Map view** (`view=grid                                                                                                                 | map`dùng`PlacesMapLoader`) |
+| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + nearby places (PostGIS `ST_DWithin`) + weather widget (Open-Meteo) + viết đánh giá + Q&A + JSON-LD `TouristAttraction` + **gallery slider** (`PlaceGallery`: hero + thumbnails + lightbox + keyboard nav) |
+| `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [x] Leaflet + marker cluster + filter chip vung/chủ đề + chuyển nền Chuẩn/Vệ tinh/Địa hình, popup mini-card + link sang chi tiết                                                                                                                                                          |
+| `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=&view=grid`          | [x] Lưới 3 cột + sidebar filter (region/category/season) + sort (recent/name)                                                                                                                                                                                                             |
+| `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=map`           | [x] view=map Leaflet thật qua `PlacesMapLoader` (cùng component với `/ban-do`) + hint số địa điểm có toạ độ                                                                                                                                                                               |
+| `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [x] List row layout (thumbnail + title + summary + categories)                                                                                                                                                                                                                            |
+| `vivu_kh_ng_t_m_th_y_k_t_qu` (No results)                     | `/tim-kiem?q=…` (state empty)     | [x] EmptyState + gợi ý "Xem tất cả địa điểm"                                                                                                                                                                                                                                              |
+| `vivu_s_tay_c_a_t_i` (Sổ tay danh sách)                       | `/so-tay`                         | [x] List sổ tay của tôi, tạo mới inline, xoá, auth-gated                                                                                                                                                                                                                                  |
+| `vivu_chi_ti_t_s_tay_m_a_h_mi_n_b_c` (Chi tiết sổ tay)        | `/so-tay/[id]`                    | [x] Chi tiết + grid place card, bỏ place khỏi sổ tay, edit name/desc/public                                                                                                                                                                                                               |
+| `vivu_vi_t_nh_gi_a_i_m` (Viết đánh giá)                       | `/dia-diem/[slug]/danh-gia/moi`   | [x] Form viết đánh giá (rating 1-5 + content), auth-gated, redirect về detail sau khi gửi                                                                                                                                                                                                 |
+| `vivu_h_i_p_c_ng_ng_danh_s_ch` (Q&A list)                     | `/hoi-dap`                        | [x] List câu hỏi mới nhất, link tới detail, link "Tìm địa điểm để hỏi"                                                                                                                                                                                                                    |
+| `vivu_chi_ti_t_c_u_h_i_c_ng_ng` (Q&A detail)                  | `/hoi-dap/[id]`                   | [x] Chi tiết câu hỏi + answers list + form trả lời + xoá (owner)                                                                                                                                                                                                                          |
+| `vivu_trang_c_nh_n` (Trang cá nhân)                           | `/u/[username]` hoặc `/tai-khoan` | [x] Hồ sơ + stats + tabs (đánh giá / sổ tay / yêu thích) — `/tai-khoan`                                                                                                                                                                                                                   |
+| `vivu_c_i_t_t_i_kho_n` (Cài đặt tài khoản)                    | `/tai-khoan/cai-dat`              | [x] Cập nhật hồ sơ + đổi mật khẩu + xoá tài khoản + placeholder 2FA + Tài khoản đã liên kết (Google) + Xuất dữ liệu (JSON/CSV)                                                                                                                                                            |
+| `vivu_logo`                                                   | (asset)                           | [x] `apps/web/public/vivu-logo.png`                                                                                                                                                                                                                                                       |
 
 ## 3. Trang xác thực
 
@@ -75,10 +75,10 @@
 - [x] `GET /api/v1/places` — hỗ trợ `q`, `region`, `category`, `season`, `sort`, `page`, `pageSize`
 - [x] `GET /api/v1/places/:slug`
 - [x] `GET /api/v1/places/:slug/reviews`
-- [x] `GET /api/v1/places/nearby?lat=&lng=&radius=&limit=&excludeSlug=` (Haversine, không cần PostGIS)
+- [x] `GET /api/v1/places/nearby?lat=&lng=&radius=&limit=&excludeSlug=` (PostGIS `ST_DWithin` trên cột `geo geography(Point, 4326)`)
 - [x] `GET /api/v1/categories`
 - [x] `GET /api/v1/regions`
-- [ ] `GET /api/v1/search/suggest?q=` (typeahead)
+- [x] `GET /api/v1/search/suggest?q=&limit=` (typeahead, public, opt-in Meili → fallback `pg_trgm`)
 
 ### Auth
 
@@ -120,7 +120,7 @@
 - [x] Thay mock review trong `apps/web/src/app/admin/danh-gia/page.tsx` bằng `/admin/reviews?status=`.
 - [x] i18n: `next-intl` + segment `app/[locale]/` + `apps/web/messages/{vi,en}.json` (helpers ở `apps/web/src/i18n/place.ts` đọc `*En` khi locale = en, fallback về `*Vi`).
 - [x] SEO: `sitemap.ts` + `robots.ts` đã có, JSON-LD `TouristAttraction` đã được inline trên place detail.
-- 🟡 Search: chưa thêm MeiliSearch service vào `docker-compose.yml`. `pg_trgm` đã có trong `schema.sql` (GIN index trên `Place.titleVi`); typeahead UI dùng `/places?q=`.
+- [x] Search: MeiliSearch service trong `docker-compose.yml` (port 7700) + `SearchIndexService` tự đồng bộ qua admin-places; endpoint `GET /search/suggest` opt-in Meili → fallback `pg_trgm` (GIN index trên `Place.titleVi`); FE header search wire qua `/api/search/suggest`.
 - [x] Dark mode: `ThemeProvider` + `ThemeToggle` ở site-header (preflight script chống FOUC).
 - [x] Header `NotificationsButton` (chuông) — hiển thị khi user đã login (admin hoặc surface authenticated); dropdown placeholder vì notifications backend chưa có.
 
@@ -141,7 +141,7 @@
 
 - [x] Reviews API + UI write-review + admin moderation thật (thay mock).
 - [x] Collections / Sổ tay (list + detail + add/remove item) — **PR #19**.
-- [x] Search results page (`/tim-kiem`) với 3 view (grid/list/map Leaflet) + sidebar filter; header search input + typeahead dropdown đã redirect tới `/tim-kiem?q=`. Còn thiếu: MeiliSearch service + endpoint `search/suggest` riêng.
+- [x] Search results page (`/tim-kiem`) với 3 view (grid/list/map Leaflet) + sidebar filter; header search input + typeahead dropdown wire qua `/api/search/suggest` (opt-in Meili, fallback `pg_trgm`) và redirect tới `/tim-kiem?q=`.
 - [x] i18n vi/en (FE `next-intl` + segment `[locale]/` + `messages/{vi,en}.json` đầy đủ + locale-aware sitemap có `hreflang`).
 - [x] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction` cho place detail.
 - [ ] Google OAuth.
@@ -150,11 +150,11 @@
 
 - [x] Q&A list + detail + post answer.
 - [ ] Trang cá nhân + cài đặt tài khoản (2FA, ngắt liên kết Google, lịch sử đăng nhập, xoá tài khoản).
-- [ ] AuditLog model + admin "Hoạt động Gần đây".
+- [x] AuditLog model + endpoint `/admin/audit-logs` + admin "Hoạt động Gần đây" wire qua audit logs thật.
 
 ## 9. Kết luận nhanh
 
-- [x] Đã có (~85%): hạ tầng monorepo, design system khớp `DESIGN.md`, schema DB đầy đủ (trừ `AuditLog`), hệ thống auth chắc chắn (rotate refresh token + reset password + change password), toàn bộ luồng đọc places (list + detail + nearby + map cluster + weather), favourites + collections (sổ tay) + reviews + Q&A, toàn bộ admin CRUD (places + review moderation + Cloudinary upload), i18n vi/en, dark mode, SEO + sitemap có `hreflang`, typeahead header, gallery slider.
-- [ ] Còn thiếu chính (~15%):
-  - **Backend:** Google OAuth (passport-google), `AuditLog` model + endpoint, PostGIS migration (`geography(Point, 4326)` + GIST), MeiliSearch service / `search/suggest` endpoint riêng.
+- [x] Đã có (~95%): hạ tầng monorepo, design system khớp `DESIGN.md`, schema DB đầy đủ (cả `AuditLog`), hệ thống auth chắc chắn (rotate refresh token + reset password + change password), toàn bộ luồng đọc places (list + detail + nearby PostGIS `ST_DWithin` + map cluster + weather), favourites + collections (sổ tay) + reviews + Q&A, toàn bộ admin CRUD (places + review moderation + Cloudinary upload + live stats + audit logs thật), MeiliSearch service + indexer (opt-in via `MEILI_HOST`), i18n vi/en, dark mode, SEO + sitemap có `hreflang`, typeahead header (qua `/search/suggest`), gallery slider.
+- [ ] Còn thiếu chính (~5%):
+  - **Backend:** Google OAuth (passport-google).
   - **Frontend:** wire 2FA / ngắt liên kết Google / lịch sử đăng nhập ở `/tai-khoan/cai-dat` (hiện là placeholder, phụ thuộc BE Google OAuth).
