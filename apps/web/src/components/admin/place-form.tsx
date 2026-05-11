@@ -280,7 +280,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               rows={10}
               value={state.descriptionVi}
               onChange={(e) => set('descriptionVi', e.target.value)}
-              placeholder={t('formDescVi.placeholder')}
+              placeholder={t('formDescViPlaceholder')}
               className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>
@@ -292,7 +292,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               rows={6}
               value={state.descriptionEn}
               onChange={(e) => set('descriptionEn', e.target.value)}
-              placeholder={t('formDescEn.placeholder')}
+              placeholder={t('formDescEnPlaceholder')}
               className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>

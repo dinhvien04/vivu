@@ -16,6 +16,7 @@
     "favorites": "Favorites"
   },
   "common": {
+    "home": "Home",
     "signIn": "Sign in",
     "signOut": "Sign out",
     "signUp": "Sign up",
@@ -127,11 +128,13 @@
   "explore": {
     "title": "Explore",
     "lead": "Filter by region, theme and season to find places that fit your trip.",
+    "headline": "Discover Vietnam",
     "regionTab": "Region",
     "categoryTab": "Theme",
     "seasonTab": "Season",
     "all": "All",
     "totalPlaces": "{total} places",
+    "filtersApplied": "{count} active filters",
     "empty": "No matching places",
     "emptyHint": "Try removing some filters to broaden the results.",
     "errorTitle": "Could not load places",
@@ -224,6 +227,7 @@
     "loading": "Loading map…",
     "noGeoPlaces": "No places with coordinates in this result set.",
     "popupViewDetails": "View details →",
+    "layerHint": "Tip: use the layer button (top right) to switch between Standard / Satellite / Terrain. Click a cluster to zoom into a group of places.",
     "layer": {
       "standard": "Standard",
       "satellite": "Satellite",
@@ -640,9 +644,9 @@
     "formAddress": "Address",
     "formAddressPlaceholder": "Province, city, locale...",
     "formDescVi": "Vietnamese",
-    "formDescVi.placeholder": "Write a detailed description: history, character, highlights...",
+    "formDescViPlaceholder": "Write a detailed description: history, character, highlights...",
     "formDescEn": "English",
-    "formDescEn.placeholder": "English description (optional)",
+    "formDescEnPlaceholder": "English description (optional)",
     "formMarkdownHint": "Basic Markdown supported (bold, italic, lists, links).",
     "formLat": "Latitude (lat)",
     "formLng": "Longitude (lng)",

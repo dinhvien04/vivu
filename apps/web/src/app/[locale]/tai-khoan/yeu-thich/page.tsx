@@ -92,7 +92,7 @@ export default function YeuThichPage() {
         ) : (
           <>
             <p className="mb-4 text-body-sm text-on-surface-variant">
-              {t('placeCount', { count: places.length })}
+              {tCommon('placeCount', { count: places.length })}
             </p>
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {places.map((place) => (

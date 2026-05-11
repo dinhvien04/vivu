@@ -16,6 +16,7 @@
     "favorites": "Yêu thích"
   },
   "common": {
+    "home": "Trang chủ",
     "signIn": "Đăng nhập",
     "signOut": "Đăng xuất",
     "signUp": "Đăng ký",
@@ -127,11 +128,13 @@
   "explore": {
     "title": "Khám phá",
     "lead": "Lọc theo vùng miền, chủ đề và mùa để tìm địa điểm phù hợp với bạn.",
+    "headline": "Khám phá Việt Nam",
     "regionTab": "Vùng miền",
     "categoryTab": "Chủ đề",
     "seasonTab": "Mùa",
     "all": "Tất cả",
     "totalPlaces": "{total} địa điểm",
+    "filtersApplied": "Đang áp dụng {count} bộ lọc",
     "empty": "Không tìm thấy địa điểm phù hợp",
     "emptyHint": "Thử bỏ bớt bộ lọc để mở rộng kết quả.",
     "errorTitle": "Không tải được danh sách địa điểm",
@@ -641,9 +644,9 @@
     "formAddress": "Địa chỉ",
     "formAddressPlaceholder": "Tỉnh, thành phố, địa danh...",
     "formDescVi": "Tiếng Việt",
-    "formDescVi.placeholder": "Viết mô tả chi tiết: lịch sử, đặc trưng, điểm nổi bật...",
+    "formDescViPlaceholder": "Viết mô tả chi tiết: lịch sử, đặc trưng, điểm nổi bật...",
     "formDescEn": "English",
-    "formDescEn.placeholder": "English description (optional)",
+    "formDescEnPlaceholder": "English description (optional)",
     "formMarkdownHint": "Hỗ trợ Markdown cơ bản (in đậm, in nghiêng, danh sách, link).",
     "formLat": "Vĩ độ (lat)",
     "formLng": "Kinh độ (lng)",
