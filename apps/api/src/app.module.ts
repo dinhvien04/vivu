@@ -17,6 +17,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { QaModule } from './qa/qa.module';
 import { RegionsModule } from './regions/regions.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     PlacesModule,
     RegionsModule,
     CategoriesModule,
+    SearchModule,
     FavoritesModule,
     ReviewsModule,
     CollectionsModule,
