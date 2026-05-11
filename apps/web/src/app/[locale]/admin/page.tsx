@@ -1,4 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AdminQuickActions } from '@/components/admin/admin-quick-actions';
+import { AdminRecentActivity } from '@/components/admin/admin-recent-activity';
+import { AdminSystemHealth } from '@/components/admin/admin-system-health';
 import { Icon } from '@/components/icon';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -211,6 +214,12 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
             )}
           </ul>
         </div>
+      </section>
+
+      <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <AdminRecentActivity />
+        <AdminSystemHealth />
+        <AdminQuickActions />
       </section>
     </>
   );

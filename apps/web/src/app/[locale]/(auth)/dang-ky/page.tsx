@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
 import { useAuth } from '@/components/auth-provider';
+import { GoogleAuthButton } from '@/components/google-auth-button';
 import { Icon } from '@/components/icon';
 import { Link, useRouter } from '@/i18n/navigation';
 import { AuthError } from '@/lib/auth-client';
@@ -181,6 +182,16 @@ function RegisterForm() {
           {submitting ? t('submittingRegister') : t('submitRegister')}
         </button>
       </form>
+
+      <div className="my-6 flex items-center">
+        <div className="h-px flex-grow border-t border-outline-variant" />
+        <span className="mx-4 bg-surface-container-lowest px-2 font-label-caps text-outline">
+          {t('or').toUpperCase()}
+        </span>
+        <div className="h-px flex-grow border-t border-outline-variant" />
+      </div>
+
+      <GoogleAuthButton mode="register" />
 
       <p className="mt-6 text-center text-on-surface-variant">
         {t('loginCta')}

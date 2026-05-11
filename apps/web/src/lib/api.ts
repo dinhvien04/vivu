@@ -37,6 +37,8 @@ export interface ListPlacesOptions {
   season?: PlaceSeason;
   /** Sort mode: `recent` (default — by updatedAt desc) or `name` (asc). */
   sort?: PlaceSort;
+  /** Minimum average rating (1.0 — 5.0). */
+  minRating?: number;
 }
 
 export async function listPlaces(opts: ListPlacesOptions = {}): Promise<Paginated<Place>> {
@@ -48,6 +50,7 @@ export async function listPlaces(opts: ListPlacesOptions = {}): Promise<Paginate
   if (opts.category) params.set('category', opts.category);
   if (opts.season) params.set('season', opts.season);
   if (opts.sort) params.set('sort', opts.sort);
+  if (opts.minRating !== undefined) params.set('minRating', String(opts.minRating));
   const qs = params.toString();
   return get<Paginated<Place>>(`/places${qs ? `?${qs}` : ''}`, { revalidate: 60 });
 }

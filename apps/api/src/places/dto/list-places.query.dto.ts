@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export const PLACE_SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
 export type PlaceSeason = (typeof PLACE_SEASONS)[number];
@@ -40,6 +40,18 @@ export class ListPlacesQueryDto {
   @IsOptional()
   @IsIn(PLACE_SORTS as unknown as string[])
   sort?: PlaceSort;
+
+  @ApiPropertyOptional({
+    description: 'Lọc theo điểm đánh giá tối thiểu (1.0 — 5.0).',
+    minimum: 1,
+    maximum: 5,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  minRating?: number;
 
   @ApiPropertyOptional({ description: 'Trang hiện tại (>=1).', default: 1 })
   @IsOptional()

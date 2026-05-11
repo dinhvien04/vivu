@@ -10,6 +10,7 @@ import { QaSection } from '@/components/qa-section';
 import { ReviewsSection } from '@/components/reviews-section';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { WeatherWidget } from '@/components/weather-widget';
 import { Link } from '@/i18n/navigation';
 import {
   placeCategoryName,
@@ -299,6 +300,9 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                     : t('place.idealTimeAnyTime')}
                 </p>
               </div>
+
+              {/* Weather widget */}
+              {place.geo && <WeatherWidget lat={place.geo.lat} lng={place.geo.lng} />}
 
               {/* Action buttons */}
               <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">

@@ -1,9 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Icon } from './icon';
+import type { Place } from '@vivu/types';
 
 interface Props {
   initialQuery?: string;
@@ -12,19 +13,103 @@ interface Props {
   placeholder?: string;
 }
 
+interface PlacesResponse {
+  data: Place[];
+  meta: { total: number; page: number; pageSize: number };
+}
+
+function placeTitle(p: Place): string {
+  return p.titleVi || p.titleEn || p.slug;
+}
+
 export function SearchHero({ initialQuery = '', compact = false, placeholder }: Props) {
   const t = useTranslations('common');
   const router = useRouter();
   const [q, setQ] = useState(initialQuery);
+  const [suggestions, setSuggestions] = useState<Place[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [active, setActive] = useState(-1);
+  const containerRef = useRef<HTMLFormElement | null>(null);
+
+  // Debounced fetch — only in compact mode (header), so the hero on / and
+  // /tim-kiem keep their simple full-form submit behavior.
+  useEffect(() => {
+    if (!compact) return;
+    const trimmed = q.trim();
+    if (trimmed.length < 2) {
+      setSuggestions([]);
+      setOpen(false);
+      return;
+    }
+    let cancelled = false;
+    const handle = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const r = await fetch(`/api/places?q=${encodeURIComponent(trimmed)}&pageSize=6`, {
+          cache: 'no-store',
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const json = (await r.json()) as PlacesResponse;
+        if (cancelled) return;
+        setSuggestions(json.data ?? []);
+        setOpen(true);
+        setActive(-1);
+      } catch {
+        if (!cancelled) {
+          setSuggestions([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [q, compact]);
+
+  // Click outside closes dropdown.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [open]);
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     const trimmed = q.trim();
+    setOpen(false);
     router.push(trimmed ? `/tim-kiem?q=${encodeURIComponent(trimmed)}` : '/tim-kiem');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!compact || !open || suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive((i) => (i + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+    } else if (e.key === 'Enter' && active >= 0) {
+      e.preventDefault();
+      const p = suggestions[active];
+      if (!p) return;
+      setOpen(false);
+      router.push(`/dia-diem/${p.slug}`);
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+    }
   };
 
   return (
     <form
+      ref={containerRef}
       onSubmit={handleSubmit}
       role="search"
       className={
@@ -46,6 +131,15 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
         name="q"
         value={q}
         onChange={(e) => setQ(e.target.value)}
+        onFocus={() => {
+          if (compact && suggestions.length > 0) setOpen(true);
+        }}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+        role={compact ? 'combobox' : undefined}
+        aria-autocomplete={compact ? 'list' : undefined}
+        aria-expanded={compact ? open : undefined}
+        aria-controls={compact ? 'header-search-listbox' : undefined}
         placeholder={placeholder ?? t('searchPlaceholder')}
         className={
           compact
@@ -61,6 +155,70 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
           <Icon name="search" className="!text-base" />
           {t('searchSubmit')}
         </button>
+      )}
+
+      {compact && open && (
+        <div
+          id="header-search-listbox"
+          role="listbox"
+          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[420px] overflow-y-auto rounded-xl border border-outline-variant bg-surface shadow-lg"
+        >
+          {loading && (
+            <div className="px-4 py-3 text-body-sm text-on-surface-variant">
+              {t('searchLoading')}
+            </div>
+          )}
+          {!loading && suggestions.length === 0 && (
+            <div className="px-4 py-3 text-body-sm text-on-surface-variant">{t('searchEmpty')}</div>
+          )}
+          {!loading && suggestions.length > 0 && (
+            <>
+              <ul className="divide-y divide-outline-variant/30">
+                {suggestions.map((p, i) => {
+                  const isActive = i === active;
+                  return (
+                    <li key={p.id} role="option" aria-selected={isActive}>
+                      <Link
+                        href={`/dia-diem/${p.slug}`}
+                        onClick={() => setOpen(false)}
+                        onMouseEnter={() => setActive(i)}
+                        className={
+                          isActive
+                            ? 'flex items-center gap-3 bg-secondary-container/50 px-4 py-2'
+                            : 'flex items-center gap-3 px-4 py-2 transition-colors hover:bg-surface-container'
+                        }
+                      >
+                        <Icon name="place" className="!text-base text-primary" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-semibold text-on-surface">{placeTitle(p)}</p>
+                          {p.address && (
+                            <p className="truncate text-body-sm text-on-surface-variant">
+                              {p.address}
+                            </p>
+                          )}
+                        </div>
+                        {p.rating && p.rating.count > 0 && (
+                          <span className="flex flex-shrink-0 items-center gap-1 text-body-sm text-on-surface-variant">
+                            <Icon name="star" className="!text-base text-amber-500" />
+                            {p.rating.average.toFixed(1)}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              <Link
+                href={`/tim-kiem?q=${encodeURIComponent(q.trim())}`}
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 border-t border-outline-variant/30 px-4 py-3 text-body-sm font-semibold text-primary transition-colors hover:bg-surface-container"
+              >
+                <Icon name="search" className="!text-base" />
+                {t('searchSeeAll')}
+              </Link>
+            </>
+          )}
+        </div>
       )}
     </form>
   );
