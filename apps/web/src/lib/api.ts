@@ -60,6 +60,32 @@ export async function getPlaceBySlug(slug: string): Promise<Place> {
   return r.data;
 }
 
+export interface NearbyPlacesOptions {
+  lat: number;
+  lng: number;
+  /** Search radius in kilometres. */
+  radius?: number;
+  /** Maximum number of results (1-30). */
+  limit?: number;
+  /** Slug to exclude (typically the current place on the detail page). */
+  excludeSlug?: string;
+}
+
+export type PlaceWithDistance = Place & { distanceKm: number };
+
+export async function listPlacesNearby(opts: NearbyPlacesOptions): Promise<PlaceWithDistance[]> {
+  const params = new URLSearchParams();
+  params.set('lat', String(opts.lat));
+  params.set('lng', String(opts.lng));
+  if (opts.radius !== undefined) params.set('radius', String(opts.radius));
+  if (opts.limit !== undefined) params.set('limit', String(opts.limit));
+  if (opts.excludeSlug) params.set('excludeSlug', opts.excludeSlug);
+  const r = await get<{ data: PlaceWithDistance[] }>(`/places/nearby?${params.toString()}`, {
+    revalidate: 60,
+  });
+  return r.data;
+}
+
 export async function listRegions(): Promise<Region[]> {
   const r = await get<{ data: Region[] }>('/regions', { revalidate: 300 });
   return r.data;
