@@ -1,9 +1,10 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Icon } from '@/components/icon';
 import { useAuth } from '@/components/auth-provider';
+import { Link } from '@/i18n/navigation';
 import { addFavorite, getFavoriteStatus, removeFavorite } from '@/lib/favorites-client';
 
 interface FavoriteButtonProps {
@@ -15,6 +16,7 @@ interface FavoriteButtonProps {
 }
 
 export function FavoriteButton({ placeId, variant = 'pill', className }: FavoriteButtonProps) {
+  const t = useTranslations('favoriteBtn');
   const { user, loading: authLoading, getAccessToken } = useAuth();
   const [favorited, setFavorited] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
@@ -49,7 +51,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
       return (
         <Link
           href={`/dang-nhap?next=${encodeURIComponent(typeof window === 'undefined' ? '/' : window.location.pathname)}`}
-          aria-label="Đăng nhập để lưu yêu thích"
+          aria-label={t('signInIcon')}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest text-error shadow-md transition-transform hover:scale-105"
         >
           <Icon name="favorite_border" />
@@ -65,7 +67,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
         }
       >
         <Icon name="favorite_border" className="!text-base" />
-        <span>Đăng nhập để yêu thích</span>
+        <span>{t('signIn')}</span>
       </Link>
     );
   }
@@ -78,7 +80,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
     setFavorited(next); // optimistic
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn. Đăng nhập lại để tiếp tục.');
+      if (!token) throw new Error(t('sessionExpired'));
       if (next) {
         await addFavorite(placeId, token);
       } else {
@@ -86,7 +88,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
       }
     } catch (e) {
       setFavorited(!next); // rollback
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('genericError'));
     } finally {
       setBusy(false);
     }
@@ -99,7 +101,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
         onClick={handleToggle}
         disabled={busy || authLoading || favorited === null}
         aria-pressed={favorited ?? false}
-        aria-label={favorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+        aria-label={favorited ? t('remove') : t('add')}
         title={error ?? undefined}
         className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest text-error shadow-md transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
       >
@@ -123,7 +125,7 @@ export function FavoriteButton({ placeId, variant = 'pill', className }: Favorit
         }
       >
         <Icon name={favorited ? 'favorite' : 'favorite_border'} className="!text-base" />
-        <span>{favorited ? 'Đã yêu thích' : 'Thêm vào yêu thích'}</span>
+        <span>{favorited ? t('favorited') : t('add')}</span>
       </button>
       {error && (
         <p role="alert" className="text-body-sm text-error">
