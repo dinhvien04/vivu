@@ -25,9 +25,19 @@
     "notifications": "Thông báo",
     "toggleTheme": {
       "toLight": "Chuyển sang giao diện sáng",
-      "toDark": "Chuyển sang giao diện tối"
+      "toDark": "Chuyển sang giao diện tối",
+      "light": "Sáng",
+      "dark": "Tối"
     },
     "toggleLocale": "Đổi ngôn ngữ",
+    "searchPlaceholder": "Tìm địa điểm, vùng miền, chủ đề…",
+    "searchSubmit": "Tìm",
+    "accountMenu": "Tài khoản của {name}",
+    "accountProfile": "Trang cá nhân",
+    "accountFavorites": "Yêu thích",
+    "accountCollections": "Sổ tay",
+    "accountSettings": "Cài đặt",
+    "accountAdmin": "Quản trị",
     "loading": "Đang tải…",
     "submit": "Gửi",
     "cancel": "Huỷ",

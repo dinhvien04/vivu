@@ -25,9 +25,19 @@
     "notifications": "Notifications",
     "toggleTheme": {
       "toLight": "Switch to light mode",
-      "toDark": "Switch to dark mode"
+      "toDark": "Switch to dark mode",
+      "light": "Light",
+      "dark": "Dark"
     },
     "toggleLocale": "Change language",
+    "searchPlaceholder": "Search places, regions, themes…",
+    "searchSubmit": "Search",
+    "accountMenu": "{name}'s account",
+    "accountProfile": "Profile",
+    "accountFavorites": "Favorites",
+    "accountCollections": "Collections",
+    "accountSettings": "Settings",
+    "accountAdmin": "Admin",
     "loading": "Loading…",
     "submit": "Submit",
     "cancel": "Cancel",
