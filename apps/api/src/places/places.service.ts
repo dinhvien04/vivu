@@ -177,8 +177,10 @@ export class PlacesService {
   }
 
   /**
-   * Return places near a coordinate using Haversine distance (great-circle).
-   * Falls back to in-app filter rather than PostGIS so it works on plain Postgres.
+   * Return places near a coordinate using PostGIS `ST_DWithin` over the
+   * `geo geography(Point, 4326)` column (kept in sync with lat/lng by the
+   * `place_geo_sync` trigger declared in schema.sql). The GIST index
+   * `Place_geo_gist_idx` makes radius filtering fast even on large datasets.
    * `excludeSlug` lets the place-detail page exclude itself from results.
    */
   async listNearby(params: {
@@ -189,23 +191,42 @@ export class PlacesService {
     excludeSlug?: string;
   }): Promise<Array<Place & { distanceKm: number }>> {
     const { lat, lng, radiusKm, limit, excludeSlug } = params;
-    // First narrow to a coarse bbox so we don't scan every row.
-    // 1 degree of latitude ~= 111 km; longitude ~= 111 * cos(lat) km.
-    const deltaLat = radiusKm / 111;
-    const cosLat = Math.cos((lat * Math.PI) / 180);
-    const deltaLng = radiusKm / Math.max(1, 111 * Math.abs(cosLat || 0.0001));
+    const radiusMeters = radiusKm * 1000;
+    const safeLimit = Math.min(Math.max(limit, 1), 50);
 
-    const where: Prisma.PlaceWhereInput = {
-      status: 'published',
-      lat: { gte: lat - deltaLat, lte: lat + deltaLat },
-      lng: { gte: lng - deltaLng, lte: lng + deltaLng },
-    };
-    if (excludeSlug) {
-      where.slug = { not: excludeSlug };
+    const excludeFilter =
+      excludeSlug !== undefined ? Prisma.sql`AND "slug" <> ${excludeSlug}` : Prisma.sql``;
+
+    const rows = await this.prisma.$queryRaw<Array<{ id: string; distance_m: number }>>(Prisma.sql`
+      SELECT
+        "id",
+        ST_Distance(
+          "geo",
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography
+        ) AS distance_m
+      FROM "Place"
+      WHERE "status"::text = 'published'
+        AND "geo" IS NOT NULL
+        AND ST_DWithin(
+          "geo",
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
+          ${radiusMeters}
+        )
+        ${excludeFilter}
+      ORDER BY distance_m ASC
+      LIMIT ${safeLimit}
+    `);
+
+    if (rows.length === 0) return [];
+
+    const ids = rows.map((r) => r.id);
+    const distanceById = new Map<string, number>();
+    for (const r of rows) {
+      distanceById.set(r.id, Number(r.distance_m) / 1000);
     }
 
-    const candidates = await this.prisma.place.findMany({
-      where,
+    const places = await this.prisma.place.findMany({
+      where: { id: { in: ids } },
       include: {
         region: true,
         photos: { orderBy: { position: 'asc' } },
@@ -213,17 +234,6 @@ export class PlacesService {
       },
     });
 
-    const rows = candidates
-      .filter((p): p is typeof p & { lat: number; lng: number } => p.lat !== null && p.lng !== null)
-      .map((p) => ({ place: p, distanceKm: haversineKm(lat, lng, p.lat, p.lng) }))
-      .filter((x) => x.distanceKm <= radiusKm)
-      .sort((a, b) => a.distanceKm - b.distanceKm)
-      .slice(0, limit);
-
-    if (rows.length === 0) return [];
-
-    // Aggregate ratings for the selected page.
-    const ids = rows.map((r) => r.place.id);
     const grouped = await this.prisma.review.groupBy({
       by: ['placeId'],
       where: { placeId: { in: ids }, status: 'visible' },
@@ -238,21 +248,18 @@ export class PlacesService {
       });
     }
 
-    return rows.map(({ place, distanceKm }) => {
+    // Reorder by the distance returned from the raw query (Prisma findMany
+    // does not preserve `IN (...)` order).
+    const placeById = new Map(places.map((p) => [p.id, p]));
+    const ordered = ids
+      .map((id) => placeById.get(id))
+      .filter((p): p is (typeof places)[number] => p !== undefined);
+
+    return ordered.map((place) => {
       const api = toApiPlace(place as PlaceWithRelations);
       api.rating = ratingByPlaceId.get(place.id) ?? { count: 0, average: 0 };
+      const distanceKm = distanceById.get(place.id) ?? 0;
       return { ...api, distanceKm: Math.round(distanceKm * 10) / 10 };
     });
   }
-}
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
 }
