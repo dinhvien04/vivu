@@ -1,9 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { useRouter } from '@/i18n/navigation';
+import { placeCategoryName, placeRegionName } from '@/i18n/place';
+import type { Locale } from '@/i18n/routing';
 import {
   adminCreatePlace,
   adminUpdatePlace,
@@ -14,16 +17,16 @@ import type { Category, Place, Region } from '@vivu/types';
 import { CloudinaryUpload, type UploadedImage } from './cloudinary-upload';
 
 const SEASONS = [
-  { value: 'spring', label: 'Mùa Xuân' },
-  { value: 'summer', label: 'Mùa Hạ' },
-  { value: 'autumn', label: 'Mùa Thu' },
-  { value: 'winter', label: 'Mùa Đông' },
+  { value: 'spring', labelKey: 'seasonSpring' },
+  { value: 'summer', labelKey: 'seasonSummer' },
+  { value: 'autumn', labelKey: 'seasonAutumn' },
+  { value: 'winter', labelKey: 'seasonWinter' },
 ] as const;
 
 const STATUSES = [
-  { value: 'draft', label: 'Bản nháp' },
-  { value: 'published', label: 'Đã xuất bản' },
-  { value: 'archived', label: 'Đã lưu trữ' },
+  { value: 'draft', labelKey: 'statusDraft' },
+  { value: 'published', labelKey: 'statusPublished' },
+  { value: 'archived', labelKey: 'statusArchivedFull' },
 ] as const;
 
 interface FormState {
@@ -117,6 +120,8 @@ interface PlaceFormProps {
 }
 
 export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceFormProps) {
+  const t = useTranslations('admin');
+  const locale = useLocale() as Locale;
   const { getAccessToken } = useAuth();
   const router = useRouter();
   const parentRegions = useMemo(() => regions.filter((r) => r.parentId === null), [regions]);
@@ -151,13 +156,13 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
     e.preventDefault();
     setError(null);
     if (!state.titleVi.trim() || !state.slug.trim() || !state.regionId) {
-      setError('Vui lòng điền slug, tên (tiếng Việt), và chọn vùng.');
+      setError(t('formRequiredError'));
       return;
     }
     setSubmitting(true);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errSessionExpired'));
       const payload = buildPayload(state);
       if (mode === 'create') {
         const created = await adminCreatePlace(payload, token);
@@ -174,7 +179,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
         setState(toForm(updated, defaultRegionId));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Có lỗi xảy ra');
+      setError(err instanceof Error ? err.message : t('errGeneric'));
     } finally {
       setSubmitting(false);
     }
@@ -184,35 +189,37 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
     <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       <div className="space-y-6 lg:col-span-8">
         <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">Thông tin cơ bản</legend>
+          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">
+            {t('formBasicInfo')}
+          </legend>
           <div className="space-y-4">
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Tên (tiếng Việt) *
+                {t('formTitleVi')}
               </span>
               <input
                 type="text"
                 value={state.titleVi}
                 onChange={(e) => set('titleVi', e.target.value)}
                 required
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Tên (English)
+                {t('formTitleEn')}
               </span>
               <input
                 type="text"
                 value={state.titleEn}
                 onChange={(e) => set('titleEn', e.target.value)}
-                placeholder="Tên tiếng Anh (tuỳ chọn)"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-white focus:ring-2 focus:ring-primary"
+                placeholder={t('formTitleEnPlaceholder')}
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-lg focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Slug *
+                {t('formSlug')}
               </span>
               <input
                 type="text"
@@ -220,87 +227,85 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 onChange={(e) => set('slug', e.target.value)}
                 required
                 pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
-                placeholder="vinh-ha-long"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                placeholder={t('formSlugPlaceholder')}
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
-              <span className="mt-1 block text-body-sm text-outline">
-                Chỉ chữ thường, số, dấu gạch ngang. Ví dụ: <code>vinh-ha-long</code>.
-              </span>
+              <span className="mt-1 block text-body-sm text-outline">{t('formSlugHint')}</span>
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Tóm tắt (tiếng Việt)
+                {t('formSummaryVi')}
               </span>
               <textarea
                 rows={3}
                 value={state.summaryVi}
                 onChange={(e) => set('summaryVi', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Tóm tắt (English)
+                {t('formSummaryEn')}
               </span>
               <textarea
                 rows={3}
                 value={state.summaryEn}
                 onChange={(e) => set('summaryEn', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Địa chỉ
+                {t('formAddress')}
               </span>
               <input
                 type="text"
                 value={state.address}
                 onChange={(e) => set('address', e.target.value)}
-                placeholder="Tỉnh, thành phố, địa danh..."
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                placeholder={t('formAddressPlaceholder')}
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
           </div>
         </fieldset>
 
         <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">Mô tả chi tiết</legend>
+          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">
+            {t('formDescription')}
+          </legend>
           <label className="block">
             <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-              Tiếng Việt
+              {t('formDescVi')}
             </span>
             <textarea
               rows={10}
               value={state.descriptionVi}
               onChange={(e) => set('descriptionVi', e.target.value)}
-              placeholder="Viết mô tả chi tiết: lịch sử, đặc trưng, điểm nổi bật..."
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-white focus:ring-2 focus:ring-primary"
+              placeholder={t('formDescViPlaceholder')}
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>
           <label className="mt-4 block">
             <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-              English
+              {t('formDescEn')}
             </span>
             <textarea
               rows={6}
               value={state.descriptionEn}
               onChange={(e) => set('descriptionEn', e.target.value)}
-              placeholder="English description (optional)"
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-white focus:ring-2 focus:ring-primary"
+              placeholder={t('formDescEnPlaceholder')}
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-sans text-body-md leading-relaxed focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </label>
-          <p className="mt-2 text-body-sm text-outline">
-            Hỗ trợ Markdown cơ bản (in đậm, in nghiêng, danh sách, link).
-          </p>
+          <p className="mt-2 text-body-sm text-outline">{t('formMarkdownHint')}</p>
         </fieldset>
 
         <fieldset className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">Toạ độ</legend>
+          <legend className="mb-4 px-2 font-h4 text-h4 text-on-surface">{t('formCoords')}</legend>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Vĩ độ (lat)
+                {t('formLat')}
               </span>
               <input
                 type="number"
@@ -310,12 +315,12 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.lat}
                 onChange={(e) => set('lat', e.target.value)}
                 placeholder="20.9101"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
             <label className="block">
               <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-                Kinh độ (lng)
+                {t('formLng')}
               </span>
               <input
                 type="number"
@@ -325,7 +330,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                 value={state.lng}
                 onChange={(e) => set('lng', e.target.value)}
                 placeholder="107.1839"
-                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+                className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 font-mono text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
               />
             </label>
           </div>
@@ -334,19 +339,19 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
 
       <aside className="space-y-6 lg:col-span-4">
         <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <h3 className="mb-4 font-h4 text-h4 text-on-surface">Trạng thái</h3>
+          <h3 className="mb-4 font-h4 text-h4 text-on-surface">{t('formStatus')}</h3>
           <label className="block">
             <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-              Hiển thị
+              {t('formStatusLabel')}
             </span>
             <select
               value={state.status}
               onChange={(e) => set('status', e.target.value as FormState['status'])}
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             >
               {STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>
-                  {s.label}
+                  {t(s.labelKey)}
                 </option>
               ))}
             </select>
@@ -354,24 +359,24 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
         </div>
 
         <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <h3 className="mb-4 font-h4 text-h4 text-on-surface">Vùng miền</h3>
+          <h3 className="mb-4 font-h4 text-h4 text-on-surface">{t('formRegion')}</h3>
           <select
             value={state.regionId}
             onChange={(e) => set('regionId', e.target.value)}
-            className="w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+            className="w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
           >
-            {regions.length === 0 && <option value="">Đang tải vùng…</option>}
+            {regions.length === 0 && <option value="">{t('formRegionLoading')}</option>}
             {parentRegions.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.nameVi}
+                {placeRegionName(r, locale)}
               </option>
             ))}
           </select>
         </div>
 
         <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <h3 className="mb-2 font-h4 text-h4 text-on-surface">Mùa đẹp nhất</h3>
-          <p className="mb-3 text-body-sm text-outline">Chọn 1 hoặc nhiều mùa.</p>
+          <h3 className="mb-2 font-h4 text-h4 text-on-surface">{t('formSeasons')}</h3>
+          <p className="mb-3 text-body-sm text-outline">{t('formSeasonsHint')}</p>
           <div className="flex flex-wrap gap-2">
             {SEASONS.map((s) => {
               const active = state.bestSeasons.includes(s.value);
@@ -386,7 +391,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                       : 'rounded-full bg-surface-container px-3 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container'
                   }
                 >
-                  {s.label}
+                  {t(s.labelKey)}
                 </button>
               );
             })}
@@ -394,11 +399,13 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
         </div>
 
         <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
-          <h3 className="mb-2 font-h4 text-h4 text-on-surface">Chuyên mục</h3>
-          <p className="mb-3 text-body-sm text-outline">Có thể chọn nhiều chuyên mục.</p>
+          <h3 className="mb-2 font-h4 text-h4 text-on-surface">{t('formCategories')}</h3>
+          <p className="mb-3 text-body-sm text-outline">{t('formCategoriesHint')}</p>
           <div className="flex flex-wrap gap-2">
             {categories.length === 0 && (
-              <span className="text-body-sm text-on-surface-variant">Đang tải chuyên mục…</span>
+              <span className="text-body-sm text-on-surface-variant">
+                {t('formCategoriesLoading')}
+              </span>
             )}
             {categories.map((c) => {
               const active = state.categoryIds.includes(c.id);
@@ -414,7 +421,7 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
                   }
                 >
                   {c.icon && <Icon name={c.icon} className="!text-sm" />}
-                  {c.nameVi}
+                  {placeCategoryName(c, locale)}
                 </button>
               );
             })}
@@ -437,10 +444,21 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
               type="url"
               value={state.heroImageUrl}
               onChange={(e) => set('heroImageUrl', e.target.value)}
-              placeholder="https://res.cloudinary.com/..."
-              className="mt-2 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-sm focus:bg-white focus:ring-2 focus:ring-primary"
+              placeholder={t('formHeroPlaceholder')}
+              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
-          </details>
+          </label>
+          {state.heroImageUrl && (
+            <div className="mt-3 overflow-hidden rounded-lg border border-outline-variant/40">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={state.heroImageUrl}
+                alt={t('formHeroPreviewAlt')}
+                className="h-32 w-full object-cover"
+              />
+            </div>
+          )}
+          <p className="mt-2 text-body-sm text-outline">{t('formHeroHint')}</p>
         </div>
 
         {error && (
@@ -461,12 +479,12 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
             {submitting ? (
               <>
                 <Icon name="hourglass_empty" className="text-base" />
-                Đang lưu…
+                {mode === 'create' ? t('formCreating') : t('formSubmitting')}
               </>
             ) : (
               <>
                 <Icon name="save" className="text-base" />
-                {mode === 'create' ? 'Tạo địa điểm' : 'Lưu thay đổi'}
+                {mode === 'create' ? t('formCreate') : t('formSubmit')}
               </>
             )}
           </button>

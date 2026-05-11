@@ -1,7 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import { Icon } from './icon';
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function SearchHero({ initialQuery = '', compact = false, placeholder }: Props) {
+  const t = useTranslations('common');
   const router = useRouter();
   const [q, setQ] = useState(initialQuery);
 
@@ -44,10 +46,10 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
         name="q"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder={placeholder ?? 'Tìm địa điểm, vùng miền, chủ đề…'}
+        placeholder={placeholder ?? t('searchPlaceholder')}
         className={
           compact
-            ? 'w-full rounded-full border border-outline-variant bg-white py-2 pl-10 pr-4 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
+            ? 'w-full rounded-full border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-4 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
             : 'flex-1 bg-transparent px-4 py-3 text-body-lg text-on-surface focus:outline-none'
         }
       />
@@ -57,7 +59,7 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
           className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
         >
           <Icon name="search" className="!text-base" />
-          Tìm
+          {t('searchSubmit')}
         </button>
       )}
     </form>

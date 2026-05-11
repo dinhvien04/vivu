@@ -2,6 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet base styles + marker cluster styles. Imported once at the root so
+ * any page that mounts a map gets correct tile/marker rendering. */
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
+/*
+ * Material Design 3 — Vivu Discovery palette.
+ * All Tailwind tokens (`bg-surface`, `text-on-surface`, …) resolve via
+ * `rgb(var(--color-...) / <alpha-value>)`, so flipping the `dark` class on
+ * <html> swaps the entire palette.
+ */
+:root {
+  --color-surface: 248 249 250;
+  --color-surface-dim: 217 218 219;
+  --color-surface-bright: 248 249 250;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 243 244 245;
+  --color-surface-container: 237 238 239;
+  --color-surface-container-high: 231 232 233;
+  --color-surface-container-highest: 225 227 228;
+  --color-surface-variant: 225 227 228;
+  --color-surface-tint: 0 92 186;
+  --color-on-surface: 25 28 29;
+  --color-on-surface-variant: 65 71 83;
+  --color-inverse-surface: 46 49 50;
+  --color-inverse-on-surface: 240 241 242;
+  --color-outline: 114 119 132;
+  --color-outline-variant: 193 198 213;
+  --color-primary: 0 78 159;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 0 102 204;
+  --color-on-primary-container: 223 232 255;
+  --color-inverse-primary: 170 199 255;
+  --color-primary-fixed: 215 227 255;
+  --color-primary-fixed-dim: 170 199 255;
+  --color-on-primary-fixed: 0 27 62;
+  --color-on-primary-fixed-variant: 0 69 142;
+  --color-secondary: 86 96 104;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 218 228 238;
+  --color-on-secondary-container: 92 102 110;
+  --color-secondary-fixed: 218 228 238;
+  --color-secondary-fixed-dim: 190 200 209;
+  --color-on-secondary-fixed: 19 29 36;
+  --color-on-secondary-fixed-variant: 62 72 80;
+  --color-tertiary: 0 82 143;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 0 106 184;
+  --color-on-tertiary-container: 219 233 255;
+  --color-tertiary-fixed: 210 228 255;
+  --color-tertiary-fixed-dim: 161 201 255;
+  --color-on-tertiary-fixed: 0 28 55;
+  --color-on-tertiary-fixed-variant: 0 72 128;
+  --color-error: 186 26 26;
+  --color-on-error: 255 255 255;
+  --color-error-container: 255 218 214;
+  --color-on-error-container: 147 0 10;
+  --color-background: 248 249 250;
+  --color-on-background: 25 28 29;
+  --color-selection-bg: 215 227 255;
+  --color-selection-fg: 0 27 62;
+}
+
+.dark {
+  --color-surface: 18 20 21;
+  --color-surface-dim: 18 20 21;
+  --color-surface-bright: 56 57 58;
+  --color-surface-container-lowest: 14 16 16;
+  --color-surface-container-low: 28 31 31;
+  --color-surface-container: 32 35 37;
+  --color-surface-container-high: 42 45 46;
+  --color-surface-container-highest: 53 54 55;
+  --color-surface-variant: 65 71 83;
+  --color-surface-tint: 170 199 255;
+  --color-on-surface: 225 227 228;
+  --color-on-surface-variant: 193 198 213;
+  --color-inverse-surface: 225 227 228;
+  --color-inverse-on-surface: 46 49 50;
+  --color-outline: 139 144 158;
+  --color-outline-variant: 65 71 83;
+  --color-primary: 170 199 255;
+  --color-on-primary: 0 47 101;
+  --color-primary-container: 0 69 142;
+  --color-on-primary-container: 215 227 255;
+  --color-inverse-primary: 0 78 159;
+  --color-primary-fixed: 215 227 255;
+  --color-primary-fixed-dim: 170 199 255;
+  --color-on-primary-fixed: 0 27 62;
+  --color-on-primary-fixed-variant: 0 69 142;
+  --color-secondary: 190 200 209;
+  --color-on-secondary: 40 50 56;
+  --color-secondary-container: 62 72 80;
+  --color-on-secondary-container: 218 228 238;
+  --color-secondary-fixed: 218 228 238;
+  --color-secondary-fixed-dim: 190 200 209;
+  --color-on-secondary-fixed: 19 29 36;
+  --color-on-secondary-fixed-variant: 62 72 80;
+  --color-tertiary: 161 201 255;
+  --color-on-tertiary: 0 50 89;
+  --color-tertiary-container: 0 72 128;
+  --color-on-tertiary-container: 210 228 255;
+  --color-tertiary-fixed: 210 228 255;
+  --color-tertiary-fixed-dim: 161 201 255;
+  --color-on-tertiary-fixed: 0 28 55;
+  --color-on-tertiary-fixed-variant: 0 72 128;
+  --color-error: 255 180 171;
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+  --color-background: 18 20 21;
+  --color-on-background: 225 227 228;
+  --color-selection-bg: 0 69 142;
+  --color-selection-fg: 215 227 255;
+}
+
 html,
 body {
   @apply bg-surface text-on-surface antialiased;
@@ -33,6 +149,6 @@ body {
 }
 
 ::selection {
-  background-color: #d7e3ff; /* primary-fixed */
-  color: #001b3e; /* on-primary-fixed */
+  background-color: rgb(var(--color-selection-bg));
+  color: rgb(var(--color-selection-fg));
 }

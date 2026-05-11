@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, type ReactNode } from 'react';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useAuth } from './auth-provider';
 import { Icon } from './icon';
 
@@ -21,6 +21,7 @@ interface AdminGuardProps {
  * A follow-up will move admin endpoints behind the JwtAuthGuard + RolesGuard.
  */
 export function AdminGuard({ children, allowedRoles = ['admin', 'editor'] }: AdminGuardProps) {
+  const t = useTranslations('admin');
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname() ?? '/admin';
@@ -35,7 +36,7 @@ export function AdminGuard({ children, allowedRoles = ['admin', 'editor'] }: Adm
   if (loading || !user) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-body-md text-on-surface-variant">Đang xác thực…</p>
+        <p className="text-body-md text-on-surface-variant">{t('guardAuthenticating')}</p>
       </div>
     );
   }
@@ -46,19 +47,17 @@ export function AdminGuard({ children, allowedRoles = ['admin', 'editor'] }: Adm
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-container text-on-error-container">
           <Icon name="lock" size={32} />
         </div>
-        <h1 className="font-h2 text-h2 text-on-surface">Không có quyền truy cập</h1>
-        <p className="text-body-md text-on-surface-variant">
-          Tài khoản của bạn chưa được cấp quyền vào khu vực quản trị. Liên hệ quản trị viên Vivu để
-          được hỗ trợ.
-        </p>
+        <h1 className="font-h2 text-h2 text-on-surface">{t('guardForbiddenTitle')}</h1>
+        <p className="text-body-md text-on-surface-variant">{t('guardForbiddenLead')}</p>
         <p className="text-body-sm text-on-surface-variant/80">
-          Đang đăng nhập với <strong>{user.email}</strong> · vai trò: <strong>{user.role}</strong>
+          {t('guardForbiddenAccountPrefix')} <strong>{user.email}</strong>{' '}
+          {t('guardForbiddenAccountSeparator')} <strong>{user.role}</strong>
         </p>
         <Link
           href="/"
           className="mt-2 rounded-full bg-primary px-6 py-2 font-semibold text-on-primary transition-colors hover:bg-primary-container"
         >
-          Về trang chủ
+          {t('guardHomeBtn')}
         </Link>
       </div>
     );

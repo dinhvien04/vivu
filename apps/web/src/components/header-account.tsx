@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useAuth } from './auth-provider';
 import { Icon } from './icon';
 
@@ -12,6 +12,7 @@ import { Icon } from './icon';
  * - When logged in: avatar + name + dropdown with profile / admin / logout.
  */
 export function HeaderAccount() {
+  const t = useTranslations('common');
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -53,7 +54,7 @@ export function HeaderAccount() {
         href={`/dang-nhap${next}`}
         className="rounded-full px-4 py-2 text-body-md font-semibold text-primary transition-colors hover:bg-primary-fixed"
       >
-        Đăng nhập
+        {t('signIn')}
       </Link>
     );
   }
@@ -64,7 +65,7 @@ export function HeaderAccount() {
     <div ref={ref} className="relative">
       <button
         type="button"
-        aria-label={`Tài khoản của ${user.name}`}
+        aria-label={t('accountMenu', { name: user.name })}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -94,7 +95,7 @@ export function HeaderAccount() {
                 role="menuitem"
               >
                 <Icon name="person" size={20} className="text-outline" />
-                Trang cá nhân
+                {t('accountProfile')}
               </Link>
             </li>
             <li>
@@ -104,7 +105,7 @@ export function HeaderAccount() {
                 role="menuitem"
               >
                 <Icon name="favorite" size={20} className="text-outline" />
-                Yêu thích
+                {t('accountFavorites')}
               </Link>
             </li>
             <li>
@@ -114,7 +115,7 @@ export function HeaderAccount() {
                 role="menuitem"
               >
                 <Icon name="collections_bookmark" size={20} className="text-outline" />
-                Sổ tay
+                {t('accountCollections')}
               </Link>
             </li>
             <li>
@@ -124,7 +125,7 @@ export function HeaderAccount() {
                 role="menuitem"
               >
                 <Icon name="settings" size={20} className="text-outline" />
-                Cài đặt
+                {t('accountSettings')}
               </Link>
             </li>
             {(user.role === 'admin' || user.role === 'editor') && (
@@ -135,7 +136,7 @@ export function HeaderAccount() {
                   role="menuitem"
                 >
                   <Icon name="admin_panel_settings" size={20} className="text-outline" />
-                  Quản trị
+                  {t('accountAdmin')}
                 </Link>
               </li>
             )}
@@ -153,7 +154,7 @@ export function HeaderAccount() {
               role="menuitem"
             >
               <Icon name="logout" size={20} className="text-outline" />
-              Đăng xuất
+              {t('signOut')}
             </button>
           </div>
         </div>

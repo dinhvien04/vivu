@@ -1,17 +1,23 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, usePathname } from '@/i18n/navigation';
 import { HeaderAccount } from './header-account';
 import { Icon } from './icon';
+import { LocaleToggle } from './locale-toggle';
+import { NotificationsButton } from './notifications-button';
 import { SearchHero } from './search-hero';
+import { ThemeToggle } from './theme-toggle';
 
-const NAV_ITEMS = [
-  { label: 'Trang chủ', href: '/' },
-  { label: 'Khám phá', href: '/kham-pha' },
-  { label: 'Hỏi đáp', href: '/hoi-dap' },
+type NavKey = 'home' | 'explore' | 'map' | 'qa';
+
+const NAV_ITEMS: { labelKey: NavKey; href: '/' | '/kham-pha' | '/ban-do' | '/hoi-dap' }[] = [
+  { labelKey: 'home', href: '/' },
+  { labelKey: 'explore', href: '/kham-pha' },
+  { labelKey: 'map', href: '/ban-do' },
+  { labelKey: 'qa', href: '/hoi-dap' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -23,8 +29,16 @@ function isActive(pathname: string, href: string): boolean {
 
 export function SiteHeader() {
   const pathname = usePathname() ?? '/';
+  const t = useTranslations();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // The notifications bell is only relevant in authenticated surfaces; we
+  // surface it on `/admin/*` and `/so-tay/*` to match the spec in PROGRESS.md.
+  const showNotifications = useMemo(
+    () => pathname.startsWith('/admin') || pathname.startsWith('/so-tay'),
+    [pathname],
+  );
 
   // Close drawer on route change.
   useEffect(() => {
@@ -61,7 +75,7 @@ export function SiteHeader() {
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
                 return (
-                  <li key={item.label}>
+                  <li key={item.href}>
                     <Link
                       href={item.href}
                       className={
@@ -70,7 +84,7 @@ export function SiteHeader() {
                           : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
                       }
                     >
-                      {item.label}
+                      {t(`nav.${item.labelKey}`)}
                     </Link>
                   </li>
                 );
@@ -81,25 +95,30 @@ export function SiteHeader() {
           <div className="flex items-center gap-2 md:gap-6">
             {/* Desktop search input */}
             <div className="hidden w-64 lg:block">
-              <SearchHero compact placeholder="Tìm địa danh..." />
+              <SearchHero compact placeholder={t('common.searchPlaceholder')} />
             </div>
 
             {/* Mobile/Tablet search button */}
             <button
               type="button"
-              aria-label="Tìm kiếm"
+              aria-label={t('common.search')}
               onClick={() => setSearchOpen((s) => !s)}
               className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden"
             >
               <Icon name="search" />
             </button>
 
+            {showNotifications && <NotificationsButton />}
+
+            <ThemeToggle />
+            <LocaleToggle />
+
             <HeaderAccount />
 
             {/* Hamburger — mobile only */}
             <button
               type="button"
-              aria-label="Mở menu"
+              aria-label={t('common.openMenu')}
               aria-expanded={drawerOpen}
               aria-controls="mobile-drawer"
               onClick={() => setDrawerOpen(true)}
@@ -113,7 +132,7 @@ export function SiteHeader() {
         {/* Mobile search row — slides down when active */}
         {searchOpen && (
           <div className="border-t border-outline-variant/30 px-margin-mobile py-3 lg:hidden">
-            <SearchHero compact placeholder="Tìm địa danh..." />
+            <SearchHero compact placeholder={t('common.searchPlaceholder')} />
           </div>
         )}
       </header>
@@ -147,7 +166,7 @@ export function SiteHeader() {
           </Link>
           <button
             type="button"
-            aria-label="Đóng menu"
+            aria-label={t('common.closeMenu')}
             onClick={() => setDrawerOpen(false)}
             className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container"
           >
@@ -160,7 +179,7 @@ export function SiteHeader() {
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
               return (
-                <li key={item.label}>
+                <li key={item.href}>
                   <Link
                     href={item.href}
                     className={`flex items-center justify-between rounded-lg px-3 py-3 transition-colors ${
@@ -169,20 +188,24 @@ export function SiteHeader() {
                         : 'font-medium text-on-surface hover:bg-surface-container'
                     }`}
                   >
-                    {item.label}
+                    {t(`nav.${item.labelKey}`)}
                     <Icon name="chevron_right" className="text-outline" />
                   </Link>
                 </li>
               );
             })}
           </ul>
+          <div className="flex items-center gap-2 border-t border-outline-variant/30 pt-4">
+            <ThemeToggle />
+            <LocaleToggle />
+          </div>
           <div className="border-t border-outline-variant/30 pt-4">
             <Link
               href="/dang-nhap"
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container"
             >
               <Icon name="login" size={20} />
-              Đăng nhập / Đăng ký
+              {t('common.signIn')} / {t('common.signUp')}
             </Link>
           </div>
         </nav>

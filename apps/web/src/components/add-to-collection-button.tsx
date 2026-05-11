@@ -1,9 +1,10 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
 import { addCollectionItem, createCollection, listMyCollections } from '@/lib/collections-client';
 import type { Collection } from '@vivu/types';
 
@@ -15,6 +16,7 @@ interface AddToCollectionButtonProps {
 type Status = 'idle' | 'busy' | 'done';
 
 export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionButtonProps) {
+  const t = useTranslations('collectionBtn');
   const { user, loading: authLoading, getAccessToken } = useAuth();
   const [open, setOpen] = useState(false);
   const [collections, setCollections] = useState<Collection[] | null>(null);
@@ -32,20 +34,20 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
     (async () => {
       try {
         const token = await getAccessToken();
-        if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+        if (!token) throw new Error(t('sessionExpired'));
         const data = await listMyCollections(token);
         if (!cancelled) setCollections(data);
       } catch (e) {
         if (!cancelled) {
           setCollections([]);
-          setError(e instanceof Error ? e.message : 'Không tải được sổ tay');
+          setError(e instanceof Error ? e.message : t('loadFailed'));
         }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [open, user, getAccessToken]);
+  }, [open, user, getAccessToken, t]);
 
   if (!authLoading && !user) {
     return (
@@ -54,7 +56,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary py-3 font-bold text-primary transition-all hover:bg-primary/10"
       >
         <Icon name="bookmark_add" className="!text-base" />
-        <span>Đăng nhập để lưu vào sổ tay</span>
+        <span>{t('signIn')}</span>
       </Link>
     );
   }
@@ -64,28 +66,28 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
     setStatus('busy');
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('sessionExpired'));
       await addCollectionItem(collection.id, placeId, token);
       setSavedTo(collection.name);
       setStatus('done');
       setTimeout(() => setOpen(false), 1200);
     } catch (e) {
       setStatus('idle');
-      setError(e instanceof Error ? e.message : 'Không thêm được');
+      setError(e instanceof Error ? e.message : t('addFailed'));
     }
   };
 
   const handleCreateAndAdd = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (newName.trim().length === 0) {
-      setError('Vui lòng nhập tên sổ tay.');
+      setError(t('nameRequired'));
       return;
     }
     setError(null);
     setStatus('busy');
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('sessionExpired'));
       const created = await createCollection({ name: newName.trim() }, token);
       await addCollectionItem(created.id, placeId, token);
       setSavedTo(created.name);
@@ -96,7 +98,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
       setTimeout(() => setOpen(false), 1200);
     } catch (e) {
       setStatus('idle');
-      setError(e instanceof Error ? e.message : 'Không tạo được');
+      setError(e instanceof Error ? e.message : t('createFailed'));
     }
   };
 
@@ -113,23 +115,23 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary py-3 font-bold text-primary transition-all hover:bg-primary/10"
       >
         <Icon name="bookmark_add" className="!text-base" />
-        <span>Thêm vào sổ tay</span>
+        <span>{t('add')}</span>
       </button>
 
       {open && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Thêm vào sổ tay"
+          aria-label={t('dialogTitle')}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 py-8 sm:items-center"
           onClick={(e) => {
             if (e.target === e.currentTarget && status !== 'busy') setOpen(false);
           }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+          <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest shadow-xl">
             <div className="flex items-center justify-between border-b border-outline-variant px-5 py-4">
               <div>
-                <h3 className="font-h4 text-h4 text-on-surface">Thêm vào sổ tay</h3>
+                <h3 className="font-h4 text-h4 text-on-surface">{t('dialogTitle')}</h3>
                 <p className="mt-0.5 line-clamp-1 text-body-sm text-on-surface-variant">
                   {placeTitle}
                 </p>
@@ -137,7 +139,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Đóng"
+                aria-label={t('close')}
                 disabled={status === 'busy'}
                 className="rounded-full p-2 text-on-surface-variant hover:bg-surface-container disabled:cursor-not-allowed"
               >
@@ -158,14 +160,14 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
               {status === 'done' && savedTo && (
                 <div className="mb-4 inline-flex items-center gap-2 rounded-lg bg-tertiary-container px-3 py-2 text-body-sm text-on-tertiary-container">
                   <Icon name="check_circle" className="!text-base" />
-                  Đã lưu vào &ldquo;{savedTo}&rdquo;.
+                  {t('savedTo', { name: savedTo })}
                 </div>
               )}
 
               {showCreate ? (
                 <form onSubmit={handleCreateAndAdd} className="space-y-3">
                   <label htmlFor="new-coll" className="block text-label-md text-on-surface">
-                    Tên sổ tay mới <span className="text-error">*</span>
+                    {t('newNameLabel')} <span className="text-error">*</span>
                   </label>
                   <input
                     id="new-coll"
@@ -174,8 +176,8 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     maxLength={120}
-                    placeholder="Ví dụ: Đi Đà Nẵng tháng 7"
-                    className="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder={t('newNamePlaceholder')}
+                    className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                   <div className="flex items-center gap-2">
                     <button
@@ -183,7 +185,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                       disabled={status === 'busy'}
                       className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {status === 'busy' ? 'Đang tạo…' : 'Tạo và thêm'}
+                      {status === 'busy' ? t('creatingBtn') : t('createAddBtn')}
                     </button>
                     <button
                       type="button"
@@ -193,7 +195,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                       }}
                       className="rounded-lg px-4 py-2 font-medium text-on-surface-variant hover:bg-surface-container"
                     >
-                      Quay lại
+                      {t('backBtn')}
                     </button>
                   </div>
                 </form>
@@ -209,16 +211,14 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                 </ul>
               ) : collections.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-outline-variant px-4 py-6 text-center">
-                  <p className="mb-3 text-body-md text-on-surface-variant">
-                    Bạn chưa có sổ tay nào.
-                  </p>
+                  <p className="mb-3 text-body-md text-on-surface-variant">{t('empty')}</p>
                   <button
                     type="button"
                     onClick={() => setShowCreate(true)}
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
                   >
                     <Icon name="add" className="!text-base" />
-                    Tạo sổ tay đầu tiên
+                    {t('createFirstBtn')}
                   </button>
                 </div>
               ) : (
@@ -234,7 +234,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                         <div>
                           <p className="font-semibold text-on-surface">{c.name}</p>
                           <p className="text-body-sm text-on-surface-variant">
-                            {c.itemsCount} địa điểm
+                            {t('placesCount', { count: c.itemsCount })}
                           </p>
                         </div>
                         <Icon name="add_circle" className="!text-2xl text-primary" />
@@ -253,7 +253,7 @@ export function AddToCollectionButton({ placeId, placeTitle }: AddToCollectionBu
                   className="inline-flex items-center gap-2 text-body-md font-semibold text-primary hover:underline"
                 >
                   <Icon name="add" className="!text-base" />
-                  Tạo sổ tay mới
+                  {t('createNewBtn')}
                 </button>
               </div>
             )}

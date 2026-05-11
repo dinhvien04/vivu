@@ -1,25 +1,44 @@
 /**
- * Tiện ích biểu diễn mùa của địa điểm.
- * Schema lưu mảng các slug `spring`, `summer`, `autumn`, `winter`.
+ * Locale-aware helpers for rendering a place's `bestSeasons` array.
+ * The schema stores slugs `spring`, `summer`, `autumn`, `winter`.
  */
 
-const SEASON_LABELS: Record<string, { label: string; months: string }> = {
-  spring: { label: 'Mùa xuân', months: 'Tháng 2 – Tháng 4' },
-  summer: { label: 'Mùa hè', months: 'Tháng 5 – Tháng 8' },
-  autumn: { label: 'Mùa thu', months: 'Tháng 9 – Tháng 11' },
-  winter: { label: 'Mùa đông', months: 'Tháng 12 – Tháng 1' },
+import type { Locale } from '@/i18n/routing';
+
+const SEASON_LABELS: Record<string, Record<Locale, { label: string; months: string }>> = {
+  spring: {
+    vi: { label: 'Mùa xuân', months: 'Tháng 2 – Tháng 4' },
+    en: { label: 'Spring', months: 'Feb – Apr' },
+  },
+  summer: {
+    vi: { label: 'Mùa hè', months: 'Tháng 5 – Tháng 8' },
+    en: { label: 'Summer', months: 'May – Aug' },
+  },
+  autumn: {
+    vi: { label: 'Mùa thu', months: 'Tháng 9 – Tháng 11' },
+    en: { label: 'Autumn', months: 'Sep – Nov' },
+  },
+  winter: {
+    vi: { label: 'Mùa đông', months: 'Tháng 12 – Tháng 1' },
+    en: { label: 'Winter', months: 'Dec – Jan' },
+  },
 };
 
-export function getSeasonLabel(slug: string): string {
-  return SEASON_LABELS[slug]?.label ?? slug;
+const ANY_TIME: Record<Locale, { label: string; months: string }> = {
+  vi: { label: 'Đi được quanh năm', months: 'Quanh năm' },
+  en: { label: 'Year-round', months: 'Year-round' },
+};
+
+export function getSeasonLabel(slug: string, locale: Locale = 'vi'): string {
+  return SEASON_LABELS[slug]?.[locale]?.label ?? slug;
 }
 
-export function formatBestSeasons(slugs: string[]): string {
-  if (!slugs.length) return 'Đi được quanh năm';
-  return slugs.map((s) => SEASON_LABELS[s]?.label ?? s).join(' · ');
+export function formatBestSeasons(slugs: string[], locale: Locale = 'vi'): string {
+  if (!slugs.length) return ANY_TIME[locale].label;
+  return slugs.map((s) => SEASON_LABELS[s]?.[locale]?.label ?? s).join(' · ');
 }
 
-export function formatSeasonMonths(slugs: string[]): string {
-  if (!slugs.length) return 'Quanh năm';
-  return slugs.map((s) => SEASON_LABELS[s]?.months ?? s).join(' · ');
+export function formatSeasonMonths(slugs: string[], locale: Locale = 'vi'): string {
+  if (!slugs.length) return ANY_TIME[locale].months;
+  return slugs.map((s) => SEASON_LABELS[s]?.[locale]?.months ?? s).join(' · ');
 }
