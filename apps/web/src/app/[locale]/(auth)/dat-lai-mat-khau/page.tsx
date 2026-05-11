@@ -80,7 +80,7 @@ function ResetPasswordForm() {
         <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-2">
             <label className="font-label-caps text-on-surface-variant" htmlFor="password">
-              {t('newPassword') ? t('newPassword').toUpperCase() : t('password').toUpperCase()}
+              {t('password').toUpperCase()}
             </label>
             <input
               id="password"
