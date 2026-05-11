@@ -11,6 +11,7 @@ import {
   type PlaceUpdatePayload,
 } from '@/lib/admin-places-client';
 import type { Category, Place, Region } from '@vivu/types';
+import { CloudinaryUpload, type UploadedImage } from './cloudinary-upload';
 
 const SEASONS = [
   { value: 'spring', label: 'Mùa Xuân' },
@@ -422,27 +423,24 @@ export function PlaceForm({ mode, initialPlace, regions, categories }: PlaceForm
 
         <div className="rounded-2xl border border-outline-variant/40 bg-surface p-6 shadow-sm">
           <h3 className="mb-3 font-h4 text-h4 text-on-surface">Ảnh đại diện</h3>
-          <label className="block">
-            <span className="text-overline uppercase tracking-overline text-on-surface-variant">
-              URL ảnh hero
-            </span>
+          <CloudinaryUpload
+            currentUrl={state.heroImageUrl || null}
+            folder="vivu/places"
+            onUploaded={(img: UploadedImage) => set('heroImageUrl', img.url)}
+            buttonLabel={state.heroImageUrl ? 'Thay ảnh hero' : 'Tải ảnh hero'}
+          />
+          <details className="mt-3">
+            <summary className="cursor-pointer text-body-sm text-outline hover:text-on-surface">
+              Hoặc dán URL ảnh sẵn
+            </summary>
             <input
               type="url"
               value={state.heroImageUrl}
               onChange={(e) => set('heroImageUrl', e.target.value)}
               placeholder="https://res.cloudinary.com/..."
-              className="mt-1 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-md focus:bg-white focus:ring-2 focus:ring-primary"
+              className="mt-2 w-full rounded-lg border border-outline-variant bg-surface-container/40 p-3 text-body-sm focus:bg-white focus:ring-2 focus:ring-primary"
             />
-          </label>
-          {state.heroImageUrl && (
-            <div className="mt-3 overflow-hidden rounded-lg border border-outline-variant/40">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={state.heroImageUrl} alt="Preview" className="h-32 w-full object-cover" />
-            </div>
-          )}
-          <p className="mt-2 text-body-sm text-outline">
-            Tạm thời dán URL ảnh sẵn (Cloudinary, Unsplash, …). Upload trực tiếp sẽ thêm sau.
-          </p>
+          </details>
         </div>
 
         {error && (

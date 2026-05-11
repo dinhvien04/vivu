@@ -10,9 +10,11 @@ import type {
   Place as PrismaPlace,
   Region as PrismaRegion,
 } from '@prisma/client';
-import type { Paginated, Place } from '@vivu/types';
+import type { Paginated, Photo, Place } from '@vivu/types';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { ListPlacesQueryDto } from '../places/dto/list-places.query.dto';
+import { AddPhotoDto } from './dto/add-photo.dto';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 
@@ -77,7 +79,10 @@ function toApiPlace(p: PlaceWithRelations): Place {
 
 @Injectable()
 export class AdminPlacesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudinary: CloudinaryService,
+  ) {}
 
   async list(query: ListPlacesQueryDto): Promise<Paginated<Place>> {
     const page = query.page ?? 1;
@@ -246,6 +251,64 @@ export class AdminPlacesService {
         throw new NotFoundException('Không tìm thấy địa điểm');
       }
       throw e;
+    }
+  }
+
+  async addPhoto(placeId: string, dto: AddPhotoDto): Promise<Photo> {
+    const place = await this.prisma.place.findUnique({
+      where: { id: placeId },
+      select: { id: true },
+    });
+    if (!place) throw new NotFoundException('Không tìm thấy địa điểm');
+
+    const last = await this.prisma.photo.findFirst({
+      where: { placeId },
+      orderBy: { position: 'desc' },
+      select: { position: true },
+    });
+    const position = (last?.position ?? -1) + 1;
+
+    if (dto.isCover) {
+      await this.prisma.photo.updateMany({
+        where: { placeId, isCover: true },
+        data: { isCover: false },
+      });
+    }
+
+    const created = await this.prisma.photo.create({
+      data: {
+        placeId,
+        url: dto.url,
+        publicId: dto.publicId ?? null,
+        width: dto.width ?? null,
+        height: dto.height ?? null,
+        alt: dto.alt ?? null,
+        position,
+        isCover: dto.isCover ?? false,
+      },
+    });
+
+    return {
+      id: created.id,
+      url: created.url,
+      publicId: created.publicId,
+      width: created.width,
+      height: created.height,
+      alt: created.alt,
+      position: created.position,
+      isCover: created.isCover,
+    };
+  }
+
+  async removePhoto(placeId: string, photoId: string): Promise<void> {
+    const photo = await this.prisma.photo.findFirst({
+      where: { id: photoId, placeId },
+      select: { id: true, publicId: true },
+    });
+    if (!photo) throw new NotFoundException('Không tìm thấy ảnh');
+    await this.prisma.photo.delete({ where: { id: photoId } });
+    if (photo.publicId) {
+      await this.cloudinary.destroy(photo.publicId);
     }
   }
 

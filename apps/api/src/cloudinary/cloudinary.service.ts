@@ -1,6 +1,16 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { v2 as cloudinary, type UploadApiOptions, type UploadApiResponse } from 'cloudinary';
 
+export interface SignedUploadParams {
+  cloudName: string;
+  apiKey: string;
+  timestamp: number;
+  signature: string;
+  folder: string;
+  publicId?: string;
+  uploadUrl: string;
+}
+
 export interface UploadResult {
   publicId: string;
   url: string;
@@ -65,6 +75,51 @@ export class CloudinaryService implements OnModuleInit {
       format: res.format,
       bytes: res.bytes,
     };
+  }
+
+  /**
+   * Generate signed parameters for a direct browser upload to Cloudinary.
+   * The frontend POSTs the file (along with these params) to `uploadUrl`,
+   * receives a `secure_url` + `public_id`, then sends those to our API.
+   *
+   * Why direct upload: avoids the file ever touching our server (saves
+   * bandwidth + memory) and keeps the API_SECRET on the backend.
+   */
+  signUploadParams(opts: { folder?: string; publicId?: string } = {}): SignedUploadParams {
+    if (!this.configured) {
+      throw new Error('Cloudinary not configured. Set CLOUDINARY_URL.');
+    }
+    const cfg = cloudinary.config();
+    if (!cfg.cloud_name || !cfg.api_key || !cfg.api_secret) {
+      throw new Error('Cloudinary missing cloud_name / api_key / api_secret.');
+    }
+    const folder = opts.folder ?? 'vivu/places';
+    const timestamp = Math.floor(Date.now() / 1000);
+    const paramsToSign: Record<string, string | number> = { folder, timestamp };
+    if (opts.publicId) paramsToSign.public_id = opts.publicId;
+    const signature = cloudinary.utils.api_sign_request(paramsToSign, cfg.api_secret);
+    return {
+      cloudName: cfg.cloud_name,
+      apiKey: cfg.api_key,
+      timestamp,
+      signature,
+      folder,
+      publicId: opts.publicId,
+      uploadUrl: `https://api.cloudinary.com/v1_1/${cfg.cloud_name}/image/upload`,
+    };
+  }
+
+  /**
+   * Delete an asset from Cloudinary by public_id. Best-effort: errors are
+   * swallowed so a botched cleanup doesn't fail the DB delete.
+   */
+  async destroy(publicId: string): Promise<void> {
+    if (!this.configured) return;
+    try {
+      await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
+    } catch (e) {
+      this.logger.warn(`Failed to delete Cloudinary asset ${publicId}: ${String(e)}`);
+    }
   }
 
   /**
