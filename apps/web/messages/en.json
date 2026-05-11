@@ -145,7 +145,11 @@
     "empty": "No matching places",
     "emptyHint": "Try removing some filters to broaden the results.",
     "errorTitle": "Could not load places",
-    "errorHint": "Please retry in a moment or check your connection."
+    "errorHint": "Please retry in a moment or check your connection.",
+    "viewGrid": "Grid",
+    "viewMap": "Map",
+    "mapHint": "Showing {geo} of {total} places with coordinates.",
+    "mapEmpty": "No places to show on the map. Try removing some filters."
   },
   "place": {
     "breadcrumbHome": "Home",
