@@ -20,7 +20,7 @@ import {
   placeTitle,
 } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
-import { listPlaces, getPlaceBySlug } from '@/lib/api';
+import { listPlaces, getPlaceBySlug, listPlacesNearby } from '@/lib/api';
 import { listQuestionsForPlace } from '@/lib/qa-client';
 import { listReviewsForPlace } from '@/lib/reviews-client';
 import { formatSeasonMonths } from '@/lib/season';
@@ -91,9 +91,29 @@ export default async function PlaceDetailPage({ params }: PageProps) {
     /* ignore */
   }
 
-  // Up to 6 same-region places as related suggestions.
-  let related: Awaited<ReturnType<typeof listPlaces>>['data'] = [];
-  if (place.region) {
+  // Up to 6 related suggestions: prefer geographic neighbours when this place
+  // has coordinates, otherwise fall back to same-region recents.
+  type Related = Awaited<ReturnType<typeof listPlaces>>['data'][number] & { distanceKm?: number };
+  let related: Related[] = [];
+  let relatedMode: 'nearby' | 'region' = 'region';
+  if (place.geo) {
+    try {
+      const nearby = await listPlacesNearby({
+        lat: place.geo.lat,
+        lng: place.geo.lng,
+        radius: 200,
+        limit: 6,
+        excludeSlug: place.slug,
+      });
+      if (nearby.length > 0) {
+        related = nearby;
+        relatedMode = 'nearby';
+      }
+    } catch {
+      /* fall through to region-based suggestion */
+    }
+  }
+  if (related.length === 0 && place.region) {
     try {
       const r = await listPlaces({ region: place.region.slug, pageSize: 7 });
       related = r.data.filter((p) => p.id !== place.id).slice(0, 6);
@@ -353,9 +373,11 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           <section className="mt-section-gap">
             <div className="mb-8 flex items-center justify-between">
               <h2 className="font-h2 text-h2 text-on-surface">
-                {regionName
-                  ? t('place.relatedTitle', { region: regionName })
-                  : t('place.relatedTitleNearby')}
+                {relatedMode === 'nearby'
+                  ? t('place.relatedTitleNearby')
+                  : regionName
+                    ? t('place.relatedTitle', { region: regionName })
+                    : t('place.relatedTitleNearby')}
               </h2>
               <Link
                 href={place.region ? `/kham-pha?region=${place.region.slug}` : '/kham-pha'}
@@ -366,8 +388,13 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             </div>
             <ul className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:grid-cols-3">
               {related.map((p) => (
-                <li key={p.id}>
+                <li key={p.id} className="relative">
                   <PlaceCard place={p} locale={locale} />
+                  {typeof p.distanceKm === 'number' && (
+                    <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-surface-container/95 px-2 py-1 text-overline tracking-overline text-on-surface shadow">
+                      {t('place.distanceKm', { km: p.distanceKm.toFixed(1) })}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

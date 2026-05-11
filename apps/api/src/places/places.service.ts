@@ -175,4 +175,84 @@ export class PlacesService {
     };
     return out;
   }
+
+  /**
+   * Return places near a coordinate using Haversine distance (great-circle).
+   * Falls back to in-app filter rather than PostGIS so it works on plain Postgres.
+   * `excludeSlug` lets the place-detail page exclude itself from results.
+   */
+  async listNearby(params: {
+    lat: number;
+    lng: number;
+    radiusKm: number;
+    limit: number;
+    excludeSlug?: string;
+  }): Promise<Array<Place & { distanceKm: number }>> {
+    const { lat, lng, radiusKm, limit, excludeSlug } = params;
+    // First narrow to a coarse bbox so we don't scan every row.
+    // 1 degree of latitude ~= 111 km; longitude ~= 111 * cos(lat) km.
+    const deltaLat = radiusKm / 111;
+    const cosLat = Math.cos((lat * Math.PI) / 180);
+    const deltaLng = radiusKm / Math.max(1, 111 * Math.abs(cosLat || 0.0001));
+
+    const where: Prisma.PlaceWhereInput = {
+      status: 'published',
+      lat: { gte: lat - deltaLat, lte: lat + deltaLat },
+      lng: { gte: lng - deltaLng, lte: lng + deltaLng },
+    };
+    if (excludeSlug) {
+      where.slug = { not: excludeSlug };
+    }
+
+    const candidates = await this.prisma.place.findMany({
+      where,
+      include: {
+        region: true,
+        photos: { orderBy: { position: 'asc' } },
+        categories: { include: { category: true } },
+      },
+    });
+
+    const rows = candidates
+      .filter((p): p is typeof p & { lat: number; lng: number } => p.lat !== null && p.lng !== null)
+      .map((p) => ({ place: p, distanceKm: haversineKm(lat, lng, p.lat, p.lng) }))
+      .filter((x) => x.distanceKm <= radiusKm)
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, limit);
+
+    if (rows.length === 0) return [];
+
+    // Aggregate ratings for the selected page.
+    const ids = rows.map((r) => r.place.id);
+    const grouped = await this.prisma.review.groupBy({
+      by: ['placeId'],
+      where: { placeId: { in: ids }, status: 'visible' },
+      _count: { _all: true },
+      _avg: { rating: true },
+    });
+    const ratingByPlaceId = new Map<string, { count: number; average: number }>();
+    for (const g of grouped) {
+      ratingByPlaceId.set(g.placeId, {
+        count: g._count._all,
+        average: g._avg.rating ? Math.round(g._avg.rating * 100) / 100 : 0,
+      });
+    }
+
+    return rows.map(({ place, distanceKm }) => {
+      const api = toApiPlace(place as PlaceWithRelations);
+      api.rating = ratingByPlaceId.get(place.id) ?? { count: 0, average: 0 };
+      return { ...api, distanceKm: Math.round(distanceKm * 10) / 10 };
+    });
+  }
+}
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }

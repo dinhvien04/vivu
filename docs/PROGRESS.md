@@ -14,7 +14,7 @@
 - [ ] PG `pg_trgm` extension + GIN index trên `Place.titleVi`
 - [x] CI / quality gates (`.github/workflows/ci.yml`: lint + typecheck + build + format)
 - [ ] i18n vi/en cho frontend (schema đã có cột `*En`)
-- [ ] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction`
+- [x] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction`
 - [ ] MeiliSearch + typeahead
 - [ ] Google OAuth (design có nút "Tiếp tục với Google" trong các trang auth)
 - [ ] Dark mode (config `darkMode: 'class'` đã sẵn nhưng chưa có ThemeToggle; design có sẵn class `dark:`)
@@ -25,7 +25,7 @@
 | ------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                             |
 | `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền (động) + skeleton + chip danh mục + filter mùa + sort recent/name + filter rating + rating trên PlaceCard; [ ] switch sang Map view               |
-| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | 🟡 [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + related places + weather widget (Open-Meteo) + viết đánh giá + Q&A; [ ] gallery slider, JSON-LD |
+| `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | 🟡 [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + nearby places (Haversine) + weather widget (Open-Meteo) + viết đánh giá + Q&A + JSON-LD `TouristAttraction`; [ ] gallery slider |
 | `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình)                                                                                              |
 | `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=&view=grid`          | [x] Lưới 3 cột + sidebar filter (region/category/season) + sort (recent/name)                                                                                                      |
 | `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=map`           | 🟡 [x] view=map placeholder + list địa điểm có toạ độ; [ ] Leaflet thật (sau khi làm `/ban-do`)                                                                                    |
@@ -75,7 +75,7 @@
 - [x] `GET /api/v1/places` — hỗ trợ `q`, `region`, `category`, `season`, `sort`, `page`, `pageSize`
 - [x] `GET /api/v1/places/:slug`
 - [x] `GET /api/v1/places/:slug/reviews`
-- [ ] `GET /api/v1/places/nearby?lat=&lng=&radius=`
+- [x] `GET /api/v1/places/nearby?lat=&lng=&radius=&limit=&excludeSlug=` (Haversine, không cần PostGIS)
 - [x] `GET /api/v1/categories`
 - [x] `GET /api/v1/regions`
 - [ ] `GET /api/v1/search/suggest?q=` (typeahead)
@@ -120,7 +120,7 @@
 - [x] Bật "Lưu thay đổi" cho `apps/web/src/app/admin/dia-diem/[slug]/page.tsx` (PATCH).
 - [x] Thay mock review trong `apps/web/src/app/admin/danh-gia/page.tsx` bằng `/admin/reviews?status=`.
 - [ ] i18n: schema có sẵn `titleEn`, `summaryEn`, ... — frontend mới chỉ dùng `*Vi`. Cần `next-intl` hoặc `app/[locale]` segment.
-- [ ] SEO: `app/layout.tsx` chưa khai báo `sitemap`, `robots`, hoặc JSON-LD `TouristAttraction` cho place detail.
+- [x] SEO: `sitemap.ts` + `robots.ts` đã có, JSON-LD `TouristAttraction` đã được inline trên place detail.
 - [ ] Search: chưa thêm MeiliSearch service vào `docker-compose.yml`. Có thể dùng `pg_trgm` trước theo charter.
 - [ ] Dark mode: `darkMode: 'class'` đã bật, design đã có class `dark:` — nếu trong scope, cần thêm ThemeToggle.
 - [ ] Header design ở admin/sổ tay có icon `notifications` — chưa implement.
@@ -131,7 +131,7 @@
 
 ### Sprint kế tiếp (MVP còn thiếu)
 
-- [x] `/dia-diem/[slug]` — page chi tiết bản đầu (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, "Địa điểm khác trong vùng", QaSection inline). Còn TODO: gallery slider, JSON-LD, weather widget.
+- [x] `/dia-diem/[slug]` — page chi tiết (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, nearby places, QaSection inline, weather widget, JSON-LD). Còn TODO: gallery slider.
 - [x] API filter `category` + `season` + `sort` cho `GET /places`.
 - [x] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
 - [ ] `/ban-do` — Leaflet + OSM tile + cluster.
@@ -144,7 +144,7 @@
 - [x] Collections / Sổ tay (list + detail + add/remove item) — **PR #19**.
 - [x] Search results page (`/tim-kiem`) với 3 view (grid/list/map placeholder) + sidebar filter; header search input đã redirect tới `/tim-kiem?q=`. Còn thiếu: MeiliSearch + typeahead suggest.
 - [ ] i18n vi/en (FE next-intl + BE đã sẵn dữ liệu).
-- [ ] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction` cho place detail.
+- [x] SEO: `sitemap.ts`, `robots.ts`, JSON-LD `TouristAttraction` cho place detail.
 - [ ] Google OAuth.
 
 ### v1.x
