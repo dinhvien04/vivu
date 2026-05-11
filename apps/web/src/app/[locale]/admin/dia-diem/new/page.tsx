@@ -1,11 +1,19 @@
-import Link from 'next/link';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PlaceForm } from '@/components/admin/place-form';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
+import type { Locale } from '@/i18n/routing';
 import { listCategories, listRegions } from '@/lib/api';
 
 export const metadata = { title: 'Thêm địa điểm' };
 
-export default async function AdminPlaceNew() {
+interface AdminPlaceNewProps {
+  params: { locale: Locale };
+}
+
+export default async function AdminPlaceNew({ params }: AdminPlaceNewProps) {
+  setRequestLocale(params.locale);
+  const t = await getTranslations('admin');
   const [regions, categories] = await Promise.all([
     listRegions().catch(() => []),
     listCategories().catch(() => []),
@@ -20,13 +28,13 @@ export default async function AdminPlaceNew() {
             className="inline-flex items-center gap-1 text-body-sm text-on-surface-variant hover:text-primary"
           >
             <Icon name="arrow_back" className="!text-base" />
-            Danh sách địa điểm
+            {t('placesList')}
           </Link>
-          <h1 className="mt-2 font-h2 text-h2 text-on-surface">Thêm địa điểm mới</h1>
-          <p className="mt-1 max-w-xl text-body-md text-on-surface-variant">
-            Mặc định lưu ở trạng thái <strong>bản nháp</strong>. Bạn có thể xuất bản sau khi kiểm
-            tra lại nội dung.
-          </p>
+          <h1 className="mt-2 font-h2 text-h2 text-on-surface">{t('newPlaceTitle')}</h1>
+          <p
+            className="mt-1 max-w-xl text-body-md text-on-surface-variant"
+            dangerouslySetInnerHTML={{ __html: t.raw('newPlaceLead') as string }}
+          />
         </div>
       </header>
       <PlaceForm mode="create" regions={regions} categories={categories} />

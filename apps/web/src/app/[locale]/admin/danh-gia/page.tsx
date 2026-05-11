@@ -1,16 +1,19 @@
 'use client';
 
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
+import { placeTitle } from '@/i18n/place';
+import type { Locale } from '@/i18n/routing';
 import { adminHideReview, adminListReviews, adminRestoreReview } from '@/lib/reviews-client';
 import type { Review, ReviewStatus } from '@vivu/types';
 
-const TABS: { key: ReviewStatus; label: string }[] = [
-  { key: 'reported', label: 'Bị báo cáo' },
-  { key: 'visible', label: 'Đang hiển thị' },
-  { key: 'hidden', label: 'Đã ẩn' },
+const TABS: { key: ReviewStatus; labelKey: 'reviewsTabReported' | 'reviewsTabVisible' | 'reviewsTabHidden' }[] = [
+  { key: 'reported', labelKey: 'reviewsTabReported' },
+  { key: 'visible', labelKey: 'reviewsTabVisible' },
+  { key: 'hidden', labelKey: 'reviewsTabHidden' },
 ];
 
 function StarRow({ value }: { value: number }) {
@@ -23,9 +26,9 @@ function StarRow({ value }: { value: number }) {
   );
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: Locale): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('vi-VN', {
+  return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'vi-VN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -35,6 +38,8 @@ function formatDate(iso: string): string {
 }
 
 export default function AdminReviewsPage() {
+  const t = useTranslations('admin');
+  const locale = useLocale() as Locale;
   const { getAccessToken, user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<ReviewStatus>('reported');
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -61,7 +66,7 @@ export default function AdminReviewsPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errSessionExpired'));
       const [main, vis, hid, rep] = await Promise.all([
         adminListReviews(token, { status: focus, pageSize: 50 }),
         adminListReviews(token, { status: 'visible', pageSize: 1 }),
@@ -75,7 +80,7 @@ export default function AdminReviewsPage() {
         reported: rep.meta.total,
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('errGeneric'));
     }
   };
 
@@ -90,12 +95,12 @@ export default function AdminReviewsPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errSessionExpired'));
       if (op === 'hide') await adminHideReview(id, token);
       else await adminRestoreReview(id, token);
       await fetchAll(activeTab);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('errGeneric'));
     } finally {
       setBusy(false);
     }
@@ -106,12 +111,10 @@ export default function AdminReviewsPage() {
       <header className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="text-overline uppercase tracking-overline text-primary">
-            Hệ thống quản trị
+            {t('breadcrumb')}
           </p>
-          <h1 className="mt-1 font-h2 text-h2 text-on-surface">Kiểm duyệt đánh giá</h1>
-          <p className="mt-2 max-w-xl text-body-md text-on-surface-variant">
-            Theo dõi đánh giá người dùng. Ẩn các đánh giá không phù hợp, khôi phục khi cần thiết.
-          </p>
+          <h1 className="mt-1 font-h2 text-h2 text-on-surface">{t('reviewsTitle')}</h1>
+          <p className="mt-2 max-w-xl text-body-md text-on-surface-variant">{t('reviewsLead')}</p>
         </div>
       </header>
 
@@ -129,7 +132,7 @@ export default function AdminReviewsPage() {
                   : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-secondary-container'
               }
             >
-              {tab.label} ({counts[tab.key]})
+              {t(tab.labelKey)} ({counts[tab.key]})
             </button>
           );
         })}
@@ -149,14 +152,12 @@ export default function AdminReviewsPage() {
           <Icon name="task_alt" className="!text-3xl text-outline" />
           <h3 className="mt-2 font-h4 text-h4 text-on-surface">
             {activeTab === 'reported'
-              ? 'Không có đánh giá nào bị báo cáo'
+              ? t('reviewsEmptyReported')
               : activeTab === 'hidden'
-                ? 'Chưa có đánh giá nào bị ẩn'
-                : 'Chưa có đánh giá nào hiển thị'}
+                ? t('reviewsEmptyHidden')
+                : t('reviewsEmptyVisible')}
           </h3>
-          <p className="mt-1 text-body-md text-on-surface-variant">
-            Bảng sẽ tự cập nhật khi có thay đổi.
-          </p>
+          <p className="mt-1 text-body-md text-on-surface-variant">{t('reviewsEmptyHint')}</p>
         </div>
       ) : (
         <ul className="space-y-4">
@@ -182,19 +183,19 @@ export default function AdminReviewsPage() {
                   <div>
                     <p className="font-semibold text-on-surface">{r.user.name}</p>
                     <p className="text-body-sm text-on-surface-variant">
-                      Đánh giá{' '}
+                      {t('reviewLabel')}{' '}
                       {r.place ? (
                         <Link
                           href={`/dia-diem/${r.place.slug}`}
                           target="_blank"
                           className="font-semibold text-primary hover:underline"
                         >
-                          {r.place.titleVi}
+                          {placeTitle(r.place, locale)}
                         </Link>
                       ) : (
-                        <span className="font-semibold text-primary">(địa điểm)</span>
+                        <span className="font-semibold text-primary">{t('placePlaceholder')}</span>
                       )}{' '}
-                      · {formatDate(r.createdAt)}
+                      · {formatDate(r.createdAt, locale)}
                     </p>
                   </div>
                 </div>
@@ -212,7 +213,7 @@ export default function AdminReviewsPage() {
                     className="inline-flex items-center gap-1 rounded-lg border border-error/40 px-3 py-2 text-body-sm font-medium text-error hover:bg-error-container/30 disabled:opacity-60"
                   >
                     <Icon name="visibility_off" className="!text-base" />
-                    Ẩn
+                    {t('hideAction')}
                   </button>
                 ) : (
                   <button
@@ -222,7 +223,7 @@ export default function AdminReviewsPage() {
                     className="inline-flex items-center gap-1 rounded-lg bg-tertiary px-3 py-2 text-body-sm font-semibold text-on-tertiary hover:bg-tertiary/90 disabled:opacity-60"
                   >
                     <Icon name="visibility" className="!text-base" />
-                    Khôi phục
+                    {t('restoreAction')}
                   </button>
                 )}
               </div>

@@ -1,9 +1,12 @@
 'use client';
 
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
+import { placeCategoryName, placeRegionName, placeTitle } from '@/i18n/place';
+import type { Locale } from '@/i18n/routing';
 import {
   adminDeletePlace,
   adminListPlaces,
@@ -14,13 +17,14 @@ import type { Place } from '@/lib/api';
 import { listRegions } from '@/lib/api';
 import type { Region } from '@vivu/types';
 
-const STATUS_LABEL: Record<string, string> = {
-  draft: 'Bản nháp',
-  published: 'Đã xuất bản',
-  archived: 'Lưu trữ',
-};
-
 export default function AdminPlacesList() {
+  const t = useTranslations('admin');
+  const locale = useLocale() as Locale;
+  const STATUS_LABEL: Record<string, string> = {
+    draft: t('statusDraft'),
+    published: t('statusPublished'),
+    archived: t('statusArchived'),
+  };
   const { getAccessToken, user, loading } = useAuth();
   const [regions, setRegions] = useState<Region[]>([]);
   const [places, setPlaces] = useState<Place[] | null>(null);
@@ -36,7 +40,7 @@ export default function AdminPlacesList() {
     setError(null);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errSessionExpired'));
       const result = await adminListPlaces(token, {
         region: region || undefined,
         q: appliedQ || undefined,
@@ -45,11 +49,11 @@ export default function AdminPlacesList() {
       setPlaces(result.data);
       setTotal(result.meta.total);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('errGeneric'));
       setPlaces([]);
       setTotal(0);
     }
-  }, [loading, user, getAccessToken, region, appliedQ]);
+  }, [loading, user, getAccessToken, region, appliedQ, t]);
 
   useEffect(() => {
     if (loading || !user) return;
@@ -78,20 +82,20 @@ export default function AdminPlacesList() {
     place: Place,
   ): Promise<void> => {
     if (action === 'delete') {
-      const ok = window.confirm(`Xoá "${place.titleVi}"? Hành động này không thể hoàn tác.`);
+      const ok = window.confirm(t('deleteConfirm', { title: placeTitle(place, locale) }));
       if (!ok) return;
     }
     setBusyId(place.id);
     setError(null);
     try {
       const token = await getAccessToken();
-      if (!token) throw new Error('Phiên đăng nhập đã hết hạn');
+      if (!token) throw new Error(t('errSessionExpired'));
       if (action === 'publish') await adminPublishPlace(place.id, token);
       else if (action === 'unpublish') await adminUnpublishPlace(place.id, token);
       else await adminDeletePlace(place.id, token);
       await refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+      setError(e instanceof Error ? e.message : t('errGeneric'));
     } finally {
       setBusyId(null);
     }
@@ -102,19 +106,17 @@ export default function AdminPlacesList() {
       <header className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="text-overline uppercase tracking-overline text-primary">
-            Hệ thống quản trị
+            {t('breadcrumb')}
           </p>
-          <h1 className="mt-1 font-h2 text-h2 text-on-surface">Quản lý địa điểm</h1>
-          <p className="mt-2 max-w-xl text-body-md text-on-surface-variant">
-            Tra cứu, chỉnh sửa và xuất bản các địa điểm du lịch.
-          </p>
+          <h1 className="mt-1 font-h2 text-h2 text-on-surface">{t('placesTitle')}</h1>
+          <p className="mt-2 max-w-xl text-body-md text-on-surface-variant">{t('placesLead')}</p>
         </div>
         <Link
           href="/admin/dia-diem/new"
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white transition-all hover:bg-primary/90 active:scale-95"
         >
           <Icon name="add" className="text-base" />
-          Thêm địa điểm
+          {t('newPlace')}
         </Link>
       </header>
 
@@ -131,7 +133,7 @@ export default function AdminPlacesList() {
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Tìm theo tên hoặc địa chỉ..."
+            placeholder={t('placesSearch')}
             className="w-full rounded-full border border-outline-variant bg-surface py-2 pl-10 pr-4 text-body-md focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -139,7 +141,7 @@ export default function AdminPlacesList() {
           type="submit"
           className="rounded-lg border border-outline-variant bg-surface px-4 py-2 font-semibold text-on-surface hover:bg-surface-container"
         >
-          Tìm
+          {t('placesSearchBtn')}
         </button>
       </form>
 
@@ -153,7 +155,7 @@ export default function AdminPlacesList() {
               : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container'
           }
         >
-          Tất cả
+          {t('regionAll')}
         </button>
         {parentRegions.map((r) => (
           <button
@@ -166,7 +168,7 @@ export default function AdminPlacesList() {
                 : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container'
             }
           >
-            {r.nameVi}
+            {placeRegionName(r, locale)}
           </button>
         ))}
       </nav>
@@ -184,28 +186,30 @@ export default function AdminPlacesList() {
         <table className="min-w-full divide-y divide-outline-variant/40">
           <thead className="bg-surface-container/40">
             <tr className="text-left text-overline uppercase tracking-overline text-on-surface-variant">
-              <th className="px-4 py-3">Địa điểm</th>
-              <th className="hidden px-4 py-3 md:table-cell">Vùng</th>
-              <th className="hidden px-4 py-3 lg:table-cell">Chuyên mục</th>
-              <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3 text-right">Thao tác</th>
+              <th className="px-4 py-3">{t('colPlace')}</th>
+              <th className="hidden px-4 py-3 md:table-cell">{t('colRegion')}</th>
+              <th className="hidden px-4 py-3 lg:table-cell">{t('colCategory')}</th>
+              <th className="px-4 py-3">{t('colStatus')}</th>
+              <th className="px-4 py-3 text-right">{t('colActions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/30 text-body-md">
             {places === null ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-on-surface-variant">
-                  Đang tải…
+                  {t('tableLoading')}
                 </td>
               </tr>
             ) : places.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-on-surface-variant">
-                  Không có địa điểm khớp bộ lọc.
+                  {t('tableEmpty')}
                 </td>
               </tr>
             ) : (
-              places.map((p) => (
+              places.map((p) => {
+                const title = placeTitle(p, locale);
+                return (
                 <tr key={p.id} className="hover:bg-surface-container/30">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -214,22 +218,22 @@ export default function AdminPlacesList() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={p.heroImageUrl}
-                            alt={p.titleVi}
+                            alt={title}
                             className="h-full w-full object-cover"
                           />
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-on-surface">{p.titleVi}</p>
+                        <p className="truncate font-semibold text-on-surface">{title}</p>
                         <p className="truncate text-body-sm text-on-surface-variant">
-                          {p.address ?? 'Chưa có địa chỉ'}
+                          {p.address ?? t('noAddress')}
                         </p>
                       </div>
                     </div>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
                     <span className="text-body-sm text-on-surface-variant">
-                      {p.region?.nameVi ?? '—'}
+                      {p.region ? placeRegionName(p.region, locale) : '—'}
                     </span>
                   </td>
                   <td className="hidden px-4 py-3 lg:table-cell">
@@ -239,7 +243,7 @@ export default function AdminPlacesList() {
                           key={c.id}
                           className="rounded-full bg-secondary-container px-2 py-0.5 text-body-sm text-on-secondary-container"
                         >
-                          {c.nameVi}
+                          {placeCategoryName(c, locale)}
                         </span>
                       ))}
                     </div>
@@ -269,7 +273,7 @@ export default function AdminPlacesList() {
                           className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container disabled:opacity-60"
                         >
                           <Icon name="visibility_off" className="!text-sm" />
-                          Hủy XB
+                          {t('unpublishShort')}
                         </button>
                       ) : (
                         <button
@@ -279,7 +283,7 @@ export default function AdminPlacesList() {
                           className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-tertiary hover:bg-tertiary-container/40 disabled:opacity-60"
                         >
                           <Icon name="rocket_launch" className="!text-sm" />
-                          Xuất bản
+                          {t('publish')}
                         </button>
                       )}
                       <Link
@@ -287,7 +291,7 @@ export default function AdminPlacesList() {
                         className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-semibold text-primary hover:bg-primary-container/40"
                       >
                         <Icon name="edit" className="!text-sm" />
-                        Sửa
+                        {t('edit')}
                       </Link>
                       <button
                         type="button"
@@ -296,18 +300,19 @@ export default function AdminPlacesList() {
                         className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-body-sm font-medium text-error hover:bg-error-container/30 disabled:opacity-60"
                       >
                         <Icon name="delete" className="!text-sm" />
-                        Xoá
+                        {t('delete')}
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))
+              );
+              })
             )}
           </tbody>
         </table>
         <div className="flex items-center justify-between border-t border-outline-variant/40 bg-surface-container/40 px-4 py-2 text-body-sm text-on-surface-variant">
-          <span>{total} địa điểm</span>
-          <span>(tất cả trạng thái)</span>
+          <span>{t('totalPlaces', { total })}</span>
+          <span>{t('allStatuses')}</span>
         </div>
       </div>
     </>

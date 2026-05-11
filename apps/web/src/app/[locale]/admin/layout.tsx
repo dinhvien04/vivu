@@ -1,24 +1,26 @@
-import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { AdminGuard } from '@/components/admin-guard';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
 const NAV_ITEMS = [
-  { label: 'Tổng quan', href: '/admin', icon: 'dashboard' },
-  { label: 'Địa điểm', href: '/admin/dia-diem', icon: 'place' },
-  { label: 'Đánh giá', href: '/admin/danh-gia', icon: 'reviews' },
-];
+  { labelKey: 'navOverview', href: '/admin', icon: 'dashboard' },
+  { labelKey: 'navPlaces', href: '/admin/dia-diem', icon: 'place' },
+  { labelKey: 'navReviews', href: '/admin/danh-gia', icon: 'reviews' },
+] as const;
 
 export const metadata = {
   title: { template: '%s · Vivu Admin', default: 'Vivu Admin' },
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const t = await getTranslations('admin');
   return (
     <div className="flex min-h-screen flex-col bg-surface-container/40">
       <header className="sticky top-0 z-50 border-b border-outline-variant/40 bg-surface/95 backdrop-blur-md">
@@ -26,7 +28,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center gap-8">
             <Link href="/admin" className="flex items-center gap-2 text-h4 font-h4 text-primary">
               <Icon name="admin_panel_settings" />
-              <span>Vivu Admin</span>
+              <span>{t('brand')}</span>
             </Link>
             <nav className="hidden items-center gap-4 md:flex">
               {NAV_ITEMS.map((item) => (
@@ -36,7 +38,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-md font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary"
                 >
                   <Icon name={item.icon} className="text-base" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
             </nav>
@@ -47,7 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               className="hidden items-center gap-1 rounded-full px-3 py-1.5 text-body-sm text-on-surface-variant hover:text-primary md:flex"
             >
               <Icon name="logout" className="text-base" />
-              Thoát admin
+              {t('exitAdmin')}
             </Link>
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-container text-on-primary-container">
               <Icon name="person" />
@@ -63,7 +65,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-surface-container px-3 py-1.5 text-body-sm font-medium text-on-surface-variant"
             >
               <Icon name={item.icon} className="text-base" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </nav>
