@@ -5,7 +5,14 @@ import type { Locale } from '@/i18n/routing';
 import { listPlaces } from '@/lib/api';
 import { placeRegionName, placeTitle } from '@/i18n/place';
 
-export const metadata = { title: 'Tổng quan' };
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: Locale };
+}): Promise<{ title: string }> {
+  const t = await getTranslations({ locale: params.locale, namespace: 'admin' });
+  return { title: t('title') };
+}
 
 const REGIONS = [
   { slug: 'mien-bac', labelKey: 'regionMienBac', icon: 'north' },

@@ -12,31 +12,31 @@ import type { Locale } from '@/i18n/routing';
 import { listQuestions } from '@/lib/qa-client';
 import type { Paginated, Question } from '@vivu/types';
 
-function formatRelative(iso: string, locale: Locale): string {
-  const d = new Date(iso);
-  const diffMs = Date.now() - d.getTime();
-  const min = Math.floor(diffMs / 60000);
-  if (locale === 'en') {
-    if (min < 1) return 'Just now';
-    if (min < 60) return `${min}m ago`;
+function useFormatRelative() {
+  const t = useTranslations('qaSection');
+  const locale = useLocale() as Locale;
+  return (iso: string): string => {
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1) return t('justNow');
+    if (min < 60) return t('minutesAgo', { count: min });
     const h = Math.floor(min / 60);
-    if (h < 24) return `${h}h ago`;
+    if (h < 24) return t('hoursAgo', { count: h });
     const day = Math.floor(h / 24);
-    if (day < 30) return `${day}d ago`;
-    return d.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
-  if (min < 1) return 'Vừa xong';
-  if (min < 60) return `${min} phút trước`;
-  const h = Math.floor(min / 60);
-  if (h < 24) return `${h} giờ trước`;
-  const day = Math.floor(h / 24);
-  if (day < 30) return `${day} ngày trước`;
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (day < 30) return t('daysAgo', { count: day });
+    return d.toLocaleDateString(locale === 'en' ? 'en-US' : 'vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
 }
 
 export default function HoiDapListPage() {
   const t = useTranslations('qa');
   const locale = useLocale() as Locale;
+  const formatRelative = useFormatRelative();
   const [page, setPage] = useState<Paginated<Question> | null>(null);
   const [error, setError] = useState<string | null>(null);
 

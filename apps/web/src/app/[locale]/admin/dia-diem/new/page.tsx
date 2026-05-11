@@ -5,7 +5,14 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { listCategories, listRegions } from '@/lib/api';
 
-export const metadata = { title: 'Thêm địa điểm' };
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: Locale };
+}): Promise<{ title: string }> {
+  const t = await getTranslations({ locale: params.locale, namespace: 'admin' });
+  return { title: t('newPlaceTitle') };
+}
 
 interface AdminPlaceNewProps {
   params: { locale: Locale };
