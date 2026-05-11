@@ -26,7 +26,7 @@
 | `vivu_kh_m_ph_du_l_ch_vi_t_nam` (Trang chủ)                   | `/`                               | [x] Có Hero, "Công cụ hỗ trợ hành trình", "Cảm hứng lên đường", footer                                                                                                                                             |
 | `vivu_kh_m_ph_a_i_m_du_l_ch` (Khám phá / list)                | `/kham-pha`                       | 🟡 [x] danh sách + tab vùng miền (động) + skeleton + chip danh mục + filter mùa + sort recent/name + filter rating + rating trên PlaceCard; [ ] switch sang Map view                                               |
 | `vivu_chi_ti_t_a_i_m_v_nh_h_long` (Chi tiết địa điểm)         | `/dia-diem/[slug]`                | 🟡 [x] hero + breadcrumb + meta cards + mô tả + map placeholder + sidebar action + nearby places (Haversine) + weather widget (Open-Meteo) + viết đánh giá + Q&A + JSON-LD `TouristAttraction`; [ ] gallery slider |
-| `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [ ] Chưa có (cần Leaflet + cluster + filter chip + chuyển nền Chuẩn/Vệ tinh/Địa hình)                                                                                                                              |
+| `vivu_b_n_t_ng_t_c_kh_m_ph_du_l_ch` (Bản đồ tương tác)        | `/ban-do`                         | [x] Leaflet + marker cluster + filter chip vung/chủ đề + chuyển nền Chuẩn/Vệ tinh/Địa hình, popup mini-card + link sang chi tiết                                                                                   |
 | `vivu_k_t_qu_t_m_ki_m_l_i` (Search results — lưới)            | `/tim-kiem?q=&view=grid`          | [x] Lưới 3 cột + sidebar filter (region/category/season) + sort (recent/name)                                                                                                                                      |
 | `vivu_k_t_qu_t_m_ki_m_b_n` (Search results — bản đồ)          | `/tim-kiem?q=&view=map`           | 🟡 [x] view=map placeholder + list địa điểm có toạ độ; [ ] Leaflet thật (sau khi làm `/ban-do`)                                                                                                                    |
 | `vivu_k_t_qu_t_m_ki_m_danh_s_ch` (Search results — danh sách) | `/tim-kiem?q=&view=list`          | [x] List row layout (thumbnail + title + summary + categories)                                                                                                                                                     |
@@ -134,7 +134,7 @@
 - [x] `/dia-diem/[slug]` — page chi tiết (hero, breadcrumb, meta cards, mô tả, map placeholder, sidebar action, nearby places, QaSection inline, weather widget, JSON-LD). Còn TODO: gallery slider.
 - [x] API filter `category` + `season` + `sort` cho `GET /places`.
 - [x] `GET /api/v1/regions`, `GET /api/v1/categories` để frontend render tab/filter động.
-- [ ] `/ban-do` — Leaflet + OSM tile + cluster.
+- [x] `/ban-do` — Leaflet + OSM/Esri Satellite/OpenTopoMap tile + leaflet.markercluster + filter region/category + popup mini-card.
 - [x] Favorites — backend (POST/DELETE/GET status + GET /me/favorites) + nút "Thêm vào sổ tay" optimistic trên `/dia-diem/[slug]` + page `/tai-khoan/yeu-thich`.
 - [x] Admin CRUD places — backend POST/PATCH/DELETE/publish/unpublish (auth + role admin/editor) + bật form edit + tạo `/admin/dia-diem/new` + nút delete/publish/unpublish trên list. (🟡 còn upload trực tiếp ảnh hero qua Cloudinary, tạm thời dán URL.)
 
