@@ -9,6 +9,9 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js', 'json'],
   testRegex: '.*\\.spec\\.ts$',
+  // Integration tests live in `test/integration/**/*.int.spec.ts` and are run
+  // by `pnpm test:int` (jest.int.config.js).
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/test/integration/'],
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
@@ -19,6 +22,5 @@ module.exports = {
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.module.ts', '!src/**/dto/*.ts', '!src/main.ts'],
   coverageDirectory: '<rootDir>/coverage',
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
 };
