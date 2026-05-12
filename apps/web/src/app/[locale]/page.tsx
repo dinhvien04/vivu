@@ -162,16 +162,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               </div>
               <h3 className="mb-4 font-h3 text-h3">{t('home.card2Title')}</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">{t('home.card2Body')}</p>
-              <div className="relative h-32 w-full overflow-hidden rounded-lg border border-outline-variant/30 bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
+              <Link
+                href="/ban-do"
+                className="group/cta relative block h-32 w-full overflow-hidden rounded-lg border border-outline-variant/30 bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container transition-all hover:border-primary/60"
+                aria-label={t('home.card2Cta')}
+              >
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Icon name="map" className="!text-6xl text-primary opacity-40" />
+                  <Icon
+                    name="map"
+                    className="!text-6xl text-primary opacity-40 transition-transform group-hover/cta:scale-110"
+                  />
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
-                  <span className="rounded-full bg-white/90 px-4 py-1 text-label-caps text-primary shadow-sm backdrop-blur-sm">
-                    {t('common.comingSoon')}
-                  </span>
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-primary/85 px-4 py-2 text-on-primary backdrop-blur-sm">
+                  <span className="text-label-caps font-semibold">{t('home.card2Cta')}</span>
+                  <Icon name="arrow_forward" className="!text-base" />
                 </div>
-              </div>
+              </Link>
             </article>
 
             {/* Card 3 */}

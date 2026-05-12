@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AddToCollectionButton } from '@/components/add-to-collection-button';
 import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
+import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { PlaceCard } from '@/components/place-card';
 import { PlaceGallery } from '@/components/place-gallery';
 import { QaSection } from '@/components/qa-section';
@@ -264,26 +265,41 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             {/* Map */}
             <section className="mb-12">
               <h2 className="mb-6 font-h2 text-h2 text-on-surface">{t('place.mapTitle')}</h2>
-              <div className="relative flex h-[300px] flex-col items-center justify-center rounded-xl border border-outline-variant bg-surface-container/40 text-on-surface-variant md:h-[400px]">
-                <Icon
-                  name="location_on"
-                  className="!text-5xl text-primary"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                />
-                <p className="mt-2 font-bold text-on-surface">{place.address ?? title}</p>
-                {place.geo && (
-                  <p className="mt-1 text-body-sm">
+              {place.geo ? (
+                <>
+                  <PlacesMapLoader
+                    places={[place]}
+                    locale={locale}
+                    center={[place.geo.lat, place.geo.lng]}
+                    zoom={12}
+                    height="400px"
+                  />
+                  <p className="mt-3 text-body-sm text-on-surface-variant">
+                    <span className="font-semibold text-on-surface">
+                      {place.address ?? title}
+                    </span>
+                    <span className="mx-2 text-outline">·</span>
                     {place.geo.lat.toFixed(4)}°N, {place.geo.lng.toFixed(4)}°E
+                    <span className="mx-2 text-outline">·</span>
+                    {t('place.mapCta')}{' '}
+                    <Link href="/ban-do" className="font-semibold text-primary hover:underline">
+                      {t('place.mapCtaLink')}
+                    </Link>
                   </p>
-                )}
-                <p className="mt-3 max-w-md px-6 text-center text-body-sm">
-                  {t('place.mapCta')}{' '}
-                  <Link href="/ban-do" className="font-semibold text-primary hover:underline">
-                    {t('place.mapCtaLink')}
-                  </Link>
-                  .
-                </p>
-              </div>
+                </>
+              ) : (
+                <div className="relative flex h-[300px] flex-col items-center justify-center rounded-xl border border-outline-variant bg-surface-container/40 text-on-surface-variant md:h-[400px]">
+                  <Icon
+                    name="location_on"
+                    className="!text-5xl text-primary"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  />
+                  <p className="mt-2 font-bold text-on-surface">{place.address ?? title}</p>
+                  <p className="mt-3 max-w-md px-6 text-center text-body-sm">
+                    {t('place.mapMissingGeo')}
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Reviews */}
