@@ -32,6 +32,8 @@ interface PageProps {
   params: Promise<{ slug: string; locale: Locale }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug, locale } = await params;
   try {

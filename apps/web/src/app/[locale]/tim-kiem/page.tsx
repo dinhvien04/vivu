@@ -19,6 +19,8 @@ import {
 import { transformCloudinary } from '@/lib/image';
 import type { Place } from '@vivu/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'search' });

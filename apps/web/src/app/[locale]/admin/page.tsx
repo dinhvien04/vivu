@@ -9,6 +9,8 @@ import type { Locale } from '@/i18n/routing';
 import { listPlaces } from '@/lib/api';
 import { placeRegionName, placeTitle } from '@/i18n/place';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({
   params,
 }: {
