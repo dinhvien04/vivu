@@ -14,6 +14,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push --skip-generate --accept-data-loss",
+    "postgis:up": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/postgis.ts",
+    "db:setup": "pnpm prisma:generate && pnpm prisma:push && pnpm postgis:up",
     "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
     "seed:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-images.ts",
     "promote:admin": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/promote-admin.ts",
