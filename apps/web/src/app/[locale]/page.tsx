@@ -55,6 +55,10 @@ async function loadHomeData(locale: Locale): Promise<{
   return { hero, collections };
 }
 
+// `listPlaces()` / `listCategories()` hit the API at module-init time, so we
+// can't prerender at build time when the API isn't running (e.g. CI runners).
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

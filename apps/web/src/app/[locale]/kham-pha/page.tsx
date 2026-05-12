@@ -21,6 +21,8 @@ function isExploreView(value: string | undefined): value is ExploreView {
   return value === 'grid' || value === 'map';
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'explore' });
