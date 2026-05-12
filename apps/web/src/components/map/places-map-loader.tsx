@@ -18,12 +18,12 @@ const LazyPlacesMap = dynamic<Props>(() => import('./places-map').then((m) => m.
   loading: () => <MapLoading />,
 });
 
-function MapLoading() {
+function MapLoading({ height = '70vh' }: { height?: string }) {
   const t = useTranslations('map');
   return (
     <div
       className="flex w-full items-center justify-center rounded-2xl border border-outline-variant bg-surface-container/50 text-on-surface-variant"
-      style={{ height: '70vh' }}
+      style={{ height }}
     >
       <div className="flex flex-col items-center gap-3">
         <Icon name="map" className="!text-5xl text-primary" />
