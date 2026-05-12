@@ -275,9 +275,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                     height="400px"
                   />
                   <p className="mt-3 text-body-sm text-on-surface-variant">
-                    <span className="font-semibold text-on-surface">
-                      {place.address ?? title}
-                    </span>
+                    <span className="font-semibold text-on-surface">{place.address ?? title}</span>
                     <span className="mx-2 text-outline">·</span>
                     {place.geo.lat.toFixed(4)}°N, {place.geo.lng.toFixed(4)}°E
                     <span className="mx-2 text-outline">·</span>
