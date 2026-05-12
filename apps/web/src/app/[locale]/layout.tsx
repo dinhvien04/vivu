@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Be_Vietnam_Pro, Inter } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -9,19 +8,11 @@ import { routing } from '@/i18n/routing';
 import { SITE_URL } from '@/lib/site-url';
 import '../globals.css';
 
-const inter = Inter({
-  subsets: ['latin', 'vietnamese'],
-  weight: ['400', '500', '600'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const beVietnamPro = Be_Vietnam_Pro({
-  subsets: ['latin', 'vietnamese'],
-  weight: ['600', '700', '800'],
-  variable: '--font-be-vietnam-pro',
-  display: 'swap',
-});
+// Fonts (Inter + Be Vietnam Pro) are self-hosted via `src/app/fonts.css`, which
+// is imported from `globals.css`. We previously used `next/font/google`, but
+// that triggers a build-time fetch to fonts.gstatic.com and fails on networks
+// that block Google (CI runners behind certain firewalls, dev machines in
+// regions where Google services are slow/unreachable).
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -80,11 +71,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html
-      lang={locale}
-      className={`${inter.variable} ${beVietnamPro.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang={locale} suppressHydrationWarning>
       <head>
         {/* Material Symbols Outlined — used for inline icons matching the design system. */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
