@@ -1,5 +1,16 @@
 /* Self-hosted fonts. Auto-extracted from Google Fonts CSS — keep in sync if weights change. */
 
+/* Material Symbols Outlined — variable icon font (weight 100..700, FILL/GRAD/opsz
+ * axes accessed via font-variation-settings in .material-symbols-outlined). */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+}
+
+
 @font-face {
   font-family: 'Inter';
   font-style: normal;
