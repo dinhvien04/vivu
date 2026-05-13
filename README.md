@@ -44,13 +44,20 @@ docker compose up -d db
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 
-# 4. Sinh Prisma client + migrate (lần đầu)
-pnpm --filter @vivu/api prisma:generate
-pnpm --filter @vivu/api prisma:migrate
+# 4. Sinh Prisma client + sync schema + bật PostGIS (idempotent)
+pnpm --filter @vivu/api db:setup
 
-# 5. Chạy cả FE + BE song song
+# 5. (Tuỳ chọn) seed dữ liệu mẫu
+pnpm --filter @vivu/api seed
+
+# 6. Chạy cả FE + BE song song
 pnpm dev
 ```
+
+> `db:setup` chạy `prisma generate` + `prisma db push` + script `postgis:up`
+> (tạo cột `geo geography(Point, 4326)`, GIST index, trigger `place_geo_sync`).
+> Chạy lại lệnh này mỗi khi `prisma/schema.prisma` đổi hoặc khi gặp lỗi
+> `column "geo" does not exist` từ endpoint `/api/v1/places/nearby`.
 
 - Web: http://localhost:3000
 - API: http://localhost:4000/api/v1
