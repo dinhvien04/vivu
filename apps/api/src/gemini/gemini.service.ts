@@ -2,6 +2,9 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
 
+const MAX_GENERATION_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 750;
+
 export interface GenerateTravelAnswerParams {
   question: string;
   context: string;
@@ -41,18 +44,32 @@ export class GeminiService {
 
   async generateTravelAnswer(params: GenerateTravelAnswerParams): Promise<string> {
     this.assertConfigured();
-    const response = await this.client!.models.generateContent({
-      model: this.model,
-      contents: buildPrompt(params),
-      config: {
-        temperature: 0.2,
-      },
-    });
-    const text = response.text?.trim();
-    if (!text) {
-      throw new ServiceUnavailableException('Gemini did not return an answer.');
+
+    for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt += 1) {
+      try {
+        const response = await this.client!.models.generateContent({
+          model: this.model,
+          contents: buildPrompt(params),
+          config: {
+            temperature: 0.2,
+          },
+        });
+        const text = response.text?.trim();
+        if (!text) {
+          throw new ServiceUnavailableException('Gemini did not return an answer.');
+        }
+        return text;
+      } catch (error) {
+        if (!isTransientGeminiError(error) || attempt === MAX_GENERATION_ATTEMPTS) {
+          throw new ServiceUnavailableException(
+            'Gemini is temporarily unavailable. Please try again.',
+          );
+        }
+        await delay(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      }
     }
-    return text;
+
+    throw new ServiceUnavailableException('Gemini is temporarily unavailable. Please try again.');
   }
 
   async checkHealth(): Promise<{ status: 'ok'; model: string }> {
@@ -64,6 +81,23 @@ export class GeminiService {
     });
     return { status: 'ok', model: this.model };
   }
+}
+
+function isTransientGeminiError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const status = Number(
+    (error as Error & { status?: number; code?: number }).status ??
+      (error as Error & { status?: number; code?: number }).code,
+  );
+  return (
+    status === 429 ||
+    status >= 500 ||
+    /429|5\d\d|resource[_ ]?exhausted|unavailable|high demand|timeout/i.test(error.message)
+  );
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 function buildPrompt(params: GenerateTravelAnswerParams): string {
