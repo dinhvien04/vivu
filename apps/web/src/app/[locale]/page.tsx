@@ -10,10 +10,7 @@ import type { Locale } from '@/i18n/routing';
 import { listPlaces, type Place } from '@/lib/api';
 import { transformCloudinary } from '@/lib/image';
 
-const FEATURED_REGIONS = ['mien-bac', 'mien-trung', 'mien-nam', 'tay-nguyen'] as const;
-
 interface FeaturedCollection {
-  regionSlug: (typeof FEATURED_REGIONS)[number];
   title: string;
   href: string;
   image: string | null;
@@ -24,24 +21,16 @@ async function loadHomeData(locale: Locale): Promise<{
   hero: Place | null;
   collections: FeaturedCollection[];
 }> {
-  // Fetch one published place per region in parallel.
-  const results = await Promise.allSettled(
-    FEATURED_REGIONS.map((slug) => listPlaces({ region: slug, pageSize: 1 })),
-  );
-
-  const collections: FeaturedCollection[] = [];
-  let hero: Place | null = null;
-
-  results.forEach((r, i) => {
-    if (r.status !== 'fulfilled') return;
-    const place = r.value.data[0];
-    if (!place) return;
-    if (!hero) hero = place;
-    const slug = FEATURED_REGIONS[i];
-    if (!slug) return;
+  const result = await listPlaces({
+    province: 'Gia Lai',
+    pageSize: 5,
+    sort: 'recent',
+  }).catch(() => null);
+  const places = result?.data ?? [];
+  const hero = places[0] ?? null;
+  const collections = places.slice(1).map((place) => {
     const title = placeTitle(place, locale);
-    collections.push({
-      regionSlug: slug,
+    return {
       title,
       href: `/dia-diem/${place.slug}`,
       image: transformCloudinary(place.heroImageUrl, {
@@ -50,14 +39,14 @@ async function loadHomeData(locale: Locale): Promise<{
         crop: 'fill',
       }),
       alt: title,
-    });
+    };
   });
 
   return { hero, collections };
 }
 
-// `listPlaces()` / `listCategories()` hit the API at module-init time, so we
-// can't prerender at build time when the API isn't running (e.g. CI runners).
+// The page depends on the places API, so it cannot be prerendered when the API
+// is unavailable in environments such as isolated CI runners.
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
@@ -97,12 +86,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             <p className="max-w-2xl font-sans text-body-lg leading-relaxed text-on-surface-variant">
               {t('home.heroLead')}
             </p>
-            <div className="pt-4">
+            <div className="flex flex-wrap gap-3 pt-4">
               <Link
                 href="/kham-pha"
                 className="inline-flex items-center rounded-lg bg-primary-container px-8 py-4 text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-105 hover:shadow-hover active:scale-95"
               >
                 {t('home.heroCta')}
+              </Link>
+              <Link
+                href="/ai-chat"
+                className="inline-flex items-center rounded-lg border border-primary px-8 py-4 text-body-md font-semibold text-primary transition-colors hover:bg-primary-fixed"
+              >
+                {t('home.aiCta')}
               </Link>
             </div>
           </div>
@@ -246,9 +241,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
                       </div>
                     )}
                   </div>
-                  <p className="mb-1 text-label-caps text-on-surface-variant">
-                    {t(`regionsCaps.${c.regionSlug}`)}
-                  </p>
+                  <p className="mb-1 text-label-caps text-on-surface-variant">GIA LAI</p>
                   <h4 className="font-h3 text-xl font-bold transition-colors group-hover:text-primary">
                     {c.title}
                   </h4>

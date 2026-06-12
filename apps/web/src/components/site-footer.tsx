@@ -49,14 +49,6 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link
-                  href="/hoi-dap"
-                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
-                >
-                  {t('nav.qa')}
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/ai-chat"
                   className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
                 >

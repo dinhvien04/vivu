@@ -1,28 +1,9 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { MapPanel } from '@/components/map-panel';
+import { Icon } from '@/components/icon';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
-import { placeCategoryName, placeRegionName } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
-import { listCategories, listPlaces, listRegions } from '@/lib/api';
-import type { Place } from '@/lib/api';
-
-/**
- * Walk the paginated `/places` endpoint and concatenate the results. The
- * API caps `pageSize` at 100 so we loop until we've collected every page.
- * Stops after 20 pages as a defensive ceiling.
- */
-async function fetchAllPlaces(): Promise<Place[]> {
-  const all: Place[] = [];
-  let page = 1;
-  for (let i = 0; i < 20; i++) {
-    const r = await listPlaces({ page, pageSize: 100 });
-    all.push(...r.data);
-    if (page * r.meta.pageSize >= r.meta.total) break;
-    page += 1;
-  }
-  return all;
-}
+import { listPlaces } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,23 +18,8 @@ export default async function MapPage({ params }: { params: Promise<{ locale: Lo
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'map' });
 
-  const [places, regions, categories] = await Promise.all([
-    fetchAllPlaces(),
-    listRegions(),
-    listCategories(),
-  ]);
-
-  const geoCount = places.filter((p) => p.geo).length;
-
-  const regionOptions = regions.map((r) => ({
-    slug: r.slug,
-    name: placeRegionName(r, locale),
-  }));
-  const categoryOptions = categories.map((c) => ({
-    slug: c.slug,
-    name: placeCategoryName(c, locale),
-    icon: c.icon ?? null,
-  }));
+  const result = await listPlaces({ province: 'Gia Lai', pageSize: 100 }).catch(() => null);
+  const total = result?.meta.total ?? 0;
 
   return (
     <>
@@ -65,28 +31,14 @@ export default async function MapPage({ params }: { params: Promise<{ locale: Lo
           </span>
           <h1 className="mt-2 font-h1 text-h1 text-on-surface">{t('title')}</h1>
           <p className="mt-3 max-w-3xl text-body text-on-surface-variant">{t('lead')}</p>
-          <p className="mt-2 text-body-sm text-on-surface-variant">
-            {t.rich('geoCount', {
-              geo: geoCount,
-              total: places.length,
-              strong: (chunks) => <strong className="text-on-surface">{chunks}</strong>,
-            })}
-          </p>
         </header>
-        <MapPanel
-          locale={locale}
-          places={places}
-          regions={regionOptions}
-          categories={categoryOptions}
-          messages={{
-            filtersTitle: t('filtersTitle'),
-            filterRegion: t('filterRegion'),
-            filterCategory: t('filterCategory'),
-            noFilters: t('noFilters'),
-            layerHint: t('layerHint'),
-            noGeoPlaces: t('noGeoPlaces'),
-          }}
-        />
+        <section className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-outline-variant bg-surface-container/40 px-6 text-center">
+          <Icon name="map" className="!text-6xl text-primary" />
+          <h2 className="mt-5 font-h3 text-h3 text-on-surface">{t('updating')}</h2>
+          <p className="mt-3 max-w-xl text-body-md text-on-surface-variant">
+            {t('updatingLead', { total })}
+          </p>
+        </section>
       </main>
       <SiteFooter />
     </>

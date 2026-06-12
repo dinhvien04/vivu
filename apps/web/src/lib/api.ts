@@ -1,4 +1,4 @@
-import type { Paginated, Place, Region, Category } from '@vivu/types';
+import type { Paginated, Place, PlaceImage, Region, Category } from '@vivu/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 const PREFIX = '/api/v1';
@@ -63,6 +63,11 @@ export async function getPlaceBySlug(slug: string): Promise<Place> {
   return r.data;
 }
 
+export async function listPlaceImages(slug: string): Promise<PlaceImage[]> {
+  const r = await get<{ data: PlaceImage[] }>(`/places/${slug}/images`, { revalidate: 60 });
+  return r.data;
+}
+
 export interface NearbyPlacesOptions {
   lat: number;
   lng: number;
@@ -99,4 +104,4 @@ export async function listCategories(): Promise<Category[]> {
   return r.data;
 }
 
-export type { Place, Region, Category, Paginated };
+export type { Place, PlaceImage, Region, Category, Paginated };

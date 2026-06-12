@@ -15,7 +15,7 @@ import { WeatherWidget } from '@/components/weather-widget';
 import { Link } from '@/i18n/navigation';
 import { placeCategoryName, placeDescription, placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
-import { listPlaces, getPlaceBySlug, listPlacesNearby } from '@/lib/api';
+import { listPlaces, getPlaceBySlug, listPlaceImages, listPlacesNearby } from '@/lib/api';
 import { listQuestionsForPlace } from '@/lib/qa-client';
 import { listReviewsForPlace } from '@/lib/reviews-client';
 import { formatSeasonMonths } from '@/lib/season';
@@ -110,16 +110,25 @@ export default async function PlaceDetailPage({ params }: PageProps) {
       /* fall through to region-based suggestion */
     }
   }
-  if (related.length === 0 && place.region) {
+  if (related.length === 0) {
     try {
-      const r = await listPlaces({ region: place.region.slug, pageSize: 7 });
+      const r = await listPlaces({ province: 'Gia Lai', pageSize: 7 });
       related = r.data.filter((p) => p.id !== place.id).slice(0, 6);
     } catch {
       related = [];
     }
   }
 
-  const photos = place.photos ?? [];
+  const imageResults = await listPlaceImages(slug).catch(() => []);
+  const photos =
+    imageResults.length > 0
+      ? imageResults.map((image) => ({
+          ...image,
+          publicId: null,
+          width: null,
+          height: null,
+        }))
+      : (place.photos ?? []);
   const title = placeTitle(place, locale);
   const summary = placeSummary(place, locale);
   const description = placeDescription(place, locale);
@@ -326,6 +335,13 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
               {/* Action buttons */}
               <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
+                <Link
+                  href={`/ai-chat?place=${place.slug}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-on-primary transition-colors hover:bg-primary-container"
+                >
+                  <Icon name="auto_awesome" className="!text-base" />
+                  <span>{t('place.askAi')}</span>
+                </Link>
                 <FavoriteButton placeId={place.id} />
                 <AddToCollectionButton placeId={place.id} placeTitle={title} />
                 <button

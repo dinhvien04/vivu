@@ -43,6 +43,9 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
         <div className="flex items-center justify-between gap-2">
+          <span className="text-overline uppercase tracking-overline text-primary">
+            {place.province || 'Gia Lai'}
+          </span>
           {place.rating && place.rating.count > 0 && (
             <span className="inline-flex items-center gap-1 text-body-sm font-semibold text-on-surface">
               <Icon name="star" className="!text-base text-amber-500" />
