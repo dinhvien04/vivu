@@ -6,6 +6,7 @@ import type { ChatMessage } from '../types/ai-chat.types';
 import { ChatBubble } from './ChatBubble';
 
 interface ChatMessagesProps {
+  compact?: boolean;
   messages: ChatMessage[];
   isSending: boolean;
   suggestions: string[];
@@ -26,6 +27,7 @@ interface ChatMessagesProps {
 }
 
 export function ChatMessages({
+  compact = false,
   messages,
   isSending,
   suggestions,
@@ -39,21 +41,49 @@ export function ChatMessages({
   }, [messages, isSending]);
 
   return (
-    <div className="min-h-[420px] flex-1 space-y-5 overflow-y-auto px-4 py-6 sm:px-6">
+    <div
+      className={`flex-1 overflow-y-auto ${
+        compact ? 'min-h-0 space-y-4 px-3 py-4' : 'min-h-[420px] space-y-5 px-4 py-6 sm:px-6'
+      }`}
+    >
       {messages.length === 0 ? (
-        <div className="flex min-h-[380px] flex-col items-center justify-center text-center">
-          <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-primary-fixed text-primary shadow-premium">
-            <Icon name="travel_explore" size={40} />
+        <div
+          className={`flex flex-col items-center justify-center text-center ${
+            compact ? 'min-h-[310px]' : 'min-h-[380px]'
+          }`}
+        >
+          <div
+            className={`flex items-center justify-center rounded-full bg-primary-fixed text-primary shadow-premium ${
+              compact ? 'mb-3 h-14 w-14' : 'mb-5 h-20 w-20'
+            }`}
+          >
+            <Icon name="travel_explore" size={compact ? 29 : 40} />
           </div>
-          <h2 className="font-h3 text-h3 text-on-surface">{labels.emptyTitle}</h2>
-          <p className="mt-2 max-w-lg text-body-md text-on-surface-variant">{labels.emptyLead}</p>
-          <div className="mt-7 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
+          <h2
+            className={
+              compact ? 'text-lg font-bold text-on-surface' : 'font-h3 text-h3 text-on-surface'
+            }
+          >
+            {labels.emptyTitle}
+          </h2>
+          <p
+            className={`mt-2 text-on-surface-variant ${
+              compact ? 'max-w-xs text-sm' : 'max-w-lg text-body-md'
+            }`}
+          >
+            {labels.emptyLead}
+          </p>
+          <div
+            className={`grid w-full gap-2 ${compact ? 'mt-5' : 'mt-7 max-w-2xl sm:grid-cols-2'}`}
+          >
             {suggestions.map((question) => (
               <button
                 key={question}
                 type="button"
                 onClick={() => onSuggestion(question)}
-                className="rounded-xl border border-outline-variant/50 bg-surface-container-lowest px-4 py-3 text-left text-body-sm text-on-surface transition hover:border-primary/50 hover:bg-primary-fixed"
+                className={`rounded-xl border border-outline-variant/50 bg-surface-container-lowest text-left text-on-surface transition hover:border-primary/50 hover:bg-primary-fixed ${
+                  compact ? 'px-3 py-2.5 text-sm' : 'px-4 py-3 text-body-sm'
+                }`}
               >
                 <Icon name="auto_awesome" size={17} className="mr-2 align-middle text-primary" />
                 {question}
@@ -66,8 +96,8 @@ export function ChatMessages({
       )}
 
       {isSending && (
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-on-primary">
+        <div className={`flex items-start ${compact ? 'gap-2' : 'gap-3'}`}>
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
             <Icon name="travel_explore" size={20} />
           </div>
           <div className="flex items-center gap-2 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest px-4 py-3 text-on-surface-variant">

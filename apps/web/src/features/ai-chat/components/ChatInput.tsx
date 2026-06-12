@@ -8,10 +8,12 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 export function ChatInput({
+  compact = false,
   isSending,
   onSend,
   labels,
 }: {
+  compact?: boolean;
   isSending: boolean;
   onSend: (params: { message?: string; image?: File | null }) => Promise<void>;
   labels: {
@@ -72,7 +74,9 @@ export function ChatInput({
   return (
     <form
       onSubmit={submit}
-      className="sticky bottom-0 border-t border-outline-variant/40 bg-surface/95 p-3 backdrop-blur-md sm:p-4"
+      className={`border-t border-outline-variant/40 bg-surface/95 backdrop-blur-md ${
+        compact ? 'p-3' : 'sticky bottom-0 p-3 sm:p-4'
+      }`}
     >
       {previewUrl && image && (
         <div className="mb-3">
@@ -99,7 +103,9 @@ export function ChatInput({
           disabled={isSending}
           aria-label={labels.upload}
           title={labels.upload}
-          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container disabled:opacity-50"
+          className={`flex flex-shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container disabled:opacity-50 ${
+            compact ? 'h-10 w-10' : 'h-11 w-11'
+          }`}
         >
           <Icon name="add_photo_alternate" />
         </button>
@@ -115,13 +121,17 @@ export function ChatInput({
               void submit();
             }
           }}
-          className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-body-md text-on-surface outline-none placeholder:text-outline"
+          className={`max-h-32 flex-1 resize-none bg-transparent px-2 text-on-surface outline-none placeholder:text-outline ${
+            compact ? 'min-h-10 py-2 text-sm' : 'min-h-11 py-2.5 text-body-md'
+          }`}
         />
         <button
           type="submit"
           disabled={isSending || (!message.trim() && !image)}
           aria-label={labels.send}
-          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className={`flex flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40 ${
+            compact ? 'h-10 w-10' : 'h-11 w-11'
+          }`}
         >
           <Icon name="send" size={20} />
         </button>

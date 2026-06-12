@@ -84,6 +84,9 @@
     "copyright": "Designed by the Vivu Team · {year}"
   },
   "aiChat": {
+    "open": "Open AI travel assistant",
+    "close": "Close AI travel assistant",
+    "online": "Ready to help",
     "eyebrow": "AI travel assistant",
     "title": "Vivu AI Travel Assistant",
     "description": "Ask questions and identify Gia Lai travel destinations with AI",

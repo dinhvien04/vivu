@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Icon } from '@/components/icon';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { AiChatWidget } from '@/features/ai-chat/components/AiChatWidget';
 import { Link } from '@/i18n/navigation';
 import { placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
@@ -257,6 +258,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
           </section>
         )}
       </main>
+      <AiChatWidget />
       <SiteFooter />
     </>
   );

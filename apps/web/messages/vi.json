@@ -84,6 +84,9 @@
     "copyright": "Thiết kế bởi Vivu Team · {year}"
   },
   "aiChat": {
+    "open": "Mở trợ lý du lịch AI",
+    "close": "Đóng trợ lý du lịch AI",
+    "online": "Sẵn sàng hỗ trợ",
     "eyebrow": "Trợ lý du lịch AI",
     "title": "Vivu AI Travel Assistant",
     "description": "Hỏi đáp và nhận diện địa điểm du lịch Gia Lai bằng AI",
