@@ -20,17 +20,19 @@ export class QdrantRepository {
     options: { limit?: number; placeSlug?: string } = {},
   ): Promise<QdrantTextResult[]> {
     this.qdrant.assertConfigured();
-    const response = await this.qdrant.client.query(this.qdrant.textCollection, {
-      query: {
-        text: `query: ${message}`,
-        model: this.qdrant.textModel,
-      },
-      filter: options.placeSlug ? buildPlaceSlugFilter(options.placeSlug) : undefined,
-      limit: options.limit ?? 5,
-      with_payload: true,
-      with_vector: false,
-    });
-    return response.points.map((point) => mapTextPoint(point));
+    const limit = options.limit ?? 5;
+
+    try {
+      return await this.queryText(message, limit, options.placeSlug);
+    } catch (error) {
+      if (!options.placeSlug || !isMissingPayloadIndexError(error)) throw error;
+
+      const candidates = await this.queryText(
+        `${options.placeSlug.replaceAll('-', ' ')} ${message}`,
+        Math.max(limit * 10, 50),
+      );
+      return candidates.filter((item) => item.place_slug === options.placeSlug).slice(0, limit);
+    }
   }
 
   async searchImagesByText(
@@ -85,6 +87,24 @@ export class QdrantRepository {
     });
     return response.points.map((point) => mapImagePoint(point));
   }
+
+  private async queryText(
+    message: string,
+    limit: number,
+    placeSlug?: string,
+  ): Promise<QdrantTextResult[]> {
+    const response = await this.qdrant.client.query(this.qdrant.textCollection, {
+      query: {
+        text: `query: ${message}`,
+        model: this.qdrant.textModel,
+      },
+      filter: placeSlug ? buildPlaceSlugFilter(placeSlug) : undefined,
+      limit,
+      with_payload: true,
+      with_vector: false,
+    });
+    return response.points.map((point) => mapTextPoint(point));
+  }
 }
 
 export function buildPlaceSlugFilter(placeSlug: string): QdrantFilter {
@@ -110,4 +130,10 @@ function mapTextPoint(point: ScoredPoint): QdrantTextResult {
 function mapImagePoint(point: ScoredPoint): QdrantImageResult {
   const payload = (point.payload ?? {}) as QdrantImagePayload;
   return { id: pointId(point), score: point.score, ...payload };
+}
+
+function isMissingPayloadIndexError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const data = (error as Error & { data?: { status?: { error?: string } } }).data;
+  return /index required but not found/i.test(data?.status?.error ?? error.message);
 }

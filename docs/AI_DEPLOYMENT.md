@@ -72,7 +72,7 @@ of approximately 4.5 MB, so the extra space is required for multipart metadata.
 
 ## Smoke test
 
-1. Open `https://vivu-web.vercel.app` and click the chat button in the bottom-right corner.
+1. Open `https://vivu-web.vercel.app/ai-chat` or use the chat button on the homepage.
 2. Send `Biển Hồ Gia Lai có gì đẹp?`.
 3. Upload a JPEG/PNG/WebP image smaller than 4 MB.
 4. Upload an image with `Chỗ này có gì chơi?`.
