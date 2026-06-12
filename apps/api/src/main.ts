@@ -5,6 +5,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { applySecurityHeaders } from './common/security-headers';
+import fastifyMultipart from '@fastify/multipart';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -13,6 +14,15 @@ async function bootstrap() {
   );
 
   applySecurityHeaders(app.getHttpAdapter().getInstance());
+  await app.register(fastifyMultipart, {
+    limits: {
+      fileSize: Number(process.env.AI_MAX_IMAGE_SIZE_BYTES ?? 4 * 1024 * 1024),
+      files: 1,
+      fields: 2,
+      parts: 3,
+    },
+    throwFileSizeLimit: true,
+  });
 
   const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
     .split(',')

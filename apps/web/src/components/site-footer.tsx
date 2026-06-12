@@ -55,6 +55,14 @@ export function SiteFooter() {
                   {t('nav.qa')}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/ai-chat"
+                  className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
+                >
+                  {t('nav.aiChat')}
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="space-y-4">

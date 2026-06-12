@@ -18,6 +18,10 @@ import { QaModule } from './qa/qa.module';
 import { RegionsModule } from './regions/regions.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SearchModule } from './search/search.module';
+import { AiModule } from './ai/ai.module';
+import { GeminiModule } from './gemini/gemini.module';
+import { QdrantModule } from './qdrant/qdrant.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -44,6 +48,10 @@ import { SearchModule } from './search/search.module';
     AdminReviewsModule,
     AdminStatsModule,
     MediaModule,
+    QdrantModule,
+    GeminiModule,
+    StorageModule,
+    AiModule,
   ],
   controllers: [HealthController],
 })
