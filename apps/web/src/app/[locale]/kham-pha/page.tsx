@@ -84,7 +84,7 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
   const view: ExploreView = isExploreView(sp.view) ? sp.view : 'grid';
   // This page does not render pagination controls yet, so fetch the complete
   // catalog within the API cap instead of silently showing only the first page.
-  const pageSize = 200;
+  const pageSize = 100;
 
   const [placesResult, regions, categories] = await Promise.all([
     listPlaces({ region, category, season, sort, q, minRating, pageSize }).catch((e) => ({
