@@ -10,13 +10,13 @@ export class PlacesController {
   constructor(private readonly placesService: PlacesService) {}
 
   @Get()
-  @ApiOkResponse({ description: 'Danh sách địa điểm có phân trang.' })
+  @ApiOkResponse({ description: 'Paginated place list.' })
   list(@Query() query: ListPlacesQueryDto) {
     return this.placesService.list(query);
   }
 
   @Get('nearby')
-  @ApiOkResponse({ description: 'Danh sách địa điểm gần một toạ độ (Haversine).' })
+  @ApiOkResponse({ description: 'Places near a coordinate using Haversine/PostGIS.' })
   async nearby(@Query() query: NearbyPlacesQueryDto) {
     const data = await this.placesService.listNearby({
       lat: query.lat,
@@ -28,12 +28,22 @@ export class PlacesController {
     return { data };
   }
 
+  @Get(':slug/images')
+  @ApiOkResponse({ description: 'S3 images for a place, returned as presigned URLs.' })
+  async images(@Param('slug') slug: string) {
+    const images = await this.placesService.listImages(slug);
+    if (!images) {
+      throw new NotFoundException(`Khong tim thay dia diem: ${slug}`);
+    }
+    return { data: images };
+  }
+
   @Get(':slug')
-  @ApiOkResponse({ description: 'Chi tiết một địa điểm theo slug.' })
+  @ApiOkResponse({ description: 'Place detail by slug.' })
   async detail(@Param('slug') slug: string) {
     const place = await this.placesService.findBySlug(slug);
     if (!place) {
-      throw new NotFoundException(`Không tìm thấy địa điểm: ${slug}`);
+      throw new NotFoundException(`Khong tim thay dia diem: ${slug}`);
     }
     return { data: place };
   }

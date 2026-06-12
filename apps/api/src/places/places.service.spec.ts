@@ -8,6 +8,7 @@ import type { PrismaService } from '../prisma/prisma.service';
 function makePlace(id: string, slug: string) {
   return {
     id,
+    locationKey: null,
     slug,
     titleVi: `Place ${id}`,
     titleEn: null,
@@ -23,12 +24,17 @@ function makePlace(id: string, slug: string) {
       nameEn: 'Northern',
       parentId: null,
     },
+    province: 'Gia Lai',
+    aliases: [],
     address: null,
     lat: 21.0,
     lng: 105.8,
     bestSeasons: [],
     status: 'published',
     heroImageUrl: null,
+    heroImageS3Key: null,
+    qdrantPlaceSlug: null,
+    isAiReady: false,
     photos: [],
     categories: [],
     createdAt: new Date('2026-01-01T00:00:00Z'),
@@ -50,8 +56,9 @@ function build({
       groupBy: jest.fn().mockResolvedValue(ratings),
     },
   };
-  const service = new PlacesService(prisma as unknown as PrismaService);
-  return { service, prisma };
+  const s3 = { getPresignedGetUrl: jest.fn() };
+  const service = new PlacesService(prisma as unknown as PrismaService, s3 as never);
+  return { service, prisma, s3 };
 }
 
 describe('PlacesService.listNearby', () => {

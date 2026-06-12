@@ -24,6 +24,11 @@ export class ListPlacesQueryDto {
   @IsString()
   category?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by province.' })
+  @IsOptional()
+  @IsString()
+  province?: string;
+
   @ApiPropertyOptional({
     description: 'Lọc theo mùa đẹp nhất.',
     enum: PLACE_SEASONS,

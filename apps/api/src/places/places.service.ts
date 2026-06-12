@@ -5,8 +5,9 @@ import type {
   Photo as PrismaPhoto,
   Region as PrismaRegion,
 } from '@prisma/client';
-import type { Paginated, Place } from '@vivu/types';
+import type { Paginated, Place, PlaceImage } from '@vivu/types';
 import { PrismaService } from '../prisma/prisma.service';
+import { S3Service } from '../storage/s3.service';
 import { ListPlacesQueryDto } from './dto/list-places.query.dto';
 
 type PlaceWithRelations = PrismaPlace & {
@@ -20,6 +21,7 @@ type PlaceWithRelations = PrismaPlace & {
 function toApiPlace(p: PlaceWithRelations): Place {
   return {
     id: p.id,
+    locationKey: p.locationKey,
     slug: p.slug,
     titleVi: p.titleVi,
     titleEn: p.titleEn,
@@ -35,14 +37,20 @@ function toApiPlace(p: PlaceWithRelations): Place {
       nameEn: p.region.nameEn,
       parentId: p.region.parentId,
     },
+    province: p.province,
+    aliases: p.aliases,
     address: p.address,
     geo: p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null,
     bestSeasons: p.bestSeasons,
     status: p.status,
     heroImageUrl: p.heroImageUrl,
+    heroImageS3Key: p.heroImageS3Key,
+    qdrantPlaceSlug: p.qdrantPlaceSlug,
+    isAiReady: p.isAiReady,
     photos: p.photos.map((ph) => ({
       id: ph.id,
       url: ph.url,
+      s3Key: ph.s3Key,
       publicId: ph.publicId,
       width: ph.width,
       height: ph.height,
@@ -64,7 +72,10 @@ function toApiPlace(p: PlaceWithRelations): Place {
 
 @Injectable()
 export class PlacesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly s3: S3Service,
+  ) {}
 
   async list(query: ListPlacesQueryDto): Promise<Paginated<Place>> {
     const page = query.page ?? 1;
@@ -81,6 +92,8 @@ export class PlacesService {
         { titleVi: { contains: q, mode: 'insensitive' } },
         { titleEn: { contains: q, mode: 'insensitive' } },
         { summaryVi: { contains: q, mode: 'insensitive' } },
+        { locationKey: { contains: q, mode: 'insensitive' } },
+        { province: { contains: q, mode: 'insensitive' } },
       ];
     }
 
@@ -92,6 +105,10 @@ export class PlacesService {
       where.categories = {
         some: { category: { slug: query.category } },
       };
+    }
+
+    if (query.province) {
+      where.province = { equals: query.province.trim(), mode: 'insensitive' };
     }
 
     if (query.season) {
@@ -174,6 +191,72 @@ export class PlacesService {
       average: agg._avg.rating ? Math.round(agg._avg.rating * 100) / 100 : 0,
     };
     return out;
+  }
+
+  async listImages(slug: string): Promise<PlaceImage[] | null> {
+    const place = await this.prisma.place.findUnique({
+      where: { slug },
+      select: {
+        status: true,
+        titleVi: true,
+        heroImageS3Key: true,
+        photos: {
+          where: { s3Key: { not: null } },
+          orderBy: { position: 'asc' },
+          select: {
+            id: true,
+            s3Key: true,
+            alt: true,
+            position: true,
+            isCover: true,
+          },
+        },
+      },
+    });
+
+    if (!place || place.status !== 'published') return null;
+
+    const images = new Map<string, PlaceImage>();
+    const addImage = async (params: {
+      id: string;
+      s3Key: string;
+      alt: string | null;
+      position: number;
+      isCover: boolean;
+    }) => {
+      if (images.has(params.s3Key)) return;
+      images.set(params.s3Key, {
+        id: params.id,
+        s3Key: params.s3Key,
+        url: await this.s3.getPresignedGetUrl(params.s3Key),
+        alt: params.alt,
+        position: params.position,
+        isCover: params.isCover,
+      });
+    };
+
+    if (place.heroImageS3Key) {
+      await addImage({
+        id: 'hero',
+        s3Key: place.heroImageS3Key,
+        alt: place.titleVi,
+        position: -1,
+        isCover: true,
+      });
+    }
+
+    for (const photo of place.photos) {
+      if (!photo.s3Key) continue;
+      await addImage({
+        id: photo.id,
+        s3Key: photo.s3Key,
+        alt: photo.alt,
+        position: photo.position,
+        isCover: photo.isCover,
+      });
+    }
+
+    return [...images.values()].sort((a, b) => a.position - b.position);
   }
 
   /**

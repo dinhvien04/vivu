@@ -45,14 +45,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  reviews        Review[]
-  collections    Collection[]
-  favorites      Favorite[]
-  questions      Question[]
-  answers        Answer[]
-  refreshTokens  RefreshToken[]
-  resetTokens    PasswordResetToken[]
-  auditLogs      AuditLog[]           @relation("AuditActor")
+  reviews       Review[]
+  collections   Collection[]
+  favorites     Favorite[]
+  questions     Question[]
+  answers       Answer[]
+  refreshTokens RefreshToken[]
+  resetTokens   PasswordResetToken[]
+  auditLogs     AuditLog[]           @relation("AuditActor")
 }
 
 // Stored hash of a refresh token. We rotate refresh tokens on each /auth/refresh
@@ -60,15 +60,15 @@ model User {
 // stolen-token reuse (if an old hash is used after rotation, we revoke the
 // entire chain for that user).
 model RefreshToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String   @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
   userAgent String?
   ipAddress String?
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId, revokedAt])
 }
@@ -76,13 +76,13 @@ model RefreshToken {
 // Single-use password reset token, stored as a hash. Plaintext value is sent to
 // the user via email (stub for now — logged to server console).
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String   @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId, usedAt])
 }
@@ -99,8 +99,8 @@ model Region {
 }
 
 model Category {
-  id     String         @id @default(cuid())
-  slug   String         @unique
+  id     String          @id @default(cuid())
+  slug   String          @unique
   nameVi String
   nameEn String
   icon   String?
@@ -108,24 +108,30 @@ model Category {
 }
 
 model Place {
-  id             String      @id @default(cuid())
-  slug           String      @unique
-  titleVi        String
-  titleEn        String?
-  summaryVi      String?
-  summaryEn      String?
-  descriptionVi  String?
-  descriptionEn  String?
-  regionId       String
-  region         Region      @relation(fields: [regionId], references: [id])
-  address        String?
-  lat            Float?
-  lng            Float?
-  bestSeasons    String[]    @default([])
-  status         PlaceStatus @default(draft)
-  heroImageUrl   String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  locationKey     String?     @unique
+  slug            String      @unique
+  titleVi         String
+  titleEn         String?
+  summaryVi       String?
+  summaryEn       String?
+  descriptionVi   String?
+  descriptionEn   String?
+  regionId        String
+  region          Region      @relation(fields: [regionId], references: [id])
+  province        String      @default("Gia Lai")
+  aliases         String[]    @default([])
+  address         String?
+  lat             Float?
+  lng             Float?
+  bestSeasons     String[]    @default([])
+  status          PlaceStatus @default(draft)
+  heroImageUrl    String?
+  heroImageS3Key  String?
+  qdrantPlaceSlug String?
+  isAiReady       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   photos          Photo[]
   categories      PlaceCategory[]
@@ -134,7 +140,10 @@ model Place {
   favorites       Favorite[]
   collectionItems CollectionItem[]
 
+  @@index([locationKey])
   @@index([regionId, status])
+  @@index([province, status])
+  @@index([isAiReady])
   @@index([status, updatedAt])
 }
 
@@ -145,6 +154,7 @@ model Photo {
   // Public URL on Cloudinary (or any CDN). Resize/format params should be
   // appended on the client via the helper in apps/web.
   url       String
+  s3Key     String?
   // Cloudinary public_id, used for transformations + deletes.
   publicId  String?
   width     Int?
@@ -154,6 +164,7 @@ model Photo {
   isCover   Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  @@unique([placeId, s3Key])
   @@index([placeId, position])
 }
 
@@ -176,18 +187,18 @@ model Review {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place        @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes ReviewLike[]
 
   @@index([placeId, createdAt])
 }
 
 model ReviewLike {
-  reviewId String
-  userId   String
+  reviewId  String
+  userId    String
   createdAt DateTime @default(now())
-  review   Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   @@id([reviewId, userId])
 }
@@ -214,22 +225,22 @@ model Answer {
 }
 
 model Collection {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   userId      String
   name        String
   description String?
-  isPublic    Boolean  @default(false)
+  isPublic    Boolean          @default(false)
   coverUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   items       CollectionItem[]
 }
 
 model CollectionItem {
   collectionId String
   placeId      String
-  position     Int     @default(0)
+  position     Int        @default(0)
   note         String?
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   place        Place      @relation(fields: [placeId], references: [id], onDelete: Cascade)
@@ -241,8 +252,8 @@ model Favorite {
   userId    String
   placeId   String
   createdAt DateTime @default(now())
-  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place     Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
 
   @@id([userId, placeId])
 }

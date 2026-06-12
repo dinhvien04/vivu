@@ -16,6 +16,7 @@ type PlaceWithRelations = PrismaPlace & {
 function toApiPlace(p: PlaceWithRelations): Place {
   return {
     id: p.id,
+    locationKey: p.locationKey,
     slug: p.slug,
     titleVi: p.titleVi,
     titleEn: p.titleEn,
@@ -31,14 +32,20 @@ function toApiPlace(p: PlaceWithRelations): Place {
       nameEn: p.region.nameEn,
       parentId: p.region.parentId,
     },
+    province: p.province,
+    aliases: p.aliases,
     address: p.address,
     geo: p.lat !== null && p.lng !== null ? { lat: p.lat, lng: p.lng } : null,
     bestSeasons: p.bestSeasons,
     status: p.status,
     heroImageUrl: p.heroImageUrl,
+    heroImageS3Key: p.heroImageS3Key,
+    qdrantPlaceSlug: p.qdrantPlaceSlug,
+    isAiReady: p.isAiReady,
     photos: p.photos.map((ph) => ({
       id: ph.id,
       url: ph.url,
+      s3Key: ph.s3Key,
       publicId: ph.publicId,
       width: ph.width,
       height: ph.height,

@@ -28,6 +28,7 @@ export interface Category {
 export interface Photo {
   id: string;
   url: string;
+  s3Key: string | null;
   publicId: string | null;
   width: number | null;
   height: number | null;
@@ -38,6 +39,7 @@ export interface Photo {
 
 export interface Place {
   id: string;
+  locationKey: string | null;
   slug: string;
   titleVi: string;
   titleEn: string | null;
@@ -47,17 +49,31 @@ export interface Place {
   descriptionEn: string | null;
   regionId: string;
   region?: Region;
+  province: string;
+  aliases: string[];
   address: string | null;
   geo: GeoPoint | null;
   bestSeasons: string[];
   status: PlaceStatus;
   heroImageUrl: string | null;
+  heroImageS3Key: string | null;
+  qdrantPlaceSlug: string | null;
+  isAiReady: boolean;
   photos?: Photo[];
   categories?: Category[];
   /** Optional rating summary aggregated from visible reviews. */
   rating?: PlaceRatingSummary;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PlaceImage {
+  id: string;
+  s3Key: string;
+  url: string;
+  alt: string | null;
+  position: number;
+  isCover: boolean;
 }
 
 export type ReviewStatus = 'visible' | 'hidden' | 'reported';
