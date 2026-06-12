@@ -400,7 +400,6 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
                     : null;
                   const title = placeTitle(p, locale);
                   const summary = placeSummary(p, locale);
-                  const regionName = p.region ? placeRegionName(p.region, locale) : null;
                   return (
                     <li key={p.id}>
                       <Link
@@ -418,11 +417,6 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
                           )}
                         </div>
                         <div className="flex flex-1 flex-col justify-center px-1 py-3 pr-4">
-                          {regionName && (
-                            <p className="text-overline uppercase tracking-overline text-secondary">
-                              {regionName}
-                            </p>
-                          )}
                           <h3 className="mt-1 font-h4 text-h4 text-on-surface">{title}</h3>
                           {summary && (
                             <p className="mt-1 line-clamp-2 text-body-sm text-on-surface-variant">

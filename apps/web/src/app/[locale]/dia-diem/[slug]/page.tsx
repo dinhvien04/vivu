@@ -13,13 +13,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { WeatherWidget } from '@/components/weather-widget';
 import { Link } from '@/i18n/navigation';
-import {
-  placeCategoryName,
-  placeDescription,
-  placeRegionName,
-  placeSummary,
-  placeTitle,
-} from '@/i18n/place';
+import { placeCategoryName, placeDescription, placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 import { listPlaces, getPlaceBySlug, listPlacesNearby } from '@/lib/api';
 import { listQuestionsForPlace } from '@/lib/qa-client';
@@ -129,7 +123,6 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   const title = placeTitle(place, locale);
   const summary = placeSummary(place, locale);
   const description = placeDescription(place, locale);
-  const regionName = place.region ? placeRegionName(place.region, locale) : null;
 
   const categoriesText =
     place.categories && place.categories.length > 0
@@ -188,14 +181,6 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           <Link href="/kham-pha" className="hover:text-primary">
             {t('place.breadcrumbExplore')}
           </Link>
-          {place.region && regionName && (
-            <>
-              <Icon name="chevron_right" className="!text-base" />
-              <Link href={`/kham-pha?region=${place.region.slug}`} className="hover:text-primary">
-                {regionName}
-              </Link>
-            </>
-          )}
           <Icon name="chevron_right" className="!text-base" />
           <span className="text-primary">{title}</span>
         </nav>
@@ -242,13 +227,12 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           {/* Left column */}
           <div className="lg:col-span-8">
             {/* Meta cards */}
-            <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-2">
               <MetaCard
                 icon="calendar_month"
                 label={t('place.bestSeason')}
                 value={formatSeasonMonths(place.bestSeasons, locale)}
               />
-              <MetaCard icon="explore" label={t('place.region')} value={regionName ?? '—'} />
               <MetaCard icon="category" label={t('place.category')} value={categoriesText} />
             </div>
 
@@ -391,14 +375,9 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               <h2 className="font-h2 text-h2 text-on-surface">
                 {relatedMode === 'nearby'
                   ? t('place.relatedTitleNearby')
-                  : regionName
-                    ? t('place.relatedTitle', { region: regionName })
-                    : t('place.relatedTitleNearby')}
+                  : t('place.relatedTitleNearby')}
               </h2>
-              <Link
-                href={place.region ? `/kham-pha?region=${place.region.slug}` : '/kham-pha'}
-                className="font-semibold text-primary hover:underline"
-              >
+              <Link href="/kham-pha" className="font-semibold text-primary hover:underline">
                 {t('common.viewAll')}
               </Link>
             </div>

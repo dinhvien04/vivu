@@ -39,12 +39,13 @@ async function main() {
       continue;
     }
     const descriptionKey = findDescriptionKey(textKeys);
-    const description = descriptionKey
+    const rawDescription = descriptionKey
       ? normalizeDescription(await getObjectText(client, bucket, descriptionKey))
       : null;
+    const description = rawDescription ? extractIntroSection(rawDescription) : null;
     const heroImageS3Key = imageKeys[0] ?? null;
     const slug = keyToSlug(locationKey);
-    const name = keyToTitle(locationKey);
+    const name = inferPlaceName(description, keyToTitle(locationKey));
 
     const place = await prisma.place.upsert({
       where: { locationKey },
@@ -238,6 +239,24 @@ function normalizeDescription(value: string): string | null {
   return normalized ? normalized : null;
 }
 
+function extractIntroSection(value: string): string {
+  const normalized = value.replace(/\r\n/g, '\n').trim();
+  const introMatch = normalized.match(
+    /(?:^|\n)\s*1\.\s*Giới thiệu địa điểm\s*\n+([\s\S]*?)(?=\n\s*2\.\s|\n\s*\d+\.\s+[^\n]+|$)/i,
+  );
+  const intro = introMatch?.[1] ?? normalized;
+  return cleanDescription(intro);
+}
+
+function cleanDescription(value: string): string {
+  return value
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !isSectionHeading(line))
+    .join('\n\n')
+    .trim();
+}
+
 function firstSentence(value: string): string {
   const candidates = value
     .split(/\n{2,}|(?<=[.!?])\s+/)
@@ -259,6 +278,17 @@ function cleanSummaryCandidate(value: string): string {
 
 function isSectionHeading(value: string): boolean {
   return /^\d+\.\s*$/.test(value) || /^\d+\.\s+[\p{L}\s/]+$/u.test(value);
+}
+
+function inferPlaceName(description: string | null, fallback: string): string {
+  if (!description) return fallback;
+  const firstParagraph = cleanSummaryCandidate(description);
+  const match = firstParagraph.match(
+    /^(.{2,90}?)\s+(?:là|được|nằm|thuộc|còn\s+được|còn\s+gọi|tọa\s+lạc)(?:\s|,|\.|$)/iu,
+  );
+  const candidate = (match?.[1] ?? '').trim().replace(/[,:;.\-–—]+$/g, '');
+  if (candidate.length >= 2 && candidate.length <= 90) return candidate;
+  return fallback;
 }
 
 function normalizeStatus(value?: string): PlaceStatus {

@@ -96,8 +96,8 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
   if (total === 0 || !current) {
     return (
       <div className="relative aspect-[16/7] overflow-hidden rounded-xl shadow-lg">
-        <div className="flex h-full items-center justify-center bg-surface-container text-outline">
-          <Icon name="image" className="!text-5xl" />
+        <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 via-secondary-container to-surface-container-high text-primary">
+          <span className="px-8 text-center font-h2 text-h2">{title}</span>
         </div>
       </div>
     );

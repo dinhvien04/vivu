@@ -3,6 +3,12 @@ import type { Paginated, Review } from '@vivu/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
+function publicReviewsUrl(slug: string, qs: string): string {
+  const path = `/api/places/${slug}/reviews${qs}`;
+  if (typeof window !== 'undefined') return path;
+  return `${BASE}/api/v1/places/${slug}/reviews${qs}`;
+}
+
 interface ErrorPayload {
   message?: string | string[];
 }
@@ -51,7 +57,7 @@ export async function listReviewsForPlace(
   if (options.page) params.set('page', String(options.page));
   if (options.pageSize) params.set('pageSize', String(options.pageSize));
   const qs = params.toString() ? `?${params.toString()}` : '';
-  const res = await fetch(`${BASE}/api/v1/places/${slug}/reviews${qs}`, {
+  const res = await fetch(publicReviewsUrl(slug, qs), {
     next: { revalidate: 30 },
   });
   if (!res.ok) throw new Error(`API /places/${slug}/reviews → ${res.status}`);
