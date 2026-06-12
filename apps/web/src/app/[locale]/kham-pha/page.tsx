@@ -82,9 +82,9 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
       ? minRatingRaw
       : undefined;
   const view: ExploreView = isExploreView(sp.view) ? sp.view : 'grid';
-  // Map view needs every published place with coordinates within the active
-  // filters; bump pageSize so we don't paginate the map.
-  const pageSize = view === 'map' ? 200 : 50;
+  // This page does not render pagination controls yet, so fetch the complete
+  // catalog within the API cap instead of silently showing only the first page.
+  const pageSize = 200;
 
   const [placesResult, regions, categories] = await Promise.all([
     listPlaces({ region, category, season, sort, q, minRating, pageSize }).catch((e) => ({
