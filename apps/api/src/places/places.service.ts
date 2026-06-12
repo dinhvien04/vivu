@@ -70,6 +70,10 @@ function toApiPlace(p: PlaceWithRelations): Place {
   };
 }
 
+function isS3Url(value: string): boolean {
+  return value.startsWith('s3://');
+}
+
 @Injectable()
 export class PlacesService {
   constructor(
@@ -146,11 +150,13 @@ export class PlacesService {
       }
     }
 
-    let enriched = rows.map((p) => {
-      const out = toApiPlace(p as PlaceWithRelations);
-      out.rating = ratingByPlaceId.get(p.id) ?? { count: 0, average: 0 };
-      return out;
-    });
+    let enriched = await Promise.all(
+      rows.map(async (p) => {
+        const out = toApiPlace(p as PlaceWithRelations);
+        out.rating = ratingByPlaceId.get(p.id) ?? { count: 0, average: 0 };
+        return this.withPresignedMedia(out);
+      }),
+    );
 
     if (query.minRating !== undefined) {
       const threshold = query.minRating;
@@ -190,7 +196,7 @@ export class PlacesService {
       count: agg._count._all,
       average: agg._avg.rating ? Math.round(agg._avg.rating * 100) / 100 : 0,
     };
-    return out;
+    return this.withPresignedMedia(out);
   }
 
   async listImages(slug: string): Promise<PlaceImage[] | null> {
@@ -338,11 +344,39 @@ export class PlacesService {
       .map((id) => placeById.get(id))
       .filter((p): p is (typeof places)[number] => p !== undefined);
 
-    return ordered.map((place) => {
-      const api = toApiPlace(place as PlaceWithRelations);
-      api.rating = ratingByPlaceId.get(place.id) ?? { count: 0, average: 0 };
-      const distanceKm = distanceById.get(place.id) ?? 0;
-      return { ...api, distanceKm: Math.round(distanceKm * 10) / 10 };
-    });
+    return Promise.all(
+      ordered.map(async (place) => {
+        const api = toApiPlace(place as PlaceWithRelations);
+        api.rating = ratingByPlaceId.get(place.id) ?? { count: 0, average: 0 };
+        const distanceKm = distanceById.get(place.id) ?? 0;
+        const out = await this.withPresignedMedia(api);
+        return { ...out, distanceKm: Math.round(distanceKm * 10) / 10 };
+      }),
+    );
+  }
+
+  private async withPresignedMedia(place: Place): Promise<Place> {
+    const next: Place = {
+      ...place,
+      photos: place.photos ? [...place.photos] : place.photos,
+    };
+
+    if (!next.heroImageUrl && next.heroImageS3Key) {
+      next.heroImageUrl = await this.s3.getPresignedGetUrl(next.heroImageS3Key);
+    }
+
+    if (next.photos) {
+      next.photos = await Promise.all(
+        next.photos.map(async (photo) => {
+          if (!photo.s3Key || !isS3Url(photo.url)) return photo;
+          return {
+            ...photo,
+            url: await this.s3.getPresignedGetUrl(photo.s3Key),
+          };
+        }),
+      );
+    }
+
+    return next;
   }
 }

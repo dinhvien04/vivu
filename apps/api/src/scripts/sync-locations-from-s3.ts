@@ -239,8 +239,26 @@ function normalizeDescription(value: string): string | null {
 }
 
 function firstSentence(value: string): string {
-  const first = value.split(/\n{2,}|(?<=[.!?])\s+/).find(Boolean) ?? value;
+  const candidates = value
+    .split(/\n{2,}|(?<=[.!?])\s+/)
+    .map(cleanSummaryCandidate)
+    .filter((candidate) => candidate.length >= 40);
+  const first = candidates[0] ?? cleanSummaryCandidate(value) ?? value;
   return first.slice(0, 500);
+}
+
+function cleanSummaryCandidate(value: string): string {
+  return value
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !isSectionHeading(line))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isSectionHeading(value: string): boolean {
+  return /^\d+\.\s*$/.test(value) || /^\d+\.\s+[\p{L}\s/]+$/u.test(value);
 }
 
 function normalizeStatus(value?: string): PlaceStatus {
