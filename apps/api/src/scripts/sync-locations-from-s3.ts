@@ -8,6 +8,11 @@ import { Readable } from 'stream';
 const DOC_DIRS = ['docx', 'docs', 'doc', 'txt', 'text'];
 const IMAGE_DIRS = ['image', 'images', 'img'];
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+const CATALOG_KEY_ALIASES: Record<string, string> = {
+  CHUA_TAN_AN_FINAL: 'chua-tan-an',
+  DINH_NHON_CHAU_DINH_THAN_HOANG: 'dinh-nhon-chau-dinh-thanh-hoang',
+  NHA_THO_CO_HBAU: 'nha-tho-co-h-bau',
+};
 
 loadEnvFile();
 
@@ -28,8 +33,10 @@ async function main() {
   const status = normalizeStatus(process.env.SYNC_PLACE_STATUS);
   const region = await ensureGiaLaiRegion();
   const locationKeys = await listTopLevelPrefixes(client, bucket);
+  const catalog = loadLocationCatalog();
 
   let synced = 0;
+  const syncedLocationKeys: string[] = [];
   for (const locationKey of locationKeys) {
     const objects = await listObjects(client, bucket, `${locationKey}/`);
     const imageKeys = findImageKeys(locationKey, objects);
@@ -45,7 +52,14 @@ async function main() {
     const description = rawDescription ? extractIntroSection(rawDescription) : null;
     const heroImageS3Key = imageKeys[0] ?? null;
     const slug = keyToSlug(locationKey);
-    const name = inferPlaceName(description, keyToTitle(locationKey));
+    const catalogEntry = getCatalogEntry(catalog, locationKey, slug);
+    if (catalog && !catalogEntry) {
+      await archiveLocation(locationKey);
+      console.log(`[sync] skip ${locationKey} (not in location catalog)`);
+      continue;
+    }
+    const name = catalogEntry?.name ?? inferPlaceName(description, keyToTitle(locationKey));
+    const summary = catalogEntry?.summary ?? (description ? firstSentence(description) : null);
 
     const place = await prisma.place.upsert({
       where: { locationKey },
@@ -53,7 +67,7 @@ async function main() {
         locationKey,
         slug,
         titleVi: name,
-        summaryVi: description ? firstSentence(description) : null,
+        summaryVi: summary,
         descriptionVi: description,
         regionId: region.id,
         province: 'Gia Lai',
@@ -65,7 +79,7 @@ async function main() {
       },
       update: {
         titleVi: name,
-        summaryVi: description ? firstSentence(description) : undefined,
+        summaryVi: summary ?? undefined,
         descriptionVi: description ?? undefined,
         regionId: region.id,
         province: 'Gia Lai',
@@ -99,9 +113,24 @@ async function main() {
     }
 
     synced += 1;
+    syncedLocationKeys.push(locationKey);
     console.log(
       `[sync] ${locationKey} -> ${place.slug} (${textKeys.length} text, ${imageKeys.length} images)`,
     );
+  }
+
+  if (catalog) {
+    const archived = await prisma.place.updateMany({
+      where: {
+        locationKey: { not: null, notIn: syncedLocationKeys },
+        province: 'Gia Lai',
+        status: 'published',
+      },
+      data: { status: 'archived' },
+    });
+    if (archived.count > 0) {
+      console.log(`[sync] Archived ${archived.count} locations not present in catalog`);
+    }
   }
 
   console.log(`[sync] Done. Synced ${synced} locations from s3://${bucket}`);
@@ -239,10 +268,71 @@ function normalizeDescription(value: string): string | null {
   return normalized ? normalized : null;
 }
 
+type CatalogEntry = {
+  name: string;
+  summary: string;
+};
+
+function loadLocationCatalog(): Map<string, CatalogEntry> | null {
+  const catalogPaths = [
+    process.env.LOCATION_CATALOG_PATH,
+    join(process.cwd(), 'location_categories_short_list_style.txt'),
+    'C:\\Users\\nguye\\Downloads\\location_categories_short_list_style.txt',
+  ].filter((path): path is string => Boolean(path));
+
+  const catalogPath = catalogPaths.find((path) => existsSync(path));
+  if (!catalogPath) {
+    console.log('[sync] No location catalog found; falling back to document-derived names');
+    return null;
+  }
+
+  const catalog = new Map<string, CatalogEntry>();
+  const text = readFileSync(catalogPath, 'utf8');
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.match(/^\s*-\s*([^:]+):\s*(.+)$/);
+    if (!match) continue;
+    const name = match[1]?.trim();
+    const summary = match[2]?.trim();
+    if (!name || !summary) continue;
+    const slug = slugifyVietnamese(name);
+    if (!catalog.has(slug)) catalog.set(slug, { name, summary });
+  }
+
+  console.log(`[sync] Loaded ${catalog.size} catalog locations from ${catalogPath}`);
+  return catalog;
+}
+
+function getCatalogEntry(
+  catalog: Map<string, CatalogEntry> | null,
+  locationKey: string,
+  slug: string,
+): CatalogEntry | null {
+  if (!catalog) return null;
+  return catalog.get(CATALOG_KEY_ALIASES[locationKey] ?? slug) ?? null;
+}
+
+async function archiveLocation(locationKey: string): Promise<void> {
+  await prisma.place.updateMany({
+    where: { locationKey },
+    data: { status: 'archived' },
+  });
+}
+
+function slugifyVietnamese(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\u0111/g, 'd')
+    .replace(/\u0110/g, 'D')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function extractIntroSection(value: string): string {
   const normalized = value.replace(/\r\n/g, '\n').trim();
   const introMatch = normalized.match(
-    /(?:^|\n)\s*1\.\s*Giới thiệu địa điểm\s*\n+([\s\S]*?)(?=\n\s*2\.\s|\n\s*\d+\.\s+[^\n]+|$)/i,
+    /(?:^|\n)\s*1\.\s*Gi\u1edbi thi\u1ec7u \u0111\u1ecba \u0111i\u1ec3m\s*\n+([\s\S]*?)(?=\n\s*2\.\s|\n\s*\d+\.\s+[^\n]+|$)/i,
   );
   const intro = introMatch?.[1] ?? normalized;
   return cleanDescription(intro);
