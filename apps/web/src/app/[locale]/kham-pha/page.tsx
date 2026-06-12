@@ -87,9 +87,11 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
   const pageSize = 100;
 
   const [placesResult, regions, categories] = await Promise.all([
-    listPlaces({ region, category, season, sort, q, minRating, pageSize }).catch((e) => ({
-      _error: e instanceof Error ? e.message : 'unknown',
-    })),
+    listPlaces({ region, province: 'Gia Lai', category, season, sort, q, minRating, pageSize }).catch(
+      (e) => ({
+        _error: e instanceof Error ? e.message : 'unknown',
+      }),
+    ),
     listRegions().catch(() => []),
     listCategories().catch(() => []),
   ]);

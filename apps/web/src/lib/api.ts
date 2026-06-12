@@ -31,6 +31,8 @@ export interface ListPlacesOptions {
   q?: string;
   /** Region slug, e.g. `mien-bac`. */
   region?: string;
+  /** Province name, e.g. `Gia Lai`. */
+  province?: string;
   /** Category slug, e.g. `bien-dao`. */
   category?: string;
   /** Best season slug, e.g. `summer`. */
@@ -47,6 +49,7 @@ export async function listPlaces(opts: ListPlacesOptions = {}): Promise<Paginate
   if (opts.pageSize) params.set('pageSize', String(opts.pageSize));
   if (opts.q) params.set('q', opts.q);
   if (opts.region) params.set('region', opts.region);
+  if (opts.province) params.set('province', opts.province);
   if (opts.category) params.set('category', opts.category);
   if (opts.season) params.set('season', opts.season);
   if (opts.sort) params.set('sort', opts.sort);
