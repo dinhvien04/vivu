@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GeminiService } from '../../gemini/gemini.service';
 import { QdrantRepository } from '../../qdrant/qdrant.repository';
 import { S3Service } from '../../storage/s3.service';
-import { ContextBuilderService } from '../services/context-builder.service';
 import { ResponseFormatterService } from '../services/response-formatter.service';
 import type { AiChatResponse, AiUploadedImage } from '../types/ai.types';
 
@@ -15,9 +13,7 @@ export class ImageOnlyPipeline {
   constructor(
     config: ConfigService,
     private readonly qdrant: QdrantRepository,
-    private readonly gemini: GeminiService,
     private readonly s3: S3Service,
-    private readonly contextBuilder: ContextBuilderService,
     private readonly formatter: ResponseFormatterService,
   ) {
     this.topK = Number(config.get<string>('TOP_K_IMAGES') ?? 5);
@@ -25,7 +21,6 @@ export class ImageOnlyPipeline {
   }
 
   async run(image: AiUploadedImage): Promise<AiChatResponse> {
-    this.s3.assertConfigured();
     const imageResults = await this.searchImage(image);
     const top = imageResults[0];
     if (!top || top.score < this.threshold) {
@@ -37,17 +32,8 @@ export class ImageOnlyPipeline {
       });
     }
 
-    const context = this.contextBuilder.fromImageResults(imageResults);
-    const answer = await this.gemini.generateTravelAnswer({
-      question: 'Đây là địa điểm nào và có thông tin gì nổi bật?',
-      context,
-      detectedPlace: {
-        slug: top.place_slug,
-        name: top.location_name,
-        score: top.score,
-      },
-      matchedImages: imageResults,
-    });
+    const placeName = top.location_name ?? top.place_slug ?? 'địa điểm này';
+    const answer = `Ảnh có độ tương đồng cao nhất với ${placeName} (${(top.score * 100).toFixed(1)}%).`;
     return this.formatter.format({
       inputType: 'image_only',
       answer,

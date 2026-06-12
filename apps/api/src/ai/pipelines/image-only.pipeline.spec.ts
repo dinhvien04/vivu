@@ -1,8 +1,6 @@
 import type { ConfigService } from '@nestjs/config';
-import type { GeminiService } from '../../gemini/gemini.service';
 import type { QdrantRepository } from '../../qdrant/qdrant.repository';
 import type { S3Service } from '../../storage/s3.service';
-import type { ContextBuilderService } from '../services/context-builder.service';
 import type { ResponseFormatterService } from '../services/response-formatter.service';
 import { ImageOnlyPipeline } from './image-only.pipeline';
 
@@ -16,7 +14,6 @@ describe('ImageOnlyPipeline', () => {
 
     await pipeline.run(image);
 
-    expect(deps.gemini.generateTravelAnswer).not.toHaveBeenCalled();
     expect(deps.formatter.format).toHaveBeenCalledWith(
       expect.objectContaining({
         inputType: 'image_only',
@@ -37,13 +34,11 @@ describe('ImageOnlyPipeline', () => {
 
     await pipeline.run(image);
 
-    expect(deps.gemini.generateTravelAnswer).toHaveBeenCalledWith(
+    expect(deps.formatter.format).toHaveBeenCalledWith(
       expect.objectContaining({
-        detectedPlace: {
-          slug: 'bien-ho',
-          name: 'Biển Hồ',
-          score: 0.91,
-        },
+        inputType: 'image_only',
+        answer: expect.stringContaining('Biển Hồ'),
+        detectedPlaceSlug: 'bien-ho',
       }),
     );
   });
@@ -52,9 +47,7 @@ describe('ImageOnlyPipeline', () => {
 function makeDeps(results: object[]) {
   return {
     qdrant: { searchImagesByImageBase64: jest.fn().mockResolvedValue(results) },
-    gemini: { generateTravelAnswer: jest.fn().mockResolvedValue('answer') },
-    s3: { assertConfigured: jest.fn(), uploadTemporaryImage: jest.fn() },
-    context: { fromImageResults: jest.fn().mockReturnValue('image context') },
+    s3: { uploadTemporaryImage: jest.fn() },
     formatter: { format: jest.fn().mockResolvedValue({ success: true }) },
   };
 }
@@ -63,9 +56,7 @@ function makePipeline(deps: ReturnType<typeof makeDeps>) {
   return new ImageOnlyPipeline(
     config(),
     deps.qdrant as unknown as QdrantRepository,
-    deps.gemini as unknown as GeminiService,
     deps.s3 as unknown as S3Service,
-    deps.context as unknown as ContextBuilderService,
     deps.formatter as unknown as ResponseFormatterService,
   );
 }

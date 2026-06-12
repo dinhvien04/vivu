@@ -64,13 +64,14 @@ export function useAiChat(errorMessage: string) {
             createdAt: new Date().toISOString(),
           },
         ]);
-      } catch {
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : '';
         setMessages((current) => [
           ...current,
           {
             id: createId('assistant-error'),
             role: 'assistant',
-            content: errorMessage,
+            content: detail ? `${errorMessage}\n${detail}` : errorMessage,
             createdAt: new Date().toISOString(),
             error: true,
           },

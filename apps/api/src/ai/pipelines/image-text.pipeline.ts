@@ -27,10 +27,20 @@ export class ImageTextPipeline {
   }
 
   async run(message: string, image: AiUploadedImage): Promise<AiChatResponse> {
-    this.s3.assertConfigured();
     const imageResults = await this.searchImage(image);
     const top = imageResults[0];
-    const detectedPlaceSlug = top && top.score >= this.threshold ? top.place_slug : undefined;
+    const detectedPlaceSlug =
+      top && top.score >= this.threshold && top.place_slug ? top.place_slug : undefined;
+
+    if (!detectedPlaceSlug) {
+      return this.formatter.format({
+        inputType: 'image_text',
+        answer:
+          'Mình chưa nhận diện được địa điểm trong ảnh với độ tin cậy đủ cao nên chưa thể trả lời câu hỏi theo đúng địa điểm. Bạn hãy gửi ảnh rõ hơn.',
+        imageResults,
+      });
+    }
+
     const textResults = await this.qdrant.searchTextByMessage(message, {
       limit: this.topKText,
       placeSlug: detectedPlaceSlug,
@@ -45,11 +55,7 @@ export class ImageTextPipeline {
       question: message,
       context,
       detectedPlace: top
-        ? {
-            slug: detectedPlaceSlug,
-            name: top.location_name,
-            score: top.score,
-          }
+        ? { slug: detectedPlaceSlug, name: top.location_name, score: top.score }
         : undefined,
       matchedImages: imageResults,
     });

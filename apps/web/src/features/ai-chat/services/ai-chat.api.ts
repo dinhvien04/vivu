@@ -17,7 +17,14 @@ export async function sendAiChatMessage(params: {
   });
 
   if (!res.ok) {
-    throw new Error('Failed to send AI chat message');
+    const payload = (await res.json().catch(() => null)) as {
+      message?: string | string[];
+      error?: string;
+    } | null;
+    const message = Array.isArray(payload?.message)
+      ? payload.message.join(', ')
+      : (payload?.message ?? payload?.error);
+    throw new Error(message || 'Failed to send AI chat message');
   }
 
   return (await res.json()) as AiChatResponse;

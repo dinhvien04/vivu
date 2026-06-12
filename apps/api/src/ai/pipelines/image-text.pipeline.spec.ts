@@ -18,13 +18,24 @@ describe('ImageTextPipeline', () => {
     });
   });
 
-  it('searches text without a filter for a low-confidence image match', async () => {
+  it('does not query text or Gemini for a low-confidence image match', async () => {
     const deps = makeDeps([{ id: '1', score: 0.1, place_slug: 'bien-ho' }]);
     await makePipeline(deps).run('Chỗ này có gì chơi?', image);
-    expect(deps.qdrant.searchTextByMessage).toHaveBeenCalledWith('Chỗ này có gì chơi?', {
-      limit: 5,
-      placeSlug: undefined,
-    });
+    expect(deps.qdrant.searchTextByMessage).not.toHaveBeenCalled();
+    expect(deps.gemini.generateTravelAnswer).not.toHaveBeenCalled();
+    expect(deps.formatter.format).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputType: 'image_text',
+        answer: expect.stringContaining('chưa nhận diện'),
+      }),
+    );
+  });
+
+  it('does not query text when a confident image result has no place_slug', async () => {
+    const deps = makeDeps([{ id: '1', score: 0.9, location_name: 'Không rõ slug' }]);
+    await makePipeline(deps).run('Chỗ này có gì chơi?', image);
+    expect(deps.qdrant.searchTextByMessage).not.toHaveBeenCalled();
+    expect(deps.gemini.generateTravelAnswer).not.toHaveBeenCalled();
   });
 });
 
@@ -35,7 +46,7 @@ function makeDeps(imageResults: object[]) {
       searchTextByMessage: jest.fn().mockResolvedValue([]),
     },
     gemini: { generateTravelAnswer: jest.fn().mockResolvedValue('answer') },
-    s3: { assertConfigured: jest.fn(), uploadTemporaryImage: jest.fn() },
+    s3: { uploadTemporaryImage: jest.fn() },
     context: {
       fromTextResults: jest.fn().mockReturnValue('text context'),
       fromImageResults: jest.fn().mockReturnValue('image context'),
