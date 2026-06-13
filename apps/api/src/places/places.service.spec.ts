@@ -216,6 +216,10 @@ describe('PlacesService.list', () => {
 
     expect(prisma.place.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: expect.objectContaining({
+          status: 'published',
+          OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+        }),
         skip: 12,
         take: 12,
         include: {
@@ -227,5 +231,38 @@ describe('PlacesService.list', () => {
     expect(result.meta).toEqual({ page: 2, pageSize: 12, total: 73 });
     expect(result.data[0]?.photos).toBeUndefined();
     expect(result.data[0]?.heroImageUrl).toBe('https://signed.example/hero.jpg');
+  });
+
+  it('keeps image filtering when a search query is provided', async () => {
+    const prisma = {
+      place: {
+        findMany: jest.fn().mockResolvedValue([]),
+        count: jest.fn().mockResolvedValue(0),
+      },
+      review: {
+        groupBy: jest.fn().mockResolvedValue([]),
+      },
+    };
+    const service = new PlacesService(
+      prisma as unknown as PrismaService,
+      { getPresignedGetUrl: jest.fn() } as never,
+    );
+
+    await service.list({ q: 'Biển Hồ' } as never);
+
+    expect(prisma.place.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+          AND: [
+            {
+              OR: expect.arrayContaining([
+                { titleVi: { contains: 'Biển Hồ', mode: 'insensitive' } },
+              ]),
+            },
+          ],
+        }),
+      }),
+    );
   });
 });

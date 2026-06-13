@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { placeSummary, placeTitle } from '@/i18n/place';
 import { transformCloudinary } from '@/lib/image';
+import { hasPlaceImage } from '@/lib/place-image';
 
 interface PlaceCardProps {
   place: Place;
@@ -14,9 +15,10 @@ interface PlaceCardProps {
 }
 
 export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
-  const heroSrc = place.heroImageUrl
-    ? (transformCloudinary(place.heroImageUrl, { width: 800, height: 450 }) ?? place.heroImageUrl)
-    : null;
+  if (!hasPlaceImage(place)) return null;
+
+  const heroSrc =
+    transformCloudinary(place.heroImageUrl, { width: 800, height: 450 }) ?? place.heroImageUrl;
 
   const title = placeTitle(place, locale);
   const summary = placeSummary(place, locale);
@@ -27,19 +29,13 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface transition-shadow hover:shadow-lg"
     >
       <div className={`relative bg-surface-container ${compact ? 'aspect-[4/3]' : 'aspect-video'}`}>
-        {heroSrc ? (
-          <Image
-            src={heroSrc}
-            alt={title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 via-secondary-container to-surface-container-high text-primary">
-            <span className="px-6 text-center font-h4 text-h4">{title}</span>
-          </div>
-        )}
+        <Image
+          src={heroSrc}
+          alt={title}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+        />
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
         <div className="flex items-center justify-between gap-2">

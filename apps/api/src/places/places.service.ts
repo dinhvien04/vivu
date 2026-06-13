@@ -88,16 +88,21 @@ export class PlacesService {
 
     const where: Prisma.PlaceWhereInput = {
       status: 'published',
+      OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
     };
 
     if (query.q) {
       const q = query.q.trim();
-      where.OR = [
-        { titleVi: { contains: q, mode: 'insensitive' } },
-        { titleEn: { contains: q, mode: 'insensitive' } },
-        { summaryVi: { contains: q, mode: 'insensitive' } },
-        { locationKey: { contains: q, mode: 'insensitive' } },
-        { province: { contains: q, mode: 'insensitive' } },
+      where.AND = [
+        {
+          OR: [
+            { titleVi: { contains: q, mode: 'insensitive' } },
+            { titleEn: { contains: q, mode: 'insensitive' } },
+            { summaryVi: { contains: q, mode: 'insensitive' } },
+            { locationKey: { contains: q, mode: 'insensitive' } },
+            { province: { contains: q, mode: 'insensitive' } },
+          ],
+        },
       ];
     }
 
@@ -300,6 +305,7 @@ export class PlacesService {
         ) AS distance_m
       FROM "Place"
       WHERE "status"::text = 'published'
+        AND ("heroImageUrl" IS NOT NULL OR "heroImageS3Key" IS NOT NULL)
         AND "geo" IS NOT NULL
         AND ST_DWithin(
           "geo",

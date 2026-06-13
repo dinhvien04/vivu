@@ -11,6 +11,7 @@ import { useRouter } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { Place } from '@/lib/api';
 import { listMyFavorites } from '@/lib/favorites-client';
+import { hasPlaceImage } from '@/lib/place-image';
 
 export default function YeuThichPage() {
   const t = useTranslations('account');
@@ -20,6 +21,7 @@ export default function YeuThichPage() {
   const { user, loading: authLoading, getAccessToken } = useAuth();
   const [places, setPlaces] = useState<Place[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const visiblePlaces = places?.filter(hasPlaceImage) ?? null;
 
   useEffect(() => {
     if (authLoading) return;
@@ -82,7 +84,7 @@ export default function YeuThichPage() {
               />
             ))}
           </ul>
-        ) : places.length === 0 ? (
+        ) : visiblePlaces?.length === 0 ? (
           <EmptyState
             icon="favorite_border"
             title={t('favoritesEmpty')}
@@ -92,10 +94,10 @@ export default function YeuThichPage() {
         ) : (
           <>
             <p className="mb-4 text-body-sm text-on-surface-variant">
-              {tCommon('placeCount', { count: places.length })}
+              {tCommon('placeCount', { count: visiblePlaces?.length ?? 0 })}
             </p>
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {places.map((place) => (
+              {visiblePlaces?.map((place) => (
                 <li key={place.id}>
                   <PlaceCard place={place} locale={locale} />
                 </li>

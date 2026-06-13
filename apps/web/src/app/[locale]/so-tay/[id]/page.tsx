@@ -17,6 +17,7 @@ import {
   removeCollectionItem,
   updateCollection,
 } from '@/lib/collections-client';
+import { hasPlaceImage } from '@/lib/place-image';
 import type { Collection } from '@vivu/types';
 
 function formatDate(iso: string, locale: Locale): string {
@@ -188,6 +189,7 @@ export default function SoTayDetailPage() {
   }
 
   const items = collection.items ?? [];
+  const visibleItems = items.filter((item) => hasPlaceImage(item.place));
 
   return (
     <>
@@ -319,7 +321,7 @@ export default function SoTayDetailPage() {
           </div>
         )}
 
-        {items.length === 0 ? (
+        {visibleItems.length === 0 ? (
           <EmptyState
             icon="bookmark_border"
             title={t('emptySoTay')}
@@ -328,8 +330,8 @@ export default function SoTayDetailPage() {
           />
         ) : (
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((it) =>
-              it.place ? (
+            {visibleItems.map((it) =>
+              hasPlaceImage(it.place) ? (
                 <li key={it.placeId} className="relative">
                   <PlaceCard place={it.place} locale={locale} />
                   <button
