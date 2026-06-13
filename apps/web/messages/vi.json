@@ -115,15 +115,15 @@
     "disclaimer": "Câu trả lời được tạo từ dữ liệu truy xuất của Vivu và có thể chưa đầy đủ."
   },
   "regions": {
-    "mien-bac": "Miền Bắc",
-    "mien-trung": "Miền Trung",
-    "mien-nam": "Miền Nam",
+    "mien-bac": "Bắc Gia Lai",
+    "mien-trung": "Trung tâm Gia Lai",
+    "mien-nam": "Nam Gia Lai",
     "tay-nguyen": "Tây Nguyên"
   },
   "regionsCaps": {
-    "mien-bac": "MIỀN BẮC",
-    "mien-trung": "MIỀN TRUNG",
-    "mien-nam": "MIỀN NAM",
+    "mien-bac": "BẮC GIA LAI",
+    "mien-trung": "TRUNG TÂM GIA LAI",
+    "mien-nam": "NAM GIA LAI",
     "tay-nguyen": "TÂY NGUYÊN"
   },
   "seasons": {
@@ -258,12 +258,12 @@
     "filterRegion": "Vùng",
     "filterCategory": "Chủ đề",
     "filterSeason": "Mùa",
-    "cardExploreTitle": "Khám phá theo vùng",
-    "cardExploreBody": "Bắc, Trung, Nam và 4 mùa trong năm.",
+    "cardExploreTitle": "Khám phá Gia Lai",
+    "cardExploreBody": "Danh lam, di tích, tháp Chăm và trải nghiệm địa phương.",
     "cardBeachTitle": "Biển đảo",
-    "cardBeachBody": "Bãi biển và đảo nổi bật khắp ba miền.",
+    "cardBeachBody": "Các điểm biển đảo trong bộ dữ liệu Gia Lai mở rộng.",
     "cardCultureTitle": "Văn hoá - Lịch sử",
-    "cardCultureBody": "Đền chùa, di tích và phố cổ."
+    "cardCultureBody": "Đền chùa, di tích và không gian văn hoá địa phương."
   },
   "map": {
     "title": "Bản đồ địa danh Gia Lai",
@@ -352,7 +352,7 @@
     "errorSessionExpired": "Phiên đăng nhập đã hết hạn",
     "deleteConfirmName": "Xoá sổ tay \"{name}\"?",
     "fieldName": "Tên sổ tay",
-    "fieldNameExample": "Ví dụ: Đi miền Trung mùa hè 2026",
+    "fieldNameExample": "Ví dụ: Khám phá Gia Lai cuối tuần",
     "fieldDescription": "Mô tả ngắn (tuỳ chọn)",
     "creating": "Đang tạo…",
     "create": "Tạo sổ tay",
@@ -452,7 +452,7 @@
     "fieldEmailHint": "Email không thay đổi được trong phiên bản này.",
     "fieldName": "Họ và tên",
     "fieldLocation": "Địa điểm",
-    "fieldLocationPlaceholder": "Hà Nội, Việt Nam",
+    "fieldLocationPlaceholder": "Pleiku, Gia Lai",
     "fieldAvatar": "Ảnh đại diện (URL)",
     "fieldAvatarPlaceholder": "https://res.cloudinary.com/.../avatar.jpg",
     "fieldBio": "Giới thiệu",
@@ -673,10 +673,10 @@
     "qaPlaces": "Danh sách địa điểm",
     "qaExport": "Xuất báo cáo",
     "exportSoon": "Tính năng xuất báo cáo (CSV/Excel) sẽ sớm có mặt.",
-    "regionMienBac": "Miền Bắc",
-    "regionMienTrung": "Miền Trung",
+    "regionMienBac": "Khu vực Bắc Gia Lai",
+    "regionMienTrung": "Khu vực trung tâm Gia Lai",
     "regionTayNguyen": "Tây Nguyên",
-    "regionMienNam": "Miền Nam",
+    "regionMienNam": "Khu vực Nam Gia Lai",
     "placesTitle": "Quản lý địa điểm",
     "placesLead": "Tra cứu, chỉnh sửa và xuất bản các địa điểm du lịch.",
     "placesSearch": "Tìm theo tên hoặc địa chỉ...",

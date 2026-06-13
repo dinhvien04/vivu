@@ -115,15 +115,15 @@
     "disclaimer": "Answers are generated from Vivu retrieval data and may be incomplete."
   },
   "regions": {
-    "mien-bac": "Northern Vietnam",
-    "mien-trung": "Central Vietnam",
-    "mien-nam": "Southern Vietnam",
+    "mien-bac": "Northern Gia Lai",
+    "mien-trung": "Central Gia Lai",
+    "mien-nam": "Southern Gia Lai",
     "tay-nguyen": "Central Highlands"
   },
   "regionsCaps": {
-    "mien-bac": "NORTHERN VIETNAM",
-    "mien-trung": "CENTRAL VIETNAM",
-    "mien-nam": "SOUTHERN VIETNAM",
+    "mien-bac": "NORTHERN GIA LAI",
+    "mien-trung": "CENTRAL GIA LAI",
+    "mien-nam": "SOUTHERN GIA LAI",
     "tay-nguyen": "CENTRAL HIGHLANDS"
   },
   "seasons": {
@@ -258,12 +258,12 @@
     "filterRegion": "Region",
     "filterCategory": "Theme",
     "filterSeason": "Season",
-    "cardExploreTitle": "Browse by region",
-    "cardExploreBody": "North, Central, South and the four seasons.",
+    "cardExploreTitle": "Explore Gia Lai",
+    "cardExploreBody": "Scenic places, heritage sites, Cham towers and local experiences.",
     "cardBeachTitle": "Beaches & islands",
-    "cardBeachBody": "Notable coastlines and islands across all regions.",
+    "cardBeachBody": "Coastal and island entries in the extended Gia Lai dataset.",
     "cardCultureTitle": "Culture & history",
-    "cardCultureBody": "Temples, monuments and old quarters."
+    "cardCultureBody": "Temples, heritage sites and local cultural spaces."
   },
   "map": {
     "title": "Gia Lai destination map",
@@ -352,7 +352,7 @@
     "errorSessionExpired": "Your session has expired",
     "deleteConfirmName": "Delete collection \"{name}\"?",
     "fieldName": "Collection name",
-    "fieldNameExample": "e.g. Central Vietnam Summer 2026",
+    "fieldNameExample": "e.g. Gia Lai weekend discoveries",
     "fieldDescription": "Short description (optional)",
     "creating": "Creating…",
     "create": "Create",
@@ -452,7 +452,7 @@
     "fieldEmailHint": "Email cannot be changed in this version.",
     "fieldName": "Full name",
     "fieldLocation": "Location",
-    "fieldLocationPlaceholder": "Hanoi, Vietnam",
+    "fieldLocationPlaceholder": "Pleiku, Gia Lai",
     "fieldAvatar": "Avatar (URL)",
     "fieldAvatarPlaceholder": "https://res.cloudinary.com/.../avatar.jpg",
     "fieldBio": "Bio",
@@ -673,10 +673,10 @@
     "qaPlaces": "Places list",
     "qaExport": "Export report",
     "exportSoon": "Export report (CSV/Excel) is coming soon.",
-    "regionMienBac": "Northern Vietnam",
-    "regionMienTrung": "Central Vietnam",
+    "regionMienBac": "Northern Gia Lai area",
+    "regionMienTrung": "Central Gia Lai area",
     "regionTayNguyen": "Central Highlands",
-    "regionMienNam": "Southern Vietnam",
+    "regionMienNam": "Southern Gia Lai area",
     "placesTitle": "Manage places",
     "placesLead": "Browse, edit and publish travel destinations.",
     "placesSearch": "Search by name or address...",

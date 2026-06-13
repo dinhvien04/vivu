@@ -14,7 +14,7 @@ interface PlacesMapProps {
   places: Place[];
   /** Active locale — controls popup labels and place text. */
   locale: Locale;
-  /** Initial map centre (lat, lng). Defaults to mid-Vietnam. */
+  /** Initial map centre (lat, lng). Defaults to Gia Lai. */
   center?: [number, number];
   /** Initial zoom. */
   zoom?: number;
