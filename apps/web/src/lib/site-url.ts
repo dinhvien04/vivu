@@ -5,9 +5,12 @@
  * default. Strips any trailing slash so callers can safely concatenate paths.
  */
 export const SITE_URL: string = (() => {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const vercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const raw = vercelProductionUrl || configuredUrl;
   const value = raw && raw.length > 0 ? raw : 'http://localhost:3000';
-  return value.replace(/\/+$/, '');
+  const absoluteValue = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  return absoluteValue.replace(/\/+$/, '');
 })();
 
 /** Build an absolute URL for a path that starts with `/`. */

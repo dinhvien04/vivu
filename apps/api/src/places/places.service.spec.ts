@@ -188,3 +188,44 @@ describe('PlacesService.listNearby', () => {
     expect(out.map((p) => p.id)).toEqual(['p2']);
   });
 });
+
+describe('PlacesService.list', () => {
+  it('paginates in Prisma and omits gallery photos from list responses', async () => {
+    const place = makePlace('p1', 's-1');
+    place.heroImageS3Key = 'GIA_LAI/image/hero.jpg';
+    const prisma = {
+      place: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            ...place,
+            photos: undefined,
+          },
+        ]),
+        count: jest.fn().mockResolvedValue(73),
+      },
+      review: {
+        groupBy: jest.fn().mockResolvedValue([]),
+      },
+    };
+    const s3 = {
+      getPresignedGetUrl: jest.fn().mockResolvedValue('https://signed.example/hero.jpg'),
+    };
+    const service = new PlacesService(prisma as unknown as PrismaService, s3 as never);
+
+    const result = await service.list({ page: 2, pageSize: 12 } as never);
+
+    expect(prisma.place.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: 12,
+        take: 12,
+        include: {
+          region: true,
+          categories: { include: { category: true } },
+        },
+      }),
+    );
+    expect(result.meta).toEqual({ page: 2, pageSize: 12, total: 73 });
+    expect(result.data[0]?.photos).toBeUndefined();
+    expect(result.data[0]?.heroImageUrl).toBe('https://signed.example/hero.jpg');
+  });
+});

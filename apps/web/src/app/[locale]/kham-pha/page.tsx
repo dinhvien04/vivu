@@ -14,9 +14,9 @@ const TOPICS = [
     slug: 'danh-lam-thang-canh',
     vi: 'Danh lam thắng cảnh',
     en: 'Scenic places',
-    keywords: ['thắng cảnh', 'cảnh quan', 'du lịch'],
+    keywords: ['thắng cảnh', 'núi', 'hồ', 'thác', 'suối', 'vườn quốc gia'],
   },
-  { slug: 'di-tich', vi: 'Di tích', en: 'Historic sites', keywords: ['di tích', 'lịch sử'] },
+  { slug: 'di-tich', vi: 'Di tích', en: 'Historic sites', keywords: ['di tích', 'lũy'] },
   { slug: 'bien-dao', vi: 'Biển đảo', en: 'Beaches & islands', keywords: ['biển', 'đảo'] },
   { slug: 'chua', vi: 'Chùa', en: 'Pagodas', keywords: ['chùa', 'thiền viện'] },
   { slug: 'thap-cham', vi: 'Tháp Chăm', en: 'Cham towers', keywords: ['tháp', 'chăm'] },
@@ -59,18 +59,25 @@ function buildHref(
 
 function normalize(value: string): string {
   return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .toLowerCase();
+    .normalize('NFC')
+    .toLocaleLowerCase('vi-VN')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
 }
 
 function matchesTopic(place: Place, keywords: readonly string[], locale: Locale): boolean {
   if (keywords.length === 0) return true;
-  const text = normalize(
-    [placeTitle(place, locale), placeSummary(place, locale), place.descriptionVi ?? ''].join(' '),
-  );
-  return keywords.some((keyword) => text.includes(normalize(keyword)));
+  const text = ` ${normalize(
+    [
+      placeTitle(place, locale),
+      place.titleVi,
+      place.titleEn ?? '',
+      place.locationKey ?? '',
+      ...place.aliases,
+    ].join(' '),
+  )} `;
+  return keywords.some((keyword) => text.includes(` ${normalize(keyword)} `));
 }
 
 export const dynamic = 'force-dynamic';

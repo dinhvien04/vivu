@@ -89,7 +89,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             <div className="flex flex-wrap gap-3 pt-4">
               <Link
                 href="/kham-pha"
-                className="inline-flex items-center rounded-lg bg-primary-container px-8 py-4 text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-105 hover:shadow-hover active:scale-95"
+                className="inline-flex items-center rounded-lg bg-primary-container px-8 py-4 text-body-md font-semibold text-on-primary-container shadow-premium transition-all hover:scale-105 hover:shadow-hover active:scale-95"
               >
                 {t('home.heroCta')}
               </Link>

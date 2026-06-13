@@ -122,16 +122,20 @@ export class PlacesService {
     const orderBy: Prisma.PlaceOrderByWithRelationInput =
       query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };
 
-    // Fetch the rows for the page (pre-rating filter) then aggregate ratings + apply minRating.
-    const rows = await this.prisma.place.findMany({
-      where,
-      orderBy,
-      include: {
-        region: true,
-        photos: { orderBy: { position: 'asc' } },
-        categories: { include: { category: true } },
-      },
-    });
+    const filtersByRating = query.minRating !== undefined;
+    const [rows, unfilteredTotal] = await Promise.all([
+      this.prisma.place.findMany({
+        where,
+        orderBy,
+        skip: filtersByRating ? undefined : skip,
+        take: filtersByRating ? undefined : pageSize,
+        include: {
+          region: true,
+          categories: { include: { category: true } },
+        },
+      }),
+      filtersByRating ? Promise.resolve(0) : this.prisma.place.count({ where }),
+    ]);
 
     const placeIds = rows.map((p) => p.id);
     const ratingByPlaceId = new Map<string, { count: number; average: number }>();
@@ -152,7 +156,8 @@ export class PlacesService {
 
     let enriched = await Promise.all(
       rows.map(async (p) => {
-        const out = toApiPlace(p as PlaceWithRelations);
+        const out = toApiPlace({ ...p, photos: [] } as PlaceWithRelations);
+        out.photos = undefined;
         out.rating = ratingByPlaceId.get(p.id) ?? { count: 0, average: 0 };
         return this.withPresignedMedia(out);
       }),
@@ -163,8 +168,8 @@ export class PlacesService {
       enriched = enriched.filter((p) => (p.rating?.average ?? 0) >= threshold);
     }
 
-    const total = enriched.length;
-    const paged = enriched.slice(skip, skip + pageSize);
+    const total = filtersByRating ? enriched.length : unfilteredTotal;
+    const paged = filtersByRating ? enriched.slice(skip, skip + pageSize) : enriched;
 
     return {
       data: paged,

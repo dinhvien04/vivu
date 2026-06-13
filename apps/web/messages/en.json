@@ -532,7 +532,7 @@
     "loginTitle": "Sign in",
     "loginLead": "Sign in to save favorites, write reviews and manage collections.",
     "registerTitle": "Sign up",
-    "registerLead": "Create a free account and start exploring Vietnam.",
+    "registerLead": "Create a free account and start exploring Gia Lai with Vivu.",
     "forgotTitle": "Forgot password",
     "forgotLead": "Enter your email and we will send a reset link.",
     "resetTitle": "Reset password",
@@ -557,8 +557,8 @@
     "successReset": "Reset email sent — please check your inbox.",
     "successResetUpdated": "Password updated. Sign in again to continue.",
     "errorGeneric": "Something went wrong. Please try again.",
-    "loginTagline": "Discover the beauty of Vietnam",
-    "registerTagline": "Start your Vietnam discovery journey",
+    "loginTagline": "Discover Gia Lai with Vivu",
+    "registerTagline": "Start your Gia Lai discovery journey",
     "passwordHint": "At least 8 characters with both letters and numbers.",
     "namePlaceholder": "Jane Doe",
     "loginGoogle": "Continue with Google",
@@ -579,7 +579,7 @@
     "termsCheckbox": "I agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>",
     "shellHomeAria": "Vivu — back to home",
     "shellHomeBack": "← Back to home",
-    "shellFooter": "© {year} VIVU. DISCOVER VIETNAM."
+    "shellFooter": "© {year} VIVU. DISCOVER GIA LAI."
   },
   "notifications": {
     "title": "Notifications",

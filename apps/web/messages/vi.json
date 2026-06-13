@@ -532,7 +532,7 @@
     "loginTitle": "Đăng nhập",
     "loginLead": "Đăng nhập để lưu địa điểm yêu thích, viết đánh giá và quản lý sổ tay.",
     "registerTitle": "Đăng ký",
-    "registerLead": "Tạo tài khoản miễn phí và bắt đầu hành trình khám phá Việt Nam.",
+    "registerLead": "Tạo tài khoản miễn phí và bắt đầu khám phá Gia Lai cùng Vivu.",
     "forgotTitle": "Quên mật khẩu",
     "forgotLead": "Nhập email và chúng tôi sẽ gửi liên kết đặt lại mật khẩu.",
     "resetTitle": "Đặt lại mật khẩu",
@@ -557,8 +557,8 @@
     "successReset": "Đã gửi email đặt lại — kiểm tra hộp thư của bạn.",
     "successResetUpdated": "Đã đặt lại mật khẩu. Đăng nhập lại để tiếp tục.",
     "errorGeneric": "Có lỗi xảy ra. Hãy thử lại.",
-    "loginTagline": "Khám phá vẻ đẹp Việt Nam",
-    "registerTagline": "Bắt đầu hành trình khám phá Việt Nam của bạn",
+    "loginTagline": "Khám phá Gia Lai cùng Vivu",
+    "registerTagline": "Bắt đầu hành trình khám phá Gia Lai của bạn",
     "passwordHint": "Tối thiểu 8 ký tự, có cả chữ và số.",
     "namePlaceholder": "Nguyễn Văn A",
     "loginGoogle": "Tiếp tục với Google",
@@ -579,7 +579,7 @@
     "termsCheckbox": "Tôi đồng ý với <terms>Điều khoản</terms> và <privacy>Chính sách bảo mật</privacy>",
     "shellHomeAria": "Vivu — về trang chủ",
     "shellHomeBack": "← Về trang chủ",
-    "shellFooter": "© {year} VIVU. KHÁM PHÁ VẺ ĐẸP VIỆT NAM."
+    "shellFooter": "© {year} VIVU. KHÁM PHÁ GIA LAI."
   },
   "notifications": {
     "title": "Thông báo",
