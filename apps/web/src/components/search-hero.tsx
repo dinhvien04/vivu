@@ -143,10 +143,10 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
       {!compact && (
         <button
           type="submit"
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 font-semibold text-white transition-colors hover:bg-primary/90"
+          className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white transition-colors hover:bg-primary/90 sm:h-auto sm:w-auto sm:gap-2 sm:px-5 sm:py-2"
         >
           <Icon name="search" className="!text-base" />
-          {t('searchSubmit')}
+          <span className="hidden sm:inline">{t('searchSubmit')}</span>
         </button>
       )}
 

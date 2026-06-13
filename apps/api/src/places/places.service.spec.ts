@@ -31,8 +31,8 @@ function makePlace(id: string, slug: string) {
     lng: 105.8,
     bestSeasons: [],
     status: 'published',
-    heroImageUrl: null,
-    heroImageS3Key: null,
+    heroImageUrl: null as string | null,
+    heroImageS3Key: null as string | null,
     qdrantPlaceSlug: null,
     isAiReady: false,
     photos: [],
@@ -258,6 +258,7 @@ describe('PlacesService.list', () => {
             {
               OR: expect.arrayContaining([
                 { titleVi: { contains: 'Biển Hồ', mode: 'insensitive' } },
+                { locationKey: { contains: 'BIEN_HO', mode: 'insensitive' } },
               ]),
             },
           ],

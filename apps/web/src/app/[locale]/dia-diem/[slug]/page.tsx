@@ -26,6 +26,20 @@ interface PageProps {
   params: Promise<{ slug: string; locale: Locale }>;
 }
 
+function firstPublicParagraph(value: string | null): string | null {
+  if (!value) return null;
+  const paragraph = value
+    .split(/\n\s*\n/)
+    .map((item) => item.trim())
+    .find(
+      (item) =>
+        item.length > 0 &&
+        !/chatbot|rag|khi xây dựng|nguồn du lịch|chuẩn hóa|bộ dữ liệu/i.test(item),
+    );
+  if (!paragraph) return null;
+  return paragraph.length > 700 ? `${paragraph.slice(0, 697).trimEnd()}...` : paragraph;
+}
+
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -132,6 +146,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   const title = placeTitle(place, locale);
   const summary = placeSummary(place, locale);
   const description = placeDescription(place, locale);
+  const publicDescription = summary ?? firstPublicParagraph(description);
 
   const categoriesText =
     place.categories && place.categories.length > 0
@@ -145,7 +160,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'TouristAttraction',
     name: title,
-    description: summary ?? description ?? undefined,
+    description: publicDescription ?? undefined,
     url: absoluteUrl(`${locale === 'en' ? '/en' : ''}/dia-diem/${place.slug}`),
     image: place.heroImageUrl ? [place.heroImageUrl] : undefined,
     address: place.address
@@ -251,7 +266,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                 <h2 className="font-h2 text-h2 text-on-surface">{t('place.introTitle')}</h2>
               </div>
               <div className="prose prose-lg max-w-none whitespace-pre-line text-body-lg leading-relaxed text-on-surface-variant">
-                {description || summary || (
+                {publicDescription || (
                   <span className="italic text-outline">{t('place.descriptionPending')}</span>
                 )}
               </div>

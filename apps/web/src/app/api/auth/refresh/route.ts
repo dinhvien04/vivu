@@ -11,9 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export async function POST() {
   const refreshToken = readRefreshCookie();
-  if (!refreshToken) {
-    return NextResponse.json({ message: 'Không có phiên đăng nhập' }, { status: 401 });
-  }
+  if (!refreshToken) return new NextResponse(null, { status: 204 });
+
   const { status, body } = await callApi('/auth/refresh', {
     body: { refreshToken },
   });

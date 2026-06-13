@@ -85,6 +85,7 @@ export async function refresh(): Promise<{
       method: 'POST',
       cache: 'no-store',
     });
+    if (res.status === 204) return null;
     if (!res.ok) return null;
     return (await res.json()) as { accessToken: string; expiresIn: number };
   } catch {

@@ -93,14 +93,18 @@ export class PlacesService {
 
     if (query.q) {
       const q = query.q.trim();
+      const locationKeyQuery = q
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .replace(/đ/gi, 'd')
+        .replace(/[^\p{L}\p{N}]+/gu, '_')
+        .toUpperCase();
       where.AND = [
         {
           OR: [
             { titleVi: { contains: q, mode: 'insensitive' } },
             { titleEn: { contains: q, mode: 'insensitive' } },
-            { summaryVi: { contains: q, mode: 'insensitive' } },
-            { locationKey: { contains: q, mode: 'insensitive' } },
-            { province: { contains: q, mode: 'insensitive' } },
+            { locationKey: { contains: locationKeyQuery, mode: 'insensitive' } },
           ],
         },
       ];

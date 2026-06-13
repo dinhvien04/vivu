@@ -10,6 +10,7 @@ import { TextOnlyPipeline } from './pipelines/text-only.pipeline';
 import { ContextBuilderService } from './services/context-builder.service';
 import { ImageUrlService } from './services/image-url.service';
 import { InputRouterService } from './services/input-router.service';
+import { PlaceMentionResolverService } from './services/place-mention-resolver.service';
 import { ResponseFormatterService } from './services/response-formatter.service';
 
 @Module({
@@ -21,6 +22,7 @@ import { ResponseFormatterService } from './services/response-formatter.service'
     ContextBuilderService,
     ResponseFormatterService,
     ImageUrlService,
+    PlaceMentionResolverService,
     TextOnlyPipeline,
     ImageOnlyPipeline,
     ImageTextPipeline,

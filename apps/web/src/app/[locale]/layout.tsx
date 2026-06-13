@@ -34,6 +34,11 @@ export async function generateMetadata({
       template: '%s · Vivu',
     },
     description: t('description'),
+    manifest: '/manifest.webmanifest',
+    icons: {
+      icon: '/vivu-logo.png',
+      apple: '/vivu-logo.png',
+    },
     alternates: {
       canonical: path,
       languages: {

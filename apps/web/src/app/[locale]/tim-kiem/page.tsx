@@ -7,12 +7,11 @@ import { SearchHero } from '@/components/search-hero';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { Link } from '@/i18n/navigation';
-import { placeCategoryName, placeRegionName, placeSummary, placeTitle } from '@/i18n/place';
+import { placeCategoryName, placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 import {
   listCategories,
   listPlaces,
-  listRegions,
   type PlaceSeason,
   type PlaceSort,
 } from '@/lib/api';
@@ -78,13 +77,12 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
   const sp = ((await searchParams) ?? {}) as SearchParamsShape;
   const q = sp.q?.trim() ?? '';
   const view: SearchView = isView(sp.view) ? sp.view : 'grid';
-  const region = sp.region;
   const category = sp.category;
   const season = isSeason(sp.season) ? sp.season : undefined;
   const sort = isSort(sp.sort) ? sp.sort : 'recent';
 
   // Empty query: show prompt page.
-  if (!q && !region && !category && !season) {
+  if (!q && !category && !season) {
     return (
       <>
         <SiteHeader />
@@ -141,11 +139,10 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
     );
   }
 
-  const [placesResult, regions, categories] = await Promise.all([
-    listPlaces({ q, region, category, season, sort, pageSize: 60 }).catch((e) => ({
+  const [placesResult, categories] = await Promise.all([
+    listPlaces({ q, province: 'Gia Lai', category, season, sort, pageSize: 60 }).catch((e) => ({
       _error: e instanceof Error ? e.message : 'unknown',
     })),
-    listRegions().catch(() => []),
     listCategories().catch(() => []),
   ]);
 
@@ -157,7 +154,7 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
   const places = result.data;
   const total = result.meta.total;
 
-  const activeFilterCount = [region, category, season].filter(Boolean).length;
+  const activeFilterCount = [category, season].filter(Boolean).length;
 
   return (
     <>
@@ -217,41 +214,6 @@ export default async function TimKiemPage({ params, searchParams }: PageProps) {
                     {t('common.clearAll')}
                   </Link>
                 )}
-              </div>
-
-              {/* Region */}
-              <div>
-                <h3 className="mb-2 text-overline uppercase tracking-overline text-on-surface-variant">
-                  {t('search.filterRegion')}
-                </h3>
-                <ul className="space-y-1">
-                  <li>
-                    <Link
-                      href={buildHref(sp, { region: '' })}
-                      className={`block rounded-lg px-3 py-1.5 text-body-md transition-colors ${
-                        !region
-                          ? 'bg-primary-container font-semibold text-on-primary-container'
-                          : 'text-on-surface hover:bg-surface-container'
-                      }`}
-                    >
-                      {t('common.all')}
-                    </Link>
-                  </li>
-                  {regions.map((r) => (
-                    <li key={r.id}>
-                      <Link
-                        href={buildHref(sp, { region: r.slug })}
-                        className={`block rounded-lg px-3 py-1.5 text-body-md transition-colors ${
-                          region === r.slug
-                            ? 'bg-primary-container font-semibold text-on-primary-container'
-                            : 'text-on-surface hover:bg-surface-container'
-                        }`}
-                      >
-                        {placeRegionName(r, locale)}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
               </div>
 
               {/* Category */}

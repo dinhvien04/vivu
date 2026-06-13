@@ -2,16 +2,18 @@ import type { ConfigService } from '@nestjs/config';
 import type { GeminiService } from '../../gemini/gemini.service';
 import type { QdrantRepository } from '../../qdrant/qdrant.repository';
 import type { ContextBuilderService } from '../services/context-builder.service';
+import type { PlaceMentionResolverService } from '../services/place-mention-resolver.service';
 import type { ResponseFormatterService } from '../services/response-formatter.service';
 import { TextOnlyPipeline } from './text-only.pipeline';
 
 describe('TextOnlyPipeline', () => {
-  it('searches Qdrant text and asks Gemini with the retrieved context', async () => {
+  it('filters Qdrant retrieval by a place mentioned in the question', async () => {
     const result = {
       id: '1',
       score: 0.9,
       place_slug: 'bien-ho',
       location_name: 'Biển Hồ',
+      province: 'Gia Lai',
       text: 'Biển Hồ là thắng cảnh tại Gia Lai.',
     };
     const qdrant = {
@@ -23,6 +25,9 @@ describe('TextOnlyPipeline', () => {
     const contextBuilder = {
       fromTextResults: jest.fn().mockReturnValue('retrieved context'),
     };
+    const placeMentions = {
+      resolve: jest.fn().mockResolvedValue({ slug: 'bien-ho', name: 'Biển Hồ' }),
+    };
     const formatter = {
       format: jest.fn().mockResolvedValue({ success: true, input_type: 'text_only' }),
     };
@@ -31,6 +36,7 @@ describe('TextOnlyPipeline', () => {
       qdrant as unknown as QdrantRepository,
       gemini as unknown as GeminiService,
       contextBuilder as unknown as ContextBuilderService,
+      placeMentions as unknown as PlaceMentionResolverService,
       formatter as unknown as ResponseFormatterService,
     );
 
@@ -38,11 +44,19 @@ describe('TextOnlyPipeline', () => {
 
     expect(qdrant.searchTextByMessage).toHaveBeenCalledWith('Biển Hồ có gì đẹp?', {
       limit: 3,
+      placeSlug: 'bien-ho',
     });
     expect(gemini.generateTravelAnswer).toHaveBeenCalledWith({
       question: 'Biển Hồ có gì đẹp?',
       context: 'retrieved context',
+      detectedPlace: { slug: 'bien-ho', name: 'Biển Hồ' },
     });
+    expect(formatter.format).toHaveBeenCalledWith(
+      expect.objectContaining({
+        textResults: [result],
+        detectedPlaceSlug: 'bien-ho',
+      }),
+    );
   });
 });
 
