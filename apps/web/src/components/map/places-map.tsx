@@ -24,8 +24,8 @@ interface PlacesMapProps {
   height?: string;
 }
 
-const VIETNAM_CENTER: [number, number] = [16.05, 107.54];
-const DEFAULT_ZOOM = 6;
+const GIA_LAI_CENTER: [number, number] = [14.05, 108.45];
+const DEFAULT_ZOOM = 8;
 
 interface TileLayerSpec {
   url: string;
@@ -162,7 +162,7 @@ function FitBounds({ places, enabled }: FitBoundsProps) {
 export function PlacesMap({
   places,
   locale,
-  center = VIETNAM_CENTER,
+  center = GIA_LAI_CENTER,
   zoom = DEFAULT_ZOOM,
   fitToMarkers = true,
   height = '70vh',

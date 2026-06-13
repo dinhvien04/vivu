@@ -19,6 +19,7 @@
     "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
     "seed:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed-images.ts",
     "sync:locations": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" src/scripts/sync-locations-from-s3.ts",
+    "sync:coordinates": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" src/scripts/sync-place-coordinates.ts",
     "promote:admin": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/promote-admin.ts",
     "reindex:meili": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/reindex-meili.ts"
   },
