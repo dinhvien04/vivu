@@ -89,6 +89,11 @@
     "lng": 109.23333,
     "source": "https://vi.wikipedia.org/wiki/Gh%E1%BB%81nh_R%C3%A1ng_Ti%C3%AAn_Sa"
   },
+  "hoi-quan-quynh-phu": {
+    "lat": 13.7781268,
+    "lng": 109.228894,
+    "source": "https://sd.maptons.com/p/15201091699"
+  },
   "hai-giang": {
     "lat": 13.7519,
     "lng": 109.2862,
@@ -139,6 +144,11 @@
     "lng": 107.999199,
     "source": "https://vi.wikipedia.org/wiki/Nh%C3%A0_lao_Pleiku"
   },
+  "nha-tho-co-hbau": {
+    "lat": 14.1373875,
+    "lng": 108.0518906,
+    "source": "Google Maps business listing: H'Bau Old Church, 43P2+XQ2, Biển Hồ, Gia Lai"
+  },
   "nha-tho-da-ghenh-rang": {
     "lat": 13.7526,
     "lng": 109.2243,
@@ -158,6 +168,16 @@
     "lat": 14.0145,
     "lng": 109.0128,
     "source": "https://dantri.com.vn/du-lich/doc-la-suoi-nong-o-binh-dinh-nuoc-soi-sung-suc-luoc-chin-trung-ga-20230905223349640.htm"
+  },
+  "suoi-da-co": {
+    "lat": 14.2033125,
+    "lng": 107.8653594,
+    "source": "Google Maps business listing: Nam Trung Plate stone, Ia Phí, Gia Lai"
+  },
+  "thac-hang-doi": {
+    "lat": 14.15914,
+    "lng": 108.638079,
+    "source": "https://vi.wikipedia.org/wiki/Th%C3%A1c_Hang_D%C6%A1i"
   },
   "thap-cham-bang-keng": {
     "lat": 13.4602,
