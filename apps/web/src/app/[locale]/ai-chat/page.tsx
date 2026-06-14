@@ -14,15 +14,22 @@ export async function generateMetadata({
   return { title: t('title'), description: t('description') };
 }
 
-export default async function AiChatRoute({ params }: { params: Promise<{ locale: Locale }> }) {
+export default async function AiChatRoute({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: Locale }>;
+  searchParams?: Promise<{ place?: string }>;
+}) {
   const { locale } = await params;
+  const placeSlug = (await searchParams)?.place;
   setRequestLocale(locale);
 
   return (
     <>
       <SiteHeader />
       <main className="min-h-[calc(100vh-5rem)] bg-surface px-margin-mobile md:px-margin-desktop">
-        <AiChatPage />
+        <AiChatPage placeSlug={placeSlug} />
       </main>
       <SiteFooter />
     </>

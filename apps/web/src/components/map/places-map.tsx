@@ -6,8 +6,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { LayersControl, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { useTranslations } from 'next-intl';
 import type { Place } from '@vivu/types';
+import { Icon } from '../icon';
 import { useTheme } from '../theme-provider';
-import { placeRegionName, placeTitle } from '@/i18n/place';
+import { placeCategoryName, placeRegionName, placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 
 interface PlacesMapProps {
@@ -170,10 +171,51 @@ export function PlacesMap({
   const { theme } = useTheme();
   const t = useTranslations('map');
   const geoPlaces = useMemo(() => places.filter((p) => p.geo), [places]);
+  const [query, setQuery] = useState('');
+  const [categorySlug, setCategorySlug] = useState<string>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const selected = geoPlaces.find((p) => p.id === selectedId) ?? null;
+  const categories = useMemo(() => {
+    const items = new Map<string, string>();
+    for (const place of geoPlaces) {
+      for (const category of place.categories ?? []) {
+        if (!items.has(category.slug)) items.set(category.slug, placeCategoryName(category, locale));
+      }
+    }
+    return [...items.entries()]
+      .map(([slug, label]) => ({ slug, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, locale));
+  }, [geoPlaces, locale]);
+
+  const filteredGeoPlaces = useMemo(() => {
+    const normalizedQuery = normalizeSearch(query);
+    return geoPlaces.filter((place) => {
+      const matchesCategory =
+        categorySlug === 'all' || (place.categories ?? []).some((item) => item.slug === categorySlug);
+      if (!matchesCategory) return false;
+      if (!normalizedQuery) return true;
+      const searchable = normalizeSearch(
+        [
+          placeTitle(place, locale),
+          placeSummary(place, locale),
+          place.region ? placeRegionName(place.region, locale) : '',
+          ...(place.categories ?? []).map((item) => placeCategoryName(item, locale)),
+        ]
+          .filter(Boolean)
+          .join(' '),
+      );
+      return searchable.includes(normalizedQuery);
+    });
+  }, [categorySlug, geoPlaces, locale, query]);
+
+  useEffect(() => {
+    if (selectedId && !filteredGeoPlaces.some((place) => place.id === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [filteredGeoPlaces, selectedId]);
+
+  const selected = filteredGeoPlaces.find((p) => p.id === selectedId) ?? null;
   const detailHrefPrefix = locale === 'en' ? '/en' : '';
   const popupViewLabel = t('popupViewDetails');
   const layerLabels = {
@@ -222,13 +264,13 @@ export function PlacesMap({
         </LayersControl>
 
         <MarkerCluster
-          places={geoPlaces}
+          places={filteredGeoPlaces}
           locale={locale}
           popupViewLabel={popupViewLabel}
           detailHrefPrefix={detailHrefPrefix}
           onSelect={(p) => setSelectedId(p.id)}
         />
-        <FitBounds places={geoPlaces} enabled={fitToMarkers} />
+        <FitBounds places={filteredGeoPlaces} enabled={fitToMarkers} />
 
         {selected && selected.geo && (
           <Marker
@@ -258,11 +300,74 @@ export function PlacesMap({
         )}
       </MapContainer>
 
+      {geoPlaces.length > 0 && (
+        <div className="absolute left-3 right-3 top-3 z-[410] max-w-xl rounded-2xl border border-outline-variant/50 bg-surface/95 p-3 shadow-lg backdrop-blur md:left-4 md:right-auto md:min-w-[360px]">
+          <label className="relative block">
+            <Icon
+              name="search"
+              className="absolute left-3 top-1/2 !text-base -translate-y-1/2 text-outline"
+            />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={t('searchPlaceholder')}
+              className="h-10 w-full rounded-full border border-outline-variant bg-surface-container-lowest pl-9 pr-3 text-body-sm text-on-surface outline-none transition focus:border-primary"
+            />
+          </label>
+          {categories.length > 0 && (
+            <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+              <button
+                type="button"
+                onClick={() => setCategorySlug('all')}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  categorySlug === 'all'
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                {t('allCategories')}
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.slug}
+                  type="button"
+                  onClick={() => setCategorySlug(category.slug)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                    categorySlug === category.slug
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="mt-2 text-xs text-on-surface-variant">
+            {t('filteredCount', { shown: filteredGeoPlaces.length, total: geoPlaces.length })}
+          </p>
+        </div>
+      )}
+
       {geoPlaces.length === 0 && (
         <div className="pointer-events-none absolute inset-x-4 top-4 z-[400] rounded-lg bg-surface-container-lowest/90 px-4 py-3 text-body-sm text-on-surface-variant shadow-md backdrop-blur">
           {t('noGeoPlaces')}
         </div>
       )}
+      {geoPlaces.length > 0 && filteredGeoPlaces.length === 0 && (
+        <div className="pointer-events-none absolute inset-x-4 bottom-4 z-[400] rounded-lg bg-surface-container-lowest/95 px-4 py-3 text-body-sm text-on-surface-variant shadow-md backdrop-blur md:inset-x-auto md:left-4">
+          {t('noFilteredPlaces')}
+        </div>
+      )}
     </div>
   );
+}
+
+function normalizeSearch(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/đ/gi, 'd')
+    .toLocaleLowerCase('vi-VN')
+    .trim();
 }

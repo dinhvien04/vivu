@@ -1,15 +1,42 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Icon } from '@/components/icon';
+import { placeTitle } from '@/i18n/place';
+import type { Locale } from '@/i18n/routing';
+import { getPlaceBySlug } from '@/lib/api';
 import { useAiChat } from '../hooks/useAiChat';
 import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
 
-export function AiChatPage() {
+export function AiChatPage({ placeSlug }: { placeSlug?: string }) {
   const t = useTranslations('aiChat');
+  const locale = useLocale() as Locale;
+  const [contextPlaceTitle, setContextPlaceTitle] = useState<string | null>(null);
   const { isSending, messages, sendMessage } = useAiChat(t('error'));
   const suggestions = [t('suggestion1'), t('suggestion2'), t('suggestion3'), t('suggestion4')];
+  const contextQuestion = contextPlaceTitle
+    ? t('placeContextQuestion', { place: contextPlaceTitle })
+    : null;
+
+  useEffect(() => {
+    let cancelled = false;
+    setContextPlaceTitle(null);
+    if (!placeSlug) return;
+
+    getPlaceBySlug(placeSlug)
+      .then((place) => {
+        if (!cancelled) setContextPlaceTitle(placeTitle(place, locale));
+      })
+      .catch(() => {
+        if (!cancelled) setContextPlaceTitle(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, placeSlug]);
 
   const messageLabels = {
     emptyTitle: t('emptyTitle'),
@@ -39,6 +66,29 @@ export function AiChatPage() {
       </header>
 
       <section className="flex min-h-[620px] flex-col overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-low shadow-premium">
+        {contextPlaceTitle && contextQuestion && (
+          <div className="border-b border-outline-variant/40 bg-primary-fixed/40 px-4 py-3 sm:px-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-label-caps uppercase tracking-wide text-primary">
+                  {t('placeContextEyebrow')}
+                </p>
+                <p className="mt-1 text-body-sm text-on-surface-variant">
+                  {t('placeContextLead', { place: contextPlaceTitle })}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={isSending}
+                onClick={() => void sendMessage({ message: contextQuestion })}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Icon name="auto_awesome" size={18} />
+                {t('placeContextAsk')}
+              </button>
+            </div>
+          </div>
+        )}
         <ChatMessages
           messages={messages}
           isSending={isSending}
