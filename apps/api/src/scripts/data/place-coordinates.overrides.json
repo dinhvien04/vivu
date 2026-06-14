@@ -9,6 +9,76 @@
     "lng": 109.233843,
     "source": "https://www.beachatlas.com/quy-nhon-2"
   },
+  "chien-thang-nui-mot": {
+    "lat": 13.8090875,
+    "lng": 109.0022344,
+    "source": "https://congbao.gialai.gov.vn/congbao/congbao.nsf/70E7DA9FCA87F07B88258D96001301F5/%24file/529_signed.pdf"
+  },
+  "chua-an-binh": {
+    "lat": 13.95639,
+    "lng": 108.65639,
+    "source": "https://www.tuvienquangduc.com.au/vietnam/chuaviet/gialai/gialai.html"
+  },
+  "chua-an-thanh": {
+    "lat": 13.98518,
+    "lng": 108.09242,
+    "source": "https://baotangpleiku.gialai.gov.vn/Di-san-han-nom-gia-lai/Di-san-han-nom-gia-lai-%283%29/CSDLHN.aspx"
+  },
+  "chua-buu-minh": {
+    "lat": 14.06039,
+    "lng": 108.006,
+    "source": "https://dulichpleiku.gialai.gov.vn/Thong-tin-can-biet/Diem-tham-quan/Museum/Chua-Buu-Minh"
+  },
+  "chua-hang-thien-sanh-thach-tu": {
+    "lat": 14.2092,
+    "lng": 109.0318,
+    "source": "https://vi.wikipedia.org/wiki/Ch%C3%B9a_Hang_%28B%C3%ACnh_%C4%90%E1%BB%8Bnh%29"
+  },
+  "chua-tan-an-final": {
+    "lat": 13.9396875,
+    "lng": 109.076265625,
+    "source": "Google Maps listing: Chùa Tân An, W3QG+VGC, Cầu Vạn Thuận 1, An Nhơn Bắc, Gia Lai; cross-check: https://phatgiaogialai.org.vn/FileUploads/File/danh-ba-tu-vien-thi-xa-an-nhon-2024.pdf"
+  },
+  "dai-phat-thanh-quy-nhon": {
+    "lat": 13.7742,
+    "lng": 109.2236,
+    "source": "https://congbao.gialai.gov.vn/congbao/congbao.nsf/70E7DA9FCA87F07B88258D96001301F5/%24file/529_signed.pdf"
+  },
+  "den-tho-danh-nhan-dao-tan": {
+    "lat": 13.8392875,
+    "lng": 109.151828125,
+    "source": "Google Maps listing: Đền Thờ Đào Tấn, R5Q2+PP8, Tuy Phước, Gia Lai; cross-check: https://tuyphuoc.gialai.gov.vn/du-lich/den-tho-danh-nhan-van-hoa-dao-tan.html"
+  },
+  "den-tuong-niem-liet-si-ka-nak": {
+    "lat": 14.179,
+    "lng": 108.588,
+    "source": "https://baogialai.com.vn/hom-qua-27-7-tai-huyen-kbang-khanh-thanh-den-tuong-niem-liet-si-ka-nak-post130626.html"
+  },
+  "di-tich-champa-an-phu": {
+    "lat": 13.971389,
+    "lng": 108.084167,
+    "source": "https://baotangpleiku.gialai.gov.vn/tin-tuc-su-kien/Tin-tong-hop/HE-MO-BI-AN-VE-PHE-TICH-CHAMPA-GO-THAP-%28xa-An-Phu%2C"
+  },
+  "di-tich-chien-thang-dak-po": {
+    "lat": 13.9547,
+    "lng": 108.5986,
+    "source": "https://baogialai.com.vn/du-lich-tren-chien-truong-xua-post198440.html"
+  },
+  "di-tich-tay-son-thuong-dao": {
+    "lat": 13.95639,
+    "lng": 108.65639,
+    "source": "https://baogialai.com.vn/phat-huy-gia-tri-di-tich-tay-son-thuong-dao-post213005.html"
+  },
+  "dinh-nhon-chau-dinh-than-hoang": {
+    "lat": 13.6124375,
+    "lng": 109.355640625,
+    "source": "Google Maps listing: Đình Thành Hoàng, J964+X7C, Cù Lao Xanh, Nhơn Châu, Gia Lai; cross-check: https://baotanglichsu.vn/vi/Articles/2001/66289/nhon-chau-tu-goc-nhin-lich-su.html"
+  },
+  "doi-co-hong-dak-doa": {
+    "lat": 13.9704625,
+    "lng": 108.132546875,
+    "source": "Google Maps listing: Đồi Cỏ Hồng Đăk Đoa, X4CM+52M, Đak Đoa, Gia Lai"
+  },
   "flc-zoo-safari-park": {
     "lat": 13.8835625,
     "lng": 109.2699531,
@@ -19,19 +89,89 @@
     "lng": 109.23333,
     "source": "https://vi.wikipedia.org/wiki/Gh%E1%BB%81nh_R%C3%A1ng_Ti%C3%AAn_Sa"
   },
+  "hai-giang": {
+    "lat": 13.7519,
+    "lng": 109.2862,
+    "source": "https://quynhontourist.com/hai-giang-merry-land-quy-nhon/"
+  },
   "khu-du-tru-sinh-quyen-cao-nguyen-kon-ha-nung": {
     "lat": 14.1961781,
     "lng": 108.4037972,
     "source": "https://nbca.gov.vn/du-an-br/khu-du-tru-sinh-quyen/khu-dtsq-kon-ha-nung/"
+  },
+  "khu-sinh-thai-con-chim": {
+    "lat": 13.855556,
+    "lng": 109.219694,
+    "source": "https://www.foody.vn/binh-dinh/kdl-sinh-thai-con-chim-dam-thi-nai"
+  },
+  "lang-chai-nhon-hai": {
+    "lat": 13.7838,
+    "lng": 109.2569,
+    "source": "Google Maps listing: Làng chài Nhơn Hải, Hải Nam, Quy Nhơn Đông, Gia Lai; cross-check: https://www.vietnamairlines.com/jp/vi/plan-book/travel/travel-guide/lang-chai-nhon-hai"
+  },
+  "lang-chai-nhon-ly": {
+    "lat": 13.8827375,
+    "lng": 109.290609375,
+    "source": "Google Maps listing: Làng chài Nhơn Lý, V7MR+36X, Quy Nhơn Đông, Gia Lai"
+  },
+  "lang-khang-chien-stor": {
+    "lat": 14.3039,
+    "lng": 108.5017,
+    "source": "https://baogialai.com.vn/lang-du-lich-cong-dong-dau-tien-cua-gia-lai-co-ten-tren-google-maps-post24620.html"
+  },
+  "lang-ong-nam-hai": {
+    "lat": 13.7838,
+    "lng": 109.2569,
+    "source": "https://www.vietnamairlines.com/jp/vi/plan-book/travel/travel-guide/lang-chai-nhon-hai"
+  },
+  "mieu-ba-thuy": {
+    "lat": 13.7672,
+    "lng": 109.2196,
+    "source": "https://www.google.com/maps/search/?api=1&query=Mi%E1%BA%BFu%20B%C3%A0%20Th%E1%BB%A7y%20Quy%20Nh%C6%A1n%20C%E1%BA%A7u%20%C4%90%C3%B4i"
+  },
+  "mui-vi-rong": {
+    "lat": 14.289,
+    "lng": 109.185,
+    "source": "https://mia.vn/cam-nang-du-lich/kham-pha-mui-vi-rong-o-quy-nhon-18793"
   },
   "nha-lao-pleiku": {
     "lat": 13.977319,
     "lng": 107.999199,
     "source": "https://vi.wikipedia.org/wiki/Nh%C3%A0_lao_Pleiku"
   },
+  "nha-tho-da-ghenh-rang": {
+    "lat": 13.7526,
+    "lng": 109.2243,
+    "source": "https://vi.wikipedia.org/wiki/Gh%E1%BB%81nh_R%C3%A1ng_Ti%C3%AAn_Sa"
+  },
+  "nui-chu-pao-chu-thoi": {
+    "lat": 13.971,
+    "lng": 108.1325,
+    "source": "Google Maps listing: Chu Pa, Ia Ly, Gia Lai; cross-check: https://baogialai.com.vn/"
+  },
+  "plei-oi-vua-lua": {
+    "lat": 13.4602,
+    "lng": 108.2269,
+    "source": "https://baogialai.com.vn/den-plei-oi-ngam-ve-vua-lua-kiem-than-post212623.html"
+  },
+  "suoi-khoang-nong-hoi-van": {
+    "lat": 14.0145,
+    "lng": 109.0128,
+    "source": "https://dantri.com.vn/du-lich/doc-la-suoi-nong-o-binh-dinh-nuoc-soi-sung-suc-luoc-chin-trung-ga-20230905223349640.htm"
+  },
+  "thap-cham-bang-keng": {
+    "lat": 13.4602,
+    "lng": 108.2269,
+    "source": "https://baogialai.com.vn/"
+  },
   "trung-tam-kham-pha-khoa-hoc": {
     "lat": 13.718611,
     "lng": 109.212778,
     "source": "https://explorascience.vn/"
+  },
+  "truong-luy": {
+    "lat": 14.221,
+    "lng": 108.91,
+    "source": "https://baogialai.com.vn/"
   }
 }
