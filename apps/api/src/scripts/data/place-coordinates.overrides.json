@@ -1,12 +1,37 @@
 {
+  "bien-quy-hoa": {
+    "lat": 13.720609,
+    "lng": 109.217476,
+    "source": "https://www.beach-on-map.com/quy-hoa.html"
+  },
+  "bien-quy-nhon": {
+    "lat": 13.7693984,
+    "lng": 109.233843,
+    "source": "https://www.beachatlas.com/quy-nhon-2"
+  },
+  "flc-zoo-safari-park": {
+    "lat": 13.8835625,
+    "lng": 109.2699531,
+    "source": "https://vn.trip.com/travel-guide/attraction/nhon-ly/flc-zoo-safari-park-quy-nhon-55996025/"
+  },
   "ghenh-rang-tien-sa": {
     "lat": 13.76667,
     "lng": 109.23333,
     "source": "https://vi.wikipedia.org/wiki/Gh%E1%BB%81nh_R%C3%A1ng_Ti%C3%AAn_Sa"
   },
+  "khu-du-tru-sinh-quyen-cao-nguyen-kon-ha-nung": {
+    "lat": 14.1961781,
+    "lng": 108.4037972,
+    "source": "https://nbca.gov.vn/du-an-br/khu-du-tru-sinh-quyen/khu-dtsq-kon-ha-nung/"
+  },
   "nha-lao-pleiku": {
     "lat": 13.977319,
     "lng": 107.999199,
     "source": "https://vi.wikipedia.org/wiki/Nh%C3%A0_lao_Pleiku"
+  },
+  "trung-tam-kham-pha-khoa-hoc": {
+    "lat": 13.718611,
+    "lng": 109.212778,
+    "source": "https://explorascience.vn/"
   }
 }
