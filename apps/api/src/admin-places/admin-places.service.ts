@@ -121,6 +121,13 @@ export class AdminPlacesService {
     } else if (query.hasGeo === false) {
       appendWhereAnd(where, { OR: [{ lat: null }, { lng: null }] });
     }
+    if (query.hasHeroImage === true) {
+      appendWhereAnd(where, {
+        OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+      });
+    } else if (query.hasHeroImage === false) {
+      appendWhereAnd(where, { heroImageUrl: null, heroImageS3Key: null });
+    }
 
     const orderBy: Prisma.PlaceOrderByWithRelationInput =
       query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };

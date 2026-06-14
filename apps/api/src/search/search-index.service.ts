@@ -12,6 +12,7 @@ export interface IndexedPlace {
   address: string | null;
   heroImageUrl: string | null;
   regionSlug: string | null;
+  province: string;
   status: string;
   updatedAt: number;
 }
@@ -99,6 +100,7 @@ export class SearchIndexService implements OnApplicationBootstrap {
       address: place.address,
       heroImageUrl: place.heroImageUrl,
       regionSlug: place.region?.slug ?? null,
+      province: place.province,
       status: place.status,
       updatedAt: place.updatedAt.getTime(),
     };
@@ -150,18 +152,30 @@ export class SearchIndexService implements OnApplicationBootstrap {
     if (!index) return null;
     try {
       const result = await index.search<IndexedPlace>(q, {
-        limit,
+        limit: Math.max(limit * 4, 20),
         filter: ['status = published'],
-        attributesToRetrieve: ['id', 'slug', 'titleVi', 'titleEn', 'address', 'heroImageUrl'],
+        attributesToRetrieve: [
+          'id',
+          'slug',
+          'titleVi',
+          'titleEn',
+          'address',
+          'heroImageUrl',
+          'province',
+        ],
       });
-      return result.hits.map((h) => ({
-        id: h.id,
-        slug: h.slug,
-        titleVi: h.titleVi,
-        titleEn: h.titleEn,
-        address: h.address,
-        heroImageUrl: h.heroImageUrl,
-      }));
+      const hits = result.hits
+        .filter((hit) => hit.province?.toLocaleLowerCase('vi') === 'gia lai')
+        .slice(0, limit)
+        .map((h) => ({
+          id: h.id,
+          slug: h.slug,
+          titleVi: h.titleVi,
+          titleEn: h.titleEn,
+          address: h.address,
+          heroImageUrl: h.heroImageUrl,
+        }));
+      return hits.length > 0 ? hits : null;
     } catch (e) {
       this.logger.warn(`MeiliSearch suggest failed: ${(e as Error).message}`);
       return null;
@@ -179,7 +193,10 @@ export class SearchIndexService implements OnApplicationBootstrap {
     if (!index) return null;
     await this.ensureIndex();
     const places = await this.prisma.place.findMany({
-      where: { status: 'published' },
+      where: {
+        status: 'published',
+        province: { equals: 'Gia Lai', mode: 'insensitive' },
+      },
       include: { region: true },
     });
     if (places.length === 0) {

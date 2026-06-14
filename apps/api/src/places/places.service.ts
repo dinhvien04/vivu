@@ -18,6 +18,8 @@ type PlaceWithRelations = PrismaPlace & {
   }[];
 };
 
+const PUBLIC_PROVINCE = 'Gia Lai';
+
 function toApiPlace(p: PlaceWithRelations): Place {
   return {
     id: p.id,
@@ -94,8 +96,16 @@ export class PlacesService {
 
     const where: Prisma.PlaceWhereInput = {
       status: 'published',
-      OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+      province: { equals: PUBLIC_PROVINCE, mode: 'insensitive' },
     };
+
+    if (query.hasHeroImage === false) {
+      appendWhereAnd(where, { heroImageUrl: null, heroImageS3Key: null });
+    } else {
+      appendWhereAnd(where, {
+        OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+      });
+    }
 
     if (query.q) {
       const q = query.q.trim();
@@ -122,10 +132,6 @@ export class PlacesService {
       where.categories = {
         some: { category: { slug: query.category } },
       };
-    }
-
-    if (query.province) {
-      where.province = { equals: query.province.trim(), mode: 'insensitive' };
     }
 
     if (query.season) {
@@ -206,7 +212,11 @@ export class PlacesService {
       },
     });
 
-    if (!place || place.status !== 'published') {
+    if (
+      !place ||
+      place.status !== 'published' ||
+      place.province.toLocaleLowerCase('vi') !== PUBLIC_PROVINCE.toLocaleLowerCase('vi')
+    ) {
       return null;
     }
 
@@ -228,6 +238,7 @@ export class PlacesService {
       where: { slug },
       select: {
         status: true,
+        province: true,
         titleVi: true,
         heroImageS3Key: true,
         photos: {
@@ -244,7 +255,13 @@ export class PlacesService {
       },
     });
 
-    if (!place || place.status !== 'published') return null;
+    if (
+      !place ||
+      place.status !== 'published' ||
+      place.province.toLocaleLowerCase('vi') !== PUBLIC_PROVINCE.toLocaleLowerCase('vi')
+    ) {
+      return null;
+    }
 
     const images = new Map<string, PlaceImage>();
     const addImage = async (params: {
@@ -319,6 +336,7 @@ export class PlacesService {
         ) AS distance_m
       FROM "Place"
       WHERE "status"::text = 'published'
+        AND LOWER("province") = LOWER(${PUBLIC_PROVINCE})
         AND ("heroImageUrl" IS NOT NULL OR "heroImageS3Key" IS NOT NULL)
         AND "geo" IS NOT NULL
         AND ST_DWithin(

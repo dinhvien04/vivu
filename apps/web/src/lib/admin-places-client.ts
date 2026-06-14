@@ -52,6 +52,7 @@ export interface AdminListPlacesOptions {
   q?: string;
   region?: string;
   hasGeo?: boolean;
+  hasHeroImage?: boolean;
 }
 
 export async function adminListPlaces(
@@ -64,6 +65,7 @@ export async function adminListPlaces(
   if (opts.q) params.set('q', opts.q);
   if (opts.region) params.set('region', opts.region);
   if (opts.hasGeo !== undefined) params.set('hasGeo', String(opts.hasGeo));
+  if (opts.hasHeroImage !== undefined) params.set('hasHeroImage', String(opts.hasHeroImage));
   const qs = params.toString() ? `?${params.toString()}` : '';
   return call<Paginated<Place>>(
     `/api/admin/places${qs}`,

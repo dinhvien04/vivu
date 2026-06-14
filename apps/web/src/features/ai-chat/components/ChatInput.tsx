@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Icon } from '@/components/icon';
+import { prepareChatImage } from '../utils/prepare-chat-image';
 import { ImagePreview } from './ImagePreview';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -29,6 +30,7 @@ export function ChatInput({
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export function ChatInput({
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const selectImage = (event: ChangeEvent<HTMLInputElement>) => {
+  const selectImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     setError(null);
     if (!file) return;
@@ -57,13 +59,22 @@ export function ChatInput({
       event.target.value = '';
       return;
     }
-    setImage(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    setIsPreparing(true);
+    try {
+      const prepared = await prepareChatImage(file);
+      setImage(prepared);
+      setPreviewUrl(URL.createObjectURL(prepared));
+    } catch {
+      setError(labels.tooLarge);
+      event.target.value = '';
+    } finally {
+      setIsPreparing(false);
+    }
   };
 
   const submit = async (event?: FormEvent) => {
     event?.preventDefault();
-    if (isSending || (!message.trim() && !image)) return;
+    if (isSending || isPreparing || (!message.trim() && !image)) return;
     const currentMessage = message;
     const currentImage = image;
     setMessage('');
@@ -94,25 +105,25 @@ export function ChatInput({
           ref={fileRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          onChange={selectImage}
+          onChange={(event) => void selectImage(event)}
           className="hidden"
         />
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          disabled={isSending}
+          disabled={isSending || isPreparing}
           aria-label={labels.upload}
           title={labels.upload}
           className={`flex flex-shrink-0 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container disabled:opacity-50 ${
             compact ? 'h-10 w-10' : 'h-11 w-11'
           }`}
         >
-          <Icon name="add_photo_alternate" />
+          <Icon name={isPreparing ? 'hourglass_top' : 'add_photo_alternate'} />
         </button>
         <textarea
           value={message}
           rows={1}
-          disabled={isSending}
+          disabled={isSending || isPreparing}
           placeholder={labels.placeholder}
           onChange={(event) => setMessage(event.target.value)}
           onKeyDown={(event) => {
@@ -127,7 +138,7 @@ export function ChatInput({
         />
         <button
           type="submit"
-          disabled={isSending || (!message.trim() && !image)}
+          disabled={isSending || isPreparing || (!message.trim() && !image)}
           aria-label={labels.send}
           className={`flex flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40 ${
             compact ? 'h-10 w-10' : 'h-11 w-11'

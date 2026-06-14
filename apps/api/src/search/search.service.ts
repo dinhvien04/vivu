@@ -62,6 +62,8 @@ export class SearchService {
         "heroImageUrl"
       FROM "Place"
       WHERE "status"::text = 'published'
+        AND LOWER("province") = LOWER('Gia Lai')
+        AND ("heroImageUrl" IS NOT NULL OR "heroImageS3Key" IS NOT NULL)
         AND (
           "titleVi" ILIKE ${pattern}
           OR COALESCE("titleEn", '') ILIKE ${pattern}

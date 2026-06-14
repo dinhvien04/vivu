@@ -281,6 +281,7 @@ describe('SearchIndexService — enabled (MEILI_HOST set)', () => {
           titleEn: null,
           address: null,
           heroImageUrl: null,
+          province: 'Gia Lai',
           extraNoise: 'should-be-stripped',
         },
       ],
@@ -294,7 +295,7 @@ describe('SearchIndexService — enabled (MEILI_HOST set)', () => {
     expect(index.search).toHaveBeenCalledWith(
       'A',
       expect.objectContaining({
-        limit: 5,
+        limit: 20,
         filter: ['status = published'],
       }),
     );

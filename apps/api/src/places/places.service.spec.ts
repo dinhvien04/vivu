@@ -218,7 +218,12 @@ describe('PlacesService.list', () => {
       expect.objectContaining({
         where: expect.objectContaining({
           status: 'published',
-          OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+          province: { equals: 'Gia Lai', mode: 'insensitive' },
+          AND: expect.arrayContaining([
+            {
+              OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+            },
+          ]),
         }),
         skip: 12,
         take: 12,
@@ -253,15 +258,18 @@ describe('PlacesService.list', () => {
     expect(prisma.place.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
-          AND: [
+          province: { equals: 'Gia Lai', mode: 'insensitive' },
+          AND: expect.arrayContaining([
+            {
+              OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }],
+            },
             {
               OR: expect.arrayContaining([
                 { titleVi: { contains: 'Biển Hồ', mode: 'insensitive' } },
                 { locationKey: { contains: 'BIEN_HO', mode: 'insensitive' } },
               ]),
             },
-          ],
+          ]),
         }),
       }),
     );

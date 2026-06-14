@@ -60,6 +60,19 @@ export class ListPlacesQueryDto {
   hasGeo?: boolean;
 
   @ApiPropertyOptional({
+    description: 'Filter places by hero image availability.',
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  hasHeroImage?: boolean;
+
+  @ApiPropertyOptional({
     description: 'Sắp xếp kết quả.',
     enum: PLACE_SORTS,
     default: 'recent',

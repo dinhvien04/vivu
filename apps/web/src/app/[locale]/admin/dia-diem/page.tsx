@@ -33,6 +33,7 @@ export default function AdminPlacesList() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [region, setRegion] = useState<string>('');
   const [geoFilter, setGeoFilter] = useState<'all' | 'with' | 'missing'>('all');
+  const [imageFilter, setImageFilter] = useState<'all' | 'with' | 'missing'>('all');
   const [q, setQ] = useState<string>('');
   const [appliedQ, setAppliedQ] = useState<string>('');
 
@@ -47,6 +48,8 @@ export default function AdminPlacesList() {
         q: appliedQ || undefined,
         hasGeo:
           geoFilter === 'with' ? true : geoFilter === 'missing' ? false : undefined,
+        hasHeroImage:
+          imageFilter === 'with' ? true : imageFilter === 'missing' ? false : undefined,
         pageSize: 100,
       });
       setPlaces(result.data);
@@ -56,7 +59,7 @@ export default function AdminPlacesList() {
       setPlaces([]);
       setTotal(0);
     }
-  }, [loading, user, getAccessToken, region, geoFilter, appliedQ, t]);
+  }, [loading, user, getAccessToken, region, geoFilter, imageFilter, appliedQ, t]);
 
   useEffect(() => {
     if (loading || !user) return;
@@ -176,7 +179,11 @@ export default function AdminPlacesList() {
         ))}
       </nav>
 
-      <nav className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 space-y-3">
+        <nav className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-body-sm font-semibold text-on-surface-variant">
+            {t('geoFilterLabel')}
+          </span>
         {(['all', 'missing', 'with'] as const).map((value) => (
           <button
             key={value}
@@ -195,7 +202,31 @@ export default function AdminPlacesList() {
                 : t('geoWith')}
           </button>
         ))}
-      </nav>
+        </nav>
+        <nav className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-body-sm font-semibold text-on-surface-variant">
+            {t('imageFilterLabel')}
+          </span>
+          {(['all', 'missing', 'with'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setImageFilter(value)}
+              className={
+                imageFilter === value
+                  ? 'rounded-full bg-secondary px-4 py-1.5 text-body-sm font-semibold text-white'
+                  : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container'
+              }
+            >
+              {value === 'all'
+                ? t('imageAll')
+                : value === 'missing'
+                  ? t('imageMissing')
+                  : t('imageWith')}
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {error && (
         <div
@@ -239,13 +270,20 @@ export default function AdminPlacesList() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md bg-surface-container">
-                          {p.heroImageUrl && (
+                          {p.heroImageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={p.heroImageUrl}
                               alt={title}
                               className="h-full w-full object-cover"
                             />
+                          ) : (
+                            <div
+                              className="flex h-full w-full items-center justify-center text-outline"
+                              title={t('imageMissing')}
+                            >
+                              <Icon name="image_not_supported" className="!text-lg" />
+                            </div>
                           )}
                         </div>
                         <div className="min-w-0">
