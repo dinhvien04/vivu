@@ -1,5 +1,6 @@
 import type { ConfigService } from '@nestjs/config';
 import type { GeminiService } from '../../gemini/gemini.service';
+import type { PrismaService } from '../../prisma/prisma.service';
 import type { QdrantRepository } from '../../qdrant/qdrant.repository';
 import type { ContextBuilderService } from '../services/context-builder.service';
 import type { PlaceMentionResolverService } from '../services/place-mention-resolver.service';
@@ -31,6 +32,19 @@ describe('TextOnlyPipeline', () => {
     const formatter = {
       format: jest.fn().mockResolvedValue({ success: true, input_type: 'text_only' }),
     };
+    const prisma = {
+      place: {
+        findUnique: jest.fn().mockResolvedValue({
+          titleVi: 'Biển Hồ',
+          province: 'Gia Lai',
+          summaryVi: 'Biển Hồ là thắng cảnh nổi tiếng.',
+          descriptionVi: null,
+          address: null,
+          aliases: ['Hồ Tơ Nưng'],
+          categories: [],
+        }),
+      },
+    };
     const pipeline = new TextOnlyPipeline(
       config({ TOP_K_TEXT: '3' }),
       qdrant as unknown as QdrantRepository,
@@ -38,6 +52,7 @@ describe('TextOnlyPipeline', () => {
       contextBuilder as unknown as ContextBuilderService,
       placeMentions as unknown as PlaceMentionResolverService,
       formatter as unknown as ResponseFormatterService,
+      prisma as unknown as PrismaService,
     );
 
     await pipeline.run('Biển Hồ có gì đẹp?');
@@ -48,9 +63,14 @@ describe('TextOnlyPipeline', () => {
     });
     expect(gemini.generateTravelAnswer).toHaveBeenCalledWith({
       question: 'Biển Hồ có gì đẹp?',
-      context: 'retrieved context',
+      context: expect.stringContaining('retrieved context'),
       detectedPlace: { slug: 'bien-ho', name: 'Biển Hồ' },
     });
+    expect(gemini.generateTravelAnswer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.stringContaining('Biển Hồ là thắng cảnh nổi tiếng.'),
+      }),
+    );
     expect(formatter.format).toHaveBeenCalledWith(
       expect.objectContaining({
         textResults: [result],
