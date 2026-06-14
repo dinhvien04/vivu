@@ -74,6 +74,12 @@ function isS3Url(value: string): boolean {
   return value.startsWith('s3://');
 }
 
+function appendWhereAnd(where: Prisma.PlaceWhereInput, condition: Prisma.PlaceWhereInput): void {
+  const current = where.AND;
+  const conditions = Array.isArray(current) ? current : current ? [current] : [];
+  where.AND = [...conditions, condition];
+}
+
 @Injectable()
 export class PlacesService {
   constructor(
@@ -99,15 +105,13 @@ export class PlacesService {
         .replace(/đ/gi, 'd')
         .replace(/[^\p{L}\p{N}]+/gu, '_')
         .toUpperCase();
-      where.AND = [
-        {
-          OR: [
-            { titleVi: { contains: q, mode: 'insensitive' } },
-            { titleEn: { contains: q, mode: 'insensitive' } },
-            { locationKey: { contains: locationKeyQuery, mode: 'insensitive' } },
-          ],
-        },
-      ];
+      appendWhereAnd(where, {
+        OR: [
+          { titleVi: { contains: q, mode: 'insensitive' } },
+          { titleEn: { contains: q, mode: 'insensitive' } },
+          { locationKey: { contains: locationKeyQuery, mode: 'insensitive' } },
+        ],
+      });
     }
 
     if (query.region) {
@@ -126,6 +130,12 @@ export class PlacesService {
 
     if (query.season) {
       where.bestSeasons = { has: query.season };
+    }
+
+    if (query.hasGeo === true) {
+      appendWhereAnd(where, { lat: { not: null }, lng: { not: null } });
+    } else if (query.hasGeo === false) {
+      appendWhereAnd(where, { OR: [{ lat: null }, { lng: null }] });
     }
 
     const orderBy: Prisma.PlaceOrderByWithRelationInput =

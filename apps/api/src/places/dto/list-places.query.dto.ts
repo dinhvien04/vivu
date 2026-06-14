@@ -1,6 +1,15 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export const PLACE_SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
 export type PlaceSeason = (typeof PLACE_SEASONS)[number];
@@ -36,6 +45,19 @@ export class ListPlacesQueryDto {
   @IsOptional()
   @IsIn(PLACE_SEASONS as unknown as string[])
   season?: PlaceSeason;
+
+  @ApiPropertyOptional({
+    description: 'Filter places by coordinate availability.',
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  hasGeo?: boolean;
 
   @ApiPropertyOptional({
     description: 'Sắp xếp kết quả.',

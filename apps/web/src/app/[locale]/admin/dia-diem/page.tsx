@@ -32,6 +32,7 @@ export default function AdminPlacesList() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [region, setRegion] = useState<string>('');
+  const [geoFilter, setGeoFilter] = useState<'all' | 'with' | 'missing'>('all');
   const [q, setQ] = useState<string>('');
   const [appliedQ, setAppliedQ] = useState<string>('');
 
@@ -44,6 +45,8 @@ export default function AdminPlacesList() {
       const result = await adminListPlaces(token, {
         region: region || undefined,
         q: appliedQ || undefined,
+        hasGeo:
+          geoFilter === 'with' ? true : geoFilter === 'missing' ? false : undefined,
         pageSize: 100,
       });
       setPlaces(result.data);
@@ -53,7 +56,7 @@ export default function AdminPlacesList() {
       setPlaces([]);
       setTotal(0);
     }
-  }, [loading, user, getAccessToken, region, appliedQ, t]);
+  }, [loading, user, getAccessToken, region, geoFilter, appliedQ, t]);
 
   useEffect(() => {
     if (loading || !user) return;
@@ -145,7 +148,7 @@ export default function AdminPlacesList() {
         </button>
       </form>
 
-      <nav className="mb-6 flex flex-wrap gap-2 border-b border-outline-variant pb-2">
+      <nav className="mb-3 flex flex-wrap gap-2 border-b border-outline-variant pb-2">
         <button
           type="button"
           onClick={() => setRegion('')}
@@ -173,6 +176,27 @@ export default function AdminPlacesList() {
         ))}
       </nav>
 
+      <nav className="mb-6 flex flex-wrap gap-2">
+        {(['all', 'missing', 'with'] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setGeoFilter(value)}
+            className={
+              geoFilter === value
+                ? 'rounded-full bg-tertiary px-4 py-1.5 text-body-sm font-semibold text-white'
+                : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-tertiary-container hover:text-on-tertiary-container'
+            }
+          >
+            {value === 'all'
+              ? t('geoAll')
+              : value === 'missing'
+                ? t('geoMissing')
+                : t('geoWith')}
+          </button>
+        ))}
+      </nav>
+
       {error && (
         <div
           role="alert"
@@ -189,6 +213,7 @@ export default function AdminPlacesList() {
               <th className="px-4 py-3">{t('colPlace')}</th>
               <th className="hidden px-4 py-3 md:table-cell">{t('colRegion')}</th>
               <th className="hidden px-4 py-3 lg:table-cell">{t('colCategory')}</th>
+              <th className="hidden px-4 py-3 xl:table-cell">{t('colGeo')}</th>
               <th className="px-4 py-3">{t('colStatus')}</th>
               <th className="px-4 py-3 text-right">{t('colActions')}</th>
             </tr>
@@ -196,13 +221,13 @@ export default function AdminPlacesList() {
           <tbody className="divide-y divide-outline-variant/30 text-body-md">
             {places === null ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-on-surface-variant">
+                <td colSpan={6} className="px-4 py-8 text-center text-on-surface-variant">
                   {t('tableLoading')}
                 </td>
               </tr>
             ) : places.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-on-surface-variant">
+                <td colSpan={6} className="px-4 py-8 text-center text-on-surface-variant">
                   {t('tableEmpty')}
                 </td>
               </tr>
@@ -247,6 +272,18 @@ export default function AdminPlacesList() {
                           </span>
                         ))}
                       </div>
+                    </td>
+                    <td className="hidden px-4 py-3 xl:table-cell">
+                      {p.geo ? (
+                        <span className="font-mono text-body-sm text-on-surface-variant">
+                          {p.geo.lat.toFixed(5)}, {p.geo.lng.toFixed(5)}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-error-container px-2 py-0.5 text-body-sm text-on-error-container">
+                          <Icon name="location_off" className="!text-sm" />
+                          {t('geoMissing')}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span

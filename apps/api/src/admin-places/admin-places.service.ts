@@ -33,6 +33,12 @@ const FULL_INCLUDE = {
   categories: { include: { category: true } },
 } as const;
 
+function appendWhereAnd(where: Prisma.PlaceWhereInput, condition: Prisma.PlaceWhereInput): void {
+  const current = where.AND;
+  const conditions = Array.isArray(current) ? current : current ? [current] : [];
+  where.AND = [...conditions, condition];
+}
+
 function toApiPlace(p: PlaceWithRelations): Place {
   return {
     id: p.id,
@@ -110,6 +116,11 @@ export class AdminPlacesService {
     if (query.region) where.region = { slug: query.region };
     if (query.category) where.categories = { some: { category: { slug: query.category } } };
     if (query.season) where.bestSeasons = { has: query.season };
+    if (query.hasGeo === true) {
+      appendWhereAnd(where, { lat: { not: null }, lng: { not: null } });
+    } else if (query.hasGeo === false) {
+      appendWhereAnd(where, { OR: [{ lat: null }, { lng: null }] });
+    }
 
     const orderBy: Prisma.PlaceOrderByWithRelationInput =
       query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };
