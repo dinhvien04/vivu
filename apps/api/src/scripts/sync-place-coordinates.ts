@@ -14,11 +14,7 @@ const SEARCH_BOUNDS = {
   maxLng: 109.55,
 };
 const MIN_MATCH_SCORE = 0.62;
-const QUERY_CONTEXTS = [
-  'Gia Lai, Vietnam',
-  'Binh Dinh, Vietnam',
-  'Quy Nhon, Binh Dinh, Vietnam',
-];
+const QUERY_CONTEXTS = ['Gia Lai, Vietnam', 'Binh Dinh, Vietnam', 'Quy Nhon, Binh Dinh, Vietnam'];
 const STOP_WORDS = new Set([
   'an',
   'ba',
@@ -68,7 +64,10 @@ interface ScoredResult extends NominatimResult {
 interface CoordinateOverride {
   lat: number;
   lng: number;
+  confidence?: 'high' | 'medium' | 'low';
   source?: string;
+  note?: string;
+  addressHint?: string;
 }
 
 loadEnvFile();
@@ -175,9 +174,7 @@ async function geocode(place: PlaceToGeocode): Promise<ScoredResult | null> {
   }
 
   return (
-    scored.sort(
-      (a, b) => b.score - a.score || (b.importance ?? 0) - (a.importance ?? 0),
-    )[0] ?? null
+    scored.sort((a, b) => b.score - a.score || (b.importance ?? 0) - (a.importance ?? 0))[0] ?? null
   );
 }
 
@@ -189,10 +186,7 @@ async function searchNominatim(query: string): Promise<NominatimResult[]> {
     addressdetails: '1',
     q: query,
   });
-  const response = await fetchWithRetry(
-    `https://nominatim.openstreetmap.org/search?${params}`,
-    3,
-  );
+  const response = await fetchWithRetry(`https://nominatim.openstreetmap.org/search?${params}`, 3);
   if (!response.ok) {
     throw new Error(`Nominatim returned ${response.status} for ${query}`);
   }
@@ -277,8 +271,7 @@ function tokenize(value: string, options: { includeStopWords?: boolean } = {}): 
   return normalize(value)
     .split(' ')
     .filter(
-      (token) =>
-        token.length >= 2 && (options.includeStopWords === true || !STOP_WORDS.has(token)),
+      (token) => token.length >= 2 && (options.includeStopWords === true || !STOP_WORDS.has(token)),
     );
 }
 

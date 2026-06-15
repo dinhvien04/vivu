@@ -74,6 +74,14 @@
     "lng": 109.355640625,
     "source": "Google Maps listing: Đình Thành Hoàng, J964+X7C, Cù Lao Xanh, Nhơn Châu, Gia Lai; cross-check: https://baotanglichsu.vn/vi/Articles/2001/66289/nhon-chau-tu-goc-nhin-lich-su.html"
   },
+  "dinh-lang-huu-thanh": {
+    "lat": 13.8980125,
+    "lng": 109.190296875,
+    "confidence": "medium",
+    "source": "https://baogialai.com.vn/nhung-tram-tich-van-hoa-o-dinh-lang-huu-thanh-post342398.html; Google Maps nearby listings: TH Co Chuyen - Cho An The, V5XR+54W and Truong Thue Bridge, V5XR+JFM, Tuy Phuoc Dong, Gia Lai",
+    "note": "Representative point near Truong The/Truong Thue market in Huu Thanh village; no official standalone map listing was found. Do not confuse it with Dinh lang Huu Sy in Trung Thanh.",
+    "addressHint": "Sau cho Truong The/Truong Thue, thon Huu Thanh, Tuy Phuoc Dong, Gia Lai"
+  },
   "doi-co-hong-dak-doa": {
     "lat": 13.9704625,
     "lng": 108.132546875,
@@ -173,6 +181,14 @@
     "lat": 14.2033125,
     "lng": 107.8653594,
     "source": "Google Maps business listing: Nam Trung Plate stone, Ia Phí, Gia Lai"
+  },
+  "suoi-da-vang": {
+    "lat": 13.689065,
+    "lng": 109.221062,
+    "confidence": "high",
+    "source": "https://resortseasideboutiquequynhon.vn-hotel.com/vi/; https://gody.vn/chau-a/viet-nam/binh-dinh/suoi-da-vang; https://www.klook.com/vi/blog/du-lich-quy-nhon-phu-yen-4-ngay-3-dem/",
+    "note": "Coordinates identify Tuyet Tinh Coc, also known as Suoi Da Vang, Ho Trai Tim or Ho Bom, near Bai Xep and Ghenh Rang. Do not use similarly named places in Quang Ngai or Dong Nai.",
+    "addressHint": "Tuyet Tinh Coc / Suoi Da Vang / Ho Trai Tim, gan Bai Xep, Ghenh Rang, Gia Lai"
   },
   "thac-hang-doi": {
     "lat": 14.15914,
