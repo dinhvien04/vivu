@@ -1,89 +1,165 @@
 # Vivu
 
-> Portal **tra cứu địa điểm du lịch Việt Nam**. Người dùng tìm – xem – lưu – đánh giá – chia sẻ. **Không có yếu tố thương mại** (đặt phòng, tour, thanh toán).
+Vivu là nền tảng tra cứu địa danh và hỗ trợ du lịch Gia Lai. Hệ thống cung cấp
+danh sách địa điểm, bản đồ, tìm kiếm, đánh giá, sổ tay và trợ lý AI nhận câu hỏi
+hoặc hình ảnh địa danh.
 
-- **Frontend:** [Next.js 14](https://nextjs.org) (App Router, TS, Tailwind) — `apps/web`
-- **Backend:** [NestJS 10](https://nestjs.com) (Fastify, Prisma) — `apps/api`
-- **Database:** PostgreSQL (+ PostGIS sẽ thêm sau)
-- **Search:** MeiliSearch (sẽ tích hợp ở v1)
-- **Mono-repo:** pnpm workspaces + Turborepo
+- Web production: <https://vivu-web.vercel.app>
+- API production: <https://vivu-api.vercel.app>
+- Swagger local: <http://localhost:4000/docs>
+
+## Phạm vi hiện tại
+
+- Dữ liệu hiển thị trên web lấy từ PostgreSQL, không hard-code ở frontend.
+- S3 lưu ảnh riêng tư; backend tạo presigned URL trước khi trả cho web.
+- Qdrant Cloud chỉ dùng truy xuất ngữ cảnh cho AI, không phải database hiển thị.
+- Gemini và Qdrant chỉ được gọi từ backend; API key không xuất hiện ở frontend.
+- Backend không chạy embedding local và không tạo lại collection Qdrant.
+- Giao diện công khai chỉ hiển thị địa danh thuộc phạm vi Gia Lai của dự án.
+
+## Công nghệ
+
+| Thành phần       | Công nghệ                                                          |
+| ---------------- | ------------------------------------------------------------------ |
+| Frontend         | Next.js 14, React 18, TypeScript, Tailwind CSS, next-intl, Leaflet |
+| Backend          | NestJS 10, Fastify, Prisma                                         |
+| Dữ liệu          | PostgreSQL, PostGIS                                                |
+| Tìm kiếm         | Meilisearch, có fallback PostgreSQL                                |
+| Lưu trữ ảnh      | AWS S3                                                             |
+| AI retrieval     | Qdrant Cloud Inference                                             |
+| Sinh câu trả lời | Google Gemini                                                      |
+| Monorepo         | pnpm workspaces, Turborepo                                         |
 
 ## Cấu trúc
 
-```
+```text
 vivu/
 ├─ apps/
-│  ├─ web/        # Next.js 14 app
-│  └─ api/        # NestJS 10 app
+│  ├─ api/                 # NestJS API
+│  └─ web/                 # Next.js web
 ├─ packages/
-│  └─ types/      # Shared TypeScript types
-├─ docs/
-│  └─ overview.md # Tài liệu tổng quan đầy đủ
+│  └─ types/               # Kiểu dữ liệu dùng chung
+├─ docs/                   # Tài liệu dự án
 ├─ docker-compose.yml
 ├─ pnpm-workspace.yaml
-├─ turbo.json
-└─ package.json
+└─ turbo.json
 ```
 
-## Yêu cầu
+## Chạy local
 
-- Node.js >= 20 (xem `.nvmrc`)
-- pnpm >= 9
-- Docker (để chạy Postgres local)
+Yêu cầu:
 
-## Bắt đầu nhanh
+- Node.js 20 trở lên
+- pnpm 9
+- Docker
 
 ```bash
-# 1. Cài deps
 pnpm install
+docker compose up -d db meilisearch
+```
 
-# 2. Khởi động Postgres local
-docker compose up -d db
+Tạo file môi trường:
 
-# 3. Tạo file env
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
+```powershell
+Copy-Item apps/api/.env.example apps/api/.env
+Copy-Item apps/web/.env.example apps/web/.env.local
+```
 
-# 4. Sinh Prisma client + sync schema + bật PostGIS (idempotent)
+Điền các biến bắt buộc trong hai file vừa tạo, sau đó chuẩn bị database và chạy
+ứng dụng:
+
+```bash
 pnpm --filter @vivu/api db:setup
-
-# 5. (Tuỳ chọn) seed dữ liệu mẫu
-pnpm --filter @vivu/api seed
-
-# 6. Chạy cả FE + BE song song
 pnpm dev
 ```
 
-> `db:setup` chạy `prisma generate` + `prisma db push` + script `postgis:up`
-> (tạo cột `geo geography(Point, 4326)`, GIST index, trigger `place_geo_sync`).
-> Chạy lại lệnh này mỗi khi `prisma/schema.prisma` đổi hoặc khi gặp lỗi
-> `column "geo" does not exist` từ endpoint `/api/v1/places/nearby`.
+Các địa chỉ local:
 
-- Web: http://localhost:3000
-- API: http://localhost:4000/api/v1
-- API Docs (Swagger): http://localhost:4000/docs
+- Web: <http://localhost:3000>
+- API: <http://localhost:4000/api/v1>
+- Swagger: <http://localhost:4000/docs>
 
-## Scripts gốc
+## Biến môi trường
 
-| Lệnh             | Mô tả                                   |
-| ---------------- | --------------------------------------- |
-| `pnpm dev`       | Chạy dev cả `web` + `api` qua Turborepo |
-| `pnpm build`     | Build tất cả workspaces                 |
-| `pnpm lint`      | Lint tất cả workspaces                  |
-| `pnpm typecheck` | Type-check tất cả workspaces            |
-| `pnpm format`    | Prettier format toàn repo               |
+Không commit file `.env` hoặc khóa thật lên Git.
 
-## Quy ước
+Backend cần các nhóm biến sau:
 
-- Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`...
-- Branch: `feat/<scope>`, `fix/<scope>`. Không push thẳng vào `main`.
-- TS strict bật toàn repo. Không dùng `any` trừ khi có lý do.
-- Mỗi PR cần: lint pass, typecheck pass, build pass, có test nếu thay đổi logic.
+- PostgreSQL: `DATABASE_URL`
+- Auth: `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`
+- AWS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`,
+  `AWS_BUCKET_NAME`
+- Qdrant: `QDRANT_URL`, `QDRANT_API_KEY` và tên collection/model
+- Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL`
+- Tùy chọn: Meilisearch, CORS, cache TTL và giới hạn cache
+
+Frontend:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
+API_INTERNAL_URL=http://localhost:4000
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Danh sách đầy đủ nằm tại
+[`apps/api/.env.example`](apps/api/.env.example) và
+[`apps/web/.env.example`](apps/web/.env.example).
+
+## Đồng bộ dữ liệu
+
+Database là nguồn dữ liệu chính cho giao diện. Có thể đồng bộ thư mục địa danh
+từ S3 và cập nhật tọa độ bằng các lệnh:
+
+```bash
+pnpm --filter @vivu/api sync:locations
+pnpm --filter @vivu/api sync:coordinates
+pnpm --filter @vivu/api reindex:meili
+```
+
+Script đồng bộ S3 dùng `locationKey` để upsert, lấy ảnh đại diện và phần giới
+thiệu ngắn từ tài liệu địa danh. Script không tạo embedding và không thay đổi
+collection Qdrant.
+
+## API chính
+
+```text
+GET  /api/v1/places
+GET  /api/v1/places/nearby
+GET  /api/v1/places/:slug
+GET  /api/v1/places/:slug/images
+GET  /api/v1/categories
+GET  /api/v1/regions
+GET  /api/v1/search/suggest
+POST /api/v1/ai/chat
+```
+
+`POST /api/v1/ai/chat` nhận `multipart/form-data` với `message`,
+`session_id` và/hoặc `image`; hỗ trợ text-only, image-only và image + text.
+
+## Kiểm tra chất lượng
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm --filter @vivu/api test
+pnpm --filter @vivu/api test:int
+```
+
+Integration test dùng Testcontainers nên cần Docker đang chạy.
 
 ## Tài liệu
 
-- [Tài liệu tổng quan dự án](./docs/overview.md) — kiến trúc, schema, API, lộ trình, security, SEO, ...
+- [Tổng quan kiến trúc](docs/overview.md)
+- [Phạm vi và quy ước dự án](docs/PROJECT.md)
+- [Trạng thái triển khai](docs/PROGRESS.md)
+- [Thiết kế hệ thống](docs/DESIGN.md)
+- [Triển khai AI](docs/AI_DEPLOYMENT.md)
 
-## License
+## Quy ước an toàn
 
-Private — chưa quyết định license công khai.
+- Giữ nguyên logo và brand name Vivu.
+- Không đưa khóa AWS, Qdrant hoặc Gemini vào frontend.
+- Không gọi trực tiếp S3, Qdrant hoặc Gemini từ trình duyệt.
+- Không dùng Qdrant làm nguồn dữ liệu hiển thị chính.
+- Không commit `.env`, token, presigned URL hoặc dữ liệu nhạy cảm.

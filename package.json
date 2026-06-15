@@ -2,7 +2,7 @@
   "name": "vivu",
   "version": "0.0.0",
   "private": true,
-  "description": "Vivu — Portal tra cứu địa điểm du lịch Việt Nam",
+  "description": "Vivu - N?n t?ng kh?m ph? v? h?i ??p du l?ch Gia Lai",
   "packageManager": "pnpm@9.15.1",
   "engines": {
     "node": ">=20"
