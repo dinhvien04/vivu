@@ -275,3 +275,48 @@ describe('PlacesService.list', () => {
     );
   });
 });
+
+describe('PlacesService.findBySlug', () => {
+  it('loads place detail and rating aggregate concurrently', async () => {
+    let resolvePlace!: (value: ReturnType<typeof makePlace>) => void;
+    let resolveRating!: (value: {
+      _count: { _all: number };
+      _avg: { rating: number | null };
+    }) => void;
+    const placePromise = new Promise<ReturnType<typeof makePlace>>((resolve) => {
+      resolvePlace = resolve;
+    });
+    const ratingPromise = new Promise<{
+      _count: { _all: number };
+      _avg: { rating: number | null };
+    }>((resolve) => {
+      resolveRating = resolve;
+    });
+    const prisma = {
+      place: {
+        findUnique: jest.fn().mockReturnValue(placePromise),
+      },
+      review: {
+        aggregate: jest.fn().mockReturnValue(ratingPromise),
+      },
+    };
+    const service = new PlacesService(
+      prisma as unknown as PrismaService,
+      { getPresignedGetUrl: jest.fn() } as never,
+    );
+
+    const resultPromise = service.findBySlug('bien-ho');
+    expect(prisma.place.findUnique).toHaveBeenCalledTimes(1);
+    expect(prisma.review.aggregate).toHaveBeenCalledTimes(1);
+
+    resolvePlace(makePlace('p1', 'bien-ho'));
+    resolveRating({ _count: { _all: 4 }, _avg: { rating: 4.25 } });
+
+    await expect(resultPromise).resolves.toEqual(
+      expect.objectContaining({
+        slug: 'bien-ho',
+        rating: { count: 4, average: 4.25 },
+      }),
+    );
+  });
+});

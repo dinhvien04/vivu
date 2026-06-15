@@ -203,14 +203,28 @@ export class PlacesService {
   }
 
   async findBySlug(slug: string): Promise<Place | null> {
-    const place = await this.prisma.place.findUnique({
-      where: { slug },
-      include: {
-        region: true,
-        photos: { orderBy: { position: 'asc' } },
-        categories: { include: { category: true } },
-      },
-    });
+    const [place, agg] = await Promise.all([
+      this.prisma.place.findUnique({
+        where: { slug },
+        include: {
+          region: true,
+          photos: { orderBy: { position: 'asc' } },
+          categories: { include: { category: true } },
+        },
+      }),
+      this.prisma.review.aggregate({
+        where: {
+          status: 'visible',
+          place: {
+            slug,
+            status: 'published',
+            province: { equals: PUBLIC_PROVINCE, mode: 'insensitive' },
+          },
+        },
+        _count: { _all: true },
+        _avg: { rating: true },
+      }),
+    ]);
 
     if (
       !place ||
@@ -220,11 +234,6 @@ export class PlacesService {
       return null;
     }
 
-    const agg = await this.prisma.review.aggregate({
-      where: { placeId: place.id, status: 'visible' },
-      _count: { _all: true },
-      _avg: { rating: true },
-    });
     const out = toApiPlace(place as PlaceWithRelations);
     out.rating = {
       count: agg._count._all,
