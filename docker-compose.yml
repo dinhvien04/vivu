@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
     environment:
       MEILI_ENV: development
-      # Đổi sang giá trị ngẫu nhiên ≥ 16 ký tự cho production.
+      # Use a random value with at least 16 characters in production.
       MEILI_MASTER_KEY: vivu_dev_master_key_change_me
     ports:
       - '7700:7700'

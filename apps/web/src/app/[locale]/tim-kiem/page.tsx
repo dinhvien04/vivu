@@ -9,12 +9,7 @@ import { SiteHeader } from '@/components/site-header';
 import { Link } from '@/i18n/navigation';
 import { placeCategoryName, placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
-import {
-  listCategories,
-  listPlaces,
-  type PlaceSeason,
-  type PlaceSort,
-} from '@/lib/api';
+import { listCategories, listPlaces, type PlaceSeason, type PlaceSort } from '@/lib/api';
 import { transformCloudinary } from '@/lib/image';
 import type { Place } from '@vivu/types';
 

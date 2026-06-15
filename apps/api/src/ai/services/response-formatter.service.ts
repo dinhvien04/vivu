@@ -171,8 +171,10 @@ export class ResponseFormatterService {
     item: QdrantTextResult | QdrantImageResult,
     lookup: Map<string, PlaceLabel>,
   ): PlaceLabel | undefined {
-    return (item.place_slug && lookup.get(item.place_slug)) ||
+    return (
+      (item.place_slug && lookup.get(item.place_slug)) ||
       (item.location_key && lookup.get(item.location_key)) ||
-      undefined;
+      undefined
+    );
   }
 }

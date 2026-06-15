@@ -46,10 +46,8 @@ export default function AdminPlacesList() {
       const result = await adminListPlaces(token, {
         region: region || undefined,
         q: appliedQ || undefined,
-        hasGeo:
-          geoFilter === 'with' ? true : geoFilter === 'missing' ? false : undefined,
-        hasHeroImage:
-          imageFilter === 'with' ? true : imageFilter === 'missing' ? false : undefined,
+        hasGeo: geoFilter === 'with' ? true : geoFilter === 'missing' ? false : undefined,
+        hasHeroImage: imageFilter === 'with' ? true : imageFilter === 'missing' ? false : undefined,
         pageSize: 100,
       });
       setPlaces(result.data);
@@ -184,24 +182,20 @@ export default function AdminPlacesList() {
           <span className="mr-1 text-body-sm font-semibold text-on-surface-variant">
             {t('geoFilterLabel')}
           </span>
-        {(['all', 'missing', 'with'] as const).map((value) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setGeoFilter(value)}
-            className={
-              geoFilter === value
-                ? 'rounded-full bg-tertiary px-4 py-1.5 text-body-sm font-semibold text-white'
-                : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-tertiary-container hover:text-on-tertiary-container'
-            }
-          >
-            {value === 'all'
-              ? t('geoAll')
-              : value === 'missing'
-                ? t('geoMissing')
-                : t('geoWith')}
-          </button>
-        ))}
+          {(['all', 'missing', 'with'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setGeoFilter(value)}
+              className={
+                geoFilter === value
+                  ? 'rounded-full bg-tertiary px-4 py-1.5 text-body-sm font-semibold text-white'
+                  : 'rounded-full bg-surface-container px-4 py-1.5 text-body-sm font-medium text-on-surface-variant hover:bg-tertiary-container hover:text-on-tertiary-container'
+              }
+            >
+              {value === 'all' ? t('geoAll') : value === 'missing' ? t('geoMissing') : t('geoWith')}
+            </button>
+          ))}
         </nav>
         <nav className="flex flex-wrap items-center gap-2">
           <span className="mr-1 text-body-sm font-semibold text-on-surface-variant">

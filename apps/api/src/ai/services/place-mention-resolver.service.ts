@@ -25,7 +25,7 @@ export class PlaceMentionResolverService {
       },
     });
 
-    let best: ResolvedPlaceMention & { length: number } | null = null;
+    let best: (ResolvedPlaceMention & { length: number }) | null = null;
     for (const place of places) {
       const names = [place.titleVi, place.titleEn, ...place.aliases].filter(
         (value): value is string => Boolean(value?.trim()),

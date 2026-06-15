@@ -180,7 +180,8 @@ export function PlacesMap({
     const items = new Map<string, string>();
     for (const place of geoPlaces) {
       for (const category of place.categories ?? []) {
-        if (!items.has(category.slug)) items.set(category.slug, placeCategoryName(category, locale));
+        if (!items.has(category.slug))
+          items.set(category.slug, placeCategoryName(category, locale));
       }
     }
     return [...items.entries()]
@@ -192,7 +193,8 @@ export function PlacesMap({
     const normalizedQuery = normalizeSearch(query);
     return geoPlaces.filter((place) => {
       const matchesCategory =
-        categorySlug === 'all' || (place.categories ?? []).some((item) => item.slug === categorySlug);
+        categorySlug === 'all' ||
+        (place.categories ?? []).some((item) => item.slug === categorySlug);
       if (!matchesCategory) return false;
       if (!normalizedQuery) return true;
       const searchable = normalizeSearch(
