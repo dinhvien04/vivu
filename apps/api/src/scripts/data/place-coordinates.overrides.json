@@ -137,6 +137,14 @@
     "lng": 109.2569,
     "source": "https://www.vietnamairlines.com/jp/vi/plan-book/travel/travel-guide/lang-chai-nhon-hai"
   },
+  "luy-da-co-phu-ha": {
+    "lat": 14.37747,
+    "lng": 109.10289,
+    "confidence": "low",
+    "source": "FishingPoints Ho Phu Ha: 14°22.648200'N, 109°6.173400'E; Bao Gia Lai: luy da co Phu Ha nam duoi chan nui Bich Ke, thon Phu Ha, tu suoi Cay Tram den gan bo ho Phu Ha; Quyet dinh 529/QD-UBND Gia Lai ngay 05/02/2026: thon Phu Ha, xa Phu My Bac",
+    "note": "Representative access-area point based on Ho Phu Ha. This is not an officially surveyed coordinate for the ancient stone wall itself and must remain low confidence.",
+    "addressHint": "Thon Phu Ha, xa Phu My Bac, Phu My, Gia Lai; khu rung phong ho nui Bich Ke, tu suoi Cay Tram den gan bo ho Phu Ha"
+  },
   "mieu-ba-thuy": {
     "lat": 13.7672,
     "lng": 109.2196,

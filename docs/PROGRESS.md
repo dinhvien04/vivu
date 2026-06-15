@@ -26,10 +26,9 @@ Cập nhật: 15/06/2026.
 
 - API công khai đang giới hạn địa danh thuộc phạm vi Gia Lai.
 - Ảnh hỏng/thiếu không được render như một thẻ ảnh lỗi.
-- `suoi-da-vang` và `dinh-lang-huu-thanh` đã có tọa độ kèm nguồn và mức tin cậy.
-- Một địa danh đang cần tiếp tục xác minh tọa độ: `luy-da-co-phu-ha`.
-
-Không nên gán tọa độ ước lượng cho địa danh còn lại chỉ để đủ số lượng.
+- Tất cả địa danh công khai hiện đã có tọa độ hoặc điểm đại diện kèm nguồn.
+- `luy-da-co-phu-ha` dùng điểm đại diện khu vực hồ Phú Hà với mức tin cậy thấp,
+  không phải tọa độ đo đạc chính xác thân lũy.
 
 ## Kiểm thử gần nhất
 
@@ -43,7 +42,7 @@ Không nên gán tọa độ ước lượng cho địa danh còn lại chỉ đ
 
 ## Việc bảo trì tiếp theo
 
-- [ ] Xác minh tọa độ `luy-da-co-phu-ha` bằng nguồn đáng tin cậy.
+- [ ] Thay điểm đại diện `luy-da-co-phu-ha` khi có tọa độ khảo sát chính thức.
 - [ ] Theo dõi tỷ lệ lỗi S3/presigned URL trên production.
 - [ ] Bổ sung dashboard quan sát latency API và AI.
 - [ ] Chạy integration test định kỳ trong CI có Docker.
