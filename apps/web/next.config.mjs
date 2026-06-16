@@ -9,11 +9,9 @@ const nextConfig = {
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
   },
-  experimental: {
-    // typedRoutes disabled while routes are still being scaffolded.
-    // Re-enable once route inventory stabilises.
-    typedRoutes: false,
-  },
+  // typedRoutes disabled while routes are still being scaffolded.
+  // Re-enable once route inventory stabilises.
+  typedRoutes: false,
 };
 
 export default withNextIntl(nextConfig);

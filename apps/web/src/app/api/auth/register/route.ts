@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const { status, body: data } = await callApi('/auth/register', { body });
   if (status === 201 && data && typeof data === 'object' && 'tokens' in data) {
     const ok = data as ApiAuthSuccess;
-    setRefreshCookie(ok.tokens.refreshToken);
+    await setRefreshCookie(ok.tokens.refreshToken);
     return NextResponse.json(
       {
         user: ok.user,

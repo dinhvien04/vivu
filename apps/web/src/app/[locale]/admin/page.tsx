@@ -14,9 +14,10 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }): Promise<{ title: string }> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'admin' });
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'admin' });
   return { title: t('title') };
 }
 
@@ -54,11 +55,12 @@ function StatCard({ label, value, hint, icon, iconBg, iconColor }: StatCardProps
 }
 
 interface AdminDashboardProps {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }
 
 export default async function AdminDashboard({ params }: AdminDashboardProps) {
-  setRequestLocale(params.locale);
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations('admin');
   // Pull a quick aggregate by hitting the list endpoint with pageSize=1 for
   // each region. Total count is returned in `meta.total`.
@@ -168,7 +170,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
               </li>
             ) : (
               recentPlaces.map((p) => {
-                const title = placeTitle(p, params.locale);
+                const title = placeTitle(p, locale);
                 return (
                   <li key={p.id} className="flex items-center gap-4 py-3">
                     <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container">
@@ -189,7 +191,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
                         {title}
                       </Link>
                       <p className="truncate text-body-sm text-on-surface-variant">
-                        {p.region ? placeRegionName(p.region, params.locale) : '—'} ·{' '}
+                        {p.region ? placeRegionName(p.region, locale) : '—'} ·{' '}
                         {p.address ?? t('noAddress')}
                       </p>
                     </div>

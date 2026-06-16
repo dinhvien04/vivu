@@ -12,21 +12,21 @@ function pickBearer(req: Request): string | undefined {
 /** Note: backend GET /admin/places/:slug uses slug; PATCH/DELETE use id.
  * Caller must pass the right value as the [id] segment. */
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
-  const { status, body } = await callApi(`/admin/places/${params.id}`, {
+  const { status, body } = await callApi(`/admin/places/${(await params).id}`, {
     method: 'GET',
     bearer,
   });
   return NextResponse.json(body, { status });
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
   const body = await req.json().catch(() => null);
-  const { status, body: data } = await callApi(`/admin/places/${params.id}`, {
+  const { status, body: data } = await callApi(`/admin/places/${(await params).id}`, {
     method: 'PATCH',
     body,
     bearer,
@@ -34,10 +34,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return NextResponse.json(data, { status });
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
-  const { status, body } = await callApi(`/admin/places/${params.id}`, {
+  const { status, body } = await callApi(`/admin/places/${(await params).id}`, {
     method: 'DELETE',
     bearer,
   });

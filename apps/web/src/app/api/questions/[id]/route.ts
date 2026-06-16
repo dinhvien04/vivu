@@ -9,15 +9,18 @@ function pickBearer(req: Request): string | undefined {
   return auth?.toLowerCase().startsWith('bearer ') ? auth.slice('bearer '.length) : undefined;
 }
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const { status, body } = await callApi(`/questions/${params.id}`, { method: 'GET' });
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { status, body } = await callApi(`/questions/${(await params).id}`, { method: 'GET' });
   return NextResponse.json(body, { status });
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
-  const { status, body } = await callApi(`/questions/${params.id}`, { method: 'DELETE', bearer });
+  const { status, body } = await callApi(`/questions/${(await params).id}`, {
+    method: 'DELETE',
+    bearer,
+  });
   if (status === 204) return new NextResponse(null, { status: 204 });
   return NextResponse.json(body, { status });
 }

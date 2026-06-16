@@ -43,14 +43,20 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Vivu API')
-    .setDescription('REST API cho portal tra cứu địa điểm du lịch Vivu')
-    .setVersion('0.0.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  const swaggerEnabled =
+    process.env.SWAGGER_ENABLED === 'true' ||
+    (process.env.SWAGGER_ENABLED !== 'false' && process.env.NODE_ENV !== 'production');
+
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle('Vivu API')
+      .setDescription('REST API for the Vivu travel platform')
+      .setVersion('0.0.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   const port = Number(process.env.PORT ?? 4000);
   await app.listen(port, '0.0.0.0');

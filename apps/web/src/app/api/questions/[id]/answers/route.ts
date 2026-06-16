@@ -9,11 +9,11 @@ function pickBearer(req: Request): string | undefined {
   return auth?.toLowerCase().startsWith('bearer ') ? auth.slice('bearer '.length) : undefined;
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
   const body = await req.json().catch(() => null);
-  const { status, body: data } = await callApi(`/questions/${params.id}/answers`, {
+  const { status, body: data } = await callApi(`/questions/${(await params).id}/answers`, {
     method: 'POST',
     body,
     bearer,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { PlaceForm } from '@/components/admin/place-form';
 import { useAuth } from '@/components/auth-provider';
@@ -17,11 +18,9 @@ import {
 import { listCategories, listRegions } from '@/lib/api';
 import type { Category, Place, Region } from '@vivu/types';
 
-interface PageProps {
-  params: { slug: string };
-}
-
-export default function AdminPlaceEdit({ params }: PageProps) {
+export default function AdminPlaceEdit() {
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
   const t = useTranslations('admin');
   const locale = useLocale() as Locale;
   const STATUS_LABEL: Record<string, string> = {
@@ -48,7 +47,7 @@ export default function AdminPlaceEdit({ params }: PageProps) {
         const token = await getAccessToken();
         if (!token) throw new Error(t('errSessionExpired'));
         const [p, rs, cs] = await Promise.all([
-          adminGetPlace(params.slug, token),
+          adminGetPlace(slug, token),
           listRegions().catch(() => [] as Region[]),
           listCategories().catch(() => [] as Category[]),
         ]);
@@ -66,7 +65,7 @@ export default function AdminPlaceEdit({ params }: PageProps) {
     return () => {
       cancelled = true;
     };
-  }, [loading, user, getAccessToken, params.slug, t]);
+  }, [loading, user, getAccessToken, slug, t]);
 
   const handleStatus = async (action: 'publish' | 'unpublish'): Promise<void> => {
     if (!place) return;
@@ -111,7 +110,7 @@ export default function AdminPlaceEdit({ params }: PageProps) {
       <div className="mx-auto flex min-h-[40vh] max-w-md flex-col items-center justify-center gap-3 text-center">
         <h1 className="font-h3 text-h3 text-on-surface">{t('notFoundTitle')}</h1>
         <p className="text-body-md text-on-surface-variant">
-          {t('notFoundLeadPrefix')} <code>{params.slug}</code> {t('notFoundLeadSuffix')}
+          {t('notFoundLeadPrefix')} <code>{slug}</code> {t('notFoundLeadSuffix')}
         </p>
         <Link
           href="/admin/dia-diem"

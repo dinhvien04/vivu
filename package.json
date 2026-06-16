@@ -2,7 +2,7 @@
   "name": "vivu",
   "version": "0.0.0",
   "private": true,
-  "description": "Vivu - N?n t?ng kh?m ph? v? h?i ??p du l?ch Gia Lai",
+  "description": "Vivu - Nen tang kham pha va hoi dap du lich Gia Lai",
   "packageManager": "pnpm@9.15.1",
   "engines": {
     "node": ">=20"
@@ -20,8 +20,8 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3",
-    "turbo": "^2.3.3",
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18",
     "typescript": "^5.6.3"
   },
   "lint-staged": {
@@ -34,7 +34,21 @@
   },
   "pnpm": {
     "overrides": {
-      "fastify": "4.29.1"
+      "@fastify/middie": "^9.3.2",
+      "@grpc/grpc-js": "^1.14.4",
+      "@babel/core": "^7.29.6",
+      "fast-uri": "^3.1.2",
+      "fastify": "^5.8.5",
+      "form-data": "^4.0.6",
+      "glob": "^10.5.0",
+      "lodash": "^4.18.1",
+      "picomatch": "^4.0.4",
+      "postcss": "^8.5.10",
+      "js-yaml": "^4.2.0",
+      "qs": "^6.15.2",
+      "tmp": "^0.2.6",
+      "protobufjs": "^7.6.3",
+      "uuid": "^11.1.1"
     }
   }
 }

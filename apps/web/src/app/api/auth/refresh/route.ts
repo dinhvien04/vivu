@@ -10,14 +10,14 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  const refreshToken = readRefreshCookie();
+  const refreshToken = await readRefreshCookie();
   if (!refreshToken) return new NextResponse(null, { status: 204 });
 
   const { status, body } = await callApi('/auth/refresh', {
     body: { refreshToken },
   });
   if (status !== 200) {
-    clearRefreshCookie();
+    await clearRefreshCookie();
     return NextResponse.json(body ?? { message: 'Phiên hết hạn' }, { status });
   }
   if (body && typeof body === 'object' && 'accessToken' in body && 'refreshToken' in body) {
@@ -26,7 +26,7 @@ export async function POST() {
       refreshToken: string;
       expiresIn: number;
     };
-    setRefreshCookie(tokens.refreshToken);
+    await setRefreshCookie(tokens.refreshToken);
     return NextResponse.json(
       {
         accessToken: tokens.accessToken,
@@ -35,6 +35,6 @@ export async function POST() {
       { status: 200 },
     );
   }
-  clearRefreshCookie();
+  await clearRefreshCookie();
   return NextResponse.json({ message: 'Phiên không hợp lệ' }, { status: 401 });
 }

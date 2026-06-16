@@ -9,18 +9,20 @@ function pickBearer(req: Request): string | undefined {
   return auth?.toLowerCase().startsWith('bearer ') ? auth.slice('bearer '.length) : undefined;
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const url = new URL(req.url);
   const qs = url.search;
-  const { status, body } = await callApi(`/places/${params.id}/reviews${qs}`, { method: 'GET' });
+  const { status, body } = await callApi(`/places/${(await params).id}/reviews${qs}`, {
+    method: 'GET',
+  });
   return NextResponse.json(body, { status });
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
   if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
   const body = await req.json().catch(() => null);
-  const { status, body: data } = await callApi(`/places/${params.id}/reviews`, {
+  const { status, body: data } = await callApi(`/places/${(await params).id}/reviews`, {
     method: 'POST',
     body,
     bearer,

@@ -47,7 +47,7 @@ export async function DELETE(req: Request) {
     bearer,
   });
   if (status === 204) {
-    clearRefreshCookie();
+    await clearRefreshCookie();
     return NextResponse.json({ ok: true }, { status: 200 });
   }
   return NextResponse.json(data ?? { message: 'Xoá tài khoản thất bại' }, { status });

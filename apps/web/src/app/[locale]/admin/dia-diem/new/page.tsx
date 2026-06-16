@@ -10,18 +10,20 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }): Promise<{ title: string }> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'admin' });
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'admin' });
   return { title: t('newPlaceTitle') };
 }
 
 interface AdminPlaceNewProps {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }
 
 export default async function AdminPlaceNew({ params }: AdminPlaceNewProps) {
-  setRequestLocale(params.locale);
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations('admin');
   const [regions, categories] = await Promise.all([
     listRegions().catch(() => []),

@@ -5,11 +5,12 @@ import type { Locale } from '@/i18n/routing';
 
 interface AuthLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: string }>;
 }
 
 export default async function AuthLayout({ children, params }: AuthLayoutProps) {
-  const { locale } = await params;
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as Locale;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'auth' });
 

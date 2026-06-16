@@ -55,8 +55,9 @@ export async function callApi(
   return { status: res.status, body };
 }
 
-export function setRefreshCookie(value: string): void {
-  cookies().set({
+export async function setRefreshCookie(value: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set({
     name: REFRESH_COOKIE,
     value,
     httpOnly: true,
@@ -67,8 +68,9 @@ export function setRefreshCookie(value: string): void {
   });
 }
 
-export function clearRefreshCookie(): void {
-  cookies().set({
+export async function clearRefreshCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set({
     name: REFRESH_COOKIE,
     value: '',
     httpOnly: true,
@@ -79,6 +81,7 @@ export function clearRefreshCookie(): void {
   });
 }
 
-export function readRefreshCookie(): string | null {
-  return cookies().get(REFRESH_COOKIE)?.value ?? null;
+export async function readRefreshCookie(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get(REFRESH_COOKIE)?.value ?? null;
 }

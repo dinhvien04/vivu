@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
@@ -9,11 +10,9 @@ import { SiteHeader } from '@/components/site-header';
 import { Link, useRouter } from '@/i18n/navigation';
 import { createReview } from '@/lib/reviews-client';
 
-interface PageProps {
-  params: { slug: string };
-}
-
-export default function WriteReviewPage({ params }: PageProps) {
+export default function WriteReviewPage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
   const t = useTranslations('review');
   const router = useRouter();
   const { user, loading, getAccessToken } = useAuth();
@@ -24,10 +23,10 @@ export default function WriteReviewPage({ params }: PageProps) {
 
   useEffect(() => {
     if (!loading && !user) {
-      const next = `/dia-diem/${params.slug}/danh-gia/moi`;
+      const next = `/dia-diem/${slug}/danh-gia/moi`;
       router.replace(`/dang-nhap?next=${encodeURIComponent(next)}`);
     }
-  }, [loading, user, router, params.slug]);
+  }, [loading, user, router, slug]);
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -44,8 +43,8 @@ export default function WriteReviewPage({ params }: PageProps) {
     try {
       const token = await getAccessToken();
       if (!token) throw new Error(t('sessionExpired'));
-      await createReview(params.slug, { rating, content: content.trim() }, token);
-      router.push(`/dia-diem/${params.slug}`);
+      await createReview(slug, { rating, content: content.trim() }, token);
+      router.push(`/dia-diem/${slug}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : t('genericError'));
@@ -58,7 +57,7 @@ export default function WriteReviewPage({ params }: PageProps) {
       <SiteHeader />
       <main className="container mx-auto flex-1 px-6 py-10 md:px-10">
         <Link
-          href={`/dia-diem/${params.slug}`}
+          href={`/dia-diem/${slug}`}
           className="mb-4 inline-flex items-center gap-1 text-body-sm text-on-surface-variant hover:text-primary"
         >
           <Icon name="arrow_back" className="!text-base" />
@@ -120,7 +119,7 @@ export default function WriteReviewPage({ params }: PageProps) {
 
             <div className="flex flex-wrap justify-end gap-3">
               <Link
-                href={`/dia-diem/${params.slug}`}
+                href={`/dia-diem/${slug}`}
                 className="rounded-lg border border-outline-variant px-4 py-2 font-medium text-on-surface-variant hover:bg-surface-container"
               >
                 {t('cancel')}
