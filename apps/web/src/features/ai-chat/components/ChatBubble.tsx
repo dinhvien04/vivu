@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
 import type { ChatMessage } from '../types/ai-chat.types';
 import { MatchedImages } from './MatchedImages';
 import { SourcesList } from './SourcesList';
@@ -13,6 +14,9 @@ interface ChatBubbleLabels {
   showMore: string;
   showLess: string;
   score: string;
+  detectedPlace: string;
+  askFollowUp: string;
+  lowConfidence: (place: string, score: string) => string;
 }
 
 export function ChatBubble({
@@ -24,6 +28,14 @@ export function ChatBubble({
 }) {
   const assistant = message.role === 'assistant';
   const response = message.response;
+  const topMatch = response?.matched_images?.[0];
+  const detectedName = topMatch?.location_name ?? topMatch?.place_slug;
+  const detectedScore =
+    topMatch?.score !== undefined ? `${(topMatch.score * 100).toFixed(1)}%` : undefined;
+  const lowConfidence =
+    detectedName && topMatch?.score !== undefined && topMatch.score < 0.7
+      ? labels.lowConfidence(detectedName, detectedScore ?? '')
+      : null;
 
   return (
     <article className={`flex items-start gap-3 ${assistant ? 'justify-start' : 'justify-end'}`}>
@@ -59,6 +71,34 @@ export function ChatBubble({
           </div>
         )}
         {message.content && <p className="whitespace-pre-wrap text-body-md">{message.content}</p>}
+
+        {assistant && detectedName && (
+          <section className="mt-4 rounded-xl border border-primary/20 bg-primary-fixed/50 p-3 text-on-primary-fixed">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                  {labels.detectedPlace}
+                </p>
+                <p className="mt-1 text-body-sm">
+                  <span className="font-semibold">{detectedName}</span>
+                  {detectedScore ? ` · ${labels.score}: ${detectedScore}` : ''}
+                </p>
+              </div>
+              {topMatch?.place_slug && (
+                <Link
+                  href={`/ai-chat?place=${topMatch.place_slug}`}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary"
+                >
+                  <Icon name="chat" size={15} />
+                  {labels.askFollowUp}
+                </Link>
+              )}
+            </div>
+            {lowConfidence && (
+              <p className="mt-2 text-xs text-on-surface-variant">{lowConfidence}</p>
+            )}
+          </section>
+        )}
 
         {response?.places && response.places.length > 0 && (
           <section className="mt-4">

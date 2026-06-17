@@ -1,6 +1,7 @@
 import type { Paginated, Place, PlaceImage, Region, Category } from '@vivu/types';
+import { getPublicApiBase } from './api-base';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const BASE = getPublicApiBase();
 const PREFIX = '/api/v1';
 
 interface FetchOptions {
@@ -41,6 +42,7 @@ export interface ListPlacesOptions {
   sort?: PlaceSort;
   /** Minimum average rating (1.0 — 5.0). */
   minRating?: number;
+  isAiReady?: boolean;
 }
 
 export async function listPlaces(opts: ListPlacesOptions = {}): Promise<Paginated<Place>> {
@@ -54,6 +56,7 @@ export async function listPlaces(opts: ListPlacesOptions = {}): Promise<Paginate
   if (opts.season) params.set('season', opts.season);
   if (opts.sort) params.set('sort', opts.sort);
   if (opts.minRating !== undefined) params.set('minRating', String(opts.minRating));
+  if (opts.isAiReady !== undefined) params.set('isAiReady', String(opts.isAiReady));
   const qs = params.toString();
   return get<Paginated<Place>>(`/places${qs ? `?${qs}` : ''}`, { revalidate: 60 });
 }

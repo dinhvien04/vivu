@@ -35,6 +35,9 @@ export function AiChatWidget() {
     showMore: t('showMore'),
     showLess: t('showLess'),
     score: t('score'),
+    detectedPlace: t('detectedPlace'),
+    askFollowUp: t('askFollowUp'),
+    lowConfidence: (place: string, score: string) => t('lowConfidence', { place, score }),
   };
 
   return (

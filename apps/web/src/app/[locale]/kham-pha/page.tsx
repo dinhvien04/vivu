@@ -7,26 +7,70 @@ import { Link } from '@/i18n/navigation';
 import { placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 import { listPlaces, type Place, type PlaceSort } from '@/lib/api';
+import { hasPlaceImage } from '@/lib/place-image';
 
-const TOPICS = [
-  { slug: '', vi: 'Tất cả', en: 'All', keywords: [] },
+const TOPIC_FILTERS = [
+  { slug: '', vi: 'Tất cả', en: 'All', categorySlugs: [], keywords: [] },
   {
     slug: 'danh-lam-thang-canh',
     vi: 'Danh lam thắng cảnh',
     en: 'Scenic places',
-    keywords: ['thắng cảnh', 'núi', 'hồ', 'thác', 'suối', 'vườn quốc gia'],
+    categorySlugs: ['danh-lam-thang-canh', 'nui-rung'],
+    keywords: ['danh lam', 'thắng cảnh', 'núi', 'đồi', 'cao nguyên', 'rừng', 'khu sinh thái'],
   },
-  { slug: 'di-tich', vi: 'Di tích', en: 'Historic sites', keywords: ['di tích', 'lũy'] },
-  { slug: 'bien-dao', vi: 'Biển đảo', en: 'Beaches & islands', keywords: ['biển', 'đảo'] },
-  { slug: 'chua', vi: 'Chùa', en: 'Pagodas', keywords: ['chùa', 'thiền viện'] },
-  { slug: 'thap-cham', vi: 'Tháp Chăm', en: 'Cham towers', keywords: ['tháp', 'chăm'] },
-  { slug: 'bao-tang', vi: 'Bảo tàng', en: 'Museums', keywords: ['bảo tàng'] },
+  {
+    slug: 'di-tich',
+    vi: 'Di tích',
+    en: 'Historic sites',
+    categorySlugs: ['di-tich', 'di-san'],
+    keywords: ['di tích', 'di sản', 'lịch sử', 'đình', 'nhà tù', 'thành', 'lũy', 'hội quán'],
+  },
+  {
+    slug: 'bien-dao',
+    vi: 'Biển đảo',
+    en: 'Beaches & islands',
+    categorySlugs: ['bien-dao'],
+    keywords: ['biển', 'bãi', 'đảo', 'hòn', 'làng chài', 'kỳ co', 'eo gió'],
+  },
+  {
+    slug: 'chua',
+    vi: 'Chùa',
+    en: 'Pagodas',
+    categorySlugs: ['chua', 'van-hoa'],
+    keywords: ['chùa', 'thiền viện', 'tịnh xá', 'tu viện'],
+  },
+  {
+    slug: 'thap-cham',
+    vi: 'Tháp Chăm',
+    en: 'Cham towers',
+    categorySlugs: ['thap-cham'],
+    keywords: ['tháp', 'chăm', 'champa', 'dương long', 'bánh ít', 'thủ thiện', 'phú lốc'],
+  },
+  {
+    slug: 'bao-tang',
+    vi: 'Bảo tàng',
+    en: 'Museums',
+    categorySlugs: ['bao-tang'],
+    keywords: ['bảo tàng', 'museum', 'trung tâm khám phá', 'khoa học'],
+  },
   {
     slug: 'ho-thac-suoi',
     vi: 'Hồ - thác - suối',
     en: 'Lakes, falls & streams',
-    keywords: ['hồ', 'thác', 'suối'],
+    categorySlugs: ['ho-thac-suoi', 'thac-suoi'],
+    keywords: ['hồ', 'thác', 'suối', 'biển hồ', 'đá vàng', 'đá cổ'],
   },
+] as const;
+
+const AREA_FILTERS = [
+  { slug: '', vi: 'Tất cả', en: 'All', keywords: [] },
+  { slug: 'pleiku', vi: 'Pleiku', en: 'Pleiku', keywords: ['pleiku', 'biển hồ', 'nhà lao pleiku'] },
+  { slug: 'quy-nhon', vi: 'Quy Nhơn', en: 'Quy Nhon', keywords: ['quy nhơn', 'quy nhon'] },
+  { slug: 'an-nhon', vi: 'An Nhơn', en: 'An Nhon', keywords: ['an nhơn', 'an nhon'] },
+  { slug: 'tuy-phuoc', vi: 'Tuy Phước', en: 'Tuy Phuoc', keywords: ['tuy phước', 'tuy phuoc'] },
+  { slug: 'phu-cat', vi: 'Phù Cát', en: 'Phu Cat', keywords: ['phù cát', 'phu cat'] },
+  { slug: 'phu-my', vi: 'Phù Mỹ', en: 'Phu My', keywords: ['phù mỹ', 'phu my'] },
+  { slug: 'hoai-nhon', vi: 'Hoài Nhơn', en: 'Hoai Nhon', keywords: ['hoài nhơn', 'hoai nhon'] },
 ] as const;
 
 type ExploreView = 'grid' | 'map';
@@ -35,6 +79,8 @@ interface PageProps {
   params: Promise<{ locale: Locale }>;
   searchParams?: Promise<{
     topic?: string;
+    area?: string;
+    aiReady?: string;
     sort?: string;
     q?: string;
     view?: string;
@@ -59,25 +105,51 @@ function buildHref(
 
 function normalize(value: string): string {
   return value
-    .normalize('NFC')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
     .toLocaleLowerCase('vi-VN')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim()
     .replace(/\s+/g, ' ');
 }
 
-function matchesTopic(place: Place, keywords: readonly string[], locale: Locale): boolean {
-  if (keywords.length === 0) return true;
-  const text = ` ${normalize(
+function buildPlaceSearchText(place: Place, locale: Locale): string {
+  return normalize(
     [
       placeTitle(place, locale),
       place.titleVi,
       place.titleEn ?? '',
       place.locationKey ?? '',
+      place.address ?? '',
+      placeSummary(place, locale) ?? '',
       ...place.aliases,
     ].join(' '),
-  )} `;
-  return keywords.some((keyword) => text.includes(` ${normalize(keyword)} `));
+  );
+}
+
+function matchesTopic(
+  place: Place,
+  topic: (typeof TOPIC_FILTERS)[number],
+  locale: Locale,
+): boolean {
+  if (topic.categorySlugs.length === 0) return true;
+
+  const slugs = new Set<string>(topic.categorySlugs);
+  const categories = place.categories ?? [];
+  if (categories.length > 0) {
+    return categories.some((category) => slugs.has(category.slug));
+  }
+
+  const haystack = buildPlaceSearchText(place, locale);
+  return topic.keywords.some((keyword) => haystack.includes(normalize(keyword)));
+}
+
+function matchesArea(place: Place, keywords: readonly string[], locale: Locale): boolean {
+  if (keywords.length === 0) return true;
+  const haystack = buildPlaceSearchText(place, locale);
+  return keywords.some((keyword) => haystack.includes(normalize(keyword)));
 }
 
 export const dynamic = 'force-dynamic';
@@ -93,7 +165,9 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const sp = (await searchParams) ?? {};
-  const topic = TOPICS.find((item) => item.slug === sp.topic) ?? TOPICS[0];
+  const topic = TOPIC_FILTERS.find((item) => item.slug === sp.topic) ?? TOPIC_FILTERS[0];
+  const area = AREA_FILTERS.find((item) => item.slug === sp.area) ?? AREA_FILTERS[0];
+  const aiReady = sp.aiReady === 'true';
   const sort: PlaceSort = sp.sort === 'name' ? 'name' : 'recent';
   const view: ExploreView = sp.view === 'map' ? 'map' : 'grid';
 
@@ -102,10 +176,14 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
     pageSize: 100,
     sort,
     q: sp.q?.trim() || undefined,
+    isAiReady: aiReady ? true : undefined,
   }).catch(() => null);
 
   const places =
-    placesResult?.data.filter((place) => matchesTopic(place, topic.keywords, locale)) ?? [];
+    placesResult?.data
+      .filter(hasPlaceImage)
+      .filter((place) => matchesTopic(place, topic, locale))
+      .filter((place) => matchesArea(place, area.keywords, locale)) ?? [];
 
   return (
     <>
@@ -121,9 +199,9 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
 
         <nav
           aria-label={t('explore.categoryTab')}
-          className="mb-6 flex flex-wrap gap-2 border-b border-outline-variant pb-4"
+          className="mb-5 flex flex-wrap gap-2 border-b border-outline-variant pb-4"
         >
-          {TOPICS.map((item) => {
+          {TOPIC_FILTERS.map((item) => {
             const active = topic.slug === item.slug;
             return (
               <Link
@@ -133,6 +211,31 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
                   active
                     ? 'rounded-full bg-primary px-4 py-2 text-body-sm font-semibold text-white'
                     : 'rounded-full border border-outline-variant px-4 py-2 text-body-sm text-on-surface-variant transition-colors hover:border-primary hover:text-primary'
+                }
+              >
+                {locale === 'en' ? item.en : item.vi}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <nav
+          aria-label={locale === 'en' ? 'Area' : 'Khu vực'}
+          className="mb-6 flex flex-wrap items-center gap-2"
+        >
+          <span className="text-overline uppercase tracking-overline text-on-surface-variant">
+            {locale === 'en' ? 'Area' : 'Khu vực'}
+          </span>
+          {AREA_FILTERS.map((item) => {
+            const active = area.slug === item.slug;
+            return (
+              <Link
+                key={item.slug || 'all-area'}
+                href={buildHref(sp, { area: item.slug })}
+                className={
+                  active
+                    ? 'rounded-full bg-secondary-container px-3 py-1.5 text-body-sm font-semibold text-on-secondary-container'
+                    : 'rounded-full border border-outline-variant px-3 py-1.5 text-body-sm text-on-surface-variant transition-colors hover:border-primary hover:text-primary'
                 }
               >
                 {locale === 'en' ? item.en : item.vi}
@@ -170,7 +273,18 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={buildHref(sp, { aiReady: aiReady ? '' : 'true' })}
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-label-md ${
+                aiReady
+                  ? 'border-primary bg-primary-fixed font-semibold text-primary'
+                  : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'
+              }`}
+            >
+              <Icon name="auto_awesome" className="!text-base" />
+              {locale === 'en' ? 'AI ready' : 'Có dữ liệu AI'}
+            </Link>
             <span className="text-overline uppercase tracking-overline text-on-surface-variant">
               {t('common.sort')}
             </span>

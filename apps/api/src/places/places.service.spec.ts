@@ -274,6 +274,32 @@ describe('PlacesService.list', () => {
       }),
     );
   });
+
+  it('filters by AI-ready availability when requested', async () => {
+    const prisma = {
+      place: {
+        findMany: jest.fn().mockResolvedValue([]),
+        count: jest.fn().mockResolvedValue(0),
+      },
+      review: {
+        groupBy: jest.fn().mockResolvedValue([]),
+      },
+    };
+    const service = new PlacesService(
+      prisma as unknown as PrismaService,
+      { getPresignedGetUrl: jest.fn() } as never,
+    );
+
+    await service.list({ isAiReady: true } as never);
+
+    expect(prisma.place.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          isAiReady: true,
+        }),
+      }),
+    );
+  });
 });
 
 describe('PlacesService.findBySlug', () => {

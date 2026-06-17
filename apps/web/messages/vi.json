@@ -116,6 +116,9 @@
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
     "score": "Độ khớp",
+    "detectedPlace": "AI nhận diện địa danh",
+    "askFollowUp": "Hỏi tiếp",
+    "lowConfidence": "Ảnh này giống {place} khoảng {score}, nhưng Vivu AI chưa hoàn toàn chắc chắn.",
     "disclaimer": "Câu trả lời được tạo từ dữ liệu truy xuất của Vivu và có thể chưa đầy đủ."
   },
   "regions": {

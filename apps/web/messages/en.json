@@ -116,6 +116,9 @@
     "showMore": "Show more",
     "showLess": "Show less",
     "score": "Match",
+    "detectedPlace": "AI detected place",
+    "askFollowUp": "Ask more",
+    "lowConfidence": "This image looks like {place} at {score}, but Vivu AI is not fully certain yet.",
     "disclaimer": "Answers are generated from Vivu retrieval data and may be incomplete."
   },
   "regions": {

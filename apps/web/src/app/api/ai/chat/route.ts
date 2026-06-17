@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
+import { getInternalApiBase } from '@/lib/api-base';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const API_BASE =
-  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API_BASE = getInternalApiBase();
 const MAX_PROXY_BODY_BYTES = 4.25 * 1024 * 1024;
 
 export async function POST(req: Request) {

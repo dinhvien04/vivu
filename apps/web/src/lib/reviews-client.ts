@@ -1,7 +1,8 @@
 /** Client helpers for the Reviews API. */
 import type { Paginated, Review } from '@vivu/types';
+import { getPublicApiBase } from './api-base';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const BASE = getPublicApiBase();
 
 function publicReviewsUrl(slug: string, qs: string): string {
   const path = `/api/places/${slug}/reviews${qs}`;

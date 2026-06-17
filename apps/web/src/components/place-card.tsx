@@ -22,6 +22,11 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
 
   const title = placeTitle(place, locale);
   const summary = placeSummary(place, locale);
+  const badges = [
+    locale === 'en' ? 'Image' : 'Có ảnh',
+    place.geo ? (locale === 'en' ? 'Coordinates' : 'Có tọa độ') : null,
+    place.isAiReady ? (locale === 'en' ? 'AI data' : 'Có dữ liệu AI') : null,
+  ].filter((badge): badge is string => Boolean(badge));
 
   return (
     <Link
@@ -54,6 +59,16 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
         {summary && (
           <p className="mt-1 line-clamp-2 text-body-sm text-on-surface-variant">{summary}</p>
         )}
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {badges.map((badge) => (
+            <span
+              key={badge}
+              className="rounded-full bg-surface-container px-2 py-1 text-[11px] font-semibold text-on-surface-variant"
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
       </div>
     </Link>
   );

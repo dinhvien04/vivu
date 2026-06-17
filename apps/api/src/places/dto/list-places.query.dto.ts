@@ -64,6 +64,19 @@ export class ListPlacesQueryDto {
   hasHeroImage?: boolean;
 
   @ApiPropertyOptional({
+    description: 'Filter places by AI/RAG data availability.',
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  isAiReady?: boolean;
+
+  @ApiPropertyOptional({
     description: 'Sắp xếp kết quả.',
     enum: PLACE_SORTS,
     default: 'recent',

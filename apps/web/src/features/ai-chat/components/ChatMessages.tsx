@@ -23,6 +23,9 @@ interface ChatMessagesProps {
     showMore: string;
     showLess: string;
     score: string;
+    detectedPlace: string;
+    askFollowUp: string;
+    lowConfidence: (place: string, score: string) => string;
   };
 }
 

@@ -7,12 +7,12 @@
  * client in the JSON body and held in React memory only.
  */
 import { cookies } from 'next/headers';
+import { getInternalApiBase } from './api-base';
 
 const REFRESH_COOKIE = 'vivu_refresh';
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60;
 
-const API_BASE =
-  process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API_BASE = getInternalApiBase();
 const API_PREFIX = '/api/v1';
 
 export interface ApiAuthSuccess {

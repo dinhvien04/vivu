@@ -14,6 +14,8 @@ describe('ListPlacesQueryDto validation', () => {
     ['hasGeo', 'false', false],
     ['hasHeroImage', 'true', true],
     ['hasHeroImage', 'false', false],
+    ['isAiReady', 'true', true],
+    ['isAiReady', 'false', false],
   ] as const)('transforms %s=%s to %s', async (field, value, expected) => {
     const { dto, errors } = await run({ [field]: value });
 
@@ -21,9 +23,12 @@ describe('ListPlacesQueryDto validation', () => {
     expect(dto[field]).toBe(expected);
   });
 
-  it.each(['hasGeo', 'hasHeroImage'] as const)('rejects invalid %s values', async (field) => {
-    const { errors } = await run({ [field]: 'invalid' });
+  it.each(['hasGeo', 'hasHeroImage', 'isAiReady'] as const)(
+    'rejects invalid %s values',
+    async (field) => {
+      const { errors } = await run({ [field]: 'invalid' });
 
-    expect(errors.some((error) => error.property === field)).toBe(true);
-  });
+      expect(errors.some((error) => error.property === field)).toBe(true);
+    },
+  );
 });

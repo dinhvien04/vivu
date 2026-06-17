@@ -144,6 +144,10 @@ export class PlacesService {
       appendWhereAnd(where, { OR: [{ lat: null }, { lng: null }] });
     }
 
+    if (query.isAiReady !== undefined) {
+      where.isAiReady = query.isAiReady;
+    }
+
     const orderBy: Prisma.PlaceOrderByWithRelationInput =
       query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };
 
