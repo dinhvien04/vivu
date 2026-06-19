@@ -2,25 +2,35 @@
 
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  type PointerEvent as ReactPointerEvent,
+  type WheelEvent as ReactWheelEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type { Photo } from '@vivu/types';
 import { HoverZoomImage } from './hover-zoom-image';
 import { Icon } from './icon';
 import { transformCloudinary } from '../lib/image';
-import type { Photo } from '@vivu/types';
 
 interface PlaceGalleryProps {
-  /** Cover image URL — used when `photos` is empty or as the first slide. */
   heroImageUrl: string | null;
   photos: Photo[];
-  /** Used as the alt text fallback for slides without a caption. */
   title: string;
 }
 
 interface Slide {
-  /** Stable id (photo id or `hero`). */
   id: string;
   url: string;
   alt: string;
+}
+
+interface LightboxPan {
+  x: number;
+  y: number;
 }
 
 const HERO_TRANSFORM = { width: 1600, height: 700 } as const;
@@ -30,17 +40,6 @@ const LIGHTBOX_ZOOM_MIN = 1;
 const LIGHTBOX_ZOOM_MAX = 3;
 const LIGHTBOX_ZOOM_STEP = 0.25;
 
-/**
- * Hero + thumbnail slider for place detail pages.
- *
- * - Renders a 16:7 hero image with previous/next arrows and dot indicators.
- * - Click any thumbnail to switch the active slide.
- * - Click the hero or hit Enter/Space to open a fullscreen lightbox.
- * - Keyboard: ArrowLeft/ArrowRight cycle slides, Escape closes the lightbox.
- *
- * No third-party slider dependency — simple state machine over the photo
- * array keeps bundle size small and avoids hydration mismatches.
- */
 export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps) {
   const t = useTranslations('gallery');
   const slides = useMemo<Slide[]>(() => {
@@ -61,10 +60,25 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxZoom, setLightboxZoom] = useState(1);
+  const [lightboxPan, setLightboxPan] = useState<LightboxPan>({ x: 0, y: 0 });
+  const [isDraggingLightbox, setIsDraggingLightbox] = useState(false);
+  const lightboxDragRef = useRef({
+    pointerId: -1,
+    startX: 0,
+    startY: 0,
+    panX: 0,
+    panY: 0,
+  });
 
   const total = slides.length;
   const safeIndex = total === 0 ? 0 : ((activeIndex % total) + total) % total;
   const current = slides[safeIndex];
+
+  const resetZoom = useCallback(() => {
+    setLightboxZoom(1);
+    setLightboxPan({ x: 0, y: 0 });
+    setIsDraggingLightbox(false);
+  }, []);
 
   const goPrev = useCallback(() => {
     if (total === 0) return;
@@ -83,18 +97,70 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
   }, []);
 
   const zoomOut = useCallback(() => {
-    setLightboxZoom((zoom) =>
-      Math.max(LIGHTBOX_ZOOM_MIN, Number((zoom - LIGHTBOX_ZOOM_STEP).toFixed(2))),
-    );
+    setLightboxZoom((zoom) => {
+      const next = Math.max(LIGHTBOX_ZOOM_MIN, Number((zoom - LIGHTBOX_ZOOM_STEP).toFixed(2)));
+      if (next === LIGHTBOX_ZOOM_MIN) setLightboxPan({ x: 0, y: 0 });
+      return next;
+    });
   }, []);
 
-  const resetZoom = useCallback(() => setLightboxZoom(1), []);
+  const openLightbox = useCallback(() => {
+    resetZoom();
+    setLightboxOpen(true);
+  }, [resetZoom]);
+
+  const handleLightboxPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (lightboxZoom <= LIGHTBOX_ZOOM_MIN) return;
+      event.preventDefault();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      lightboxDragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        panX: lightboxPan.x,
+        panY: lightboxPan.y,
+      };
+      setIsDraggingLightbox(true);
+    },
+    [lightboxPan.x, lightboxPan.y, lightboxZoom],
+  );
+
+  const handleLightboxPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isDraggingLightbox || lightboxDragRef.current.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      setLightboxPan({
+        x: lightboxDragRef.current.panX + event.clientX - lightboxDragRef.current.startX,
+        y: lightboxDragRef.current.panY + event.clientY - lightboxDragRef.current.startY,
+      });
+    },
+    [isDraggingLightbox],
+  );
+
+  const stopLightboxDrag = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (lightboxDragRef.current.pointerId === event.pointerId) {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+      lightboxDragRef.current.pointerId = -1;
+    }
+    setIsDraggingLightbox(false);
+  }, []);
+
+  const handleLightboxWheel = useCallback(
+    (event: ReactWheelEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      if (event.deltaY < 0) zoomIn();
+      else zoomOut();
+    },
+    [zoomIn, zoomOut],
+  );
 
   useEffect(() => {
     resetZoom();
   }, [safeIndex, resetZoom]);
 
-  // Wire up keyboard navigation while the lightbox is open.
   useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -116,7 +182,6 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
     return () => window.removeEventListener('keydown', onKey);
   }, [lightboxOpen, goPrev, goNext, resetZoom, zoomIn, zoomOut]);
 
-  // Lock body scroll when lightbox is open.
   useEffect(() => {
     if (!lightboxOpen) return;
     const prev = document.body.style.overflow;
@@ -150,10 +215,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
       >
         <button
           type="button"
-          onClick={() => {
-            resetZoom();
-            setLightboxOpen(true);
-          }}
+          onClick={openLightbox}
           className="absolute inset-0 cursor-zoom-in"
           aria-label={t('openLargeAria', { alt: current.alt })}
         >
@@ -244,7 +306,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
           role="dialog"
           aria-modal="true"
           aria-label={current.alt}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 overflow-hidden bg-black/90 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) setLightboxOpen(false);
           }}
@@ -253,25 +315,87 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
             type="button"
             onClick={() => setLightboxOpen(false)}
             aria-label={t('close')}
-            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+            className="absolute right-4 top-4 z-20 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
           >
             <Icon name="close" />
           </button>
-          <div className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full bg-white/10 p-1 text-white shadow-lg backdrop-blur">
+
+          {showControls && (
+            <>
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label={t('prev')}
+                className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20"
+              >
+                <Icon name="chevron_left" />
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label={t('next')}
+                className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20"
+              >
+                <Icon name="chevron_right" />
+              </button>
+            </>
+          )}
+
+          <div
+            className={`absolute inset-x-5 bottom-24 top-16 flex touch-none items-center justify-center overflow-hidden sm:inset-x-20 ${
+              lightboxZoom > LIGHTBOX_ZOOM_MIN
+                ? isDraggingLightbox
+                  ? 'cursor-grabbing'
+                  : 'cursor-grab'
+                : 'cursor-default'
+            }`}
+            onDoubleClick={() => {
+              if (lightboxZoom > LIGHTBOX_ZOOM_MIN) resetZoom();
+              else setLightboxZoom(2);
+            }}
+            onPointerDown={handleLightboxPointerDown}
+            onPointerMove={handleLightboxPointerMove}
+            onPointerUp={stopLightboxDrag}
+            onPointerCancel={stopLightboxDrag}
+            onWheel={handleLightboxWheel}
+          >
+            <Image
+              key={`lightbox-${current.id}`}
+              src={lightboxSrc}
+              alt={current.alt}
+              width={1920}
+              height={1080}
+              sizes="100vw"
+              draggable={false}
+              className="max-h-full max-w-full select-none object-contain transition-transform duration-150 ease-out"
+              style={{
+                transform: `translate3d(${lightboxPan.x}px, ${lightboxPan.y}px, 0) scale(${lightboxZoom})`,
+              }}
+              unoptimized
+            />
+          </div>
+
+          <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full bg-neutral-950/80 px-2 py-1 text-white shadow-2xl ring-1 ring-white/10 backdrop-blur">
+            {showControls && (
+              <span className="min-w-12 px-2 text-center text-sm font-semibold text-white/85">
+                {safeIndex + 1}/{total}
+              </span>
+            )}
+            {showControls && <span className="mx-1 h-6 w-px bg-white/15" />}
             <button
               type="button"
               onClick={zoomOut}
               disabled={lightboxZoom <= LIGHTBOX_ZOOM_MIN}
               aria-label={t('zoomOut')}
-              className="rounded-full p-2 transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-full p-2 transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Icon name="remove" />
+              <Icon name="zoom_out" />
             </button>
             <button
               type="button"
               onClick={resetZoom}
               aria-label={t('resetZoom')}
-              className="min-w-16 rounded-full px-3 py-2 text-sm font-semibold transition-colors hover:bg-white/20"
+              className="min-w-16 rounded-full px-3 py-2 text-sm font-semibold transition-colors hover:bg-white/15"
             >
               {Math.round(lightboxZoom * 100)}%
             </button>
@@ -280,51 +404,10 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
               onClick={zoomIn}
               disabled={lightboxZoom >= LIGHTBOX_ZOOM_MAX}
               aria-label={t('zoomIn')}
-              className="rounded-full p-2 transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-full p-2 transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Icon name="add" />
+              <Icon name="zoom_in" />
             </button>
-          </div>
-          {showControls && (
-            <>
-              <button
-                type="button"
-                onClick={goPrev}
-                aria-label={t('prev')}
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20"
-              >
-                <Icon name="chevron_left" />
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                aria-label={t('next')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20"
-              >
-                <Icon name="chevron_right" />
-              </button>
-            </>
-          )}
-          <div className="flex max-w-[92vw] flex-col items-center">
-            <div className="max-h-[85vh] w-[min(92vw,72rem)] overflow-auto rounded-lg">
-              <Image
-                key={`lightbox-${current.id}`}
-                src={lightboxSrc}
-                alt={current.alt}
-                width={1920}
-                height={1080}
-                sizes="100vw"
-                className="h-auto max-w-none object-contain transition-[width] duration-200"
-                style={{ width: `${lightboxZoom * 100}%` }}
-                unoptimized
-              />
-            </div>
-            {showControls && (
-              <div className="mt-3 text-center text-body-sm text-white/80">
-                {safeIndex + 1} / {total}
-                {current.alt && current.alt !== title ? ` · ${current.alt}` : ''}
-              </div>
-            )}
           </div>
         </div>
       )}
