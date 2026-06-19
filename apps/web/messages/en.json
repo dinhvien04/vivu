@@ -860,7 +860,10 @@
     "next": "Next photo",
     "thumbsAria": "Choose thumbnail",
     "viewThumbAria": "View photo {index}",
-    "close": "Close"
+    "close": "Close",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetZoom": "Reset zoom"
   },
   "favoriteBtn": {
     "signInIcon": "Sign in to save favorites",

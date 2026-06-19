@@ -860,7 +860,10 @@
     "next": "Ảnh tiếp theo",
     "thumbsAria": "Chọn ảnh thu nhỏ",
     "viewThumbAria": "Xem ảnh {index}",
-    "close": "Đóng"
+    "close": "Đóng",
+    "zoomIn": "Phóng to ảnh",
+    "zoomOut": "Thu nhỏ ảnh",
+    "resetZoom": "Đặt lại mức phóng to"
   },
   "favoriteBtn": {
     "signInIcon": "Đăng nhập để lưu yêu thích",

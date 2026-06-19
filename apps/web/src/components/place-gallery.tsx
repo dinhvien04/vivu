@@ -26,6 +26,9 @@ interface Slide {
 const HERO_TRANSFORM = { width: 1600, height: 700 } as const;
 const THUMB_TRANSFORM = { width: 240, height: 160 } as const;
 const LIGHTBOX_TRANSFORM = { width: 1920, height: 1080, crop: 'fit' as const };
+const LIGHTBOX_ZOOM_MIN = 1;
+const LIGHTBOX_ZOOM_MAX = 3;
+const LIGHTBOX_ZOOM_STEP = 0.25;
 
 /**
  * Hero + thumbnail slider for place detail pages.
@@ -57,6 +60,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxZoom, setLightboxZoom] = useState(1);
 
   const total = slides.length;
   const safeIndex = total === 0 ? 0 : ((activeIndex % total) + total) % total;
@@ -72,6 +76,24 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
     setActiveIndex((i) => (i + 1) % total);
   }, [total]);
 
+  const zoomIn = useCallback(() => {
+    setLightboxZoom((zoom) =>
+      Math.min(LIGHTBOX_ZOOM_MAX, Number((zoom + LIGHTBOX_ZOOM_STEP).toFixed(2))),
+    );
+  }, []);
+
+  const zoomOut = useCallback(() => {
+    setLightboxZoom((zoom) =>
+      Math.max(LIGHTBOX_ZOOM_MIN, Number((zoom - LIGHTBOX_ZOOM_STEP).toFixed(2))),
+    );
+  }, []);
+
+  const resetZoom = useCallback(() => setLightboxZoom(1), []);
+
+  useEffect(() => {
+    resetZoom();
+  }, [safeIndex, resetZoom]);
+
   // Wire up keyboard navigation while the lightbox is open.
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -79,10 +101,20 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
       if (e.key === 'Escape') setLightboxOpen(false);
       else if (e.key === 'ArrowLeft') goPrev();
       else if (e.key === 'ArrowRight') goNext();
+      else if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        zoomIn();
+      } else if (e.key === '-') {
+        e.preventDefault();
+        zoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        resetZoom();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lightboxOpen, goPrev, goNext]);
+  }, [lightboxOpen, goPrev, goNext, resetZoom, zoomIn, zoomOut]);
 
   // Lock body scroll when lightbox is open.
   useEffect(() => {
@@ -118,7 +150,10 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
       >
         <button
           type="button"
-          onClick={() => setLightboxOpen(true)}
+          onClick={() => {
+            resetZoom();
+            setLightboxOpen(true);
+          }}
           className="absolute inset-0 cursor-zoom-in"
           aria-label={t('openLargeAria', { alt: current.alt })}
         >
@@ -222,6 +257,34 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
           >
             <Icon name="close" />
           </button>
+          <div className="absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full bg-white/10 p-1 text-white shadow-lg backdrop-blur">
+            <button
+              type="button"
+              onClick={zoomOut}
+              disabled={lightboxZoom <= LIGHTBOX_ZOOM_MIN}
+              aria-label={t('zoomOut')}
+              className="rounded-full p-2 transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Icon name="remove" />
+            </button>
+            <button
+              type="button"
+              onClick={resetZoom}
+              aria-label={t('resetZoom')}
+              className="min-w-16 rounded-full px-3 py-2 text-sm font-semibold transition-colors hover:bg-white/20"
+            >
+              {Math.round(lightboxZoom * 100)}%
+            </button>
+            <button
+              type="button"
+              onClick={zoomIn}
+              disabled={lightboxZoom >= LIGHTBOX_ZOOM_MAX}
+              aria-label={t('zoomIn')}
+              className="rounded-full p-2 transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Icon name="add" />
+            </button>
+          </div>
           {showControls && (
             <>
               <button
@@ -242,17 +305,20 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
               </button>
             </>
           )}
-          <div className="relative max-h-full max-w-6xl">
-            <Image
-              key={`lightbox-${current.id}`}
-              src={lightboxSrc}
-              alt={current.alt}
-              width={1920}
-              height={1080}
-              sizes="100vw"
-              className="max-h-[85vh] w-auto object-contain"
-              unoptimized
-            />
+          <div className="flex max-w-[92vw] flex-col items-center">
+            <div className="max-h-[85vh] w-[min(92vw,72rem)] overflow-auto rounded-lg">
+              <Image
+                key={`lightbox-${current.id}`}
+                src={lightboxSrc}
+                alt={current.alt}
+                width={1920}
+                height={1080}
+                sizes="100vw"
+                className="h-auto max-w-none object-contain transition-[width] duration-200"
+                style={{ width: `${lightboxZoom * 100}%` }}
+                unoptimized
+              />
+            </div>
             {showControls && (
               <div className="mt-3 text-center text-body-sm text-white/80">
                 {safeIndex + 1} / {total}
