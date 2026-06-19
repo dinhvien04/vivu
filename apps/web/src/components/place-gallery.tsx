@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { HoverZoomImage } from './hover-zoom-image';
 import { Icon } from './icon';
 import { transformCloudinary } from '../lib/image';
 import type { Photo } from '@vivu/types';
@@ -121,14 +122,15 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
           className="absolute inset-0 cursor-zoom-in"
           aria-label={t('openLargeAria', { alt: current.alt })}
         >
-          <Image
+          <HoverZoomImage
             key={current.id}
             src={heroSrc}
             alt={current.alt}
             fill
             priority={safeIndex === 0}
             sizes="(max-width: 1280px) 100vw, 1280px"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            className="object-cover"
+            zoomScale={1.28}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         </button>
