@@ -7,6 +7,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   'X-DNS-Prefetch-Control': 'off',
   'X-Permitted-Cross-Domain-Policies': 'none',
   'Strict-Transport-Security': 'max-age=15552000; includeSubDomains',
+  'Permissions-Policy': 'camera=(), microphone=(), payment=(), usb=()',
 };
 
 export function applySecurityHeaders(app: FastifyInstance): void {

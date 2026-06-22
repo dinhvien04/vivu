@@ -1,6 +1,16 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export const PLACE_SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
 export type PlaceSeason = (typeof PLACE_SEASONS)[number];
@@ -12,21 +22,25 @@ export class ListPlacesQueryDto {
   @ApiPropertyOptional({ description: 'Từ khoá tìm kiếm theo tên/mô tả.' })
   @IsOptional()
   @IsString()
+  @MaxLength(120)
   q?: string;
 
   @ApiPropertyOptional({ description: 'Lọc theo region slug.' })
   @IsOptional()
   @IsString()
+  @MaxLength(80)
   region?: string;
 
   @ApiPropertyOptional({ description: 'Lọc theo category slug.' })
   @IsOptional()
   @IsString()
+  @MaxLength(80)
   category?: string;
 
   @ApiPropertyOptional({ description: 'Filter by province.' })
   @IsOptional()
   @IsString()
+  @MaxLength(80)
   province?: string;
 
   @ApiPropertyOptional({

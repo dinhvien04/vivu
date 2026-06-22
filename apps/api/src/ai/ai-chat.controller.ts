@@ -21,6 +21,7 @@ import { AiChatDto, AiDebugImageUrlDto, AiDebugTextDto } from './dto/ai-chat.dto
 @Controller('ai')
 export class AiChatController {
   private readonly production: boolean;
+  private readonly deepHealthEnabled: boolean;
 
   constructor(
     config: ConfigService,
@@ -30,6 +31,7 @@ export class AiChatController {
     private readonly gemini: GeminiService,
   ) {
     this.production = config.get<string>('NODE_ENV') === 'production';
+    this.deepHealthEnabled = config.get<string>('AI_DEEP_HEALTH_ENABLED') === 'true';
   }
 
   @Post('chat')
@@ -52,6 +54,13 @@ export class AiChatController {
 
   @Get('health')
   health() {
+    if (this.production && !this.deepHealthEnabled) {
+      return {
+        status: 'ok',
+        service: 'vivu-ai',
+      };
+    }
+
     return {
       status: 'ok',
       service: 'vivu-ai',
@@ -63,6 +72,7 @@ export class AiChatController {
 
   @Get('health/qdrant')
   async qdrantHealth() {
+    this.assertDeepHealthEnabled();
     try {
       return { status: 'ok', collections: await this.qdrant.getHealth() };
     } catch {
@@ -72,6 +82,7 @@ export class AiChatController {
 
   @Get('health/gemini')
   async geminiHealth() {
+    this.assertDeepHealthEnabled();
     try {
       return await this.gemini.checkHealth();
     } catch {
@@ -101,5 +112,9 @@ export class AiChatController {
 
   private assertDebugEnabled(): void {
     if (this.production) throw new NotFoundException();
+  }
+
+  private assertDeepHealthEnabled(): void {
+    if (this.production && !this.deepHealthEnabled) throw new NotFoundException();
   }
 }

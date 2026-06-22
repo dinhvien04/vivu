@@ -1,22 +1,37 @@
-import { BadRequestException, Injectable, PayloadTooLargeException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  Logger,
+  PayloadTooLargeException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { FastifyRequest } from 'fastify';
 import { ImageOnlyPipeline } from './pipelines/image-only.pipeline';
 import { ImageTextPipeline } from './pipelines/image-text.pipeline';
 import { TextOnlyPipeline } from './pipelines/text-only.pipeline';
+import { AiQuotaService } from './services/ai-quota.service';
+import { assertValidImageBuffer } from './services/image-file-validator';
 import { InputRouterService } from './services/input-router.service';
-import type { AiChatResponse, AiPipelineInput, AiUploadedImage } from './types/ai.types';
+import type {
+  AiChatResponse,
+  AiInputType,
+  AiPipelineInput,
+  AiUploadedImage,
+} from './types/ai.types';
 import type { AiChatDto } from './dto/ai-chat.dto';
 
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 @Injectable()
 export class AiChatService {
+  private readonly logger = new Logger(AiChatService.name);
   private readonly maxImageBytes: number;
 
   constructor(
     config: ConfigService,
     private readonly inputRouter: InputRouterService,
+    private readonly quota: AiQuotaService,
     private readonly textOnly: TextOnlyPipeline,
     private readonly imageOnly: ImageOnlyPipeline,
     private readonly imageText: ImageTextPipeline,
@@ -25,17 +40,57 @@ export class AiChatService {
   }
 
   async handleRequest(request: FastifyRequest, body: AiChatDto): Promise<AiChatResponse> {
-    const input = request.isMultipart()
-      ? await this.readMultipart(request)
-      : {
-          message: normalizeText(body?.message),
-          sessionId: normalizeText(body?.session_id),
-        };
-    return this.run(input);
+    const startedAt = Date.now();
+    let inputType: AiInputType | 'unknown' = 'unknown';
+    let quotaKeyType = 'unknown';
+    let messageLength = 0;
+    let imageBytes = 0;
+
+    try {
+      const input = request.isMultipart()
+        ? await this.readMultipart(request)
+        : {
+            message: normalizeText(body?.message),
+            sessionId: normalizeText(body?.session_id),
+          };
+
+      messageLength = input.message?.length ?? 0;
+      imageBytes = input.image?.buffer.length ?? 0;
+      inputType = this.inputRouter.route(input.message, input.image);
+
+      const quota = await this.quota.consume(request, input);
+      quotaKeyType = quota.keyType;
+
+      const response = await this.runRouted(input, inputType);
+      this.logRequest({
+        status: 200,
+        latencyMs: Date.now() - startedAt,
+        inputType,
+        quotaKeyType,
+        messageLength,
+        imageBytes,
+      });
+      return response;
+    } catch (error) {
+      const status = error instanceof HttpException ? error.getStatus() : 500;
+      this.logRequest({
+        status,
+        latencyMs: Date.now() - startedAt,
+        inputType,
+        quotaKeyType,
+        messageLength,
+        imageBytes,
+      });
+      throw error;
+    }
   }
 
   async run(input: AiPipelineInput): Promise<AiChatResponse> {
     const inputType = this.inputRouter.route(input.message, input.image);
+    return this.runRouted(input, inputType);
+  }
+
+  private async runRouted(input: AiPipelineInput, inputType: AiInputType): Promise<AiChatResponse> {
     if (inputType === 'text_only') return this.textOnly.run(input.message!);
     if (inputType === 'image_only') return this.imageOnly.run(input.image!);
     return this.imageText.run(input.message!, input.image!);
@@ -64,9 +119,11 @@ export class AiChatService {
             part.file.resume();
             throw new BadRequestException('Chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.');
           }
+          const buffer = await part.toBuffer();
+          const detectedContentType = assertValidImageBuffer(buffer);
           image = {
-            buffer: await part.toBuffer(),
-            contentType: part.mimetype,
+            buffer,
+            contentType: detectedContentType,
             filename: part.filename,
           };
           continue;
@@ -90,6 +147,28 @@ export class AiChatService {
       throw new BadRequestException('session_id không được vượt quá 200 ký tự.');
     }
     return { message, sessionId, image };
+  }
+
+  private logRequest(event: {
+    status: number;
+    latencyMs: number;
+    inputType: AiInputType | 'unknown';
+    quotaKeyType: string;
+    messageLength: number;
+    imageBytes: number;
+  }): void {
+    const payload = JSON.stringify({
+      route: '/api/v1/ai/chat',
+      status: event.status,
+      latencyMs: event.latencyMs,
+      inputType: event.inputType,
+      quotaKeyType: event.quotaKeyType,
+      messageLength: event.messageLength,
+      imageBytes: event.imageBytes,
+    });
+    if (event.status >= 500) this.logger.error(payload);
+    else if (event.status >= 400) this.logger.warn(payload);
+    else this.logger.log(payload);
   }
 }
 

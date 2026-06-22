@@ -10,6 +10,7 @@ export class S3Service {
   private readonly expiresIn: number;
   private readonly cacheTtlMs: number;
   private readonly maxCacheEntries: number;
+  private readonly serverSideEncryption?: 'AES256';
   private readonly client: S3Client;
   private readonly presignedUrlCache = new Map<string, { url: string; expiresAt: number }>();
   private readonly pendingPresignedUrls = new Map<string, Promise<string>>();
@@ -26,6 +27,10 @@ export class S3Service {
       config.get<string>('S3_PRESIGNED_CACHE_MAX_ENTRIES'),
       2000,
     );
+    this.serverSideEncryption =
+      (config.get<string>('S3_SERVER_SIDE_ENCRYPTION') ?? 'AES256') === 'AES256'
+        ? 'AES256'
+        : undefined;
     this.client = new S3Client({
       region,
       credentials: accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined,
@@ -82,6 +87,7 @@ export class S3Service {
         Key: s3Key,
         Body: buffer,
         ContentType: contentType,
+        ...(this.serverSideEncryption ? { ServerSideEncryption: this.serverSideEncryption } : {}),
       }),
     );
     return {

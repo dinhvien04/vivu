@@ -25,10 +25,11 @@ export class QdrantService {
     this.imageModel = config.get<string>('QDRANT_IMAGE_MODEL') ?? 'qdrant/clip-vit-b-32-vision';
     this.imageTextModel =
       config.get<string>('QDRANT_IMAGE_TEXT_MODEL') ?? 'qdrant/clip-vit-b-32-text';
+    const timeout = positiveInteger(config.get<string>('QDRANT_TIMEOUT_MS'), 15_000);
     this.client = new QdrantClient({
       url: this.url ?? 'http://127.0.0.1:6333',
       apiKey: this.apiKey,
-      timeout: 60_000,
+      timeout,
       checkCompatibility: false,
     });
   }
@@ -60,4 +61,9 @@ export class QdrantService {
       }),
     );
   }
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }

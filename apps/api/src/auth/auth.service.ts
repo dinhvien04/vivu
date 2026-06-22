@@ -9,6 +9,13 @@ const ACCESS_TTL = '15m';
 const REFRESH_TTL_DAYS = 7;
 const RESET_TTL_MINUTES = 30;
 const BCRYPT_ROUNDS = 12;
+const INVALID_LOGIN_MESSAGE = 'Email hoặc mật khẩu không đúng';
+
+interface LoginFailureBucket {
+  count: number;
+  resetAt: number;
+  lockedUntil: number;
+}
 
 export interface AuthTokens {
   accessToken: string;
@@ -42,6 +49,10 @@ const USER_PUBLIC_SELECT = {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly accessSecret: string;
+  private readonly production: boolean;
+  private readonly loginMaxFailures: number;
+  private readonly loginLockoutWindowMs: number;
+  private readonly loginFailures = new Map<string, LoginFailureBucket>();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -53,6 +64,12 @@ export class AuthService {
       throw new Error('JWT_ACCESS_SECRET is not set. Add it to apps/api/.env');
     }
     this.accessSecret = secret;
+    this.production = config.get<string>('NODE_ENV') === 'production';
+    this.loginMaxFailures = positiveInteger(config.get<string>('AUTH_LOGIN_MAX_FAILURES'), 5);
+    this.loginLockoutWindowMs = positiveInteger(
+      config.get<string>('AUTH_LOGIN_LOCKOUT_WINDOW_MS'),
+      15 * 60_000,
+    );
   }
 
   async register(input: {
@@ -79,14 +96,19 @@ export class AuthService {
     password: string;
   }): Promise<{ user: PublicUser; tokens: AuthTokens }> {
     const email = input.email.trim().toLowerCase();
+    this.assertLoginNotLocked(email);
+
     const found = await this.prisma.user.findUnique({ where: { email } });
     if (!found) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+      this.recordLoginFailure(email);
+      throw new UnauthorizedException(INVALID_LOGIN_MESSAGE);
     }
     const ok = await bcrypt.compare(input.password, found.passwordHash);
     if (!ok) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+      this.recordLoginFailure(email);
+      throw new UnauthorizedException(INVALID_LOGIN_MESSAGE);
     }
+    this.clearLoginFailures(email);
     const user: PublicUser = {
       id: found.id,
       email: found.email,
@@ -154,7 +176,9 @@ export class AuthService {
     });
     if (!user) {
       // Do not leak account existence — succeed silently.
-      this.logger.log(`Password reset requested for unknown email ${normalized}`);
+      this.logger.log(
+        `Password reset requested for unknown email hash=${this.loginFailureKey(normalized)}`,
+      );
       return;
     }
     const token = randomBytes(32).toString('hex');
@@ -166,8 +190,12 @@ export class AuthService {
         expiresAt: new Date(Date.now() + RESET_TTL_MINUTES * 60_000),
       },
     });
-    // Stub for email delivery — log to server console for now.
-    this.logger.warn(`Password reset link (DEV ONLY): /dat-lai-mat-khau?token=${token}`);
+    // Stub for email delivery in local/dev only. Never log reset tokens in production.
+    if (this.production) {
+      this.logger.log(`Password reset token created for user ${user.id}`);
+    } else {
+      this.logger.warn(`Password reset link (DEV ONLY): /dat-lai-mat-khau?token=${token}`);
+    }
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
@@ -303,8 +331,63 @@ export class AuthService {
     });
     return { accessToken, refreshToken, expiresIn: 15 * 60 };
   }
+
+  private assertLoginNotLocked(email: string): void {
+    const key = this.loginFailureKey(email);
+    const bucket = this.loginFailures.get(key);
+    if (!bucket) return;
+
+    const now = Date.now();
+    if (bucket.lockedUntil > now) {
+      throw new UnauthorizedException(INVALID_LOGIN_MESSAGE);
+    }
+    if (bucket.resetAt <= now) {
+      this.loginFailures.delete(key);
+    }
+  }
+
+  private recordLoginFailure(email: string): void {
+    const key = this.loginFailureKey(email);
+    const now = Date.now();
+    const bucket = this.loginFailures.get(key);
+    const activeBucket = bucket && bucket.resetAt > now ? bucket : undefined;
+    const nextCount = activeBucket ? activeBucket.count + 1 : 1;
+    const lockedUntil = nextCount >= this.loginMaxFailures ? now + this.loginLockoutWindowMs : 0;
+    this.pruneLoginFailures(now);
+    this.loginFailures.set(key, {
+      count: nextCount,
+      resetAt: activeBucket?.resetAt ?? now + this.loginLockoutWindowMs,
+      lockedUntil,
+    });
+  }
+
+  private clearLoginFailures(email: string): void {
+    this.loginFailures.delete(this.loginFailureKey(email));
+  }
+
+  private loginFailureKey(email: string): string {
+    return createHash('sha256')
+      .update(this.accessSecret)
+      .update(':login:')
+      .update(email)
+      .digest('hex');
+  }
+
+  private pruneLoginFailures(now: number): void {
+    if (this.loginFailures.size < 5000) return;
+    for (const [key, bucket] of this.loginFailures) {
+      if (bucket.resetAt <= now && bucket.lockedUntil <= now) {
+        this.loginFailures.delete(key);
+      }
+    }
+  }
 }
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }

@@ -25,10 +25,14 @@ export class GeminiService {
   readonly model: string;
   private readonly apiKey?: string;
   private readonly client: GoogleGenAI | null;
+  private readonly timeoutMs: number;
+  private readonly maxOutputTokens: number;
 
   constructor(config: ConfigService) {
     this.apiKey = config.get<string>('GEMINI_API_KEY');
     this.model = config.get<string>('GEMINI_MODEL') ?? 'gemini-1.5-flash';
+    this.timeoutMs = positiveInteger(config.get<string>('GEMINI_TIMEOUT_MS'), 30_000);
+    this.maxOutputTokens = positiveInteger(config.get<string>('GEMINI_MAX_OUTPUT_TOKENS'), 1024);
     this.client = this.apiKey ? new GoogleGenAI({ apiKey: this.apiKey }) : null;
   }
 
@@ -47,13 +51,18 @@ export class GeminiService {
 
     for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt += 1) {
       try {
-        const response = await this.client!.models.generateContent({
-          model: this.model,
-          contents: buildPrompt(params),
-          config: {
-            temperature: 0.2,
-          },
-        });
+        const response = await withTimeout(
+          this.client!.models.generateContent({
+            model: this.model,
+            contents: buildPrompt(params),
+            config: {
+              temperature: 0.2,
+              maxOutputTokens: this.maxOutputTokens,
+            },
+          }),
+          this.timeoutMs,
+          'Gemini request timed out.',
+        );
         const text = response.text?.trim();
         if (!text) {
           throw new ServiceUnavailableException('Gemini did not return an answer.');
@@ -74,11 +83,15 @@ export class GeminiService {
 
   async checkHealth(): Promise<{ status: 'ok'; model: string }> {
     this.assertConfigured();
-    await this.client!.models.generateContent({
-      model: this.model,
-      contents: 'Trả lời đúng một từ: OK',
-      config: { maxOutputTokens: 8, temperature: 0 },
-    });
+    await withTimeout(
+      this.client!.models.generateContent({
+        model: this.model,
+        contents: 'Trả lời đúng một từ: OK',
+        config: { maxOutputTokens: 8, temperature: 0 },
+      }),
+      this.timeoutMs,
+      'Gemini health check timed out.',
+    );
     return { status: 'ok', model: this.model };
   }
 }
@@ -100,9 +113,24 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function withTimeout<T>(promise: Promise<T>, milliseconds: number, message: string): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => reject(new Error(message)), milliseconds);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeout) clearTimeout(timeout);
+  });
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
 function buildPrompt(params: GenerateTravelAnswerParams): string {
   return [
-    'Bạn là trợ lý du lịch Việt Nam.',
+    'Bạn là trợ lý du lịch của Vivu.',
     'Trả lời bằng tiếng Việt, tự nhiên và dễ hiểu.',
     'Chỉ sử dụng dữ liệu trong phần CONTEXT. Không sử dụng kiến thức bên ngoài.',
     'Nếu context không đủ, hãy nói rõ hệ thống chưa có đủ dữ liệu.',

@@ -8,6 +8,7 @@ import { ImageOnlyPipeline } from './pipelines/image-only.pipeline';
 import { ImageTextPipeline } from './pipelines/image-text.pipeline';
 import { TextOnlyPipeline } from './pipelines/text-only.pipeline';
 import { ContextBuilderService } from './services/context-builder.service';
+import { AiQuotaService } from './services/ai-quota.service';
 import { ImageUrlService } from './services/image-url.service';
 import { InputRouterService } from './services/input-router.service';
 import { PlaceMentionResolverService } from './services/place-mention-resolver.service';
@@ -18,6 +19,7 @@ import { ResponseFormatterService } from './services/response-formatter.service'
   controllers: [AiChatController],
   providers: [
     AiChatService,
+    AiQuotaService,
     InputRouterService,
     ContextBuilderService,
     ResponseFormatterService,

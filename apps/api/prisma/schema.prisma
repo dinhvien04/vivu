@@ -32,6 +32,12 @@ enum ReviewStatus {
   reported
 }
 
+enum AiUsageKeyType {
+  user
+  ip_session
+  ip
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -276,4 +282,19 @@ model AuditLog {
 
   @@index([createdAt])
   @@index([entityType, entityId])
+}
+
+model AiUsage {
+  id           String         @id @default(cuid())
+  keyType      AiUsageKeyType
+  keyHash      String
+  date         DateTime       @db.Date
+  aiRequests   Int            @default(0)
+  imageUploads Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([keyType, keyHash, date])
+  @@index([date])
+  @@index([keyType, keyHash])
 }

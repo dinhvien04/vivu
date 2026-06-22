@@ -11,6 +11,7 @@ import { getInternalApiBase } from './api-base';
 
 const REFRESH_COOKIE = 'vivu_refresh';
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60;
+const REFRESH_COOKIE_PATH = '/api/auth';
 
 const API_BASE = getInternalApiBase();
 const API_PREFIX = '/api/v1';
@@ -63,7 +64,7 @@ export async function setRefreshCookie(value: string): Promise<void> {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    path: '/',
+    path: REFRESH_COOKIE_PATH,
     maxAge: REFRESH_TTL_SECONDS,
   });
 }
@@ -76,7 +77,7 @@ export async function clearRefreshCookie(): Promise<void> {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    path: '/',
+    path: REFRESH_COOKIE_PATH,
     maxAge: 0,
   });
 }

@@ -91,7 +91,11 @@ Backend cần các nhóm biến sau:
   `AWS_BUCKET_NAME`
 - Qdrant: `QDRANT_URL`, `QDRANT_API_KEY` và tên collection/model
 - Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL`
-- Tùy chọn: Meilisearch, CORS, cache TTL và giới hạn cache
+- AI hardening: `AI_DAILY_QUOTA_ANON`, `AI_DAILY_QUOTA_USER`,
+  `AI_RATE_LIMIT_PER_MINUTE`, `AI_QUOTA_HASH_SECRET`, `AI_MAX_IMAGE_SIZE_BYTES`
+- Timeout provider: `QDRANT_TIMEOUT_MS`, `GEMINI_TIMEOUT_MS`, `GEMINI_MAX_OUTPUT_TOKENS`
+- Auth hardening: `AUTH_LOGIN_MAX_FAILURES`, `AUTH_LOGIN_LOCKOUT_WINDOW_MS`
+- Tùy chọn: Meilisearch, CORS, cache TTL, CSP, Sentry và giới hạn cache
 
 Frontend:
 
@@ -99,6 +103,10 @@ Frontend:
 NEXT_PUBLIC_API_URL=http://localhost:4000
 API_INTERNAL_URL=http://localhost:4000
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+CSP_CONNECT_SRC_EXTRA=
+CSP_IMG_SRC_EXTRA=
+SENTRY_DSN=
+SENTRY_ENVIRONMENT=development
 ```
 
 Danh sách đầy đủ nằm tại
@@ -155,6 +163,7 @@ Integration test dùng Testcontainers nên cần Docker đang chạy.
 - [Trạng thái triển khai](docs/PROGRESS.md)
 - [Thiết kế hệ thống](docs/DESIGN.md)
 - [Triển khai AI](docs/AI_DEPLOYMENT.md)
+- [Security hardening](docs/SECURITY.md)
 
 ## Quy ước an toàn
 

@@ -4,6 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { applyRequestLogging } from './common/request-logging';
 import { applySecurityHeaders } from './common/security-headers';
 import fastifyMultipart from '@fastify/multipart';
 
@@ -14,6 +15,7 @@ async function bootstrap() {
   );
 
   applySecurityHeaders(app.getHttpAdapter().getInstance());
+  applyRequestLogging(app.getHttpAdapter().getInstance());
   await app.register(fastifyMultipart, {
     limits: {
       fileSize: Number(process.env.AI_MAX_IMAGE_SIZE_BYTES ?? 4 * 1024 * 1024),
