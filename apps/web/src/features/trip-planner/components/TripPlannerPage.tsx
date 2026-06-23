@@ -14,69 +14,70 @@ import {
 } from '@/lib/trip-planner-client';
 
 const AREAS = [
-  { slug: 'all', vi: 'Toan tinh', en: 'All areas' },
+  { slug: 'all', vi: 'Toàn tỉnh', en: 'All areas' },
   { slug: 'pleiku', vi: 'Pleiku', en: 'Pleiku' },
-  { slug: 'quy-nhon', vi: 'Quy Nhon', en: 'Quy Nhon' },
-  { slug: 'an-nhon', vi: 'An Nhon', en: 'An Nhon' },
-  { slug: 'tuy-phuoc', vi: 'Tuy Phuoc', en: 'Tuy Phuoc' },
-  { slug: 'phu-cat', vi: 'Phu Cat', en: 'Phu Cat' },
-  { slug: 'phu-my', vi: 'Phu My', en: 'Phu My' },
-  { slug: 'hoai-nhon', vi: 'Hoai Nhon', en: 'Hoai Nhon' },
+  { slug: 'quy-nhon', vi: 'Quy Nhơn', en: 'Quy Nhon' },
+  { slug: 'an-nhon', vi: 'An Nhơn', en: 'An Nhon' },
+  { slug: 'tuy-phuoc', vi: 'Tuy Phước', en: 'Tuy Phuoc' },
+  { slug: 'phu-cat', vi: 'Phù Cát', en: 'Phu Cat' },
+  { slug: 'phu-my', vi: 'Phù Mỹ', en: 'Phu My' },
+  { slug: 'hoai-nhon', vi: 'Hoài Nhơn', en: 'Hoai Nhon' },
 ] as const;
 
 const INTERESTS = [
-  { slug: 'bien-dao', vi: 'Bien dao', en: 'Beaches' },
-  { slug: 'thap-cham', vi: 'Thap Cham', en: 'Cham towers' },
-  { slug: 'di-tich', vi: 'Di tich', en: 'Historic sites' },
-  { slug: 'ho-thac-suoi', vi: 'Ho - thac - suoi', en: 'Lakes and falls' },
-  { slug: 'am-thuc', vi: 'Am thuc', en: 'Food' },
-  { slug: 'gia-dinh', vi: 'Gia dinh', en: 'Family friendly' },
+  { slug: 'bien-dao', vi: 'Biển đảo', en: 'Beaches' },
+  { slug: 'thap-cham', vi: 'Tháp Chăm', en: 'Cham towers' },
+  { slug: 'di-tich', vi: 'Di tích', en: 'Historic sites' },
+  { slug: 'ho-thac-suoi', vi: 'Hồ - thác - suối', en: 'Lakes and falls' },
+  { slug: 'am-thuc', vi: 'Ẩm thực', en: 'Food' },
+  { slug: 'gia-dinh', vi: 'Gia đình', en: 'Family friendly' },
 ] as const;
 
 const TRANSPORTS = [
-  { slug: 'xe_may', vi: 'Xe may', en: 'Motorbike' },
-  { slug: 'oto', vi: 'O to', en: 'Car' },
-  { slug: 'xe_khach', vi: 'Xe khach', en: 'Coach' },
-  { slug: 'di_bo_ket_hop', vi: 'Di bo ket hop', en: 'Walking + transfers' },
+  { slug: 'xe_may', vi: 'Xe máy', en: 'Motorbike' },
+  { slug: 'oto', vi: 'Ô tô', en: 'Car' },
+  { slug: 'xe_khach', vi: 'Xe khách', en: 'Coach' },
+  { slug: 'di_bo_ket_hop', vi: 'Đi bộ kết hợp', en: 'Walking + transfers' },
 ] as const;
 
 function text(locale: Locale) {
   const vi = locale !== 'en';
   return {
-    eyebrow: vi ? 'Lich trinh AI' : 'AI trip planner',
-    title: vi ? 'Len lich trinh Gia Lai cung Vivu' : 'Plan Gia Lai with Vivu',
+    eyebrow: vi ? 'Lịch trình AI' : 'AI trip planner',
+    title: vi ? 'Lên lịch trình Gia Lai cùng Vivu' : 'Plan Gia Lai with Vivu',
     lead: vi
-      ? 'Chon khu vuc, so ngay va so thich. Vivu AI se goi y lich trinh dua tren du lieu dia danh trong he thong.'
+      ? 'Chọn khu vực, số ngày và sở thích. Vivu AI sẽ gợi ý lịch trình dựa trên dữ liệu địa danh trong hệ thống.'
       : 'Choose your area, days, and interests. Vivu AI will suggest an itinerary using Vivu place data.',
-    area: vi ? 'Khu vuc' : 'Area',
-    days: vi ? 'So ngay' : 'Days',
-    people: vi ? 'So nguoi' : 'People',
-    transport: vi ? 'Di chuyen' : 'Transport',
-    budget: vi ? 'Ngan sach du kien' : 'Budget',
-    note: vi ? 'Ghi chu them' : 'Extra notes',
+    area: vi ? 'Khu vực' : 'Area',
+    days: vi ? 'Số ngày' : 'Days',
+    people: vi ? 'Số người' : 'People',
+    transport: vi ? 'Di chuyển' : 'Transport',
+    budget: vi ? 'Ngân sách dự kiến' : 'Budget',
+    note: vi ? 'Ghi chú thêm' : 'Extra notes',
     notePlaceholder: vi
-      ? 'Vi du: di cung gia dinh, thich chup anh, khong muon di qua xa...'
+      ? 'Ví dụ: đi cùng gia đình, thích chụp ảnh, không muốn đi quá xa...'
       : 'Example: family trip, photo spots, avoid long transfers...',
-    generate: vi ? 'Tao lich trinh' : 'Generate plan',
-    regenerate: vi ? 'Tao lai' : 'Regenerate',
-    generating: vi ? 'Dang tao lich trinh...' : 'Generating...',
-    interests: vi ? 'So thich' : 'Interests',
-    result: vi ? 'Lich trinh goi y' : 'Suggested itinerary',
-    generalTips: vi ? 'Luu y chung' : 'General tips',
-    missing: vi ? 'Ghi chu du lieu' : 'Data note',
-    food: vi ? 'Goi y an uong' : 'Food suggestions',
-    notes: vi ? 'Ghi chu trong ngay' : 'Day notes',
-    viewPlace: vi ? 'Xem dia danh' : 'View place',
-    viewMap: vi ? 'Xem ban do' : 'View map',
-    save: vi ? 'Luu vao so tay' : 'Save to collection',
-    saved: vi ? 'Da luu vao so tay' : 'Saved to collection',
-    needLogin: vi ? 'Dang nhap de luu lich trinh vao so tay.' : 'Sign in to save this plan.',
-    consult: vi ? 'Can nguoi tu van lich trinh nay?' : 'Want help with this plan?',
-    consultCta: vi ? 'Gui yeu cau tu van' : 'Request consultation',
+    generate: vi ? 'Tạo lịch trình' : 'Generate plan',
+    regenerate: vi ? 'Tạo lại' : 'Regenerate',
+    generating: vi ? 'Đang tạo lịch trình...' : 'Generating...',
+    interests: vi ? 'Sở thích' : 'Interests',
+    result: vi ? 'Lịch trình gợi ý' : 'Suggested itinerary',
+    generalTips: vi ? 'Lưu ý chung' : 'General tips',
+    missing: vi ? 'Ghi chú dữ liệu' : 'Data note',
+    food: vi ? 'Gợi ý ăn uống' : 'Food suggestions',
+    notes: vi ? 'Ghi chú trong ngày' : 'Day notes',
+    viewPlace: vi ? 'Xem địa danh' : 'View place',
+    viewMap: vi ? 'Xem bản đồ' : 'View map',
+    save: vi ? 'Lưu vào sổ tay' : 'Save to collection',
+    saved: vi ? 'Đã lưu vào sổ tay' : 'Saved to collection',
+    needLogin: vi ? 'Đăng nhập để lưu lịch trình vào sổ tay.' : 'Sign in to save this plan.',
+    consult: vi ? 'Cần người tư vấn lịch trình này?' : 'Want help with this plan?',
+    consultCta: vi ? 'Gửi yêu cầu tư vấn' : 'Request consultation',
     quota: vi
-      ? 'Neu het quota, hay dang nhap hoac thu lai vao ngay mai.'
+      ? 'Nếu hết quota, hãy đăng nhập hoặc thử lại vào ngày mai.'
       : 'If quota is exhausted, sign in or try again tomorrow.',
-    error: vi ? 'Khong tao duoc lich trinh. Vui long thu lai.' : 'Could not generate plan.',
+    error: vi ? 'Không tạo được lịch trình. Vui lòng thử lại.' : 'Could not generate plan.',
+    day: vi ? 'Ngày' : 'Day',
   };
 }
 
@@ -256,7 +257,7 @@ export function TripPlannerPage() {
               onChange={(event) => setBudget(event.target.value)}
               maxLength={200}
               className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder={locale === 'en' ? 'Flexible / medium' : 'Linh hoat / vua phai'}
+              placeholder={locale === 'en' ? 'Flexible / medium' : 'Linh hoạt / vừa phải'}
             />
           </label>
 
@@ -372,7 +373,7 @@ export function TripPlannerPage() {
                   className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5"
                 >
                   <h3 className="font-h3 text-h3 text-on-surface">
-                    Day {day.day}: {day.theme}
+                    {labels.day} {day.day}: {day.theme}
                   </h3>
                   <ol className="mt-4 space-y-4">
                     {day.items.map((item, index) => (

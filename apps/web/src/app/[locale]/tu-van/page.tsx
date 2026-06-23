@@ -21,11 +21,11 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   return {
-    title: locale === 'en' ? 'Travel Consultation' : 'Tu van du lich',
+    title: locale === 'en' ? 'Travel Consultation' : 'Tư vấn du lịch',
     description:
       locale === 'en'
         ? 'Request travel consultation from Vivu.'
-        : 'Gui yeu cau tu van lich trinh du lich voi Vivu.',
+        : 'Gửi yêu cầu tư vấn lịch trình du lịch với Vivu.',
     alternates: {
       canonical: '/tu-van',
       languages: { vi: '/tu-van', en: '/en/tu-van' },

@@ -27,33 +27,33 @@ function safeSource(value?: string): LeadSource {
 function text(locale: Locale) {
   const vi = locale !== 'en';
   return {
-    eyebrow: vi ? 'Tu van du lich' : 'Travel consultation',
-    title: vi ? 'De Vivu ho tro lich trinh cua ban' : 'Let Vivu help with your trip',
+    eyebrow: vi ? 'Tư vấn du lịch' : 'Travel consultation',
+    title: vi ? 'Để Vivu hỗ trợ lịch trình của bạn' : 'Let Vivu help with your trip',
     lead: vi
-      ? 'Gui thong tin lien he, dia danh quan tam va nhu cau. Admin Vivu se lien he lai qua phone/Zalo.'
+      ? 'Gửi thông tin liên hệ, địa danh quan tâm và nhu cầu. Admin Vivu sẽ liên hệ lại qua phone/Zalo.'
       : 'Send your contact, places of interest, and needs. Vivu admin will follow up by phone/Zalo.',
-    name: vi ? 'Ho ten' : 'Full name',
-    phone: vi ? 'So dien thoai hoac Zalo' : 'Phone or Zalo',
+    name: vi ? 'Họ tên' : 'Full name',
+    phone: vi ? 'Số điện thoại hoặc Zalo' : 'Phone or Zalo',
     email: 'Email',
-    place: vi ? 'Dia danh quan tam' : 'Interested place',
-    area: vi ? 'Khu vuc muon di' : 'Area',
-    travelDate: vi ? 'Ngay du kien' : 'Travel date',
-    people: vi ? 'So nguoi' : 'People',
-    budget: vi ? 'Ngan sach' : 'Budget',
-    note: vi ? 'Nhu cau / ghi chu' : 'Needs / notes',
+    place: vi ? 'Địa danh quan tâm' : 'Interested place',
+    area: vi ? 'Khu vực muốn đi' : 'Area',
+    travelDate: vi ? 'Ngày dự kiến' : 'Travel date',
+    people: vi ? 'Số người' : 'People',
+    budget: vi ? 'Ngân sách' : 'Budget',
+    note: vi ? 'Nhu cầu / ghi chú' : 'Needs / notes',
     notePlaceholder: vi
-      ? 'Vi du: di 2 ngay 1 dem, thich bien dao va thap Cham, can goi y quan an...'
+      ? 'Ví dụ: đi 2 ngày 1 đêm, thích biển đảo và tháp Chăm, cần gợi ý quán ăn...'
       : 'Example: 2 days 1 night, beaches and Cham towers, food suggestions...',
-    submit: vi ? 'Gui yeu cau tu van' : 'Send request',
-    submitting: vi ? 'Dang gui...' : 'Sending...',
-    successTitle: vi ? 'Da nhan yeu cau tu van' : 'Request received',
+    submit: vi ? 'Gửi yêu cầu tư vấn' : 'Send request',
+    submitting: vi ? 'Đang gửi...' : 'Sending...',
+    successTitle: vi ? 'Đã nhận yêu cầu tư vấn' : 'Request received',
     successLead: vi
-      ? 'Vivu da ghi nhan thong tin. Neu day la ban demo, ban co the xem lead trong trang admin.'
+      ? 'Vivu đã ghi nhận thông tin. Nếu đây là bản demo, bạn có thể xem lead trong trang admin.'
       : 'Vivu has recorded your information. In demo mode, view it in the admin leads page.',
-    backExplore: vi ? 'Quay lai kham pha' : 'Back to explore',
-    error: vi ? 'Khong gui duoc yeu cau. Vui long thu lai.' : 'Could not send request.',
+    backExplore: vi ? 'Quay lại khám phá' : 'Back to explore',
+    error: vi ? 'Không gửi được yêu cầu. Vui lòng thử lại.' : 'Could not send request.',
     privacy: vi
-      ? 'Thong tin lien he chi dung de tu van chuyen di, khong hien thi cong khai.'
+      ? 'Thông tin liên hệ chỉ dùng để tư vấn chuyến đi, không hiển thị công khai.'
       : 'Contact data is used only for trip consultation and is not public.',
   };
 }
@@ -138,7 +138,7 @@ export function LeadFormPage({
             href="/lich-trinh"
             className="rounded-full bg-primary px-5 py-2 font-semibold text-on-primary hover:bg-primary/90"
           >
-            {locale === 'en' ? 'Create another plan' : 'Tao lich trinh khac'}
+            {locale === 'en' ? 'Create another plan' : 'Tạo lịch trình khác'}
           </Link>
         </div>
       </section>
@@ -156,7 +156,7 @@ export function LeadFormPage({
             <Icon name="support_agent" className="mt-0.5 text-primary" />
             {locale === 'en'
               ? 'Good for custom itinerary, group trip, or data questions.'
-              : 'Phu hop khi can lich trinh rieng, di theo nhom, hoac can hoi them ve dia danh.'}
+              : 'Phù hợp khi cần lịch trình riêng, đi theo nhóm, hoặc cần hỏi thêm về địa danh.'}
           </p>
           <p className="flex gap-2">
             <Icon name="lock" className="mt-0.5 text-primary" />
