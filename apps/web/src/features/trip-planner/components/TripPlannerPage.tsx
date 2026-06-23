@@ -34,9 +34,10 @@ const INTERESTS = [
 ] as const;
 
 const TRANSPORTS = [
-  { slug: 'car', vi: 'O to', en: 'Car' },
-  { slug: 'motorbike', vi: 'Xe may', en: 'Motorbike' },
-  { slug: 'mixed', vi: 'Linh hoat', en: 'Mixed' },
+  { slug: 'xe_may', vi: 'Xe may', en: 'Motorbike' },
+  { slug: 'oto', vi: 'O to', en: 'Car' },
+  { slug: 'xe_khach', vi: 'Xe khach', en: 'Coach' },
+  { slug: 'di_bo_ket_hop', vi: 'Di bo ket hop', en: 'Walking + transfers' },
 ] as const;
 
 function text(locale: Locale) {
@@ -57,6 +58,7 @@ function text(locale: Locale) {
       ? 'Vi du: di cung gia dinh, thich chup anh, khong muon di qua xa...'
       : 'Example: family trip, photo spots, avoid long transfers...',
     generate: vi ? 'Tao lich trinh' : 'Generate plan',
+    regenerate: vi ? 'Tao lai' : 'Regenerate',
     generating: vi ? 'Dang tao lich trinh...' : 'Generating...',
     interests: vi ? 'So thich' : 'Interests',
     result: vi ? 'Lich trinh goi y' : 'Suggested itinerary',
@@ -65,6 +67,7 @@ function text(locale: Locale) {
     food: vi ? 'Goi y an uong' : 'Food suggestions',
     notes: vi ? 'Ghi chu trong ngay' : 'Day notes',
     viewPlace: vi ? 'Xem dia danh' : 'View place',
+    viewMap: vi ? 'Xem ban do' : 'View map',
     save: vi ? 'Luu vao so tay' : 'Save to collection',
     saved: vi ? 'Da luu vao so tay' : 'Saved to collection',
     needLogin: vi ? 'Dang nhap de luu lich trinh vao so tay.' : 'Sign in to save this plan.',
@@ -88,7 +91,7 @@ export function TripPlannerPage() {
   const [area, setArea] = useState('all');
   const [days, setDays] = useState(2);
   const [peopleCount, setPeopleCount] = useState(2);
-  const [transport, setTransport] = useState('car');
+  const [transport, setTransport] = useState('xe_may');
   const [budget, setBudget] = useState('');
   const [note, setNote] = useState('');
   const [interests, setInterests] = useState<string[]>(['bien-dao', 'di-tich']);
@@ -324,6 +327,15 @@ export function TripPlannerPage() {
                 <p className="mt-2 text-body-md text-on-surface-variant">{result.output.summary}</p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={submit}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 rounded-full border border-outline-variant px-4 py-2 text-body-sm font-semibold text-on-surface-variant transition hover:border-primary hover:text-primary disabled:cursor-wait disabled:opacity-60"
+                >
+                  <Icon name="refresh" size={18} />
+                  {loading ? labels.generating : labels.regenerate}
+                </button>
                 {user ? (
                   <button
                     type="button"
@@ -378,13 +390,22 @@ export function TripPlannerPage() {
                             </p>
                           </div>
                           {item.placeSlug && (
-                            <Link
-                              href={`/dia-diem/${item.placeSlug}`}
-                              className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-primary hover:bg-primary-fixed"
-                            >
-                              {labels.viewPlace}
-                              <Icon name="arrow_forward" size={16} />
-                            </Link>
+                            <div className="flex flex-shrink-0 flex-wrap gap-2">
+                              <Link
+                                href={`/dia-diem/${item.placeSlug}`}
+                                className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-primary hover:bg-primary-fixed"
+                              >
+                                {labels.viewPlace}
+                                <Icon name="arrow_forward" size={16} />
+                              </Link>
+                              <Link
+                                href={`/ban-do?place=${item.placeSlug}`}
+                                className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
+                              >
+                                <Icon name="map" size={16} />
+                                {labels.viewMap}
+                              </Link>
+                            </div>
                           )}
                         </div>
                         {item.travelNote && (

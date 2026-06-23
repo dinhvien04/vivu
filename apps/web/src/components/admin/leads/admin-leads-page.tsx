@@ -52,6 +52,8 @@ export function AdminLeadsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const opts = useMemo<ListLeadsOptions>(() => ({ status, q: q.trim() || undefined, pageSize: 50 }), [
     q,
@@ -90,6 +92,7 @@ export function AdminLeadsPage() {
     try {
       const updated = await updateLeadStatus(token, lead.id, nextStatus);
       setRows((current) => current.map((row) => (row.id === lead.id ? updated : row)));
+      setSelectedLead((current) => (current?.id === lead.id ? updated : current));
     } finally {
       setSavingId(null);
     }
@@ -102,8 +105,19 @@ export function AdminLeadsPage() {
     try {
       const updated = await updateLeadNote(token, lead.id, internalNote);
       setRows((current) => current.map((row) => (row.id === lead.id ? updated : row)));
+      setSelectedLead((current) => (current?.id === lead.id ? updated : current));
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const copyContact = async (lead: Lead) => {
+    try {
+      await navigator.clipboard.writeText(lead.phoneOrZalo);
+      setCopiedId(lead.id);
+      window.setTimeout(() => setCopiedId(null), 1600);
+    } catch {
+      setError('Khong copy duoc phone/Zalo. Hay copy thu cong.');
     }
   };
 
@@ -206,6 +220,24 @@ export function AdminLeadsPage() {
                 </div>
 
                 <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void copyContact(lead)}
+                      className="inline-flex items-center justify-center gap-1 rounded-xl border border-outline-variant px-3 py-2 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
+                    >
+                      <Icon name={copiedId === lead.id ? 'check' : 'content_copy'} size={16} />
+                      {copiedId === lead.id ? 'Da copy' : 'Copy'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLead(lead)}
+                      className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary-fixed px-3 py-2 text-body-sm font-semibold text-primary hover:bg-primary-fixed-dim"
+                    >
+                      <Icon name="visibility" size={16} />
+                      Chi tiet
+                    </button>
+                  </div>
                   <select
                     value={lead.status}
                     disabled={savingId === lead.id}
@@ -235,6 +267,113 @@ export function AdminLeadsPage() {
           </ul>
         )}
       </div>
+
+      {selectedLead && (
+        <div className="fixed inset-0 z-[100] bg-scrim/50" onClick={() => setSelectedLead(null)}>
+          <aside
+            className="ml-auto flex h-full w-full max-w-xl flex-col bg-surface p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div>
+                <p className="text-overline uppercase tracking-overline text-primary">
+                  Chi tiet lead
+                </p>
+                <h2 className="mt-1 font-h3 text-h3 text-on-surface">{selectedLead.name}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedLead(null)}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
+                aria-label="Dong"
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1 text-body-md text-on-surface-variant">
+              <div className="rounded-2xl bg-surface-container p-4">
+                <p className="font-semibold text-on-surface">Phone/Zalo</p>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <span>{selectedLead.phoneOrZalo}</span>
+                  <button
+                    type="button"
+                    onClick={() => void copyContact(selectedLead)}
+                    className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-primary"
+                  >
+                    <Icon name={copiedId === selectedLead.id ? 'check' : 'content_copy'} size={16} />
+                    {copiedId === selectedLead.id ? 'Da copy' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Info label="Email" value={selectedLead.email ?? '-'} />
+                <Info label="Nguon" value={selectedLead.source} />
+                <Info label="Dia danh" value={selectedLead.interestedPlaceName ?? selectedLead.interestedPlaceSlug ?? '-'} />
+                <Info label="Khu vuc" value={selectedLead.area ?? '-'} />
+                <Info label="Ngay di" value={formatDate(selectedLead.travelDate)} />
+                <Info label="So nguoi" value={selectedLead.peopleCount ? String(selectedLead.peopleCount) : '-'} />
+                <Info label="Ngan sach" value={selectedLead.budget ?? '-'} />
+                <Info label="Tao luc" value={formatDate(selectedLead.createdAt)} />
+              </dl>
+
+              {selectedLead.note && (
+                <div>
+                  <p className="mb-2 font-semibold text-on-surface">Ghi chu khach hang</p>
+                  <div className="whitespace-pre-line rounded-2xl bg-surface-container p-4">
+                    {selectedLead.note}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-[180px,1fr]">
+                <label className="block">
+                  <span className="text-label-md font-semibold text-on-surface">Trang thai</span>
+                  <select
+                    value={selectedLead.status}
+                    disabled={savingId === selectedLead.id}
+                    onChange={(event) =>
+                      void changeStatus(selectedLead, event.target.value as LeadStatus)
+                    }
+                    className="mt-2 w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-2 outline-none focus:border-primary"
+                  >
+                    {STATUSES.filter((item) => item.value).map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="text-label-md font-semibold text-on-surface">Ghi chu noi bo</span>
+                  <textarea
+                    defaultValue={selectedLead.internalNote ?? ''}
+                    rows={5}
+                    placeholder="Ghi chu noi bo..."
+                    className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-2 outline-none focus:border-primary"
+                    onBlur={(event) => {
+                      if (event.target.value !== (selectedLead.internalNote ?? '')) {
+                        void saveNote(selectedLead, event.target.value);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-3">
+      <dt className="text-xs uppercase tracking-wide text-outline">{label}</dt>
+      <dd className="mt-1 font-semibold text-on-surface">{value}</dd>
     </div>
   );
 }

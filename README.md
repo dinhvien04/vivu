@@ -147,6 +147,7 @@ POST /api/v1/trip-plans/:id/save-to-collection
 POST /api/v1/leads
 GET  /api/v1/admin/leads
 POST /api/v1/data-reports
+GET  /api/v1/admin/data-reports
 POST /api/v1/analytics/events
 ```
 
@@ -157,8 +158,9 @@ Business MVP:
 
 - `/lich-trinh` tạo lịch trình AI dựa trên địa danh trong database Vivu.
 - `/tu-van` thu lead tư vấn từ home, detail, AI Chat và Trip Planner.
-- `/admin/leads` giúp admin xem lead, đổi trạng thái và ghi chú nội bộ.
-- Trang chi tiết địa danh có nút báo lỗi dữ liệu gửi về backend.
+- `/admin/leads` giúp admin xem lead, mở chi tiết, copy phone/Zalo, đổi trạng thái và ghi chú nội bộ.
+- `/admin/bao-loi` giúp admin xử lý báo lỗi dữ liệu từ người dùng.
+- Trang chi tiết địa danh có nút báo lỗi dữ liệu, CTA bản đồ/lịch trình cho địa điểm gần đó.
 
 ## Kiểm tra chất lượng
 

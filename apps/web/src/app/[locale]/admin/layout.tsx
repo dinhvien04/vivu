@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { labelKey: 'navPlaces', href: '/admin/dia-diem', icon: 'place' },
   { labelKey: 'navReviews', href: '/admin/danh-gia', icon: 'reviews' },
   { labelKey: 'navLeads', href: '/admin/leads', icon: 'support_agent' },
+  { labelKey: 'navDataReports', href: '/admin/bao-loi', icon: 'flag' },
 ] as const;
 
 export const metadata = {

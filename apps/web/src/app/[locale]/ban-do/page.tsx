@@ -13,14 +13,24 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: L
   return { title: t('title') };
 }
 
-export default async function MapPage({ params }: { params: Promise<{ locale: Locale }> }) {
+export default async function MapPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: Locale }>;
+  searchParams?: Promise<{ place?: string }>;
+}) {
   const { locale } = await params;
+  const sp = (await searchParams) ?? {};
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'map' });
 
   const result = await listPlaces({ province: 'Gia Lai', pageSize: 100 }).catch(() => null);
   const places = result?.data ?? [];
   const geoPlaces = places.filter((place) => place.geo);
+  const selectedPlace = sp.place
+    ? geoPlaces.find((place) => place.slug === sp.place && place.geo)
+    : undefined;
   const total = result?.meta.total ?? 0;
 
   return (
@@ -39,9 +49,15 @@ export default async function MapPage({ params }: { params: Promise<{ locale: Lo
             <PlacesMapLoader
               places={geoPlaces}
               locale={locale}
-              center={[14.05, 108.45]}
-              zoom={8}
+              center={
+                selectedPlace?.geo
+                  ? [selectedPlace.geo.lat, selectedPlace.geo.lng]
+                  : [14.05, 108.45]
+              }
+              zoom={selectedPlace ? 12 : 8}
+              fitToMarkers={!selectedPlace}
               height="70vh"
+              initialSelectedSlug={selectedPlace?.slug}
             />
             <p className="mt-3 text-body-sm text-on-surface-variant">
               {t.rich('geoCount', {

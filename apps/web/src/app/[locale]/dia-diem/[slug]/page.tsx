@@ -5,6 +5,7 @@ import { AddToCollectionButton } from '@/components/add-to-collection-button';
 import { FavoriteButton } from '@/components/favorite-button';
 import { Icon } from '@/components/icon';
 import { PlacesMapLoader } from '@/components/map/places-map-loader';
+import { NearbyPlaceActions } from '@/components/nearby-place-actions';
 import { PlaceCard } from '@/components/place-card';
 import { PlaceGallery } from '@/components/place-gallery';
 import { PlaceViewTracker } from '@/components/place-view-tracker';
@@ -407,6 +408,11 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               {related.map((p) => (
                 <li key={p.id} className="relative">
                   <PlaceCard place={p} locale={locale} />
+                  <NearbyPlaceActions
+                    placeSlug={p.slug}
+                    sourcePlaceSlug={place.slug}
+                    locale={locale}
+                  />
                   {typeof p.distanceKm === 'number' && (
                     <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-surface-container/95 px-2 py-1 text-overline tracking-overline text-on-surface shadow">
                       {t('place.distanceKm', { km: p.distanceKm.toFixed(1) })}

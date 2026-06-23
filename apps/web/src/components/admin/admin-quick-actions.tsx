@@ -24,6 +24,7 @@ export function AdminQuickActions() {
   const actions: QuickAction[] = [
     { labelKey: 'qaNewPlace', icon: 'add_location', href: '/admin/dia-diem/new' },
     { labelKey: 'qaModerate', icon: 'gavel', href: '/admin/danh-gia' },
+    { labelKey: 'qaDataReports', icon: 'flag', href: '/admin/bao-loi' },
     { labelKey: 'qaPlaces', icon: 'view_list', href: '/admin/dia-diem' },
     { labelKey: 'qaExport', icon: 'file_download', onClick: exportReport },
   ];

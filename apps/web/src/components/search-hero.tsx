@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { getSuggest, type SuggestPlace } from '@/lib/search-client';
 import { Icon } from './icon';
 
@@ -78,6 +79,11 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
     e.preventDefault();
     const trimmed = q.trim();
     setOpen(false);
+    if (trimmed) {
+      void trackAnalyticsEvent('search_performed', {
+        metadata: { q: trimmed, source: compact ? 'header' : 'search_form' },
+      });
+    }
     router.push(trimmed ? `/tim-kiem?q=${encodeURIComponent(trimmed)}` : '/tim-kiem');
   };
 
@@ -94,6 +100,9 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
       const p = suggestions[active];
       if (!p) return;
       setOpen(false);
+      void trackAnalyticsEvent('search_performed', {
+        metadata: { q: q.trim(), source: 'suggestion_keyboard', resultSlug: p.slug },
+      });
       router.push(`/dia-diem/${p.slug}`);
     } else if (e.key === 'Escape') {
       setOpen(false);
@@ -173,7 +182,16 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
                     <li key={p.id} role="option" aria-selected={isActive}>
                       <Link
                         href={`/dia-diem/${p.slug}`}
-                        onClick={() => setOpen(false)}
+                        onClick={() => {
+                          setOpen(false);
+                          void trackAnalyticsEvent('search_performed', {
+                            metadata: {
+                              q: q.trim(),
+                              source: 'suggestion_click',
+                              resultSlug: p.slug,
+                            },
+                          });
+                        }}
                         onMouseEnter={() => setActive(i)}
                         className={
                           isActive
@@ -197,7 +215,14 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
               </ul>
               <Link
                 href={`/tim-kiem?q=${encodeURIComponent(q.trim())}`}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  if (q.trim()) {
+                    void trackAnalyticsEvent('search_performed', {
+                      metadata: { q: q.trim(), source: 'suggestion_see_all' },
+                    });
+                  }
+                }}
                 className="flex items-center justify-center gap-2 border-t border-outline-variant/30 px-4 py-3 text-body-sm font-semibold text-primary transition-colors hover:bg-surface-container"
               >
                 <Icon name="search" className="!text-base" />

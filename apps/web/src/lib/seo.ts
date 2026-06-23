@@ -29,6 +29,12 @@ export function buildPlaceMetadata(input: {
       description: input.summary ?? undefined,
       images: input.heroImageUrl ? [{ url: input.heroImageUrl }] : undefined,
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: input.title,
+      description: input.summary ?? undefined,
+      images: input.heroImageUrl ? [input.heroImageUrl] : undefined,
+    },
   };
 }
 

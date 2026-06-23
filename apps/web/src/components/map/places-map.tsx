@@ -23,6 +23,8 @@ interface PlacesMapProps {
   fitToMarkers?: boolean;
   /** Render height — must be a fixed CSS dimension (Leaflet needs concrete size). */
   height?: string;
+  /** Optional place slug to focus when opening the map from a detail/plan CTA. */
+  initialSelectedSlug?: string;
 }
 
 const GIA_LAI_CENTER: [number, number] = [14.05, 108.45];
@@ -167,13 +169,18 @@ export function PlacesMap({
   zoom = DEFAULT_ZOOM,
   fitToMarkers = true,
   height = '70vh',
+  initialSelectedSlug,
 }: PlacesMapProps) {
   const { theme } = useTheme();
   const t = useTranslations('map');
   const geoPlaces = useMemo(() => places.filter((p) => p.geo), [places]);
   const [query, setQuery] = useState('');
   const [categorySlug, setCategorySlug] = useState<string>('all');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const initialSelectedPlace = useMemo(
+    () => geoPlaces.find((place) => place.slug === initialSelectedSlug) ?? null,
+    [geoPlaces, initialSelectedSlug],
+  );
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedPlace?.id ?? null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const categories = useMemo(() => {
@@ -216,6 +223,12 @@ export function PlacesMap({
       setSelectedId(null);
     }
   }, [filteredGeoPlaces, selectedId]);
+
+  useEffect(() => {
+    if (initialSelectedPlace) {
+      setSelectedId(initialSelectedPlace.id);
+    }
+  }, [initialSelectedPlace]);
 
   const selected = filteredGeoPlaces.find((p) => p.id === selectedId) ?? null;
   const detailHrefPrefix = locale === 'en' ? '/en' : '';

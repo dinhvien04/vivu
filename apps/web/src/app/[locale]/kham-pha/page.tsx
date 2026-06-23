@@ -73,6 +73,52 @@ const AREA_FILTERS = [
   { slug: 'hoai-nhon', vi: 'Hoài Nhơn', en: 'Hoai Nhon', keywords: ['hoài nhơn', 'hoai nhon'] },
 ] as const;
 
+const NEED_FILTERS = [
+  { slug: '', vi: 'Tất cả', en: 'All needs', categorySlugs: [], keywords: [] },
+  {
+    slug: 'chup-anh',
+    vi: 'Chụp ảnh đẹp',
+    en: 'Photo spots',
+    categorySlugs: ['danh-lam-thang-canh', 'bien-dao', 'nui-rung'],
+    keywords: ['check in', 'chụp ảnh', 'cảnh đẹp', 'view', 'eo gió', 'kỳ co', 'biển', 'tháp'],
+  },
+  {
+    slug: 'gia-dinh',
+    vi: 'Đi cùng gia đình',
+    en: 'Family friendly',
+    categorySlugs: ['bao-tang', 'ho-thac-suoi', 'danh-lam-thang-canh'],
+    keywords: ['gia đình', 'trẻ em', 'bảo tàng', 'công viên', 'khoa học', 'hồ', 'biển'],
+  },
+  {
+    slug: 'nua-ngay',
+    vi: 'Đi nửa ngày',
+    en: 'Half day',
+    categorySlugs: ['di-tich', 'thap-cham', 'bao-tang', 'chua'],
+    keywords: ['gần trung tâm', 'nửa ngày', 'tham quan', 'di tích', 'tháp', 'chùa', 'bảo tàng'],
+  },
+  {
+    slug: 'mot-ngay',
+    vi: 'Lịch trình 1 ngày',
+    en: 'One day',
+    categorySlugs: ['bien-dao', 'danh-lam-thang-canh', 'ho-thac-suoi'],
+    keywords: ['1 ngày', 'một ngày', 'đảo', 'biển', 'hồ', 'thác', 'suối', 'khu sinh thái'],
+  },
+  {
+    slug: 'lich-su-van-hoa',
+    vi: 'Lịch sử - văn hoá',
+    en: 'History & culture',
+    categorySlugs: ['di-tich', 'di-san', 'thap-cham', 'chua', 'van-hoa', 'bao-tang'],
+    keywords: ['lịch sử', 'văn hoá', 'di tích', 'di sản', 'tháp', 'chăm', 'chùa', 'hội quán'],
+  },
+  {
+    slug: 'thien-nhien',
+    vi: 'Thiên nhiên',
+    en: 'Nature',
+    categorySlugs: ['danh-lam-thang-canh', 'nui-rung', 'ho-thac-suoi', 'bien-dao'],
+    keywords: ['thiên nhiên', 'núi', 'rừng', 'hồ', 'thác', 'suối', 'biển', 'đảo', 'cao nguyên'],
+  },
+] as const;
+
 type ExploreView = 'grid' | 'map';
 
 interface PageProps {
@@ -81,6 +127,7 @@ interface PageProps {
     topic?: string;
     area?: string;
     aiReady?: string;
+    need?: string;
     sort?: string;
     q?: string;
     view?: string;
@@ -152,6 +199,23 @@ function matchesArea(place: Place, keywords: readonly string[], locale: Locale):
   return keywords.some((keyword) => haystack.includes(normalize(keyword)));
 }
 
+function matchesNeed(
+  place: Place,
+  need: (typeof NEED_FILTERS)[number],
+  locale: Locale,
+): boolean {
+  if (need.categorySlugs.length === 0 && need.keywords.length === 0) return true;
+
+  const slugs = new Set<string>(need.categorySlugs);
+  const categories = place.categories ?? [];
+  if (categories.length > 0 && categories.some((category) => slugs.has(category.slug))) {
+    return true;
+  }
+
+  const haystack = buildPlaceSearchText(place, locale);
+  return need.keywords.some((keyword) => haystack.includes(normalize(keyword)));
+}
+
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }) {
@@ -167,6 +231,7 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
   const sp = (await searchParams) ?? {};
   const topic = TOPIC_FILTERS.find((item) => item.slug === sp.topic) ?? TOPIC_FILTERS[0];
   const area = AREA_FILTERS.find((item) => item.slug === sp.area) ?? AREA_FILTERS[0];
+  const need = NEED_FILTERS.find((item) => item.slug === sp.need) ?? NEED_FILTERS[0];
   const aiReady = sp.aiReady === 'true';
   const sort: PlaceSort = sp.sort === 'name' ? 'name' : 'recent';
   const view: ExploreView = sp.view === 'map' ? 'map' : 'grid';
@@ -183,7 +248,8 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
     placesResult?.data
       .filter(hasPlaceImage)
       .filter((place) => matchesTopic(place, topic, locale))
-      .filter((place) => matchesArea(place, area.keywords, locale)) ?? [];
+      .filter((place) => matchesArea(place, area.keywords, locale))
+      .filter((place) => matchesNeed(place, need, locale)) ?? [];
 
   return (
     <>
@@ -235,6 +301,31 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
                 className={
                   active
                     ? 'rounded-full bg-secondary-container px-3 py-1.5 text-body-sm font-semibold text-on-secondary-container'
+                    : 'rounded-full border border-outline-variant px-3 py-1.5 text-body-sm text-on-surface-variant transition-colors hover:border-primary hover:text-primary'
+                }
+              >
+                {locale === 'en' ? item.en : item.vi}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <nav
+          aria-label={locale === 'en' ? 'Travel needs' : 'Nhu cầu'}
+          className="mb-6 flex flex-wrap items-center gap-2"
+        >
+          <span className="text-overline uppercase tracking-overline text-on-surface-variant">
+            {locale === 'en' ? 'Needs' : 'Nhu cầu'}
+          </span>
+          {NEED_FILTERS.map((item) => {
+            const active = need.slug === item.slug;
+            return (
+              <Link
+                key={item.slug || 'all-need'}
+                href={buildHref(sp, { need: item.slug })}
+                className={
+                  active
+                    ? 'rounded-full bg-tertiary-container px-3 py-1.5 text-body-sm font-semibold text-on-tertiary-container'
                     : 'rounded-full border border-outline-variant px-3 py-1.5 text-body-sm text-on-surface-variant transition-colors hover:border-primary hover:text-primary'
                 }
               >

@@ -10,9 +10,10 @@ nhan bao loi du lieu.
 
 - Trip Planner AI: `POST /api/v1/trip-plans/generate`, route web `/lich-trinh`.
 - Lead capture: `POST /api/v1/leads`, route web `/tu-van`.
-- Admin CRM: `GET /api/v1/admin/leads`, route web `/admin/leads`.
+- Admin CRM: `GET /api/v1/admin/leads`, route web `/admin/leads`, co drawer chi tiet va copy phone/Zalo.
 - Data report: `POST /api/v1/data-reports`, nut bao loi tren trang chi tiet dia danh.
-- Analytics event: `POST /api/v1/analytics/events`, dung cho place view, AI chat, trip plan va lead.
+- Admin Data Report: `GET /api/v1/admin/data-reports`, route web `/admin/bao-loi`.
+- Analytics event: `POST /api/v1/analytics/events`, dung cho place view, search, nearby CTA, AI chat, trip plan va lead.
 - SEO: sitemap them `/lich-trinh`, `/tu-van`; detail page co TouristAttraction JSON-LD va Breadcrumb JSON-LD.
 
 ## Luong Trip Planner AI
@@ -51,7 +52,7 @@ Trang chi tiet dia danh co nut bao loi du lieu. Report gom:
 - `message`
 - `contact` tuy chon
 
-Admin API da co `/api/v1/admin/data-reports`; UI admin rieng co the them sau neu can.
+Admin xu ly report tai `/admin/bao-loi`: loc theo trang thai/loai loi/slug, mo trang dia diem va cap nhat status.
 
 ## Migration
 
@@ -87,7 +88,8 @@ LEADS_RATE_LIMIT_PER_HOUR=5
 3. Mo `/tu-van`, gui lead voi phone/Zalo test.
 4. Dang nhap admin, mo `/admin/leads`, doi status va ghi note.
 5. Mo mot trang `/dia-diem/:slug`, bam `Bao loi du lieu`, gui report.
-6. Mo `/sitemap.xml`, kiem tra co `/lich-trinh` va `/tu-van`.
+6. Dang nhap admin, mo `/admin/bao-loi`, doi status mot report test.
+7. Mo `/sitemap.xml`, kiem tra co `/lich-trinh` va `/tu-van`.
 
 ## Trang thai
 

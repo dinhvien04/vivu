@@ -14,7 +14,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
-    title: locale === 'en' ? 'AI Trip Planner' : 'Lich trinh AI',
+    title:
+      locale === 'en'
+        ? 'AI Gia Lai Trip Planner | Vivu'
+        : 'Lập lịch trình du lịch Gia Lai bằng AI | Vivu',
     description:
       locale === 'en'
         ? 'Create a Gia Lai itinerary from Vivu place data.'
