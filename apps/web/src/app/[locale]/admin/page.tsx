@@ -111,7 +111,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
         </div>
       </header>
 
-      <section className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <section className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
         <StatCard
           label={t('statTotalPlaces')}
           value={totalPlaces}

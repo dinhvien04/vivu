@@ -38,6 +38,47 @@ enum AiUsageKeyType {
   ip
 }
 
+enum LeadSource {
+  place_detail
+  ai_chat
+  trip_planner
+  home
+  other
+}
+
+enum LeadStatus {
+  new
+  contacted
+  planning
+  booked
+  cancelled
+  spam
+}
+
+enum DataReportType {
+  wrong_image
+  wrong_coordinates
+  wrong_description
+  missing_info
+  other
+}
+
+enum DataReportStatus {
+  new
+  reviewed
+  resolved
+  rejected
+}
+
+enum AnalyticsEventType {
+  place_view
+  ai_chat_started
+  trip_plan_generated
+  lead_submitted
+  search_performed
+  nearby_clicked
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -59,6 +100,9 @@ model User {
   refreshTokens RefreshToken[]
   resetTokens   PasswordResetToken[]
   auditLogs     AuditLog[]           @relation("AuditActor")
+  tripPlans     TripPlan[]
+  leads         Lead[]
+  analytics     AnalyticsEvent[]
 }
 
 // Stored hash of a refresh token. We rotate refresh tokens on each /auth/refresh
@@ -145,6 +189,7 @@ model Place {
   questions       Question[]
   favorites       Favorite[]
   collectionItems CollectionItem[]
+  tripPlanItems   TripPlanPlace[]
 
   @@index([locationKey])
   @@index([regionId, status])
@@ -291,10 +336,96 @@ model AiUsage {
   date         DateTime       @db.Date
   aiRequests   Int            @default(0)
   imageUploads Int            @default(0)
+  tripPlanRequests Int         @default(0)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
   @@unique([keyType, keyHash, date])
   @@index([date])
   @@index([keyType, keyHash])
+}
+
+model TripPlan {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  input     Json
+  output    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  places TripPlanPlace[]
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model TripPlanPlace {
+  tripPlanId String
+  placeId    String
+  position   Int     @default(0)
+  tripPlan   TripPlan @relation(fields: [tripPlanId], references: [id], onDelete: Cascade)
+  place      Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  @@id([tripPlanId, placeId])
+  @@index([placeId])
+}
+
+model Lead {
+  id                  String     @id @default(cuid())
+  name                String
+  phoneOrZalo         String
+  email               String?
+  interestedPlaceSlug String?
+  interestedPlaceName String?
+  area                String?
+  travelDate          DateTime?
+  peopleCount         Int?
+  budget              String?
+  note                String?
+  source              LeadSource @default(other)
+  status              LeadStatus @default(new)
+  internalNote        String?
+  estimatedValue      String?
+  ipHash              String?
+  userAgentHash       String?
+  userId              String?
+  user                User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([status, createdAt])
+  @@index([source, createdAt])
+  @@index([interestedPlaceSlug])
+  @@index([userId])
+}
+
+model DataReport {
+  id        String           @id @default(cuid())
+  placeSlug String
+  type      DataReportType
+  message   String
+  contact   String?
+  status    DataReportStatus @default(new)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([placeSlug])
+  @@index([status, createdAt])
+}
+
+model AnalyticsEvent {
+  id          String             @id @default(cuid())
+  type        AnalyticsEventType
+  placeSlug   String?
+  userId      String?
+  user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionHash String?
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+
+  @@index([type, createdAt])
+  @@index([placeSlug, createdAt])
+  @@index([userId, createdAt])
 }

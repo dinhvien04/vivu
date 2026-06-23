@@ -171,6 +171,87 @@ export interface Paginated<T> {
   };
 }
 
+export type TripTimeOfDay = 'morning' | 'noon' | 'afternoon' | 'evening';
+
+export interface TripPlanItem {
+  timeOfDay: TripTimeOfDay;
+  placeName: string;
+  placeSlug: string | null;
+  reason: string;
+  suggestedDuration: string;
+  travelNote: string;
+  tips: string[];
+}
+
+export interface TripPlanDay {
+  day: number;
+  theme: string;
+  items: TripPlanItem[];
+  foodSuggestions: string[];
+  notes: string[];
+}
+
+export interface TripPlanOutput {
+  title: string;
+  summary: string;
+  days: TripPlanDay[];
+  generalTips: string[];
+  missingDataNote: string | null;
+}
+
+export interface TripPlan {
+  id: string;
+  title: string;
+  input: unknown;
+  output: TripPlanOutput;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type LeadSource = 'place_detail' | 'ai_chat' | 'trip_planner' | 'home' | 'other';
+export type LeadStatus = 'new' | 'contacted' | 'planning' | 'booked' | 'cancelled' | 'spam';
+
+export interface Lead {
+  id: string;
+  name: string;
+  phoneOrZalo: string;
+  email: string | null;
+  interestedPlaceSlug: string | null;
+  interestedPlaceName: string | null;
+  area: string | null;
+  travelDate: string | null;
+  peopleCount: number | null;
+  budget: string | null;
+  note: string | null;
+  source: LeadSource;
+  status: LeadStatus;
+  internalNote: string | null;
+  estimatedValue: string | null;
+  userId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type DataReportType =
+  | 'wrong_image'
+  | 'wrong_coordinates'
+  | 'wrong_description'
+  | 'missing_info'
+  | 'other';
+
+export type DataReportStatus = 'new' | 'reviewed' | 'resolved' | 'rejected';
+
+export interface DataReport {
+  id: string;
+  placeSlug: string;
+  type: DataReportType;
+  message: string;
+  contact: string | null;
+  status: DataReportStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ApiError {
   type: string;
   title: string;

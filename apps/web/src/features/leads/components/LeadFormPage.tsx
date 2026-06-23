@@ -1,0 +1,292 @@
+'use client';
+
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { useLocale } from 'next-intl';
+import { useAuth } from '@/components/auth-provider';
+import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
+import type { Locale } from '@/i18n/routing';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
+import { createLead } from '@/lib/leads-client';
+import type { LeadSource } from '@vivu/types';
+
+interface LeadFormPageProps {
+  initialSource?: LeadSource;
+  initialPlaceSlug?: string;
+  initialPlaceName?: string;
+  initialNote?: string;
+}
+
+const SOURCES: LeadSource[] = ['place_detail', 'ai_chat', 'trip_planner', 'home', 'other'];
+
+function safeSource(value?: string): LeadSource {
+  return SOURCES.includes(value as LeadSource) ? (value as LeadSource) : 'other';
+}
+
+function text(locale: Locale) {
+  const vi = locale !== 'en';
+  return {
+    eyebrow: vi ? 'Tu van du lich' : 'Travel consultation',
+    title: vi ? 'De Vivu ho tro lich trinh cua ban' : 'Let Vivu help with your trip',
+    lead: vi
+      ? 'Gui thong tin lien he, dia danh quan tam va nhu cau. Admin Vivu se lien he lai qua phone/Zalo.'
+      : 'Send your contact, places of interest, and needs. Vivu admin will follow up by phone/Zalo.',
+    name: vi ? 'Ho ten' : 'Full name',
+    phone: vi ? 'So dien thoai hoac Zalo' : 'Phone or Zalo',
+    email: 'Email',
+    place: vi ? 'Dia danh quan tam' : 'Interested place',
+    area: vi ? 'Khu vuc muon di' : 'Area',
+    travelDate: vi ? 'Ngay du kien' : 'Travel date',
+    people: vi ? 'So nguoi' : 'People',
+    budget: vi ? 'Ngan sach' : 'Budget',
+    note: vi ? 'Nhu cau / ghi chu' : 'Needs / notes',
+    notePlaceholder: vi
+      ? 'Vi du: di 2 ngay 1 dem, thich bien dao va thap Cham, can goi y quan an...'
+      : 'Example: 2 days 1 night, beaches and Cham towers, food suggestions...',
+    submit: vi ? 'Gui yeu cau tu van' : 'Send request',
+    submitting: vi ? 'Dang gui...' : 'Sending...',
+    successTitle: vi ? 'Da nhan yeu cau tu van' : 'Request received',
+    successLead: vi
+      ? 'Vivu da ghi nhan thong tin. Neu day la ban demo, ban co the xem lead trong trang admin.'
+      : 'Vivu has recorded your information. In demo mode, view it in the admin leads page.',
+    backExplore: vi ? 'Quay lai kham pha' : 'Back to explore',
+    error: vi ? 'Khong gui duoc yeu cau. Vui long thu lai.' : 'Could not send request.',
+    privacy: vi
+      ? 'Thong tin lien he chi dung de tu van chuyen di, khong hien thi cong khai.'
+      : 'Contact data is used only for trip consultation and is not public.',
+  };
+}
+
+export function LeadFormPage({
+  initialSource,
+  initialPlaceSlug,
+  initialPlaceName,
+  initialNote,
+}: LeadFormPageProps) {
+  const locale = useLocale() as Locale;
+  const labels = text(locale);
+  const { getAccessToken } = useAuth();
+  const [name, setName] = useState('');
+  const [phoneOrZalo, setPhoneOrZalo] = useState('');
+  const [email, setEmail] = useState('');
+  const [placeName, setPlaceName] = useState(initialPlaceName ?? '');
+  const [area, setArea] = useState('');
+  const [travelDate, setTravelDate] = useState('');
+  const [peopleCount, setPeopleCount] = useState(2);
+  const [budget, setBudget] = useState('');
+  const [note, setNote] = useState(initialNote ?? '');
+  const [website, setWebsite] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const source = safeSource(initialSource);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      await createLead(
+        {
+          name,
+          phoneOrZalo,
+          email: email.trim() || undefined,
+          interestedPlaceSlug: initialPlaceSlug,
+          interestedPlaceName: placeName.trim() || undefined,
+          area: area.trim() || undefined,
+          travelDate: travelDate || undefined,
+          peopleCount,
+          budget: budget.trim() || undefined,
+          note: note.trim() || undefined,
+          source,
+          website,
+        },
+        token,
+      );
+      await trackAnalyticsEvent('lead_submitted', {
+        bearer: token,
+        placeSlug: initialPlaceSlug,
+        metadata: { source, area, peopleCount },
+      });
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : labels.error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <section className="mx-auto max-w-2xl rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-8 text-center shadow-premium">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-fixed text-primary">
+          <Icon name="check_circle" size={36} />
+        </div>
+        <h1 className="mt-5 font-h2 text-h2 text-on-surface">{labels.successTitle}</h1>
+        <p className="mt-3 text-body-md text-on-surface-variant">{labels.successLead}</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/kham-pha"
+            className="rounded-full border border-primary px-5 py-2 font-semibold text-primary hover:bg-primary-fixed"
+          >
+            {labels.backExplore}
+          </Link>
+          <Link
+            href="/lich-trinh"
+            className="rounded-full bg-primary px-5 py-2 font-semibold text-on-primary hover:bg-primary/90"
+          >
+            {locale === 'en' ? 'Create another plan' : 'Tao lich trinh khac'}
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[0.8fr,1.2fr]">
+      <section className="rounded-3xl bg-gradient-to-br from-primary-fixed via-secondary-container/50 to-surface-container p-8">
+        <p className="text-overline uppercase tracking-overline text-primary">{labels.eyebrow}</p>
+        <h1 className="mt-2 font-h1 text-h1 text-on-surface">{labels.title}</h1>
+        <p className="mt-4 text-body-lg text-on-surface-variant">{labels.lead}</p>
+        <div className="mt-8 space-y-4 text-body-md text-on-surface-variant">
+          <p className="flex gap-2">
+            <Icon name="support_agent" className="mt-0.5 text-primary" />
+            {locale === 'en'
+              ? 'Good for custom itinerary, group trip, or data questions.'
+              : 'Phu hop khi can lich trinh rieng, di theo nhom, hoac can hoi them ve dia danh.'}
+          </p>
+          <p className="flex gap-2">
+            <Icon name="lock" className="mt-0.5 text-primary" />
+            {labels.privacy}
+          </p>
+        </div>
+      </section>
+
+      <form
+        onSubmit={submit}
+        className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-premium"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.name}</span>
+            <input
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={120}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.phone}</span>
+            <input
+              required
+              value={phoneOrZalo}
+              onChange={(event) => setPhoneOrZalo(event.target.value)}
+              maxLength={50}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.email}</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.place}</span>
+            <input
+              value={placeName}
+              onChange={(event) => setPlaceName(event.target.value)}
+              maxLength={160}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.area}</span>
+            <input
+              value={area}
+              onChange={(event) => setArea(event.target.value)}
+              maxLength={160}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">
+              {labels.travelDate}
+            </span>
+            <input
+              type="date"
+              value={travelDate}
+              onChange={(event) => setTravelDate(event.target.value)}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.people}</span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={peopleCount}
+              onChange={(event) => setPeopleCount(Number(event.target.value))}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+          <label className="block">
+            <span className="text-label-md font-semibold text-on-surface">{labels.budget}</span>
+            <input
+              value={budget}
+              onChange={(event) => setBudget(event.target.value)}
+              maxLength={200}
+              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </label>
+        </div>
+
+        <label className="mt-4 block">
+          <span className="text-label-md font-semibold text-on-surface">{labels.note}</span>
+          <textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            rows={5}
+            maxLength={1000}
+            placeholder={labels.notePlaceholder}
+            className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+        </label>
+
+        <label className="sr-only">
+          Website
+          <input
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(event) => setWebsite(event.target.value)}
+          />
+        </label>
+
+        {error && (
+          <div className="mt-4 rounded-xl border border-error/30 bg-error-container px-4 py-3 text-body-sm text-on-error-container">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-on-primary transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+        >
+          <Icon name="send" size={20} />
+          {loading ? labels.submitting : labels.submit}
+        </button>
+      </form>
+    </div>
+  );
+}

@@ -99,6 +99,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               >
                 {t('home.aiCta')}
               </Link>
+              <Link
+                href="/lich-trinh"
+                className="inline-flex items-center rounded-lg border border-outline-variant px-8 py-4 text-body-md font-semibold text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
+              >
+                {locale === 'en' ? 'AI trip planner' : 'Lịch trình AI'}
+              </Link>
             </div>
           </div>
           <Link

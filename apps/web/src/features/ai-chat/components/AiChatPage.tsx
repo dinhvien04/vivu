@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Icon } from '@/components/icon';
+import { Link } from '@/i18n/navigation';
 import { placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 import { getPlaceBySlug } from '@/lib/api';
@@ -112,7 +113,16 @@ export function AiChatPage({ placeSlug }: { placeSlug?: string }) {
           }}
         />
       </section>
-      <p className="mt-3 text-center text-xs text-outline">{t('disclaimer')}</p>
+      <div className="mt-4 flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-xs text-outline">{t('disclaimer')}</p>
+        <Link
+          href="/tu-van?source=ai_chat"
+          className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-body-sm font-semibold text-primary transition hover:bg-primary-fixed"
+        >
+          <Icon name="support_agent" size={17} />
+          {locale === 'en' ? 'Need human help? Request consultation' : 'Cần người tư vấn? Gửi yêu cầu'}
+        </Link>
+      </div>
     </div>
   );
 }

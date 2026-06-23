@@ -5,6 +5,13 @@ export interface AdminStats {
   totalReviews: number;
   activeUsers: number;
   computedAt: string;
+  totalTripPlans: number;
+  totalLeads: number;
+  aiRequestsToday: number;
+  tripPlansToday: number;
+  leadsByStatus: Array<{ status: string; count: number }>;
+  topPlacesViewed: Array<{ placeSlug: string; count: number }>;
+  topSearchQueries: Array<{ query: string; count: number }>;
 }
 
 interface ErrorPayload {

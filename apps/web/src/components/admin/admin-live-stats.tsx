@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
@@ -40,12 +40,9 @@ function StatCard({ label, value, hint, icon, iconBg, iconColor, loading }: Stat
   );
 }
 
-/**
- * Live-fetched admin stats. Renders the "Đánh giá" + "Người dùng tích cực"
- * cards with values from `GET /admin/stats` (requires admin/editor bearer).
- */
 export function AdminLiveStats() {
   const t = useTranslations('admin');
+  const locale = useLocale();
   const { getAccessToken, user } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -69,14 +66,14 @@ export function AdminLiveStats() {
   }, [getAccessToken, user]);
 
   const loading = !stats && !error;
-  const reviewsValue = error ? '—' : (stats?.totalReviews ?? 0);
-  const activeValue = error ? '—' : (stats?.activeUsers ?? 0);
+  const empty = error ? '-' : 0;
+  const vi = locale !== 'en';
 
   return (
     <>
       <StatCard
         label={t('statTotalReviews')}
-        value={reviewsValue}
+        value={error ? empty : (stats?.totalReviews ?? 0)}
         hint={t('statTotalReviewsHint')}
         icon="reviews"
         iconBg="bg-tertiary-container/40"
@@ -84,8 +81,39 @@ export function AdminLiveStats() {
         loading={loading}
       />
       <StatCard
+        label={vi ? 'Lead tu van' : 'Leads'}
+        value={error ? empty : (stats?.totalLeads ?? 0)}
+        hint={vi ? 'Yeu cau tu van da ghi nhan' : 'Captured consultation requests'}
+        icon="support_agent"
+        iconBg="bg-primary-container/40"
+        iconColor="text-primary"
+        loading={loading}
+      />
+      <StatCard
+        label={vi ? 'Lich trinh AI' : 'AI trip plans'}
+        value={error ? empty : (stats?.totalTripPlans ?? 0)}
+        hint={
+          vi
+            ? `${stats?.tripPlansToday ?? 0} tao hom nay`
+            : `${stats?.tripPlansToday ?? 0} today`
+        }
+        icon="route"
+        iconBg="bg-secondary-container/60"
+        iconColor="text-secondary"
+        loading={loading}
+      />
+      <StatCard
+        label={vi ? 'AI hom nay' : 'AI today'}
+        value={error ? empty : (stats?.aiRequestsToday ?? 0)}
+        hint={vi ? 'Luot dung AI chat trong ngay' : 'AI chat requests today'}
+        icon="auto_awesome"
+        iconBg="bg-tertiary-container/40"
+        iconColor="text-tertiary"
+        loading={loading}
+      />
+      <StatCard
         label={t('statActiveUsers')}
-        value={activeValue}
+        value={error ? empty : (stats?.activeUsers ?? 0)}
         hint={t('statActiveUsersHint')}
         icon="group"
         iconBg="bg-primary-container/40"

@@ -12,6 +12,23 @@ describe('AdminStatsController', () => {
   let controller: AdminStatsController;
   let service: { snapshot: jest.Mock };
 
+  function makeSnapshot(overrides: Partial<AdminStats> = {}): AdminStats {
+    return {
+      totalPlaces: 0,
+      totalReviews: 0,
+      activeUsers: 0,
+      computedAt: new Date().toISOString(),
+      totalTripPlans: 0,
+      totalLeads: 0,
+      aiRequestsToday: 0,
+      tripPlansToday: 0,
+      leadsByStatus: [],
+      topPlacesViewed: [],
+      topSearchQueries: [],
+      ...overrides,
+    };
+  }
+
   beforeEach(async () => {
     service = { snapshot: jest.fn() };
     const moduleRef = await Test.createTestingModule({
@@ -27,12 +44,7 @@ describe('AdminStatsController', () => {
   });
 
   it('delegates to AdminStatsService.snapshot()', async () => {
-    const snap: AdminStats = {
-      totalPlaces: 0,
-      totalReviews: 0,
-      activeUsers: 0,
-      computedAt: new Date().toISOString(),
-    };
+    const snap = makeSnapshot();
     service.snapshot.mockResolvedValueOnce(snap);
     await controller.snapshot();
     expect(service.snapshot).toHaveBeenCalledTimes(1);
@@ -40,12 +52,14 @@ describe('AdminStatsController', () => {
   });
 
   it('wraps result in `{ data }`', async () => {
-    const snap: AdminStats = {
+    const snap = makeSnapshot({
       totalPlaces: 42,
       totalReviews: 100,
       activeUsers: 17,
       computedAt: '2026-05-01T00:00:00.000Z',
-    };
+      totalTripPlans: 9,
+      totalLeads: 4,
+    });
     service.snapshot.mockResolvedValueOnce(snap);
     expect(await controller.snapshot()).toEqual({ data: snap });
   });

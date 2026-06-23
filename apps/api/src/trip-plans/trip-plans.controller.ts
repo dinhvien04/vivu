@@ -1,0 +1,46 @@
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
+import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
+import { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
+import { TripPlansService } from './trip-plans.service';
+
+@ApiTags('trip-plans')
+@Controller('trip-plans')
+export class TripPlansController {
+  constructor(private readonly tripPlans: TripPlansService) {}
+
+  @Post('generate')
+  @UseGuards(OptionalJwtAuthGuard)
+  generate(
+    @Body() dto: GenerateTripPlanDto,
+    @Req() request: FastifyRequest,
+    @CurrentUser() user?: AuthenticatedUser,
+  ) {
+    return this.tripPlans.generate(dto, request, user);
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  listMine(@CurrentUser() user: AuthenticatedUser) {
+    return this.tripPlans.listMine(user.id);
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  getMine(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.tripPlans.getMine(user.id, id);
+  }
+
+  @Post(':id/save-to-collection')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  saveToCollection(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.tripPlans.saveToCollection(user.id, id);
+  }
+}

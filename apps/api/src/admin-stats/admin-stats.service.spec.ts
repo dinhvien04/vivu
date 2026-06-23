@@ -4,6 +4,13 @@ import type { PrismaService } from '../prisma/prisma.service';
 function build(parts: {
   totalPlaces?: number;
   totalReviews?: number;
+  totalTripPlans?: number;
+  totalLeads?: number;
+  aiRequestsToday?: number;
+  tripPlansToday?: number;
+  leads?: Array<{ status: string }>;
+  placeViews?: Array<{ placeSlug: string | null }>;
+  searchEvents?: Array<{ metadata: unknown }>;
   reviewers?: Array<{ userId: string }>;
   questioners?: Array<{ userId: string }>;
   answerers?: Array<{ userId: string }>;
@@ -11,18 +18,54 @@ function build(parts: {
   const reviewFindMany = jest.fn().mockResolvedValue(parts.reviewers ?? []);
   const questionFindMany = jest.fn().mockResolvedValue(parts.questioners ?? []);
   const answerFindMany = jest.fn().mockResolvedValue(parts.answerers ?? []);
+  const tripPlanCount = jest
+    .fn()
+    .mockResolvedValueOnce(parts.totalTripPlans ?? 0)
+    .mockResolvedValueOnce(parts.tripPlansToday ?? 0);
+  const leadFindMany = jest.fn().mockResolvedValue(parts.leads ?? []);
+  const analyticsEventFindMany = jest
+    .fn()
+    .mockResolvedValueOnce(parts.placeViews ?? [])
+    .mockResolvedValueOnce(parts.searchEvents ?? []);
   const prisma = {
     place: { count: jest.fn().mockResolvedValue(parts.totalPlaces ?? 0) },
     review: {
       count: jest.fn().mockResolvedValue(parts.totalReviews ?? 0),
       findMany: reviewFindMany,
     },
+    tripPlan: {
+      count: tripPlanCount,
+    },
+    lead: {
+      count: jest.fn().mockResolvedValue(parts.totalLeads ?? 0),
+      findMany: leadFindMany,
+    },
+    aiUsage: {
+      aggregate: jest.fn().mockResolvedValue({
+        _sum: {
+          aiRequests: parts.aiRequestsToday ?? 0,
+          tripPlanRequests: parts.tripPlansToday ?? 0,
+        },
+      }),
+    },
+    analyticsEvent: {
+      findMany: analyticsEventFindMany,
+    },
     question: { findMany: questionFindMany },
     answer: { findMany: answerFindMany },
     $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
   };
   const service = new AdminStatsService(prisma as unknown as PrismaService);
-  return { service, prisma, reviewFindMany, questionFindMany, answerFindMany };
+  return {
+    service,
+    prisma,
+    reviewFindMany,
+    questionFindMany,
+    answerFindMany,
+    tripPlanCount,
+    leadFindMany,
+    analyticsEventFindMany,
+  };
 }
 
 describe('AdminStatsService.snapshot', () => {
@@ -32,13 +75,31 @@ describe('AdminStatsService.snapshot', () => {
     expect(out.totalPlaces).toBe(0);
     expect(out.totalReviews).toBe(0);
     expect(out.activeUsers).toBe(0);
+    expect(out.totalTripPlans).toBe(0);
+    expect(out.totalLeads).toBe(0);
+    expect(out.aiRequestsToday).toBe(0);
+    expect(out.tripPlansToday).toBe(0);
+    expect(out.leadsByStatus).toEqual([]);
+    expect(out.topPlacesViewed).toEqual([]);
+    expect(out.topSearchQueries).toEqual([]);
   });
 
   it('forwards counts from prisma', async () => {
-    const { service } = build({ totalPlaces: 42, totalReviews: 100 });
+    const { service } = build({
+      totalPlaces: 42,
+      totalReviews: 100,
+      totalTripPlans: 8,
+      totalLeads: 5,
+      aiRequestsToday: 12,
+      tripPlansToday: 2,
+    });
     const out = await service.snapshot();
     expect(out.totalPlaces).toBe(42);
     expect(out.totalReviews).toBe(100);
+    expect(out.totalTripPlans).toBe(8);
+    expect(out.totalLeads).toBe(5);
+    expect(out.aiRequestsToday).toBe(12);
+    expect(out.tripPlansToday).toBe(2);
   });
 
   it('returns ISO timestamp for computedAt', async () => {
@@ -87,5 +148,38 @@ describe('AdminStatsService.snapshot', () => {
     expect(reviewFindMany.mock.calls[0][0].distinct).toEqual(['userId']);
     expect(questionFindMany.mock.calls[0][0].distinct).toEqual(['userId']);
     expect(answerFindMany.mock.calls[0][0].distinct).toEqual(['userId']);
+  });
+
+  it('aggregates lead statuses, top place views and search queries', async () => {
+    const { service } = build({
+      leads: [{ status: 'new' }, { status: 'new' }, { status: 'booked' }],
+      placeViews: [
+        { placeSlug: 'bien-ho' },
+        { placeSlug: 'bien-ho' },
+        { placeSlug: 'ky-co' },
+        { placeSlug: null },
+      ],
+      searchEvents: [
+        { metadata: { q: 'bien ho' } },
+        { metadata: { q: 'bien ho' } },
+        { metadata: { q: 'ky co' } },
+        { metadata: { other: 'ignored' } },
+      ],
+    });
+
+    const out = await service.snapshot();
+
+    expect(out.leadsByStatus).toEqual([
+      { status: 'new', count: 2 },
+      { status: 'booked', count: 1 },
+    ]);
+    expect(out.topPlacesViewed).toEqual([
+      { placeSlug: 'bien-ho', count: 2 },
+      { placeSlug: 'ky-co', count: 1 },
+    ]);
+    expect(out.topSearchQueries).toEqual([
+      { query: 'bien ho', count: 2 },
+      { query: 'ky co', count: 1 },
+    ]);
   });
 });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { sendAiChatMessage } from '../services/ai-chat.api';
 import type { ChatMessage } from '../types/ai-chat.types';
 
@@ -62,6 +63,7 @@ export function useAiChat(errorMessage: string) {
   const [sessionId] = useState(createStoredSessionId);
   const previewUrls = useRef(new Set<string>());
   const hasSkippedInitialPersist = useRef(false);
+  const hasTrackedStart = useRef(false);
 
   useEffect(() => {
     const urls = previewUrls.current;
@@ -102,6 +104,12 @@ export function useAiChat(errorMessage: string) {
         },
       ]);
       setIsSending(true);
+      if (!hasTrackedStart.current) {
+        hasTrackedStart.current = true;
+        void trackAnalyticsEvent('ai_chat_started', {
+          metadata: { hasImage: Boolean(params.image), hasText: Boolean(content) },
+        });
+      }
 
       try {
         const response = await sendAiChatMessage({

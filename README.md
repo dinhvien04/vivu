@@ -93,6 +93,8 @@ Backend cần các nhóm biến sau:
 - Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL`
 - AI hardening: `AI_DAILY_QUOTA_ANON`, `AI_DAILY_QUOTA_USER`,
   `AI_RATE_LIMIT_PER_MINUTE`, `AI_QUOTA_HASH_SECRET`, `AI_MAX_IMAGE_SIZE_BYTES`
+- Business MVP: `TRIP_PLANNER_DAILY_QUOTA_ANON`, `TRIP_PLANNER_DAILY_QUOTA_USER`,
+  `LEADS_RATE_LIMIT_PER_HOUR`
 - Timeout provider: `QDRANT_TIMEOUT_MS`, `GEMINI_TIMEOUT_MS`, `GEMINI_MAX_OUTPUT_TOKENS`
 - Auth hardening: `AUTH_LOGIN_MAX_FAILURES`, `AUTH_LOGIN_LOCKOUT_WINDOW_MS`
 - Tùy chọn: Meilisearch, CORS, cache TTL, CSP, Sentry và giới hạn cache
@@ -139,10 +141,24 @@ GET  /api/v1/categories
 GET  /api/v1/regions
 GET  /api/v1/search/suggest
 POST /api/v1/ai/chat
+POST /api/v1/trip-plans/generate
+GET  /api/v1/trip-plans
+POST /api/v1/trip-plans/:id/save-to-collection
+POST /api/v1/leads
+GET  /api/v1/admin/leads
+POST /api/v1/data-reports
+POST /api/v1/analytics/events
 ```
 
 `POST /api/v1/ai/chat` nhận `multipart/form-data` với `message`,
 `session_id` và/hoặc `image`; hỗ trợ text-only, image-only và image + text.
+
+Business MVP:
+
+- `/lich-trinh` tạo lịch trình AI dựa trên địa danh trong database Vivu.
+- `/tu-van` thu lead tư vấn từ home, detail, AI Chat và Trip Planner.
+- `/admin/leads` giúp admin xem lead, đổi trạng thái và ghi chú nội bộ.
+- Trang chi tiết địa danh có nút báo lỗi dữ liệu gửi về backend.
 
 ## Kiểm tra chất lượng
 
@@ -164,6 +180,7 @@ Integration test dùng Testcontainers nên cần Docker đang chạy.
 - [Thiết kế hệ thống](docs/DESIGN.md)
 - [Triển khai AI](docs/AI_DEPLOYMENT.md)
 - [Security hardening](docs/SECURITY.md)
+- [Business MVP](docs/BUSINESS_MVP.md)
 
 ## Quy ước an toàn
 

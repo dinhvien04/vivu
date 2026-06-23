@@ -11,15 +11,16 @@ import { NotificationsButton } from './notifications-button';
 import { SearchHero } from './search-hero';
 import { ThemeToggle } from './theme-toggle';
 
-type NavKey = 'home' | 'explore' | 'map' | 'aiChat';
+type NavKey = 'home' | 'explore' | 'map' | 'tripPlanner' | 'aiChat';
 
 const NAV_ITEMS: {
   labelKey: NavKey;
-  href: '/' | '/kham-pha' | '/ban-do' | '/ai-chat';
+  href: '/' | '/kham-pha' | '/ban-do' | '/lich-trinh' | '/ai-chat';
 }[] = [
   { labelKey: 'home', href: '/' },
   { labelKey: 'explore', href: '/kham-pha' },
   { labelKey: 'map', href: '/ban-do' },
+  { labelKey: 'tripPlanner', href: '/lich-trinh' },
   { labelKey: 'aiChat', href: '/ai-chat' },
 ];
 

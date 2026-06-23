@@ -4,13 +4,16 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AdminPlacesModule } from './admin-places/admin-places.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AdminStatsModule } from './admin-stats/admin-stats.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CollectionsModule } from './collections/collections.module';
 import { HealthController } from './common/health.controller';
+import { DataReportsModule } from './data-reports/data-reports.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { LeadsModule } from './leads/leads.module';
 import { MediaModule } from './media/media.module';
 import { PlacesModule } from './places/places.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -22,6 +25,7 @@ import { AiModule } from './ai/ai.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { QdrantModule } from './qdrant/qdrant.module';
 import { StorageModule } from './storage/storage.module';
+import { TripPlansModule } from './trip-plans/trip-plans.module';
 
 @Module({
   imports: [
@@ -47,6 +51,10 @@ import { StorageModule } from './storage/storage.module';
     AdminPlacesModule,
     AdminReviewsModule,
     AdminStatsModule,
+    AnalyticsModule,
+    LeadsModule,
+    DataReportsModule,
+    TripPlansModule,
     MediaModule,
     QdrantModule,
     GeminiModule,

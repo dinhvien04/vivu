@@ -7,11 +7,13 @@ import { Icon } from '@/components/icon';
 import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { PlaceCard } from '@/components/place-card';
 import { PlaceGallery } from '@/components/place-gallery';
+import { PlaceViewTracker } from '@/components/place-view-tracker';
 import { QaSection } from '@/components/qa-section';
 import { ReviewsSection } from '@/components/reviews-section';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { WeatherWidget } from '@/components/weather-widget';
+import { DataReportButton } from '@/features/data-reports/components/DataReportButton';
 import { Link } from '@/i18n/navigation';
 import { placeCategoryName, placeDescription, placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
@@ -19,7 +21,11 @@ import { listPlaces, getPlaceBySlug, listPlaceImages, listPlacesNearby } from '@
 import { listQuestionsForPlace } from '@/lib/qa-client';
 import { listReviewsForPlace } from '@/lib/reviews-client';
 import { formatSeasonMonths } from '@/lib/season';
-import { absoluteUrl } from '@/lib/site-url';
+import {
+  buildBreadcrumbJsonLd,
+  buildPlaceMetadata,
+  buildTouristAttractionJsonLd,
+} from '@/lib/seo';
 import type { Question, Review } from '@vivu/types';
 
 interface PageProps {
@@ -48,22 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const place = await getPlaceBySlug(slug);
     const title = placeTitle(place, locale);
     const summary = placeSummary(place, locale);
-    return {
-      title,
-      description: summary ?? undefined,
-      alternates: {
-        canonical: `/dia-diem/${slug}`,
-        languages: {
-          vi: `/dia-diem/${slug}`,
-          en: `/en/dia-diem/${slug}`,
-        },
-      },
-      openGraph: {
-        title,
-        description: summary ?? undefined,
-        images: place.heroImageUrl ? [{ url: place.heroImageUrl }] : undefined,
-      },
-    };
+    return buildPlaceMetadata({ slug, title, summary, heroImageUrl: place.heroImageUrl });
   } catch {
     const t = await getTranslations({ locale, namespace: 'place' });
     return { title: t('errorTitle') };
@@ -156,40 +147,34 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   // JSON-LD TouristAttraction — surfaces the place to search engines and helps
   // them render rich results. Average rating is included only when at least
   // one visible review exists.
-  const jsonLd: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'TouristAttraction',
-    name: title,
-    description: publicDescription ?? undefined,
-    url: absoluteUrl(`${locale === 'en' ? '/en' : ''}/dia-diem/${place.slug}`),
-    image: place.heroImageUrl ? [place.heroImageUrl] : undefined,
-    address: place.address
-      ? { '@type': 'PostalAddress', streetAddress: place.address, addressCountry: 'VN' }
-      : undefined,
-    geo: place.geo
-      ? { '@type': 'GeoCoordinates', latitude: place.geo.lat, longitude: place.geo.lng }
-      : undefined,
-    touristType: place.categories?.map((c) => placeCategoryName(c, locale)) ?? undefined,
-    aggregateRating:
-      place.rating && place.rating.count > 0
-        ? {
-            '@type': 'AggregateRating',
-            ratingValue: place.rating.average,
-            reviewCount: place.rating.count,
-            bestRating: 5,
-            worstRating: 1,
-          }
-        : undefined,
-  };
+  const jsonLd = buildTouristAttractionJsonLd({
+    place,
+    title,
+    description: publicDescription,
+    locale,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    [
+      { name: t('place.breadcrumbHome'), path: '/' },
+      { name: t('place.breadcrumbExplore'), path: '/kham-pha' },
+      { name: title, path: `/dia-diem/${place.slug}` },
+    ],
+    locale,
+  );
 
   return (
     <>
+      <PlaceViewTracker placeSlug={place.slug} />
       <script
         type="application/ld+json"
         // The metadata is generated server-side and contains no user input that
         // wasn't already escaped by `JSON.stringify`. Inline JSON-LD is the
         // canonical pattern recommended by Google.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">
@@ -357,6 +342,20 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                   <Icon name="auto_awesome" className="!text-base" />
                   <span>{t('place.askAi')}</span>
                 </Link>
+                <Link
+                  href={`/lich-trinh?place=${place.slug}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary px-4 py-3 font-bold text-primary transition-colors hover:bg-primary-fixed"
+                >
+                  <Icon name="route" className="!text-base" />
+                  <span>{locale === 'en' ? 'Plan a trip' : 'Len lich trinh'}</span>
+                </Link>
+                <Link
+                  href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant py-3 font-bold text-on-surface transition-all hover:border-primary hover:text-primary"
+                >
+                  <Icon name="support_agent" className="!text-base" />
+                  <span>{locale === 'en' ? 'Request consultation' : 'Can tu van'}</span>
+                </Link>
                 <FavoriteButton placeId={place.id} />
                 <AddToCollectionButton placeId={place.id} placeTitle={title} />
                 <button
@@ -368,15 +367,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                   <Icon name="share" className="!text-base" />
                   <span>{t('place.share')}</span>
                 </button>
-                <button
-                  type="button"
-                  disabled
-                  className="flex w-full items-center justify-center gap-2 py-2 text-body-sm font-medium text-on-surface-variant disabled:cursor-not-allowed disabled:opacity-60"
-                  aria-label={t('place.reportSoon')}
-                >
-                  <Icon name="report" className="!text-base" />
-                  <span>{t('place.report')}</span>
-                </button>
+                <DataReportButton placeSlug={place.slug} placeTitle={title} />
               </div>
 
               {/* Categories */}

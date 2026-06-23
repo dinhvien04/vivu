@@ -47,6 +47,16 @@ export class GeminiService {
   }
 
   async generateTravelAnswer(params: GenerateTravelAnswerParams): Promise<string> {
+    return this.generateText(buildPrompt(params), {
+      temperature: 0.2,
+      maxOutputTokens: this.maxOutputTokens,
+    });
+  }
+
+  async generateText(
+    prompt: string,
+    options: { temperature?: number; maxOutputTokens?: number } = {},
+  ): Promise<string> {
     this.assertConfigured();
 
     for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt += 1) {
@@ -54,10 +64,10 @@ export class GeminiService {
         const response = await withTimeout(
           this.client!.models.generateContent({
             model: this.model,
-            contents: buildPrompt(params),
+            contents: prompt,
             config: {
-              temperature: 0.2,
-              maxOutputTokens: this.maxOutputTokens,
+              temperature: options.temperature ?? 0.2,
+              maxOutputTokens: options.maxOutputTokens ?? this.maxOutputTokens,
             },
           }),
           this.timeoutMs,
