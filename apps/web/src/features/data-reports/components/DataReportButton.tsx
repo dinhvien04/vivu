@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Icon } from '@/components/icon';
 import type { Locale } from '@/i18n/routing';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { createDataReport } from '@/lib/data-reports-client';
 import type { DataReportType } from '@vivu/types';
 
@@ -66,6 +67,10 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
         contact: contact.trim() || undefined,
         website,
       });
+      void trackAnalyticsEvent('detail_report_clicked', {
+        placeSlug,
+        metadata: { action: 'submitted', type },
+      });
       setStatus(labels.success);
       setMessage('');
       setContact('');
@@ -82,6 +87,10 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
       <button
         type="button"
         onClick={() => {
+          void trackAnalyticsEvent('detail_report_clicked', {
+            placeSlug,
+            metadata: { action: 'open' },
+          });
           setOpen(true);
           setStatus(null);
         }}

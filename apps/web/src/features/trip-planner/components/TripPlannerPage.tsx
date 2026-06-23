@@ -13,6 +13,13 @@ import {
   type GeneratedTripPlan,
 } from '@/lib/trip-planner-client';
 
+interface TripPlannerPageProps {
+  initialPlace?: {
+    slug: string;
+    title: string;
+  };
+}
+
 const AREAS = [
   { slug: 'all', vi: 'Toàn tỉnh', en: 'All areas' },
   { slug: 'pleiku', vi: 'Pleiku', en: 'Pleiku' },
@@ -40,6 +47,48 @@ const TRANSPORTS = [
   { slug: 'di_bo_ket_hop', vi: 'Đi bộ kết hợp', en: 'Walking + transfers' },
 ] as const;
 
+function tripExamples(locale: Locale) {
+  const vi = locale !== 'en';
+  return [
+    {
+      title: vi ? '1 ngày khám phá Quy Nhơn' : '1 day in Quy Nhon',
+      description: vi
+        ? 'Gọn, dễ đi, hợp nhóm muốn check-in nhanh.'
+        : 'A compact route for quick sightseeing and photos.',
+      area: 'quy-nhon',
+      days: 1,
+      interests: ['bien-dao', 'di-tich'],
+      transport: 'xe_may',
+      budget: vi ? 'Linh hoạt / vừa phải' : 'Flexible / medium',
+      note: vi ? 'Ưu tiên điểm dễ di chuyển trong ngày.' : 'Prioritize easy same-day transfers.',
+    },
+    {
+      title: vi ? '2 ngày biển đảo và check-in' : '2 days of coast and check-ins',
+      description: vi
+        ? 'Phù hợp người thích biển, ảnh đẹp và lịch trình không quá dày.'
+        : 'For beaches, scenic photos and a relaxed pace.',
+      area: 'quy-nhon',
+      days: 2,
+      interests: ['bien-dao', 'thap-cham'],
+      transport: 'oto',
+      budget: vi ? 'Vừa phải' : 'Medium',
+      note: vi ? 'Muốn có thời gian nghỉ và chụp ảnh.' : 'Leave time for breaks and photos.',
+    },
+    {
+      title: vi ? '3 ngày Gia Lai - Quy Nhơn' : '3 days Gia Lai - Quy Nhon',
+      description: vi
+        ? 'Kết hợp cao nguyên, biển đảo và di tích nổi bật.'
+        : 'Combine highland, coastal and heritage highlights.',
+      area: 'all',
+      days: 3,
+      interests: ['ho-thac-suoi', 'bien-dao', 'di-tich'],
+      transport: 'oto',
+      budget: vi ? 'Linh hoạt' : 'Flexible',
+      note: vi ? 'Kết hợp điểm thiên nhiên và văn hóa.' : 'Mix nature and culture stops.',
+    },
+  ];
+}
+
 function text(locale: Locale) {
   const vi = locale !== 'en';
   return {
@@ -57,9 +106,9 @@ function text(locale: Locale) {
     notePlaceholder: vi
       ? 'Ví dụ: đi cùng gia đình, thích chụp ảnh, không muốn đi quá xa...'
       : 'Example: family trip, photo spots, avoid long transfers...',
-    generate: vi ? 'Tạo lịch trình' : 'Generate plan',
+    generate: vi ? 'Tạo lịch trình AI' : 'Create AI itinerary',
     regenerate: vi ? 'Tạo lại' : 'Regenerate',
-    generating: vi ? 'Đang tạo lịch trình...' : 'Generating...',
+    generating: vi ? 'Đang tạo lịch trình...' : 'Generating itinerary...',
     interests: vi ? 'Sở thích' : 'Interests',
     result: vi ? 'Lịch trình gợi ý' : 'Suggested itinerary',
     generalTips: vi ? 'Lưu ý chung' : 'General tips',
@@ -74,6 +123,14 @@ function text(locale: Locale) {
     consult: vi ? 'Cần người tư vấn lịch trình này?' : 'Want help with this plan?',
     consultCta: vi ? 'Gửi yêu cầu tư vấn' : 'Request consultation',
     exploreMore: vi ? 'Khám phá thêm địa danh' : 'Explore more destinations',
+    emptyLead: vi
+      ? 'Chọn nhanh một mẫu bên dưới để điền form, hoặc tự chỉnh khu vực, số ngày và sở thích rồi bấm tạo.'
+      : 'Pick a starter template to fill the form, or adjust area, days and interests yourself.',
+    dataNote: vi
+      ? 'Lịch trình được tạo từ dữ liệu địa danh Vivu. Nếu cần lịch riêng, hãy gửi yêu cầu tư vấn.'
+      : 'Itineraries are generated from Vivu destination data. Request consultation for a custom plan.',
+    errorConsultCta: vi ? 'Nhờ Vivu tư vấn thay' : 'Ask Vivu to help instead',
+    prefilledPlace: vi ? 'Đã ưu tiên địa danh' : 'Prioritizing place',
     quota: vi
       ? 'Nếu hết quota, hãy đăng nhập hoặc thử lại vào ngày mai.'
       : 'If quota is exhausted, sign in or try again tomorrow.',
@@ -86,16 +143,21 @@ function label(locale: Locale, item: { vi: string; en: string }) {
   return locale === 'en' ? item.en : item.vi;
 }
 
-export function TripPlannerPage() {
+export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const locale = useLocale() as Locale;
   const labels = text(locale);
   const { getAccessToken, user } = useAuth();
+  const initialNote = initialPlace
+    ? locale === 'en'
+      ? `Prioritize ${initialPlace.title}.`
+      : `Ưu tiên ghé ${initialPlace.title}.`
+    : '';
   const [area, setArea] = useState('all');
   const [days, setDays] = useState(2);
   const [peopleCount, setPeopleCount] = useState(2);
   const [transport, setTransport] = useState('xe_may');
   const [budget, setBudget] = useState('');
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState(initialNote);
   const [interests, setInterests] = useState<string[]>(['bien-dao', 'di-tich']);
   const [result, setResult] = useState<GeneratedTripPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +171,18 @@ export function TripPlannerPage() {
         .join(', '),
     [interests, locale],
   );
+  const examples = useMemo(() => tripExamples(locale), [locale]);
+
+  const analyticsMetadata = () => ({
+    area,
+    days,
+    peopleCount,
+    transport,
+    interests: interests.join(','),
+    hasBudget: budget.trim().length > 0,
+    hasNote: note.trim().length > 0,
+    hasInitialPlace: Boolean(initialPlace),
+  });
 
   const toggleInterest = (slug: string) => {
     setInterests((current) =>
@@ -116,13 +190,32 @@ export function TripPlannerPage() {
     );
   };
 
+  const applyExample = (example: ReturnType<typeof tripExamples>[number]) => {
+    setArea(example.area);
+    setDays(example.days);
+    setPeopleCount(peopleCount || 2);
+    setTransport(example.transport);
+    setInterests(example.interests);
+    setBudget(example.budget);
+    setNote(initialPlace ? `${initialNote}\n${example.note}` : example.note);
+    setResult(null);
+    setSaveState('idle');
+    setError(null);
+  };
+
   const submit = async () => {
     if (loading) return;
     setLoading(true);
     setError(null);
     setSaveState('idle');
+    let token: string | null = null;
     try {
-      const token = await getAccessToken();
+      token = await getAccessToken();
+      await trackAnalyticsEvent('trip_plan_generate_clicked', {
+        bearer: token,
+        placeSlug: initialPlace?.slug,
+        metadata: analyticsMetadata(),
+      });
       const generated = await generateTripPlan(
         {
           area,
@@ -139,9 +232,21 @@ export function TripPlannerPage() {
       setResult(generated);
       await trackAnalyticsEvent('trip_plan_generated', {
         bearer: token,
-        metadata: { area, days, peopleCount, transport, interests: selectedInterestLabels },
+        placeSlug: initialPlace?.slug,
+        metadata: {
+          ...analyticsMetadata(),
+          interestLabels: selectedInterestLabels,
+        },
       });
     } catch (err) {
+      await trackAnalyticsEvent('trip_plan_failed', {
+        bearer: token,
+        placeSlug: initialPlace?.slug,
+        metadata: {
+          ...analyticsMetadata(),
+          reason: err instanceof Error ? err.name : 'unknown',
+        },
+      });
       setError(err instanceof Error ? err.message : labels.error);
     } finally {
       setLoading(false);
@@ -171,6 +276,12 @@ export function TripPlannerPage() {
         <p className="text-overline uppercase tracking-overline text-primary">{labels.eyebrow}</p>
         <h1 className="mt-2 font-h2 text-h2 text-on-surface">{labels.title}</h1>
         <p className="mt-3 text-body-md text-on-surface-variant">{labels.lead}</p>
+        {initialPlace && (
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary-fixed px-3 py-1.5 text-body-sm font-semibold text-primary">
+            <Icon name="location_on" size={16} />
+            {labels.prefilledPlace}: {initialPlace.title}
+          </p>
+        )}
 
         <div className="mt-6 space-y-5">
           <label className="block">
@@ -276,20 +387,29 @@ export function TripPlannerPage() {
 
           {error && (
             <div className="rounded-xl border border-error/30 bg-error-container px-4 py-3 text-body-sm text-on-error-container">
-              {error}
+              <p>{error}</p>
+              <Link
+                href={`/tu-van?source=trip_planner${initialPlace ? `&place=${initialPlace.slug}&placeName=${encodeURIComponent(initialPlace.title)}` : ''}`}
+                className="mt-3 inline-flex items-center gap-1 font-semibold underline underline-offset-4"
+              >
+                <Icon name="support_agent" size={16} />
+                {labels.errorConsultCta}
+              </Link>
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={submit}
-            disabled={loading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-on-primary transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
-          >
-            <Icon name="auto_awesome" size={20} />
-            {loading ? labels.generating : labels.generate}
-          </button>
-          <p className="text-center text-xs text-outline">{labels.quota}</p>
+          <div className="sticky bottom-0 -mx-6 border-t border-outline-variant/30 bg-surface-container-lowest/95 px-6 py-4 backdrop-blur">
+            <button
+              type="button"
+              onClick={submit}
+              disabled={loading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-on-primary transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+            >
+              <Icon name="auto_awesome" size={20} />
+              {loading ? labels.generating : labels.generate}
+            </button>
+            <p className="mt-2 text-center text-xs text-outline">{labels.quota}</p>
+          </div>
         </div>
       </section>
 
@@ -300,7 +420,32 @@ export function TripPlannerPage() {
               <Icon name="route" size={42} />
             </div>
             <h2 className="mt-5 font-h3 text-h3 text-on-surface">{labels.result}</h2>
-            <p className="mt-2 max-w-md text-body-md text-on-surface-variant">{labels.lead}</p>
+            <p className="mt-2 max-w-md text-body-md text-on-surface-variant">
+              {labels.emptyLead}
+            </p>
+            <div className="mt-6 grid w-full max-w-2xl gap-3 md:grid-cols-3">
+              {examples.map((example) => (
+                <button
+                  key={example.title}
+                  type="button"
+                  onClick={() => applyExample(example)}
+                  className="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4 text-left transition hover:border-primary hover:bg-primary-fixed/40"
+                >
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed text-primary">
+                    <Icon name="auto_awesome" size={18} />
+                  </span>
+                  <strong className="mt-3 block text-body-md text-on-surface">
+                    {example.title}
+                  </strong>
+                  <span className="mt-2 block text-body-sm text-on-surface-variant">
+                    {example.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-5 max-w-lg text-body-sm text-on-surface-variant">
+              {labels.dataNote}
+            </p>
           </div>
         )}
 

@@ -33,7 +33,7 @@ function text(locale: Locale) {
       ? 'Gửi thông tin chuyến đi, Vivu sẽ ghi nhận yêu cầu để hỗ trợ bạn qua số điện thoại hoặc Zalo đã cung cấp.'
       : 'Send your trip details. Vivu will record the request and support you by the phone or Zalo you provide.',
     name: vi ? 'Họ tên' : 'Full name',
-    phone: vi ? 'Số điện thoại hoặc Zalo' : 'Phone or Zalo',
+    phone: vi ? 'Số điện thoại hoặc Zalo *' : 'Phone or Zalo *',
     email: vi ? 'Email (không bắt buộc)' : 'Email (optional)',
     place: vi ? 'Địa danh hoặc khu vực quan tâm' : 'Interested place or area',
     area: vi ? 'Khu vực muốn đi' : 'Area',
@@ -107,10 +107,19 @@ export function LeadFormPage({
         },
         token,
       );
-      await trackAnalyticsEvent('lead_submitted', {
+      await trackAnalyticsEvent('lead_form_submitted', {
         bearer: token,
         placeSlug: initialPlaceSlug,
-        metadata: { source, area, peopleCount },
+        metadata: {
+          source,
+          peopleCount,
+          hasArea: area.trim().length > 0,
+          hasBudget: budget.trim().length > 0,
+          hasEmail: email.trim().length > 0,
+          hasNote: note.trim().length > 0,
+          hasPlace: Boolean(initialPlaceSlug || placeName.trim()),
+          hasTravelDate: Boolean(travelDate),
+        },
       });
       setSuccess(true);
     } catch (err) {

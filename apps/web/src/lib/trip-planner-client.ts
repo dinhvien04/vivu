@@ -55,10 +55,10 @@ export async function generateTripPlan(
   });
   const payload = await readJson(res);
   if (!res.ok) {
-    throw new Error(pickMessage(payload, 'Khong tao duoc lich trinh. Vui long thu lai.'));
+    throw new Error(pickMessage(payload, 'Không tạo được lịch trình. Vui lòng thử lại.'));
   }
   const body = payload as { data?: GeneratedTripPlan };
-  if (!body?.data) throw new Error('Khong tao duoc lich trinh.');
+  if (!body?.data) throw new Error('Không tạo được lịch trình.');
   return body.data;
 }
 
@@ -86,9 +86,9 @@ export async function saveTripPlanToCollection(
   });
   const payload = await readJson(res);
   if (!res.ok) {
-    throw new Error(pickMessage(payload, 'Khong luu duoc lich trinh vao so tay.'));
+    throw new Error(pickMessage(payload, 'Không lưu được lịch trình vào sổ tay.'));
   }
   const body = payload as { data?: { id: string; name: string; itemsCount: number } };
-  if (!body.data) throw new Error('Khong luu duoc lich trinh vao so tay.');
+  if (!body.data) throw new Error('Không lưu được lịch trình vào sổ tay.');
   return body.data;
 }

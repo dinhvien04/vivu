@@ -24,6 +24,8 @@ Cập nhật: 23/06/2026.
 - [x] Trip Planner AI với route `/lich-trinh` và endpoint `POST /api/v1/trip-plans/generate`.
 - [x] Lead capture với route `/tu-van`, endpoint `POST /api/v1/leads` và admin `/admin/leads`.
 - [x] Homepage/navigation đã đưa Trip Planner và Lead capture ra public UI.
+- [x] Public Business MVP UI đã polish: hero ưu tiên địa danh đẹp, CTA tư vấn nổi bật,
+  Trip Planner có mẫu gợi ý, sticky action bar và analytics click/lead/report.
 - [x] Data report cho trang chi tiết địa danh.
 - [x] Analytics event có hash session/IP và dashboard admin mở rộng.
 - [x] SEO sitemap cho route kinh doanh và JSON-LD cho trang chi tiết.

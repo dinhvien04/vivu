@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Icon } from '@/components/icon';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { TrackedLink } from '@/components/tracked-link';
 import { AiChatWidget } from '@/features/ai-chat/components/AiChatWidget';
 import { Link } from '@/i18n/navigation';
 import { placeSummary, placeTitle } from '@/i18n/place';
@@ -18,18 +19,40 @@ interface FeaturedCollection {
   alt: string;
 }
 
+const HOME_HERO_PRIORITY_SLUGS = [
+  'eo-gio',
+  'cu-lao-xanh',
+  'bien-ho',
+  'bien-ho-che',
+  'thap-banh-it',
+  'dam-thi-nai',
+  'bien-quy-nhon',
+  'bao-tang-quang-trung',
+  'doi-co-hong-dak-doa',
+  'bai-xep',
+];
+
 async function loadHomeData(locale: Locale): Promise<{
   hero: Place | null;
   collections: FeaturedCollection[];
 }> {
   const result = await listPlaces({
     province: 'Gia Lai',
-    pageSize: 5,
+    pageSize: 80,
     sort: 'recent',
   }).catch(() => null);
   const places = result?.data ?? [];
-  const hero = places[0] ?? null;
-  const collections = places.slice(1).map((place) => {
+  const hero =
+    HOME_HERO_PRIORITY_SLUGS.map((slug) =>
+      places.find((place) => place.slug === slug && place.heroImageUrl),
+    ).find(Boolean) ??
+    places.find((place) => place.heroImageUrl) ??
+    places[0] ??
+    null;
+  const collections = places
+    .filter((place) => place.id !== hero?.id && place.heroImageUrl)
+    .slice(0, 4)
+    .map((place) => {
     const title = placeTitle(place, locale);
     return {
       title,
@@ -104,18 +127,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               {t('home.heroLead')}
             </p>
             <div className="flex flex-wrap gap-3 pt-4">
-              <Link
+              <TrackedLink
                 href="/lich-trinh"
+                eventType="home_trip_planner_cta_clicked"
+                analyticsMetadata={{ surface: 'hero' }}
                 className="inline-flex items-center rounded-lg bg-primary-container px-8 py-4 text-body-md font-semibold text-on-primary-container shadow-premium transition-all hover:scale-105 hover:shadow-hover active:scale-95"
               >
                 {t('home.heroCta')}
-              </Link>
-              <Link
-                href="/tu-van"
-                className="inline-flex items-center rounded-lg border border-primary px-8 py-4 text-body-md font-semibold text-primary transition-colors hover:bg-primary-fixed"
+              </TrackedLink>
+              <TrackedLink
+                href="/tu-van?source=home"
+                eventType="home_consulting_cta_clicked"
+                analyticsMetadata={{ surface: 'hero' }}
+                className="inline-flex items-center rounded-lg border border-primary/60 bg-primary-fixed px-8 py-4 text-body-md font-semibold text-primary shadow-sm transition-colors hover:bg-primary-fixed-dim"
               >
                 {t('home.consultCta')}
-              </Link>
+              </TrackedLink>
               <Link
                 href="/kham-pha"
                 className="inline-flex items-center rounded-lg border border-outline-variant px-8 py-4 text-body-md font-semibold text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
@@ -154,9 +181,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
         <section className="rounded-3xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm md:p-8">
           <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <h2 className="font-h2 text-h2 text-on-surface">{t('home.processTitle')}</h2>
-            <Link href="/lich-trinh" className="font-semibold text-primary hover:underline">
+            <TrackedLink
+              href="/lich-trinh"
+              eventType="home_trip_planner_cta_clicked"
+              analyticsMetadata={{ surface: 'process' }}
+              className="font-semibold text-primary hover:underline"
+            >
               {t('home.heroCta')}
-            </Link>
+            </TrackedLink>
           </div>
           <ol className="grid gap-4 md:grid-cols-4">
             {PROCESS_STEPS.map((step, index) => (
@@ -203,8 +235,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               </div>
               <h3 className="mb-4 font-h3 text-h3">{t('home.card2Title')}</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">{t('home.card2Body')}</p>
-              <Link
+              <TrackedLink
                 href="/lich-trinh"
+                eventType="home_trip_planner_cta_clicked"
+                analyticsMetadata={{ surface: 'tool_card' }}
                 className="group/cta relative block h-32 w-full overflow-hidden rounded-lg border border-outline-variant/30 bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container transition-all hover:border-primary/60"
                 aria-label={t('home.card2Cta')}
               >
@@ -218,7 +252,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
                   <span className="text-label-caps font-semibold">{t('home.card2Cta')}</span>
                   <Icon name="arrow_forward" className="!text-base" />
                 </div>
-              </Link>
+              </TrackedLink>
             </article>
 
             {/* Card 3 */}
@@ -228,9 +262,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               </div>
               <h3 className="mb-4 font-h3 text-h3">{t('home.card3Title')}</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">{t('home.card3Body')}</p>
-              <Link href="/tu-van" className="font-semibold text-primary hover:underline">
+              <TrackedLink
+                href="/tu-van?source=home"
+                eventType="home_consulting_cta_clicked"
+                analyticsMetadata={{ surface: 'tool_card' }}
+                className="font-semibold text-primary hover:underline"
+              >
                 {t('home.consultCta')}
-              </Link>
+              </TrackedLink>
             </article>
           </div>
         </section>

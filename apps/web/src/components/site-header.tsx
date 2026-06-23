@@ -79,12 +79,17 @@ export function SiteHeader() {
             <ul className="hidden items-center gap-6 text-body-md md:flex">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
+                const isConsulting = item.labelKey === 'consulting';
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
                       className={
-                        active
+                        isConsulting
+                          ? active
+                            ? 'rounded-full bg-primary px-4 py-2 font-semibold text-on-primary shadow-sm'
+                            : 'rounded-full border border-primary/40 bg-primary-fixed px-4 py-2 font-semibold text-primary transition-colors hover:bg-primary-fixed-dim'
+                        : active
                           ? 'border-b-2 border-primary pb-1 font-semibold text-primary'
                           : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
                       }
@@ -183,12 +188,17 @@ export function SiteHeader() {
           <ul className="space-y-1 text-body-lg">
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
+              const isConsulting = item.labelKey === 'consulting';
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
                     className={`flex items-center justify-between rounded-lg px-3 py-3 transition-colors ${
-                      active
+                      isConsulting && active
+                        ? 'bg-primary font-semibold text-on-primary shadow-sm'
+                        : isConsulting
+                          ? 'border border-primary/40 bg-primary-fixed font-semibold text-primary hover:bg-primary-fixed-dim'
+                      : active
                         ? 'bg-primary-fixed font-semibold text-primary'
                         : 'font-medium text-on-surface hover:bg-surface-container'
                     }`}

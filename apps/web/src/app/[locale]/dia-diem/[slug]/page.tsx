@@ -13,6 +13,7 @@ import { QaSection } from '@/components/qa-section';
 import { ReviewsSection } from '@/components/reviews-section';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { TrackedLink } from '@/components/tracked-link';
 import { WeatherWidget } from '@/components/weather-widget';
 import { DataReportButton } from '@/features/data-reports/components/DataReportButton';
 import { Link } from '@/i18n/navigation';
@@ -350,13 +351,15 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                   <Icon name="route" className="!text-base" />
                   <span>{t('place.planTrip')}</span>
                 </Link>
-                <Link
+                <TrackedLink
                   href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
+                  eventType="detail_consulting_clicked"
+                  placeSlug={place.slug}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant py-3 font-bold text-on-surface transition-all hover:border-primary hover:text-primary"
                 >
                   <Icon name="support_agent" className="!text-base" />
                   <span>{t('place.consultTrip')}</span>
-                </Link>
+                </TrackedLink>
                 <FavoriteButton placeId={place.id} />
                 <AddToCollectionButton placeId={place.id} placeTitle={title} />
                 <button

@@ -1,8 +1,15 @@
-type AnalyticsEventType =
+export type AnalyticsEventType =
   | 'place_view'
   | 'ai_chat_started'
+  | 'home_trip_planner_cta_clicked'
+  | 'home_consulting_cta_clicked'
+  | 'trip_plan_generate_clicked'
   | 'trip_plan_generated'
+  | 'trip_plan_failed'
   | 'lead_submitted'
+  | 'lead_form_submitted'
+  | 'detail_consulting_clicked'
+  | 'detail_report_clicked'
   | 'search_performed'
   | 'nearby_clicked';
 
