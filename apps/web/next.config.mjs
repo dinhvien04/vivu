@@ -6,6 +6,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const apiOrigin = getOrigin(process.env.NEXT_PUBLIC_API_URL);
 const connectSrcExtra = splitSources(process.env.CSP_CONNECT_SRC_EXTRA);
 const imgSrcExtra = splitSources(process.env.CSP_IMG_SRC_EXTRA);
+const imageRemotePatterns = getImageRemotePatterns();
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -30,7 +31,7 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@vivu/types'],
   images: {
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    remotePatterns: imageRemotePatterns,
   },
   // typedRoutes disabled while routes are still being scaffolded.
   // Re-enable once route inventory stabilises.
@@ -75,4 +76,23 @@ function splitSources(value) {
     .split(',')
     .map((source) => source.trim())
     .filter(Boolean);
+}
+
+function getImageRemotePatterns() {
+  const configuredHosts = splitSources(process.env.NEXT_IMAGE_REMOTE_HOSTS);
+  const hosts =
+    configuredHosts.length > 0
+      ? configuredHosts
+      : isProduction
+        ? [
+            'res.cloudinary.com',
+            'gia-lai-tourism-images.s3.ap-southeast-1.amazonaws.com',
+            's3.ap-southeast-1.amazonaws.com',
+          ]
+        : ['**'];
+
+  // Development keeps the previous wildcard behaviour so local data from
+  // arbitrary image hosts still renders. Production should set
+  // NEXT_IMAGE_REMOTE_HOSTS explicitly when new image providers are added.
+  return hosts.map((hostname) => ({ protocol: 'https', hostname }));
 }

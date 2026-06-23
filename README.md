@@ -21,8 +21,8 @@ hoặc hình ảnh địa danh.
 
 | Thành phần       | Công nghệ                                                          |
 | ---------------- | ------------------------------------------------------------------ |
-| Frontend         | Next.js 14, React 18, TypeScript, Tailwind CSS, next-intl, Leaflet |
-| Backend          | NestJS 10, Fastify, Prisma                                         |
+| Frontend         | Next.js 15, React 18, TypeScript, Tailwind CSS, next-intl, Leaflet |
+| Backend          | NestJS 11, Fastify, Prisma                                         |
 | Dữ liệu          | PostgreSQL, PostGIS                                                |
 | Tìm kiếm         | Meilisearch, có fallback PostgreSQL                                |
 | Lưu trữ ảnh      | AWS S3                                                             |
@@ -70,6 +70,7 @@ Copy-Item apps/web/.env.example apps/web/.env.local
 
 ```bash
 pnpm --filter @vivu/api db:setup
+pnpm --filter @vivu/api prisma:generate
 pnpm dev
 ```
 
@@ -105,11 +106,17 @@ Frontend:
 NEXT_PUBLIC_API_URL=http://localhost:4000
 API_INTERNAL_URL=http://localhost:4000
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_IMAGE_REMOTE_HOSTS=
 CSP_CONNECT_SRC_EXTRA=
 CSP_IMG_SRC_EXTRA=
 SENTRY_DSN=
 SENTRY_ENVIRONMENT=development
 ```
+
+`NEXT_IMAGE_REMOTE_HOSTS` là danh sách hostname cho `next/image`, phân tách bằng dấu
+phẩy, ví dụ `res.cloudinary.com,gia-lai-tourism-images.s3.ap-southeast-1.amazonaws.com`.
+Môi trường development vẫn có fallback rộng để không phá dữ liệu local; production nên
+set rõ host ảnh đang dùng.
 
 Danh sách đầy đủ nằm tại
 [`apps/api/.env.example`](apps/api/.env.example) và
@@ -164,7 +171,12 @@ Business MVP:
 
 ## Kiểm tra chất lượng
 
+Trong môi trường fresh install/CI, chạy Prisma generate trước typecheck/build để bảo
+đảm Prisma Client đã sẵn sàng. Root `pnpm typecheck` đã tự chạy bước này, nhưng có thể
+chạy riêng khi cần debug:
+
 ```bash
+pnpm --filter @vivu/api prisma:generate
 pnpm lint
 pnpm typecheck
 pnpm build
