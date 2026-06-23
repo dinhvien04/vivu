@@ -348,14 +348,14 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary px-4 py-3 font-bold text-primary transition-colors hover:bg-primary-fixed"
                 >
                   <Icon name="route" className="!text-base" />
-                  <span>{locale === 'en' ? 'Plan a trip' : 'Len lich trinh'}</span>
+                  <span>{t('place.planTrip')}</span>
                 </Link>
                 <Link
                   href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant py-3 font-bold text-on-surface transition-all hover:border-primary hover:text-primary"
                 >
                   <Icon name="support_agent" className="!text-base" />
-                  <span>{locale === 'en' ? 'Request consultation' : 'Can tu van'}</span>
+                  <span>{t('place.consultTrip')}</span>
                 </Link>
                 <FavoriteButton placeId={place.id} />
                 <AddToCollectionButton placeId={place.id} placeTitle={title} />

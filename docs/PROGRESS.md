@@ -1,6 +1,6 @@
 # Trạng thái triển khai
 
-Cập nhật: 15/06/2026.
+Cập nhật: 23/06/2026.
 
 ## Đã hoàn thành
 
@@ -23,6 +23,7 @@ Cập nhật: 15/06/2026.
 - [x] Production web và API trên Vercel.
 - [x] Trip Planner AI với route `/lich-trinh` và endpoint `POST /api/v1/trip-plans/generate`.
 - [x] Lead capture với route `/tu-van`, endpoint `POST /api/v1/leads` và admin `/admin/leads`.
+- [x] Homepage/navigation đã đưa Trip Planner và Lead capture ra public UI.
 - [x] Data report cho trang chi tiết địa danh.
 - [x] Analytics event có hash session/IP và dashboard admin mở rộng.
 - [x] SEO sitemap cho route kinh doanh và JSON-LD cho trang chi tiết.

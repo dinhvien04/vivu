@@ -91,6 +91,16 @@ LEADS_RATE_LIMIT_PER_HOUR=5
 6. Dang nhap admin, mo `/admin/bao-loi`, doi status mot report test.
 7. Mo `/sitemap.xml`, kiem tra co `/lich-trinh` va `/tu-van`.
 
+## Checklist production UI
+
+- [x] `/` hien thi tieng Viet mac dinh voi hero ve lap lich trinh AI va tu van chuyen di.
+- [x] Navigation public co `/lich-trinh` va `/tu-van`.
+- [x] `/lich-trinh` mo duoc va co CTA gui yeu cau tu van.
+- [x] `/tu-van` gui lead duoc qua `POST /api/v1/leads`.
+- [x] `/admin/leads` xem va xu ly lead duoc.
+- [x] `/admin/bao-loi` xem va xu ly report duoc.
+- [x] `/sitemap.xml` co route kinh doanh `/lich-trinh` va `/tu-van`.
+
 ## Trang thai
 
 - Logo va brand Vivu khong bi thay doi.

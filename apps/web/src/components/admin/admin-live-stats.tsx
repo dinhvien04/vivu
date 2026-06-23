@@ -81,16 +81,16 @@ export function AdminLiveStats() {
         loading={loading}
       />
       <StatCard
-        label={vi ? 'Lead tu van' : 'Leads'}
+        label={vi ? 'Lead tư vấn' : 'Leads'}
         value={error ? empty : (stats?.totalLeads ?? 0)}
-        hint={vi ? 'Yeu cau tu van da ghi nhan' : 'Captured consultation requests'}
+        hint={vi ? 'Yêu cầu tư vấn đã ghi nhận' : 'Captured consultation requests'}
         icon="support_agent"
         iconBg="bg-primary-container/40"
         iconColor="text-primary"
         loading={loading}
       />
       <StatCard
-        label={vi ? 'Lich trinh AI' : 'AI trip plans'}
+        label={vi ? 'Lịch trình AI' : 'AI trip plans'}
         value={error ? empty : (stats?.totalTripPlans ?? 0)}
         hint={
           vi

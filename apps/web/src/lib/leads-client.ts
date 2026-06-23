@@ -47,6 +47,6 @@ export async function createLead(input: CreateLeadInput, bearer?: string | null)
     /* empty */
   }
   if (!res.ok) {
-    throw new Error(pickMessage(payload, 'Khong gui duoc thong tin tu van.'));
+    throw new Error(pickMessage(payload, 'Không gửi được thông tin tư vấn.'));
   }
 }

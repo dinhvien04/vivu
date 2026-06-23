@@ -11,7 +11,7 @@ function pickBearer(req: Request): string | undefined {
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const bearer = pickBearer(req);
-  if (!bearer) return NextResponse.json({ message: 'Thieu access token' }, { status: 401 });
+  if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
 
   const body = await req.json().catch(() => null);
   const { id } = await params;

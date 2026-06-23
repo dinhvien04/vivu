@@ -11,7 +11,7 @@ function pickBearer(req: Request): string | undefined {
 
 export async function GET(req: Request) {
   const bearer = pickBearer(req);
-  if (!bearer) return NextResponse.json({ message: 'Thieu access token' }, { status: 401 });
+  if (!bearer) return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
 
   const { status, body } = await callApi('/trip-plans', { method: 'GET', bearer });
   return NextResponse.json(body, { status });

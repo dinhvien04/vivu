@@ -16,12 +16,12 @@ export async function generateMetadata({
   return {
     title:
       locale === 'en'
-        ? 'AI Gia Lai Trip Planner | Vivu'
+        ? 'Plan your Gia Lai trip with AI | Vivu'
         : 'Lập lịch trình du lịch Gia Lai bằng AI | Vivu',
     description:
       locale === 'en'
-        ? 'Create a Gia Lai itinerary from Vivu place data.'
-        : 'Tao lich trinh du lich Gia Lai bang du lieu dia danh cua Vivu.',
+        ? 'Create a travel itinerary by days, area, interests and budget from Vivu destination data.'
+        : 'Tạo lịch trình du lịch theo số ngày, khu vực, sở thích và ngân sách dựa trên dữ liệu địa danh Vivu.',
     alternates: {
       canonical: '/lich-trinh',
       languages: { vi: '/lich-trinh', en: '/en/lich-trinh' },

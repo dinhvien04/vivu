@@ -28,14 +28,14 @@ function text(locale: Locale) {
   const vi = locale !== 'en';
   return {
     eyebrow: vi ? 'Tư vấn du lịch' : 'Travel consultation',
-    title: vi ? 'Để Vivu hỗ trợ lịch trình của bạn' : 'Let Vivu help with your trip',
+    title: vi ? 'Tư vấn chuyến đi cùng Vivu' : 'Plan with Vivu consulting',
     lead: vi
-      ? 'Gửi thông tin liên hệ, địa danh quan tâm và nhu cầu. Admin Vivu sẽ liên hệ lại qua phone/Zalo.'
-      : 'Send your contact, places of interest, and needs. Vivu admin will follow up by phone/Zalo.',
+      ? 'Gửi thông tin chuyến đi, Vivu sẽ ghi nhận yêu cầu để hỗ trợ bạn qua số điện thoại hoặc Zalo đã cung cấp.'
+      : 'Send your trip details. Vivu will record the request and support you by the phone or Zalo you provide.',
     name: vi ? 'Họ tên' : 'Full name',
     phone: vi ? 'Số điện thoại hoặc Zalo' : 'Phone or Zalo',
-    email: 'Email',
-    place: vi ? 'Địa danh quan tâm' : 'Interested place',
+    email: vi ? 'Email (không bắt buộc)' : 'Email (optional)',
+    place: vi ? 'Địa danh hoặc khu vực quan tâm' : 'Interested place or area',
     area: vi ? 'Khu vực muốn đi' : 'Area',
     travelDate: vi ? 'Ngày dự kiến' : 'Travel date',
     people: vi ? 'Số người' : 'People',
@@ -46,15 +46,16 @@ function text(locale: Locale) {
       : 'Example: 2 days 1 night, beaches and Cham towers, food suggestions...',
     submit: vi ? 'Gửi yêu cầu tư vấn' : 'Send request',
     submitting: vi ? 'Đang gửi...' : 'Sending...',
-    successTitle: vi ? 'Đã nhận yêu cầu tư vấn' : 'Request received',
+    successTitle: vi ? 'Vivu đã nhận yêu cầu tư vấn của bạn.' : 'Vivu received your consultation request.',
     successLead: vi
-      ? 'Vivu đã ghi nhận thông tin. Nếu đây là bản demo, bạn có thể xem lead trong trang admin.'
-      : 'Vivu has recorded your information. In demo mode, view it in the admin leads page.',
+      ? 'Thông tin đã được ghi nhận trong hệ thống để đội ngũ Vivu xử lý.'
+      : 'Your information has been recorded in the system for the Vivu team to process.',
     backExplore: vi ? 'Quay lại khám phá' : 'Back to explore',
     error: vi ? 'Không gửi được yêu cầu. Vui lòng thử lại.' : 'Could not send request.',
     privacy: vi
       ? 'Thông tin liên hệ chỉ dùng để tư vấn chuyến đi, không hiển thị công khai.'
       : 'Contact data is used only for trip consultation and is not public.',
+    planFirst: vi ? 'Chưa có lịch trình? Tạo lịch trình AI trước.' : 'No itinerary yet? Create an AI itinerary first.',
   };
 }
 
@@ -163,6 +164,13 @@ export function LeadFormPage({
             {labels.privacy}
           </p>
         </div>
+        <Link
+          href="/lich-trinh"
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 font-semibold text-on-primary transition hover:bg-primary/90"
+        >
+          <Icon name="route" size={18} />
+          {labels.planFirst}
+        </Link>
       </section>
 
       <form

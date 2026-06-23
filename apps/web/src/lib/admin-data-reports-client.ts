@@ -46,7 +46,7 @@ export async function listAdminDataReports(
     cache: 'no-store',
   });
   const payload = await readJson(res);
-  if (!res.ok) throw new Error(pickMessage(payload, 'Khong tai duoc danh sach bao loi.'));
+  if (!res.ok) throw new Error(pickMessage(payload, 'Không tải được danh sách báo lỗi.'));
   return payload as Paginated<DataReport>;
 }
 

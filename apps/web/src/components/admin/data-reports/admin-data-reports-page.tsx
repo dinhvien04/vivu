@@ -12,20 +12,20 @@ import {
 } from '@/lib/admin-data-reports-client';
 
 const STATUSES: Array<{ value: DataReportStatus | ''; label: string }> = [
-  { value: '', label: 'Tat ca' },
-  { value: 'new', label: 'Moi' },
-  { value: 'reviewed', label: 'Da xem' },
-  { value: 'resolved', label: 'Da xu ly' },
-  { value: 'rejected', label: 'Tu choi' },
+  { value: '', label: 'Tất cả' },
+  { value: 'new', label: 'Mới' },
+  { value: 'reviewed', label: 'Đã xem' },
+  { value: 'resolved', label: 'Đã xử lý' },
+  { value: 'rejected', label: 'Từ chối' },
 ];
 
 const TYPES: Array<{ value: DataReportType | ''; label: string }> = [
-  { value: '', label: 'Tat ca loai loi' },
-  { value: 'wrong_image', label: 'Sai hinh anh' },
-  { value: 'wrong_coordinates', label: 'Sai toa do' },
-  { value: 'wrong_description', label: 'Sai mo ta' },
-  { value: 'missing_info', label: 'Thieu thong tin' },
-  { value: 'other', label: 'Khac' },
+  { value: '', label: 'Tất cả loại lỗi' },
+  { value: 'wrong_image', label: 'Sai hình ảnh' },
+  { value: 'wrong_coordinates', label: 'Sai tọa độ' },
+  { value: 'wrong_description', label: 'Sai mô tả' },
+  { value: 'missing_info', label: 'Thiếu thông tin' },
+  { value: 'other', label: 'Khác' },
 ];
 
 function formatDate(value: string): string {
@@ -78,7 +78,7 @@ export function AdminDataReportsPage() {
       setError(null);
       try {
         const token = await getAccessToken();
-        if (!token) throw new Error('Thieu access token.');
+        if (!token) throw new Error('Thiếu access token.');
         const data = await listAdminDataReports(token, opts);
         if (!cancelled) {
           setRows(data.data);
@@ -86,7 +86,7 @@ export function AdminDataReportsPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Khong tai duoc bao loi.');
+          setError(err instanceof Error ? err.message : 'Không tải được báo lỗi.');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -115,9 +115,9 @@ export function AdminDataReportsPage() {
       <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-overline uppercase tracking-overline text-primary">Data quality</p>
-          <h1 className="mt-1 font-h2 text-h2 text-on-surface">Bao loi du lieu</h1>
+          <h1 className="mt-1 font-h2 text-h2 text-on-surface">Báo lỗi dữ liệu</h1>
           <p className="mt-2 text-body-md text-on-surface-variant">
-            Theo doi cac bao cao sai anh, sai toa do, sai mo ta va thieu thong tin tu nguoi dung.
+            Theo dõi các báo cáo sai ảnh, sai tọa độ, sai mô tả và thiếu thông tin từ người dùng.
           </p>
         </div>
         <div className="rounded-full bg-surface-container px-4 py-2 text-body-sm text-on-surface-variant">
@@ -131,7 +131,7 @@ export function AdminDataReportsPage() {
           <input
             value={placeSlug}
             onChange={(event) => setPlaceSlug(event.target.value)}
-            placeholder="Loc theo slug dia danh..."
+            placeholder="Lọc theo slug địa danh..."
             className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest py-3 pl-10 pr-4 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -173,7 +173,7 @@ export function AdminDataReportsPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-on-surface-variant">Chua co bao loi phu hop.</div>
+          <div className="p-8 text-center text-on-surface-variant">Chưa có báo lỗi phù hợp.</div>
         ) : (
           <ul className="divide-y divide-outline-variant/30">
             {rows.map((report) => (
@@ -222,7 +222,7 @@ export function AdminDataReportsPage() {
                     className="inline-flex items-center justify-center gap-1 rounded-xl border border-outline-variant px-3 py-2 text-body-sm font-semibold text-primary hover:bg-primary-fixed"
                   >
                     <Icon name="open_in_new" className="!text-base" />
-                    Mo trang dia diem
+                    Mở trang địa điểm
                   </Link>
                 </div>
               </li>
@@ -240,7 +240,7 @@ export function AdminDataReportsPage() {
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <p className="text-overline uppercase tracking-overline text-primary">
-                  Chi tiet bao loi
+                  Chi tiết báo lỗi
                 </p>
                 <h2 className="mt-1 font-h3 text-h3 text-on-surface">{selected.placeSlug}</h2>
               </div>
@@ -248,7 +248,7 @@ export function AdminDataReportsPage() {
                 type="button"
                 onClick={() => setSelected(null)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
-                aria-label="Dong"
+                aria-label="Đóng"
               >
                 <Icon name="close" />
               </button>
@@ -256,23 +256,23 @@ export function AdminDataReportsPage() {
 
             <div className="space-y-4 text-body-md text-on-surface-variant">
               <p>
-                <span className="font-semibold text-on-surface">Loai loi: </span>
+                <span className="font-semibold text-on-surface">Loại lỗi: </span>
                 {selected.type}
               </p>
               <p>
-                <span className="font-semibold text-on-surface">Trang thai: </span>
+                <span className="font-semibold text-on-surface">Trạng thái: </span>
                 {selected.status}
               </p>
               <p>
-                <span className="font-semibold text-on-surface">Lien he: </span>
+                <span className="font-semibold text-on-surface">Liên hệ: </span>
                 {selected.contact ?? '-'}
               </p>
               <p>
-                <span className="font-semibold text-on-surface">Tao luc: </span>
+                <span className="font-semibold text-on-surface">Tạo lúc: </span>
                 {formatDate(selected.createdAt)}
               </p>
               <div>
-                <p className="mb-2 font-semibold text-on-surface">Noi dung bao loi</p>
+                <p className="mb-2 font-semibold text-on-surface">Nội dung báo lỗi</p>
                 <div className="whitespace-pre-line rounded-2xl bg-surface-container p-4">
                   {selected.message}
                 </div>
@@ -283,14 +283,14 @@ export function AdminDataReportsPage() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant px-4 py-3 font-semibold text-primary hover:bg-primary-fixed"
                 >
                   <Icon name="open_in_new" />
-                  Mo dia diem
+                  Mở địa điểm
                 </Link>
                 <Link
                   href={`/admin/dia-diem/${selected.placeSlug}`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-on-primary hover:bg-primary/90"
                 >
                   <Icon name="edit" />
-                  Sua du lieu
+                  Sửa dữ liệu
                 </Link>
               </div>
             </div>

@@ -12,12 +12,12 @@ import {
 } from '@/lib/admin-leads-client';
 
 const STATUSES: Array<{ value: LeadStatus | ''; label: string }> = [
-  { value: '', label: 'Tat ca' },
-  { value: 'new', label: 'Moi' },
-  { value: 'contacted', label: 'Da lien he' },
-  { value: 'planning', label: 'Dang tu van' },
-  { value: 'booked', label: 'Da chot' },
-  { value: 'cancelled', label: 'Huy' },
+  { value: '', label: 'Tất cả' },
+  { value: 'new', label: 'Mới' },
+  { value: 'contacted', label: 'Đã liên hệ' },
+  { value: 'planning', label: 'Đang tư vấn' },
+  { value: 'booked', label: 'Đã chốt' },
+  { value: 'cancelled', label: 'Hủy' },
   { value: 'spam', label: 'Spam' },
 ];
 
@@ -68,14 +68,14 @@ export function AdminLeadsPage() {
       setError(null);
       try {
         const token = await getAccessToken();
-        if (!token) throw new Error('Thieu access token.');
+        if (!token) throw new Error('Thiếu access token.');
         const data = await listAdminLeads(token, opts);
         if (!cancelled) {
           setRows(data.data);
           setTotal(data.meta.total);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Khong tai duoc lead.');
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Không tải được lead.');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -117,7 +117,7 @@ export function AdminLeadsPage() {
       setCopiedId(lead.id);
       window.setTimeout(() => setCopiedId(null), 1600);
     } catch {
-      setError('Khong copy duoc phone/Zalo. Hay copy thu cong.');
+      setError('Không copy được phone/Zalo. Hãy copy thủ công.');
     }
   };
 
@@ -126,9 +126,9 @@ export function AdminLeadsPage() {
       <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-overline uppercase tracking-overline text-primary">CRM</p>
-          <h1 className="mt-1 font-h2 text-h2 text-on-surface">Lead tu van</h1>
+          <h1 className="mt-1 font-h2 text-h2 text-on-surface">Lead tư vấn</h1>
           <p className="mt-2 text-body-md text-on-surface-variant">
-            Quan ly yeu cau tu van tu trang chi tiet, AI Chat va lich trinh AI.
+            Quản lý yêu cầu tư vấn từ trang chi tiết, AI Chat và lịch trình AI.
           </p>
         </div>
         <div className="rounded-full bg-surface-container px-4 py-2 text-body-sm text-on-surface-variant">
@@ -142,7 +142,7 @@ export function AdminLeadsPage() {
           <input
             value={q}
             onChange={(event) => setQ(event.target.value)}
-            placeholder="Tim ten, phone/Zalo, dia danh..."
+            placeholder="Tìm tên, phone/Zalo, địa danh..."
             className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest py-3 pl-10 pr-4 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -173,7 +173,7 @@ export function AdminLeadsPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-on-surface-variant">Chua co lead phu hop.</div>
+          <div className="p-8 text-center text-on-surface-variant">Chưa có lead phù hợp.</div>
         ) : (
           <ul className="divide-y divide-outline-variant/30">
             {rows.map((lead) => (
@@ -201,21 +201,21 @@ export function AdminLeadsPage() {
                     </p>
                   )}
                   <p className="mt-2 text-body-sm text-on-surface-variant">
-                    Tao luc {formatDate(lead.createdAt)}
+                    Tạo lúc {formatDate(lead.createdAt)}
                   </p>
                 </div>
 
                 <div className="space-y-1 text-body-sm text-on-surface-variant">
                   <p>
-                    Dia danh:{' '}
+                    Địa danh:{' '}
                     <span className="font-semibold text-on-surface">
                       {lead.interestedPlaceName ?? lead.interestedPlaceSlug ?? '-'}
                     </span>
                   </p>
-                  <p>Khu vuc: {lead.area ?? '-'}</p>
-                  <p>Ngay di: {formatDate(lead.travelDate)}</p>
-                  <p>So nguoi: {lead.peopleCount ?? '-'}</p>
-                  <p>Ngan sach: {lead.budget ?? '-'}</p>
+                  <p>Khu vực: {lead.area ?? '-'}</p>
+                  <p>Ngày đi: {formatDate(lead.travelDate)}</p>
+                  <p>Số người: {lead.peopleCount ?? '-'}</p>
+                  <p>Ngân sách: {lead.budget ?? '-'}</p>
                   {lead.note && <p className="mt-2 rounded-lg bg-surface-container p-2">{lead.note}</p>}
                 </div>
 
@@ -227,7 +227,7 @@ export function AdminLeadsPage() {
                       className="inline-flex items-center justify-center gap-1 rounded-xl border border-outline-variant px-3 py-2 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
                     >
                       <Icon name={copiedId === lead.id ? 'check' : 'content_copy'} size={16} />
-                      {copiedId === lead.id ? 'Da copy' : 'Copy'}
+                      {copiedId === lead.id ? 'Đã copy' : 'Copy'}
                     </button>
                     <button
                       type="button"
@@ -235,7 +235,7 @@ export function AdminLeadsPage() {
                       className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary-fixed px-3 py-2 text-body-sm font-semibold text-primary hover:bg-primary-fixed-dim"
                     >
                       <Icon name="visibility" size={16} />
-                      Chi tiet
+                      Chi tiết
                     </button>
                   </div>
                   <select
@@ -253,7 +253,7 @@ export function AdminLeadsPage() {
                   <textarea
                     defaultValue={lead.internalNote ?? ''}
                     rows={3}
-                    placeholder="Ghi chu noi bo..."
+                    placeholder="Ghi chú nội bộ..."
                     className="w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-2 outline-none focus:border-primary"
                     onBlur={(event) => {
                       if (event.target.value !== (lead.internalNote ?? '')) {
@@ -277,7 +277,7 @@ export function AdminLeadsPage() {
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <p className="text-overline uppercase tracking-overline text-primary">
-                  Chi tiet lead
+                  Chi tiết lead
                 </p>
                 <h2 className="mt-1 font-h3 text-h3 text-on-surface">{selectedLead.name}</h2>
               </div>
@@ -285,7 +285,7 @@ export function AdminLeadsPage() {
                 type="button"
                 onClick={() => setSelectedLead(null)}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
-                aria-label="Dong"
+                aria-label="Đóng"
               >
                 <Icon name="close" />
               </button>
@@ -302,25 +302,25 @@ export function AdminLeadsPage() {
                     className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-primary"
                   >
                     <Icon name={copiedId === selectedLead.id ? 'check' : 'content_copy'} size={16} />
-                    {copiedId === selectedLead.id ? 'Da copy' : 'Copy'}
+                    {copiedId === selectedLead.id ? 'Đã copy' : 'Copy'}
                   </button>
                 </div>
               </div>
 
               <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Info label="Email" value={selectedLead.email ?? '-'} />
-                <Info label="Nguon" value={selectedLead.source} />
-                <Info label="Dia danh" value={selectedLead.interestedPlaceName ?? selectedLead.interestedPlaceSlug ?? '-'} />
-                <Info label="Khu vuc" value={selectedLead.area ?? '-'} />
-                <Info label="Ngay di" value={formatDate(selectedLead.travelDate)} />
-                <Info label="So nguoi" value={selectedLead.peopleCount ? String(selectedLead.peopleCount) : '-'} />
-                <Info label="Ngan sach" value={selectedLead.budget ?? '-'} />
-                <Info label="Tao luc" value={formatDate(selectedLead.createdAt)} />
+                <Info label="Nguồn" value={selectedLead.source} />
+                <Info label="Địa danh" value={selectedLead.interestedPlaceName ?? selectedLead.interestedPlaceSlug ?? '-'} />
+                <Info label="Khu vực" value={selectedLead.area ?? '-'} />
+                <Info label="Ngày đi" value={formatDate(selectedLead.travelDate)} />
+                <Info label="Số người" value={selectedLead.peopleCount ? String(selectedLead.peopleCount) : '-'} />
+                <Info label="Ngân sách" value={selectedLead.budget ?? '-'} />
+                <Info label="Tạo lúc" value={formatDate(selectedLead.createdAt)} />
               </dl>
 
               {selectedLead.note && (
                 <div>
-                  <p className="mb-2 font-semibold text-on-surface">Ghi chu khach hang</p>
+                  <p className="mb-2 font-semibold text-on-surface">Ghi chú khách hàng</p>
                   <div className="whitespace-pre-line rounded-2xl bg-surface-container p-4">
                     {selectedLead.note}
                   </div>
@@ -329,7 +329,7 @@ export function AdminLeadsPage() {
 
               <div className="grid gap-3 sm:grid-cols-[180px,1fr]">
                 <label className="block">
-                  <span className="text-label-md font-semibold text-on-surface">Trang thai</span>
+                  <span className="text-label-md font-semibold text-on-surface">Trạng thái</span>
                   <select
                     value={selectedLead.status}
                     disabled={savingId === selectedLead.id}
@@ -347,11 +347,11 @@ export function AdminLeadsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-label-md font-semibold text-on-surface">Ghi chu noi bo</span>
+                  <span className="text-label-md font-semibold text-on-surface">Ghi chú nội bộ</span>
                   <textarea
                     defaultValue={selectedLead.internalNote ?? ''}
                     rows={5}
-                    placeholder="Ghi chu noi bo..."
+                    placeholder="Ghi chú nội bộ..."
                     className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-2 outline-none focus:border-primary"
                     onBlur={(event) => {
                       if (event.target.value !== (selectedLead.internalNote ?? '')) {

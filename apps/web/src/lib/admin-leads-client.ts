@@ -46,7 +46,7 @@ export async function listAdminLeads(
     cache: 'no-store',
   });
   const payload = await readJson(res);
-  if (!res.ok) throw new Error(pickMessage(payload, 'Khong tai duoc danh sach lead.'));
+  if (!res.ok) throw new Error(pickMessage(payload, 'Không tải được danh sách lead.'));
   return payload as Paginated<Lead>;
 }
 

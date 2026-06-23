@@ -11,16 +11,17 @@ import { NotificationsButton } from './notifications-button';
 import { SearchHero } from './search-hero';
 import { ThemeToggle } from './theme-toggle';
 
-type NavKey = 'home' | 'explore' | 'map' | 'tripPlanner' | 'aiChat';
+type NavKey = 'home' | 'explore' | 'map' | 'tripPlanner' | 'consulting' | 'aiChat';
 
 const NAV_ITEMS: {
   labelKey: NavKey;
-  href: '/' | '/kham-pha' | '/ban-do' | '/lich-trinh' | '/ai-chat';
+  href: '/' | '/kham-pha' | '/ban-do' | '/lich-trinh' | '/tu-van' | '/ai-chat';
 }[] = [
   { labelKey: 'home', href: '/' },
   { labelKey: 'explore', href: '/kham-pha' },
   { labelKey: 'map', href: '/ban-do' },
   { labelKey: 'tripPlanner', href: '/lich-trinh' },
+  { labelKey: 'consulting', href: '/tu-van' },
   { labelKey: 'aiChat', href: '/ai-chat' },
 ];
 
@@ -75,7 +76,7 @@ export function SiteHeader() {
                 className="h-10 w-auto object-contain"
               />
             </Link>
-            <ul className="hidden items-center gap-8 text-body-md md:flex">
+            <ul className="hidden items-center gap-6 text-body-md md:flex">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
                 return (

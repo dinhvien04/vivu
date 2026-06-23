@@ -9,6 +9,7 @@ import { placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 import { listPlaces, type Place } from '@/lib/api';
 import { transformCloudinary } from '@/lib/image';
+import { absoluteUrl } from '@/lib/site-url';
 
 interface FeaturedCollection {
   title: string;
@@ -63,20 +64,36 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
   const heroSummary = hero ? placeSummary(hero, locale) : null;
   const heroHref = hero ? `/dia-diem/${hero.slug}` : '/kham-pha';
 
-  const SEARCH_FILTERS = [
-    { icon: 'location_on', label: t('home.filterRegion') },
-    { icon: 'category', label: t('home.filterTopic') },
-    { icon: 'calendar_month', label: t('home.filterSeason') },
+  const PROCESS_STEPS = [
+    { icon: 'tune', label: t('home.processStep1') },
+    { icon: 'auto_awesome', label: t('home.processStep2') },
+    { icon: 'map', label: t('home.processStep3') },
+    { icon: 'support_agent', label: t('home.processStep4') },
   ];
-
-  const QUICK_LINKS = [
-    { icon: 'bookmark', label: t('home.savedQuick') },
-    { icon: 'collections_bookmark', label: t('home.collectionsQuick') },
-    { icon: 'rate_review', label: t('home.reviewsQuick') },
+  const homePath = locale === 'en' ? '/en' : '/';
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Vivu',
+      url: absoluteUrl(homePath),
+      inLanguage: locale,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Vivu',
+      url: absoluteUrl(homePath),
+      logo: absoluteUrl('/vivu-logo.png'),
+    },
   ];
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
         {/* Hero */}
@@ -88,22 +105,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             </p>
             <div className="flex flex-wrap gap-3 pt-4">
               <Link
-                href="/kham-pha"
+                href="/lich-trinh"
                 className="inline-flex items-center rounded-lg bg-primary-container px-8 py-4 text-body-md font-semibold text-on-primary-container shadow-premium transition-all hover:scale-105 hover:shadow-hover active:scale-95"
               >
                 {t('home.heroCta')}
               </Link>
               <Link
-                href="/ai-chat"
+                href="/tu-van"
                 className="inline-flex items-center rounded-lg border border-primary px-8 py-4 text-body-md font-semibold text-primary transition-colors hover:bg-primary-fixed"
               >
-                {t('home.aiCta')}
+                {t('home.consultCta')}
               </Link>
               <Link
-                href="/lich-trinh"
+                href="/kham-pha"
                 className="inline-flex items-center rounded-lg border border-outline-variant px-8 py-4 text-body-md font-semibold text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
               >
-                {locale === 'en' ? 'AI trip planner' : 'Lịch trình AI'}
+                {t('home.exploreCta')}
               </Link>
             </div>
           </div>
@@ -133,6 +150,32 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
           </Link>
         </section>
 
+        {/* Business flow */}
+        <section className="rounded-3xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm md:p-8">
+          <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <h2 className="font-h2 text-h2 text-on-surface">{t('home.processTitle')}</h2>
+            <Link href="/lich-trinh" className="font-semibold text-primary hover:underline">
+              {t('home.heroCta')}
+            </Link>
+          </div>
+          <ol className="grid gap-4 md:grid-cols-4">
+            {PROCESS_STEPS.map((step, index) => (
+              <li
+                key={step.label}
+                className="rounded-2xl border border-outline-variant/30 bg-surface p-5"
+              >
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-fixed text-primary">
+                  <Icon name={step.icon} />
+                </div>
+                <p className="text-overline uppercase tracking-overline text-primary">
+                  {String(index + 1).padStart(2, '0')}
+                </p>
+                <h3 className="mt-1 text-body-lg font-bold text-on-surface">{step.label}</h3>
+              </li>
+            ))}
+          </ol>
+        </section>
+
         {/* Feature cards */}
         <section className="py-section-gap">
           <div className="mb-16 text-center">
@@ -144,38 +187,30 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             {/* Card 1 */}
             <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-8 shadow-premium transition-all hover:shadow-hover">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
-                <Icon name="search" className="text-3xl" />
+                <Icon name="travel_explore" className="text-3xl" />
               </div>
               <h3 className="mb-4 font-h3 text-h3">{t('home.card1Title')}</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">{t('home.card1Body')}</p>
-              <div className="space-y-3 rounded-lg bg-surface-container p-4">
-                {SEARCH_FILTERS.map((f) => (
-                  <div
-                    key={f.label}
-                    className="flex items-center gap-2 rounded-md border border-outline-variant/10 bg-surface-container-lowest px-3 py-2 shadow-sm"
-                  >
-                    <Icon name={f.icon} className="scale-75 text-primary" />
-                    <span className="text-label-caps text-on-surface-variant">{f.label}</span>
-                  </div>
-                ))}
-              </div>
+              <Link href="/kham-pha" className="font-semibold text-primary hover:underline">
+                {t('home.exploreCta')}
+              </Link>
             </article>
 
             {/* Card 2 */}
             <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-8 shadow-premium transition-all hover:shadow-hover">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
-                <Icon name="map" className="text-3xl" />
+                <Icon name="route" className="text-3xl" />
               </div>
               <h3 className="mb-4 font-h3 text-h3">{t('home.card2Title')}</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">{t('home.card2Body')}</p>
               <Link
-                href="/ban-do"
+                href="/lich-trinh"
                 className="group/cta relative block h-32 w-full overflow-hidden rounded-lg border border-outline-variant/30 bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container transition-all hover:border-primary/60"
                 aria-label={t('home.card2Cta')}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Icon
-                    name="map"
+                    name="auto_awesome"
                     className="!text-6xl text-primary opacity-40 transition-transform group-hover/cta:scale-110"
                   />
                 </div>
@@ -189,24 +224,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             {/* Card 3 */}
             <article className="flex flex-col rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-8 shadow-premium transition-all hover:shadow-hover">
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
-                <Icon name="book" className="text-3xl" />
+                <Icon name="support_agent" className="text-3xl" />
               </div>
               <h3 className="mb-4 font-h3 text-h3">{t('home.card3Title')}</h3>
               <p className="mb-8 flex-grow text-on-surface-variant">{t('home.card3Body')}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {QUICK_LINKS.map((q) => (
-                  <Link
-                    key={q.label}
-                    href="/tai-khoan/yeu-thich"
-                    className="group flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg bg-surface-container transition-colors hover:bg-primary-fixed"
-                  >
-                    <Icon name={q.icon} className="text-primary" />
-                    <span className="text-[10px] font-bold uppercase text-on-surface-variant">
-                      {q.label}
-                    </span>
-                  </Link>
-                ))}
-              </div>
+              <Link href="/tu-van" className="font-semibold text-primary hover:underline">
+                {t('home.consultCta')}
+              </Link>
             </article>
           </div>
         </section>

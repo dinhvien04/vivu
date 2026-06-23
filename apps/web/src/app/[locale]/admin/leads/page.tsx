@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<{ title: string }> {
   const { locale } = await params;
-  return { title: locale === 'en' ? 'Leads' : 'Lead tu van' };
+  return { title: locale === 'en' ? 'Leads' : 'Lead tư vấn' };
 }
 
 export default async function AdminLeadsRoute({

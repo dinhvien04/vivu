@@ -9,7 +9,7 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return { title: locale === 'en' ? 'Data reports' : 'Bao loi du lieu' };
+  return { title: locale === 'en' ? 'Data reports' : 'Báo lỗi dữ liệu' };
 }
 
 export default async function AdminDataReportsRoute({

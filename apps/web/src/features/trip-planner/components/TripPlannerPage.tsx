@@ -44,10 +44,10 @@ function text(locale: Locale) {
   const vi = locale !== 'en';
   return {
     eyebrow: vi ? 'Lịch trình AI' : 'AI trip planner',
-    title: vi ? 'Lên lịch trình Gia Lai cùng Vivu' : 'Plan Gia Lai with Vivu',
+    title: vi ? 'Lập lịch trình du lịch bằng AI' : 'Plan your trip with AI',
     lead: vi
-      ? 'Chọn khu vực, số ngày và sở thích. Vivu AI sẽ gợi ý lịch trình dựa trên dữ liệu địa danh trong hệ thống.'
-      : 'Choose your area, days, and interests. Vivu AI will suggest an itinerary using Vivu place data.',
+      ? 'Nhập số ngày, khu vực, sở thích và ngân sách. Vivu sẽ gợi ý lịch trình dựa trên dữ liệu địa danh trong hệ thống.'
+      : 'Enter days, area, interests and budget. Vivu suggests an itinerary from destination data in the system.',
     area: vi ? 'Khu vực' : 'Area',
     days: vi ? 'Số ngày' : 'Days',
     people: vi ? 'Số người' : 'People',
@@ -73,6 +73,7 @@ function text(locale: Locale) {
     needLogin: vi ? 'Đăng nhập để lưu lịch trình vào sổ tay.' : 'Sign in to save this plan.',
     consult: vi ? 'Cần người tư vấn lịch trình này?' : 'Want help with this plan?',
     consultCta: vi ? 'Gửi yêu cầu tư vấn' : 'Request consultation',
+    exploreMore: vi ? 'Khám phá thêm địa danh' : 'Explore more destinations',
     quota: vi
       ? 'Nếu hết quota, hãy đăng nhập hoặc thử lại vào ngày mai.'
       : 'If quota is exhausted, sign in or try again tomorrow.',
@@ -362,6 +363,13 @@ export function TripPlannerPage() {
                 >
                   <Icon name="support_agent" size={18} />
                   {labels.consultCta}
+                </Link>
+                <Link
+                  href="/kham-pha"
+                  className="inline-flex items-center gap-2 rounded-full border border-outline-variant px-4 py-2 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
+                >
+                  <Icon name="travel_explore" size={18} />
+                  {labels.exploreMore}
                 </Link>
               </div>
             </div>

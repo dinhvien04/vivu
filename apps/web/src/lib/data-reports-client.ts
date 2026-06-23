@@ -37,6 +37,6 @@ export async function createDataReport(input: CreateDataReportInput): Promise<vo
     /* empty */
   }
   if (!res.ok) {
-    throw new Error(pickMessage(payload, 'Khong gui duoc bao loi du lieu.'));
+    throw new Error(pickMessage(payload, 'Không gửi được báo lỗi dữ liệu.'));
   }
 }

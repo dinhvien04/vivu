@@ -70,7 +70,7 @@ export async function listTripPlans(bearer: string): Promise<TripPlan[]> {
   });
   const payload = await readJson(res);
   if (!res.ok) {
-    throw new Error(pickMessage(payload, 'Khong tai duoc lich trinh cua ban.'));
+    throw new Error(pickMessage(payload, 'Không tải được lịch trình của bạn.'));
   }
   return ((payload as { data?: TripPlan[] })?.data ?? []) as TripPlan[];
 }

@@ -163,6 +163,7 @@ POST /api/v1/analytics/events
 
 Business MVP:
 
+- Homepage và navigation public đã đưa rõ luồng lập lịch trình AI và tư vấn chuyến đi.
 - `/lich-trinh` tạo lịch trình AI dựa trên địa danh trong database Vivu.
 - `/tu-van` thu lead tư vấn từ home, detail, AI Chat và Trip Planner.
 - `/admin/leads` giúp admin xem lead, mở chi tiết, copy phone/Zalo, đổi trạng thái và ghi chú nội bộ.
@@ -195,6 +196,7 @@ Integration test dùng Testcontainers nên cần Docker đang chạy.
 - [Triển khai AI](docs/AI_DEPLOYMENT.md)
 - [Security hardening](docs/SECURITY.md)
 - [Business MVP](docs/BUSINESS_MVP.md)
+- [Deploy checklist](docs/DEPLOY_CHECKLIST.md)
 
 ## Quy ước an toàn
 

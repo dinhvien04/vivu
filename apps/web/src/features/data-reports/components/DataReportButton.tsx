@@ -13,29 +13,29 @@ interface DataReportButtonProps {
 }
 
 const TYPES: Array<{ value: DataReportType; vi: string; en: string }> = [
-  { value: 'wrong_image', vi: 'Sai hinh anh', en: 'Wrong image' },
-  { value: 'wrong_coordinates', vi: 'Sai toa do', en: 'Wrong coordinates' },
-  { value: 'wrong_description', vi: 'Sai mo ta', en: 'Wrong description' },
-  { value: 'missing_info', vi: 'Thieu thong tin', en: 'Missing info' },
-  { value: 'other', vi: 'Khac', en: 'Other' },
+  { value: 'wrong_image', vi: 'Sai hình ảnh', en: 'Wrong image' },
+  { value: 'wrong_coordinates', vi: 'Sai tọa độ', en: 'Wrong coordinates' },
+  { value: 'wrong_description', vi: 'Sai mô tả', en: 'Wrong description' },
+  { value: 'missing_info', vi: 'Thiếu thông tin', en: 'Missing info' },
+  { value: 'other', vi: 'Khác', en: 'Other' },
 ];
 
 function text(locale: Locale) {
   const vi = locale !== 'en';
   return {
-    button: vi ? 'Bao loi du lieu' : 'Report data issue',
-    title: vi ? 'Bao loi du lieu' : 'Report data issue',
+    button: vi ? 'Báo lỗi thông tin' : 'Report data issue',
+    title: vi ? 'Báo lỗi thông tin' : 'Report data issue',
     lead: vi
-      ? 'Noi cho Vivu biet thong tin nao can sua. Bao cao nay chi gui ve admin.'
+      ? 'Nói cho Vivu biết thông tin nào cần sửa. Báo cáo này chỉ gửi về admin.'
       : 'Tell Vivu what should be corrected. This report goes to admin only.',
-    type: vi ? 'Loai loi' : 'Issue type',
-    message: vi ? 'Mo ta ngan' : 'Short description',
-    contact: vi ? 'Lien he neu can' : 'Contact if needed',
-    cancel: vi ? 'Huy' : 'Cancel',
-    submit: vi ? 'Gui bao loi' : 'Submit report',
-    sending: vi ? 'Dang gui...' : 'Sending...',
-    success: vi ? 'Da gui bao loi, cam on ban.' : 'Report sent. Thank you.',
-    error: vi ? 'Khong gui duoc bao loi. Vui long thu lai.' : 'Could not submit report.',
+    type: vi ? 'Loại lỗi' : 'Issue type',
+    message: vi ? 'Mô tả ngắn' : 'Short description',
+    contact: vi ? 'Liên hệ nếu cần' : 'Contact if needed',
+    cancel: vi ? 'Hủy' : 'Cancel',
+    submit: vi ? 'Gửi báo lỗi' : 'Submit report',
+    sending: vi ? 'Đang gửi...' : 'Sending...',
+    success: vi ? 'Đã gửi báo lỗi, cảm ơn bạn.' : 'Report sent. Thank you.',
+    error: vi ? 'Không gửi được báo lỗi. Vui lòng thử lại.' : 'Could not submit report.',
   };
 }
 
