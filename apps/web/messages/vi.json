@@ -179,6 +179,14 @@
     "inspirationTitle": "Địa danh Gia Lai nổi bật",
     "viewAllPlaces": "Xem tất cả địa danh →"
   },
+  "tripPlanner": {
+    "presetOneTitle": "1 ngày khám phá Quy Nhơn",
+    "presetOneDescription": "Gọn, dễ đi, hợp nhóm muốn check-in nhanh.",
+    "presetTwoTitle": "2 ngày biển đảo và check-in",
+    "presetTwoDescription": "Phù hợp người thích biển, ảnh đẹp và lịch trình không quá dày.",
+    "presetThreeTitle": "3 ngày Gia Lai - Quy Nhơn",
+    "presetThreeDescription": "Kết hợp cao nguyên, biển đảo và di tích nổi bật."
+  },
   "explore": {
     "title": "Khám phá",
     "lead": "Tra cứu các địa danh Gia Lai được cung cấp trực tiếp từ cơ sở dữ liệu Vivu.",

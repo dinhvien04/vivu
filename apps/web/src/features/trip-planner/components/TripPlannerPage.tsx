@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
 import { Link } from '@/i18n/navigation';
@@ -33,6 +33,7 @@ const AREAS = [
 
 const INTERESTS = [
   { slug: 'bien-dao', vi: 'Biển đảo', en: 'Beaches' },
+  { slug: 'check-in', vi: 'Check-in', en: 'Photo spots' },
   { slug: 'thap-cham', vi: 'Tháp Chăm', en: 'Cham towers' },
   { slug: 'di-tich', vi: 'Di tích', en: 'Historic sites' },
   { slug: 'ho-thac-suoi', vi: 'Hồ - thác - suối', en: 'Lakes and falls' },
@@ -47,38 +48,44 @@ const TRANSPORTS = [
   { slug: 'di_bo_ket_hop', vi: 'Đi bộ kết hợp', en: 'Walking + transfers' },
 ] as const;
 
-function tripExamples(locale: Locale) {
+interface TripExampleCopy {
+  oneDescription: string;
+  oneTitle: string;
+  threeDescription: string;
+  threeTitle: string;
+  twoDescription: string;
+  twoTitle: string;
+}
+
+function tripExamples(locale: Locale, copy: TripExampleCopy) {
   const vi = locale !== 'en';
   return [
     {
-      title: vi ? '1 ngày khám phá Quy Nhơn' : '1 day in Quy Nhon',
-      description: vi
-        ? 'Gọn, dễ đi, hợp nhóm muốn check-in nhanh.'
-        : 'A compact route for quick sightseeing and photos.',
+      key: 'one-day-quy-nhon',
+      title: copy.oneTitle,
+      description: copy.oneDescription,
       area: 'quy-nhon',
       days: 1,
-      interests: ['bien-dao', 'di-tich'],
+      interests: ['bien-dao', 'check-in', 'am-thuc'],
       transport: 'xe_may',
       budget: vi ? 'Linh hoạt / vừa phải' : 'Flexible / medium',
       note: vi ? 'Ưu tiên điểm dễ di chuyển trong ngày.' : 'Prioritize easy same-day transfers.',
     },
     {
-      title: vi ? '2 ngày biển đảo và check-in' : '2 days of coast and check-ins',
-      description: vi
-        ? 'Phù hợp người thích biển, ảnh đẹp và lịch trình không quá dày.'
-        : 'For beaches, scenic photos and a relaxed pace.',
+      key: 'two-days-islands-checkin',
+      title: copy.twoTitle,
+      description: copy.twoDescription,
       area: 'quy-nhon',
       days: 2,
-      interests: ['bien-dao', 'thap-cham'],
+      interests: ['bien-dao', 'check-in'],
       transport: 'oto',
       budget: vi ? 'Vừa phải' : 'Medium',
       note: vi ? 'Muốn có thời gian nghỉ và chụp ảnh.' : 'Leave time for breaks and photos.',
     },
     {
-      title: vi ? '3 ngày Gia Lai - Quy Nhơn' : '3 days Gia Lai - Quy Nhon',
-      description: vi
-        ? 'Kết hợp cao nguyên, biển đảo và di tích nổi bật.'
-        : 'Combine highland, coastal and heritage highlights.',
+      key: 'three-days-gia-lai-quy-nhon',
+      title: copy.threeTitle,
+      description: copy.threeDescription,
       area: 'all',
       days: 3,
       interests: ['ho-thac-suoi', 'bien-dao', 'di-tich'],
@@ -127,8 +134,8 @@ function text(locale: Locale) {
       ? 'Chọn nhanh một mẫu bên dưới để điền form, hoặc tự chỉnh khu vực, số ngày và sở thích rồi bấm tạo.'
       : 'Pick a starter template to fill the form, or adjust area, days and interests yourself.',
     dataNote: vi
-      ? 'Lịch trình được tạo từ dữ liệu địa danh Vivu. Nếu cần lịch riêng, hãy gửi yêu cầu tư vấn.'
-      : 'Itineraries are generated from Vivu destination data. Request consultation for a custom plan.',
+      ? 'Vivu chỉ gợi ý dựa trên dữ liệu địa danh có trong hệ thống. Một số thông tin như giá vé hoặc giờ mở cửa có thể cần kiểm tra lại.'
+      : 'Vivu suggests itineraries from destination data in the system. Details such as ticket prices or opening hours may need to be checked again.',
     errorConsultCta: vi ? 'Nhờ Vivu tư vấn thay' : 'Ask Vivu to help instead',
     prefilledPlace: vi ? 'Đã ưu tiên địa danh' : 'Prioritizing place',
     quota: vi
@@ -145,6 +152,7 @@ function label(locale: Locale, item: { vi: string; en: string }) {
 
 export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const locale = useLocale() as Locale;
+  const tripPlannerT = useTranslations('tripPlanner');
   const labels = text(locale);
   const { getAccessToken, user } = useAuth();
   const initialNote = initialPlace
@@ -171,7 +179,18 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
         .join(', '),
     [interests, locale],
   );
-  const examples = useMemo(() => tripExamples(locale), [locale]);
+  const examples = useMemo(
+    () =>
+      tripExamples(locale, {
+        oneDescription: tripPlannerT('presetOneDescription'),
+        oneTitle: tripPlannerT('presetOneTitle'),
+        threeDescription: tripPlannerT('presetThreeDescription'),
+        threeTitle: tripPlannerT('presetThreeTitle'),
+        twoDescription: tripPlannerT('presetTwoDescription'),
+        twoTitle: tripPlannerT('presetTwoTitle'),
+      }),
+    [locale, tripPlannerT],
+  );
 
   const analyticsMetadata = () => ({
     area,
@@ -191,6 +210,16 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   };
 
   const applyExample = (example: ReturnType<typeof tripExamples>[number]) => {
+    void trackAnalyticsEvent('trip_planner_preset_clicked', {
+      placeSlug: initialPlace?.slug,
+      metadata: {
+        preset: example.key,
+        area: example.area,
+        days: example.days,
+        hasInitialPlace: Boolean(initialPlace),
+        interests: example.interests.join(','),
+      },
+    });
     setArea(example.area);
     setDays(example.days);
     setPeopleCount(peopleCount || 2);

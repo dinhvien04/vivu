@@ -6,6 +6,7 @@ export const ANALYTICS_EVENT_TYPES = [
   'ai_chat_started',
   'home_trip_planner_cta_clicked',
   'home_consulting_cta_clicked',
+  'trip_planner_preset_clicked',
   'trip_plan_generate_clicked',
   'trip_plan_generated',
   'trip_plan_failed',

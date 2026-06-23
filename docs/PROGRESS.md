@@ -53,6 +53,8 @@ Cập nhật: 23/06/2026.
 
 - [ ] Thay điểm đại diện `luy-da-co-phu-ha` khi có tọa độ khảo sát chính thức.
 - [ ] Theo dõi tỷ lệ lỗi S3/presigned URL trên production.
+- [ ] Test thủ công định kỳ full flow production user → admin: tạo lịch trình, gửi lead,
+  báo lỗi dữ liệu, kiểm tra `/admin/leads` và `/admin/bao-loi`.
 - [ ] Bổ sung dashboard quan sát latency API và AI.
 - [ ] Chạy integration test định kỳ trong CI có Docker.
 - [ ] Rà soát chất lượng mô tả địa danh khi dữ liệu S3 thay đổi.

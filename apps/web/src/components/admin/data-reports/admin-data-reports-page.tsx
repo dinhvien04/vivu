@@ -173,7 +173,7 @@ export function AdminDataReportsPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-on-surface-variant">Chưa có báo lỗi phù hợp.</div>
+          <div className="p-8 text-center text-on-surface-variant">Chưa có báo lỗi dữ liệu.</div>
         ) : (
           <ul className="divide-y divide-outline-variant/30">
             {rows.map((report) => (

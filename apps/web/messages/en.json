@@ -179,6 +179,14 @@
     "inspirationTitle": "Featured Gia Lai destinations",
     "viewAllPlaces": "Browse all destinations →"
   },
+  "tripPlanner": {
+    "presetOneTitle": "1 day in Quy Nhon",
+    "presetOneDescription": "A compact route for quick sightseeing and photos.",
+    "presetTwoTitle": "2 days of coast and check-ins",
+    "presetTwoDescription": "For beaches, scenic photos and a relaxed pace.",
+    "presetThreeTitle": "3 days Gia Lai - Quy Nhon",
+    "presetThreeDescription": "Combine highland, coastal and heritage highlights."
+  },
   "explore": {
     "title": "Explore",
     "lead": "Browse Gia Lai destinations served directly from the Vivu database.",

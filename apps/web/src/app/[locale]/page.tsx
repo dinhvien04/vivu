@@ -30,6 +30,8 @@ const HOME_HERO_PRIORITY_SLUGS = [
   'bao-tang-quang-trung',
   'doi-co-hong-dak-doa',
   'bai-xep',
+  'hon-kho',
+  'ky-co',
 ];
 
 async function loadHomeData(locale: Locale): Promise<{

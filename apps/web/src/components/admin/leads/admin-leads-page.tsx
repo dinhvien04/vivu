@@ -173,7 +173,7 @@ export function AdminLeadsPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-on-surface-variant">Chưa có lead phù hợp.</div>
+          <div className="p-8 text-center text-on-surface-variant">Chưa có lead mới.</div>
         ) : (
           <ul className="divide-y divide-outline-variant/30">
             {rows.map((lead) => (
