@@ -24,9 +24,10 @@ const SCRIPT_ID = 'cf-turnstile-script';
 interface TurnstileWidgetProps {
   siteKey?: string;
   onToken(token: string): void;
+  resetKey?: string | number;
 }
 
-export function TurnstileWidget({ siteKey, onToken }: TurnstileWidgetProps) {
+export function TurnstileWidget({ siteKey, onToken, resetKey }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const onTokenRef = useRef(onToken);
@@ -72,7 +73,7 @@ export function TurnstileWidget({ siteKey, onToken }: TurnstileWidgetProps) {
       }
       widgetIdRef.current = null;
     };
-  }, [siteKey]);
+  }, [siteKey, resetKey]);
 
   if (!siteKey) return null;
 

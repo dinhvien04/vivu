@@ -3,12 +3,17 @@
 import { useTranslations } from 'next-intl';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Icon } from '@/components/icon';
+import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link } from '@/i18n/navigation';
 import { AuthError, forgotPassword } from '@/lib/auth-client';
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth');
   const [email, setEmail] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
@@ -18,11 +23,13 @@ export default function ForgotPasswordPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await forgotPassword(email);
+      await forgotPassword(email, turnstileToken);
       setSent(email);
     } catch (err) {
       const msg = err instanceof AuthError ? err.message : t('errorGeneric');
       setError(msg);
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
     } finally {
       setSubmitting(false);
     }
@@ -72,6 +79,12 @@ export default function ForgotPasswordPage() {
               className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
             />
           </div>
+
+          <TurnstileWidget
+            siteKey={TURNSTILE_SITE_KEY}
+            onToken={setTurnstileToken}
+            resetKey={turnstileResetKey}
+          />
 
           {error && (
             <div

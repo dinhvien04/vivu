@@ -1,4 +1,5 @@
 import type { FastifyRequest } from 'fastify';
+import { TurnstileService } from '../common/turnstile.service';
 import { DataReportsService } from './data-reports.service';
 
 function request(): FastifyRequest {
@@ -18,6 +19,29 @@ function config(overrides: Record<string, string> = {}) {
 }
 
 describe('DataReportsService', () => {
+  it('rejects missing Turnstile token when Turnstile is enabled', async () => {
+    const prisma = { dataReport: { create: jest.fn() } };
+    const cfg = config({
+      ABUSE_HASH_SECRET: 'secret',
+      TURNSTILE_ENABLED: 'true',
+      TURNSTILE_SECRET_KEY: 'turnstile-secret',
+    });
+    const turnstile = new TurnstileService(cfg as never);
+    const service = new DataReportsService(prisma as never, cfg as never, turnstile);
+
+    await expect(
+      service.create(
+        {
+          placeSlug: 'bien-ho',
+          type: 'wrong_description',
+          message: 'Noi dung can sua',
+        },
+        request(),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(prisma.dataReport.create).not.toHaveBeenCalled();
+  });
+
   it('does not persist honeypot reports', async () => {
     const prisma = { dataReport: { create: jest.fn() } };
     const turnstile = { verify: jest.fn() };

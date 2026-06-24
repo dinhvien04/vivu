@@ -17,7 +17,12 @@ interface AuthContextValue {
   /** True until the first refresh-on-mount completes. */
   loading: boolean;
   login(input: { email: string; password: string }): Promise<auth.AuthUser>;
-  register(input: { name: string; email: string; password: string }): Promise<auth.AuthUser>;
+  register(input: {
+    name: string;
+    email: string;
+    password: string;
+    turnstileToken?: string;
+  }): Promise<auth.AuthUser>;
   logout(): Promise<void>;
   /** Returns the current access token, refreshing it if necessary. */
   getAccessToken(): Promise<string | null>;

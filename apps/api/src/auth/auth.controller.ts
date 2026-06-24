@@ -7,13 +7,16 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import type { FastifyRequest } from 'fastify';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { TurnstileService } from '../common/turnstile.service';
 import {
   ChangePasswordDto,
   DeleteAccountDto,
@@ -32,13 +35,17 @@ const AUTH_RATE_LIMIT_PER_15_MIN = positiveInteger(process.env.AUTH_RATE_LIMIT_P
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly turnstile: TurnstileService,
+  ) {}
 
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { ttl: 900_000, limit: AUTH_RATE_LIMIT_PER_15_MIN } })
-  register(@Body() dto: RegisterDto) {
+  async register(@Body() dto: RegisterDto, @Req() request: FastifyRequest) {
+    await this.turnstile.verify(dto.turnstileToken, request);
     return this.auth.register(dto);
   }
 
@@ -69,7 +76,11 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
+  async forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+    @Req() request: FastifyRequest,
+  ): Promise<void> {
+    await this.turnstile.verify(dto.turnstileToken, request);
     await this.auth.forgotPassword(dto.email);
   }
 

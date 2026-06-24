@@ -25,6 +25,11 @@ export class RegisterDto {
     message: 'Mật khẩu cần có ít nhất 1 chữ và 1 số',
   })
   password!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  turnstileToken?: string;
 }
 
 export class LoginDto {
@@ -46,6 +51,11 @@ export class ForgotPasswordDto {
   @IsEmail({}, { message: 'Email không hợp lệ' })
   @MaxLength(254)
   email!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  turnstileToken?: string;
 }
 
 export class ResetPasswordDto {

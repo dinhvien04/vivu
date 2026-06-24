@@ -72,6 +72,7 @@ export async function register(input: {
   email: string;
   password: string;
   name: string;
+  turnstileToken?: string;
 }): Promise<AuthSession> {
   return postJson<AuthSession>('/api/auth/register', input, 'Đăng ký thất bại');
 }
@@ -107,8 +108,12 @@ export async function fetchMe(accessToken: string): Promise<AuthUser | null> {
   return (await res.json()) as AuthUser;
 }
 
-export async function forgotPassword(email: string): Promise<void> {
-  await postJson<{ ok: true }>('/api/auth/forgot-password', { email }, 'Yêu cầu thất bại');
+export async function forgotPassword(email: string, turnstileToken?: string): Promise<void> {
+  await postJson<{ ok: true }>(
+    '/api/auth/forgot-password',
+    { email, turnstileToken },
+    'Yêu cầu thất bại',
+  );
 }
 
 export async function resetPassword(token: string, password: string): Promise<void> {

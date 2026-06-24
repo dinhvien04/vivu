@@ -81,6 +81,7 @@ export function LeadFormPage({
   const [note, setNote] = useState(initialNote ?? '');
   const [website, setWebsite] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -128,6 +129,8 @@ export function LeadFormPage({
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : labels.error);
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
     } finally {
       setLoading(false);
     }
@@ -295,7 +298,11 @@ export function LeadFormPage({
         </label>
 
         <div className="mt-4">
-          <TurnstileWidget siteKey={TURNSTILE_SITE_KEY} onToken={setTurnstileToken} />
+          <TurnstileWidget
+            siteKey={TURNSTILE_SITE_KEY}
+            onToken={setTurnstileToken}
+            resetKey={turnstileResetKey}
+          />
         </div>
 
         {error && (

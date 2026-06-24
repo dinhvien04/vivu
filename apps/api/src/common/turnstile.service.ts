@@ -63,7 +63,9 @@ export class TurnstileService {
           codes: payload['error-codes'] ?? [],
         }),
       );
-      throw new BadRequestException('Xác minh chống spam không hợp lệ. Vui lòng thử lại.');
+      throw new BadRequestException(
+        'Xác minh chống spam không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.',
+      );
     }
   }
 }

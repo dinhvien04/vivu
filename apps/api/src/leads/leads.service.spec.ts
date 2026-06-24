@@ -1,4 +1,5 @@
 import type { FastifyRequest } from 'fastify';
+import { TurnstileService } from '../common/turnstile.service';
 import { LeadsService } from './leads.service';
 
 function request(): FastifyRequest {
@@ -12,6 +13,33 @@ function request(): FastifyRequest {
 }
 
 describe('LeadsService', () => {
+  it('rejects missing Turnstile token when Turnstile is enabled', async () => {
+    const prisma = { lead: { create: jest.fn() } };
+    const config = {
+      get: jest.fn((key: string) => {
+        const values: Record<string, string> = {
+          ABUSE_HASH_SECRET: 'secret',
+          TURNSTILE_ENABLED: 'true',
+          TURNSTILE_SECRET_KEY: 'turnstile-secret',
+        };
+        return values[key];
+      }),
+    };
+    const turnstile = new TurnstileService(config as never);
+    const service = new LeadsService(prisma as never, config as never, turnstile);
+
+    await expect(
+      service.create(
+        {
+          name: 'Nguyen Van A',
+          phoneOrZalo: '0909000000',
+        },
+        request(),
+      ),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(prisma.lead.create).not.toHaveBeenCalled();
+  });
+
   it('does not persist honeypot submissions', async () => {
     const prisma = { lead: { create: jest.fn() } };
     const config = { get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)) };

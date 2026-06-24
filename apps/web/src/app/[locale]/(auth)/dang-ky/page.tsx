@@ -6,8 +6,11 @@ import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { Icon } from '@/components/icon';
+import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link, useRouter } from '@/i18n/navigation';
 import { AuthError } from '@/lib/auth-client';
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function RegisterPage() {
   return (
@@ -37,6 +40,8 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [agree, setAgree] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,12 +58,14 @@ function RegisterForm() {
     }
     setSubmitting(true);
     try {
-      await register({ name: name || email, email, password });
+      await register({ name: name || email, email, password, turnstileToken });
       router.replace(next);
       router.refresh();
     } catch (err) {
       const msg = err instanceof AuthError ? err.message : t('errorGeneric');
       setError(msg);
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
     } finally {
       setSubmitting(false);
     }
@@ -163,6 +170,12 @@ function RegisterForm() {
             })}
           </span>
         </label>
+
+        <TurnstileWidget
+          siteKey={TURNSTILE_SITE_KEY}
+          onToken={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
 
         {error && (
           <div

@@ -31,7 +31,7 @@ honeypot, Turnstile optional, role guard, CSP và log không chứa dữ liệu 
   - Trip Planner anonymous/user.
 - HMAC hash cho abuse keys bằng `ABUSE_HASH_SECRET`; không lưu raw IP nếu không cần.
 - Honeypot `website` cho lead và data report.
-- Turnstile optional cho lead và data report.
+- Turnstile optional cho lead, data report, đăng ký và quên mật khẩu.
 - Admin API dùng `JwtAuthGuard + RolesGuard`.
 - Refresh token nằm trong HttpOnly cookie của Next proxy; access token giữ trong React memory.
 - CSP production không dùng `unsafe-eval`, có `frame-ancestors 'none'`, `object-src 'none'`,
@@ -73,15 +73,17 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 ## Khi bật Turnstile
 
+Setup chi tiết nằm ở [TURNSTILE_SETUP.md](./TURNSTILE_SETUP.md).
+
 1. Tạo site trong Cloudflare Turnstile.
 2. Set backend `TURNSTILE_ENABLED=true`.
 3. Set backend `TURNSTILE_SECRET_KEY`.
 4. Set web `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
 5. Redeploy cả API và Web.
-6. Test `/tu-van` và modal `Báo lỗi thông tin`.
+6. Test `/tu-van`, modal `Báo lỗi thông tin`, `/dang-ky` và `/quen-mat-khau`.
 
 Nếu chưa set site key frontend, widget không render. Nếu backend bật mà frontend không gửi token,
-backend sẽ từ chối lead/report bằng 400.
+backend sẽ từ chối lead/report/register/forgot-password bằng 400.
 
 ## Checklist khi nghi bị abuse
 

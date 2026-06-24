@@ -55,6 +55,7 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
   const [contact, setContact] = useState('');
   const [website, setWebsite] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -79,9 +80,12 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
       setMessage('');
       setContact('');
       setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
       window.setTimeout(() => setOpen(false), 900);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : labels.error);
+      setTurnstileToken('');
+      setTurnstileResetKey((value) => value + 1);
     } finally {
       setLoading(false);
     }
@@ -175,7 +179,11 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
                 />
               </label>
 
-              <TurnstileWidget siteKey={TURNSTILE_SITE_KEY} onToken={setTurnstileToken} />
+              <TurnstileWidget
+                siteKey={TURNSTILE_SITE_KEY}
+                onToken={setTurnstileToken}
+                resetKey={turnstileResetKey}
+              />
 
               <label className="sr-only">
                 Website
