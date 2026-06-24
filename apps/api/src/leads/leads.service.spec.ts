@@ -15,7 +15,8 @@ describe('LeadsService', () => {
   it('does not persist honeypot submissions', async () => {
     const prisma = { lead: { create: jest.fn() } };
     const config = { get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)) };
-    const service = new LeadsService(prisma as never, config as never);
+    const turnstile = { verify: jest.fn() };
+    const service = new LeadsService(prisma as never, config as never, turnstile as never);
 
     await expect(
       service.create(
@@ -28,6 +29,7 @@ describe('LeadsService', () => {
       ),
     ).resolves.toEqual({ ok: true, spam: true });
     expect(prisma.lead.create).not.toHaveBeenCalled();
+    expect(turnstile.verify).not.toHaveBeenCalled();
   });
 
   it('persists a normal lead without raw ip or user-agent', async () => {
@@ -37,7 +39,8 @@ describe('LeadsService', () => {
       },
     };
     const config = { get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)) };
-    const service = new LeadsService(prisma as never, config as never);
+    const turnstile = { verify: jest.fn().mockResolvedValue(undefined) };
+    const service = new LeadsService(prisma as never, config as never, turnstile as never);
 
     await expect(
       service.create(
@@ -51,6 +54,7 @@ describe('LeadsService', () => {
       ),
     ).resolves.toEqual({ ok: true, id: 'lead-1' });
 
+    expect(turnstile.verify).toHaveBeenCalledWith(undefined, expect.any(Object));
     expect(prisma.lead.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

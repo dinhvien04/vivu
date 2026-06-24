@@ -15,7 +15,7 @@ export class RegisterDto {
   name!: string;
 
   @IsEmail({}, { message: 'Email không hợp lệ' })
-  @MaxLength(160)
+  @MaxLength(254)
   email!: string;
 
   @IsString()
@@ -29,7 +29,7 @@ export class RegisterDto {
 
 export class LoginDto {
   @IsEmail({}, { message: 'Email không hợp lệ' })
-  @MaxLength(160)
+  @MaxLength(254)
   email!: string;
 
   @IsString()
@@ -44,7 +44,7 @@ export class RefreshDto {
 
 export class ForgotPasswordDto {
   @IsEmail({}, { message: 'Email không hợp lệ' })
-  @MaxLength(160)
+  @MaxLength(254)
   email!: string;
 }
 

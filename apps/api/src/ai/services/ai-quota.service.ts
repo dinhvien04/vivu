@@ -38,6 +38,7 @@ export class AiQuotaService {
     this.userDailyQuota = positiveInteger(config.get<string>('AI_DAILY_QUOTA_USER'), 100);
     this.perMinuteLimit = positiveInteger(config.get<string>('AI_RATE_LIMIT_PER_MINUTE'), 10);
     this.hashSecret =
+      config.get<string>('ABUSE_HASH_SECRET') ??
       config.get<string>('AI_QUOTA_HASH_SECRET') ??
       config.get<string>('JWT_ACCESS_SECRET') ??
       'vivu-local-dev-ai-quota-secret';

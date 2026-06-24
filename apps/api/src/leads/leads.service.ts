@@ -9,6 +9,7 @@ import {
   hashUserAgent,
   positiveInteger,
 } from '../common/request-fingerprint';
+import { TurnstileService } from '../common/turnstile.service';
 import type { CreateLeadDto } from './dto/create-lead.dto';
 import type { ListLeadsQueryDto } from './dto/list-leads.query.dto';
 
@@ -26,21 +27,25 @@ export class LeadsService {
   constructor(
     private readonly prisma: PrismaService,
     config: ConfigService,
+    private readonly turnstile: TurnstileService,
   ) {
     this.hourlyLimit = positiveInteger(config.get<string>('LEADS_RATE_LIMIT_PER_HOUR'), 5);
     this.hashSecret =
+      config.get<string>('ABUSE_HASH_SECRET') ??
       config.get<string>('AI_QUOTA_HASH_SECRET') ??
       config.get<string>('JWT_ACCESS_SECRET') ??
       'vivu-local-dev-leads-secret';
   }
 
   async create(dto: CreateLeadDto, request: FastifyRequest, user?: AuthenticatedUser) {
-    const ipHash = hashRequestIp(request, this.hashSecret);
-    this.consumeHourly(ipHash);
-
     if (dto.website?.trim()) {
       return { ok: true, spam: true };
     }
+
+    await this.turnstile.verify(dto.turnstileToken, request);
+
+    const ipHash = hashRequestIp(request, this.hashSecret);
+    this.consumeHourly(ipHash);
 
     const lead = await this.prisma.lead.create({
       data: {

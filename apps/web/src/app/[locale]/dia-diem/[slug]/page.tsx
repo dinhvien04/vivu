@@ -27,6 +27,7 @@ import {
   buildBreadcrumbJsonLd,
   buildPlaceMetadata,
   buildTouristAttractionJsonLd,
+  safeJsonLd,
 } from '@/lib/seo';
 import type { Question, Review } from '@vivu/types';
 
@@ -169,14 +170,11 @@ export default async function PlaceDetailPage({ params }: PageProps) {
       <PlaceViewTracker placeSlug={place.slug} />
       <script
         type="application/ld+json"
-        // The metadata is generated server-side and contains no user input that
-        // wasn't already escaped by `JSON.stringify`. Inline JSON-LD is the
-        // canonical pattern recommended by Google.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">

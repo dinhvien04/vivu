@@ -5,6 +5,7 @@ import type { FormEvent } from 'react';
 import { useLocale } from 'next-intl';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
+import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
@@ -19,6 +20,7 @@ interface LeadFormPageProps {
 }
 
 const SOURCES: LeadSource[] = ['place_detail', 'ai_chat', 'trip_planner', 'home', 'other'];
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 function safeSource(value?: string): LeadSource {
   return SOURCES.includes(value as LeadSource) ? (value as LeadSource) : 'other';
@@ -78,6 +80,7 @@ export function LeadFormPage({
   const [budget, setBudget] = useState('');
   const [note, setNote] = useState(initialNote ?? '');
   const [website, setWebsite] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -104,6 +107,7 @@ export function LeadFormPage({
           note: note.trim() || undefined,
           source,
           website,
+          turnstileToken: turnstileToken || undefined,
         },
         token,
       );
@@ -213,6 +217,7 @@ export function LeadFormPage({
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              maxLength={254}
               className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </label>
@@ -221,7 +226,7 @@ export function LeadFormPage({
             <input
               value={placeName}
               onChange={(event) => setPlaceName(event.target.value)}
-              maxLength={160}
+              maxLength={200}
               className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </label>
@@ -288,6 +293,10 @@ export function LeadFormPage({
             onChange={(event) => setWebsite(event.target.value)}
           />
         </label>
+
+        <div className="mt-4">
+          <TurnstileWidget siteKey={TURNSTILE_SITE_KEY} onToken={setTurnstileToken} />
+        </div>
 
         {error && (
           <div className="mt-4 rounded-xl border border-error/30 bg-error-container px-4 py-3 text-body-sm text-on-error-container">

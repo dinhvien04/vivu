@@ -7,14 +7,17 @@ const apiOrigin = getOrigin(process.env.NEXT_PUBLIC_API_URL);
 const connectSrcExtra = splitSources(process.env.CSP_CONNECT_SRC_EXTRA);
 const imgSrcExtra = splitSources(process.env.CSP_IMG_SRC_EXTRA);
 const imageRemotePatterns = getImageRemotePatterns();
+const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+const turnstileOrigin = 'https://challenges.cloudflare.com';
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}${turnstileEnabled ? ` ${turnstileOrigin}` : ''}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   `img-src 'self' data: blob: https: ${imgSrcExtra.join(' ')}`.trim(),
-  `connect-src 'self' ${apiOrigin ? apiOrigin : ''} ${connectSrcExtra.join(' ')}`.trim(),
+  `connect-src 'self' ${apiOrigin ? apiOrigin : ''} ${turnstileEnabled ? turnstileOrigin : ''} ${connectSrcExtra.join(' ')}`.trim(),
+  `frame-src 'self'${turnstileEnabled ? ` ${turnstileOrigin}` : ''}`,
   "media-src 'self' blob: https:",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",

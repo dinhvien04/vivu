@@ -19,6 +19,7 @@ export class TripPlannerQuotaService {
     this.anonDailyQuota = positiveInteger(config.get<string>('TRIP_PLANNER_DAILY_QUOTA_ANON'), 5);
     this.userDailyQuota = positiveInteger(config.get<string>('TRIP_PLANNER_DAILY_QUOTA_USER'), 20);
     this.hashSecret =
+      config.get<string>('ABUSE_HASH_SECRET') ??
       config.get<string>('AI_QUOTA_HASH_SECRET') ??
       config.get<string>('JWT_ACCESS_SECRET') ??
       'vivu-local-dev-trip-planner-secret';

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { Icon } from '@/components/icon';
+import { TurnstileWidget } from '@/components/turnstile-widget';
 import type { Locale } from '@/i18n/routing';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { createDataReport } from '@/lib/data-reports-client';
@@ -20,6 +21,7 @@ const TYPES: Array<{ value: DataReportType; vi: string; en: string }> = [
   { value: 'missing_info', vi: 'Thiếu thông tin', en: 'Missing info' },
   { value: 'other', vi: 'Khác', en: 'Other' },
 ];
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 function text(locale: Locale) {
   const vi = locale !== 'en';
@@ -52,6 +54,7 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
   const [message, setMessage] = useState('');
   const [contact, setContact] = useState('');
   const [website, setWebsite] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -66,6 +69,7 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
         message: message.trim(),
         contact: contact.trim() || undefined,
         website,
+        turnstileToken: turnstileToken || undefined,
       });
       void trackAnalyticsEvent('detail_report_clicked', {
         placeSlug,
@@ -74,6 +78,7 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
       setStatus(labels.success);
       setMessage('');
       setContact('');
+      setTurnstileToken('');
       window.setTimeout(() => setOpen(false), 900);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : labels.error);
@@ -165,10 +170,12 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
                 <input
                   value={contact}
                   onChange={(event) => setContact(event.target.value)}
-                  maxLength={160}
+                  maxLength={254}
                   className="mt-2 w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </label>
+
+              <TurnstileWidget siteKey={TURNSTILE_SITE_KEY} onToken={setTurnstileToken} />
 
               <label className="sr-only">
                 Website

@@ -27,7 +27,7 @@ export class CreateDataReportDto {
   @ApiPropertyOptional({ maxLength: 160 })
   @IsOptional()
   @IsString()
-  @MaxLength(160)
+  @MaxLength(254)
   contact?: string;
 
   @ApiPropertyOptional({ description: 'Hidden bot trap field.' })
@@ -35,4 +35,10 @@ export class CreateDataReportDto {
   @IsString()
   @MaxLength(200)
   website?: string;
+
+  @ApiPropertyOptional({ description: 'Cloudflare Turnstile response token.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  turnstileToken?: string;
 }

@@ -13,6 +13,7 @@ export interface CreateLeadInput {
   note?: string;
   source?: LeadSource;
   website?: string;
+  turnstileToken?: string;
 }
 
 interface ErrorPayload {

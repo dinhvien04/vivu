@@ -1,5 +1,8 @@
 # Security Hardening
 
+Xem thêm checklist chống DevTools/Console abuse và Self-XSS tại
+[`SECURITY_CONSOLE_ABUSE.md`](SECURITY_CONSOLE_ABUSE.md).
+
 Tài liệu này ghi các quy tắc vận hành an toàn cho Vivu. Mục tiêu là giảm rủi ro lộ khóa,
 lạm dụng AI, upload file độc hại, IDOR/BOLA và lỗi cấu hình production.
 

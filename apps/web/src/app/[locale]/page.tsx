@@ -10,6 +10,7 @@ import { placeSummary, placeTitle } from '@/i18n/place';
 import type { Locale } from '@/i18n/routing';
 import { listPlaces, type Place } from '@/lib/api';
 import { transformCloudinary } from '@/lib/image';
+import { safeJsonLd } from '@/lib/seo';
 import { absoluteUrl } from '@/lib/site-url';
 
 interface FeaturedCollection {
@@ -117,7 +118,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">

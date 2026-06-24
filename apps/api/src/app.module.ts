@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AdminPlacesModule } from './admin-places/admin-places.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AdminStatsModule } from './admin-stats/admin-stats.module';
+import { AbuseProtectionModule } from './common/abuse-protection.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuthModule } from './auth/auth.module';
@@ -33,9 +35,10 @@ import { TripPlansModule } from './trip-plans/trip-plans.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60_000,
-        limit: 120,
+        limit: positiveInteger(process.env.GLOBAL_RATE_LIMIT_PER_MINUTE, 120),
       },
     ]),
+    AbuseProtectionModule,
     PrismaModule,
     CloudinaryModule,
     AuthModule,
@@ -62,5 +65,11 @@ import { TripPlansModule } from './trip-plans/trip-plans.module';
     AiModule,
   ],
   controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}

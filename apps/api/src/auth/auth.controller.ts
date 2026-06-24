@@ -27,6 +27,8 @@ import {
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedUser } from './strategies/jwt.strategy';
 
+const AUTH_RATE_LIMIT_PER_15_MIN = positiveInteger(process.env.AUTH_RATE_LIMIT_PER_15_MIN, 20);
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -35,7 +37,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @Throttle({ default: { ttl: 900_000, limit: AUTH_RATE_LIMIT_PER_15_MIN } })
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
@@ -43,7 +45,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { ttl: 60_000, limit: 20 } })
+  @Throttle({ default: { ttl: 900_000, limit: AUTH_RATE_LIMIT_PER_15_MIN } })
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
   }
@@ -127,4 +129,9 @@ export class AuthController {
   ): Promise<void> {
     await this.auth.deleteAccount(user.id, dto.password);
   }
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }

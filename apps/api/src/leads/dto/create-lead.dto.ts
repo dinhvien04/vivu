@@ -28,7 +28,7 @@ export class CreateLeadDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsEmail()
-  @MaxLength(160)
+  @MaxLength(254)
   email?: string;
 
   @ApiPropertyOptional()
@@ -40,7 +40,7 @@ export class CreateLeadDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @MaxLength(160)
+  @MaxLength(200)
   interestedPlaceName?: string;
 
   @ApiPropertyOptional()
@@ -84,4 +84,10 @@ export class CreateLeadDto {
   @IsString()
   @MaxLength(200)
   website?: string;
+
+  @ApiPropertyOptional({ description: 'Cloudflare Turnstile response token.' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  turnstileToken?: string;
 }

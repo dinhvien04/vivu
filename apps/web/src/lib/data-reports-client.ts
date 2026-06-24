@@ -6,6 +6,7 @@ export interface CreateDataReportInput {
   message: string;
   contact?: string;
   website?: string;
+  turnstileToken?: string;
 }
 
 interface ErrorPayload {
