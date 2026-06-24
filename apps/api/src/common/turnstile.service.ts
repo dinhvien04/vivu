@@ -8,6 +8,10 @@ interface TurnstileVerifyResponse {
   'error-codes'?: string[];
 }
 
+interface FetchTextResponse {
+  text(): Promise<string>;
+}
+
 @Injectable()
 export class TurnstileService {
   private readonly logger = new Logger(TurnstileService.name);
@@ -37,11 +41,11 @@ export class TurnstileService {
 
     let payload: TurnstileVerifyResponse;
     try {
-      const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      const response = (await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
         method: 'POST',
         body,
-      });
-      payload = (await response.json()) as TurnstileVerifyResponse;
+      })) as unknown as FetchTextResponse;
+      payload = JSON.parse(await response.text()) as TurnstileVerifyResponse;
     } catch (error) {
       this.logger.warn(
         JSON.stringify({
