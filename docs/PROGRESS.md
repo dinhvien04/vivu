@@ -1,6 +1,6 @@
 # Trạng thái triển khai
 
-Cập nhật: 23/06/2026.
+Cập nhật: 24/06/2026.
 
 ## Đã hoàn thành
 
@@ -29,6 +29,12 @@ Cập nhật: 23/06/2026.
 - [x] Data report cho trang chi tiết địa danh.
 - [x] Analytics event có hash session/IP và dashboard admin mở rộng.
 - [x] SEO sitemap cho route kinh doanh và JSON-LD cho trang chi tiết.
+- [x] Deploy checklist đã bổ sung luồng lịch trình → lead → admin, báo lỗi dữ liệu → admin,
+  smoke test ảnh production và checklist SEO.
+- [x] Trip Planner truyền note lịch trình và địa danh sang form tư vấn khi người dùng bấm
+  `Gửi yêu cầu tư vấn`.
+- [x] Tài liệu production image allowlist đã ghi đủ host Cloudinary/S3 đang dùng.
+- [x] Header public web đã chỉnh responsive để menu desktop không xuống dòng ở viewport vừa.
 
 ## Trạng thái dữ liệu
 
@@ -43,9 +49,17 @@ Cập nhật: 23/06/2026.
 - API unit test: 22 test suites, 127 tests.
 - API lint, typecheck và build: đạt.
 - Typecheck trực tiếp bằng `tsc --noEmit` cho `apps/api` và `apps/web`: đạt trong sandbox 23/06/2026.
+- Production readiness 24/06/2026:
+  - `pnpm lint`: đạt;
+  - `pnpm typecheck`: đạt, tự chạy Prisma generate trước Turbo typecheck;
+  - `pnpm build`: đạt.
 - Production smoke test:
   - danh sách/chi tiết địa danh;
   - ảnh Explore;
+  - ảnh production trên `/`, `/kham-pha`, `eo-gio`, `bien-ho`, `thap-banh-it`, `cu-lao-xanh`,
+    `bai-xep`, `bao-tang-quang-trung`;
+  - sitemap không chứa admin/API/tài khoản/sổ tay/auth routes;
+  - robots disallow admin/API/private routes và trỏ đúng sitemap production;
   - Qdrant và Gemini health;
   - AI text-only, image-only, image + text.
 

@@ -64,9 +64,9 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-surface/90 shadow-sm backdrop-blur-md">
-        <nav className="mx-auto flex h-20 max-w-container-max items-center justify-between px-margin-mobile py-unit md:px-margin-desktop">
-          <div className="flex items-center gap-10">
-            <Link href="/" className="flex items-center" aria-label="Vivu">
+        <nav className="mx-auto flex h-20 max-w-container-max items-center gap-4 px-margin-mobile py-unit md:px-margin-desktop">
+          <div className="flex min-w-0 flex-1 items-center gap-6 xl:gap-10">
+            <Link href="/" className="flex shrink-0 items-center" aria-label="Vivu">
               <Image
                 src="/vivu-logo.png"
                 alt="Vivu"
@@ -76,22 +76,22 @@ export function SiteHeader() {
                 className="h-10 w-auto object-contain"
               />
             </Link>
-            <ul className="hidden items-center gap-6 text-body-md md:flex">
+            <ul className="hidden min-w-0 flex-1 items-center gap-3 text-body-sm lg:flex xl:gap-5 xl:text-body-md">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
                 const isConsulting = item.labelKey === 'consulting';
                 return (
-                  <li key={item.href}>
+                  <li key={item.href} className="shrink-0">
                     <Link
                       href={item.href}
                       className={
                         isConsulting
                           ? active
-                            ? 'rounded-full bg-primary px-4 py-2 font-semibold text-on-primary shadow-sm'
-                            : 'rounded-full border border-primary/40 bg-primary-fixed px-4 py-2 font-semibold text-primary transition-colors hover:bg-primary-fixed-dim'
+                            ? 'whitespace-nowrap rounded-full bg-primary px-3 py-2 font-semibold text-on-primary shadow-sm xl:px-4'
+                            : 'whitespace-nowrap rounded-full border border-primary/40 bg-primary-fixed px-3 py-2 font-semibold text-primary transition-colors hover:bg-primary-fixed-dim xl:px-4'
                         : active
-                          ? 'border-b-2 border-primary pb-1 font-semibold text-primary'
-                          : 'font-medium text-on-surface-variant transition-colors hover:text-primary'
+                          ? 'whitespace-nowrap border-b-2 border-primary pb-1 font-semibold text-primary'
+                          : 'whitespace-nowrap font-medium text-on-surface-variant transition-colors hover:text-primary'
                       }
                     >
                       {t(`nav.${item.labelKey}`)}
@@ -102,9 +102,9 @@ export function SiteHeader() {
             </ul>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-6">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-3 xl:gap-4">
             {/* Desktop search input */}
-            <div className="hidden w-64 lg:block">
+            <div className="hidden w-56 xl:block 2xl:w-64">
               <SearchHero compact placeholder={t('common.searchPlaceholder')} />
             </div>
 
@@ -113,7 +113,7 @@ export function SiteHeader() {
               type="button"
               aria-label={t('common.search')}
               onClick={() => setSearchOpen((s) => !s)}
-              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden"
+              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container xl:hidden"
             >
               <Icon name="search" />
             </button>
@@ -132,7 +132,7 @@ export function SiteHeader() {
               aria-expanded={drawerOpen}
               aria-controls="mobile-drawer"
               onClick={() => setDrawerOpen(true)}
-              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container md:hidden"
+              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden"
             >
               <Icon name="menu" />
             </button>
@@ -141,7 +141,7 @@ export function SiteHeader() {
 
         {/* Mobile search row — slides down when active */}
         {searchOpen && (
-          <div className="border-t border-outline-variant/30 px-margin-mobile py-3 lg:hidden">
+          <div className="border-t border-outline-variant/30 px-margin-mobile py-3 xl:hidden">
             <SearchHero compact placeholder={t('common.searchPlaceholder')} />
           </div>
         )}
@@ -150,7 +150,7 @@ export function SiteHeader() {
       {/* Mobile drawer overlay */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
@@ -159,7 +159,7 @@ export function SiteHeader() {
       {/* Mobile drawer panel */}
       <aside
         id="mobile-drawer"
-        className={`fixed right-0 top-0 z-[70] h-full w-72 max-w-[85%] transform bg-surface shadow-2xl transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed right-0 top-0 z-[70] h-full w-72 max-w-[85%] transform bg-surface shadow-2xl transition-transform duration-300 ease-out lg:hidden ${
           drawerOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-hidden={!drawerOpen}

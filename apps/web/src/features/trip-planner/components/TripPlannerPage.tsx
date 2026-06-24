@@ -171,6 +171,8 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const initialPlaceSlug = initialPlace?.slug;
+  const initialPlaceTitle = initialPlace?.title;
 
   const selectedInterestLabels = useMemo(
     () =>
@@ -191,6 +193,20 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
       }),
     [locale, tripPlannerT],
   );
+  const consultationNote = result
+    ? [result.output.title, result.output.summary].filter(Boolean).join('\n')
+    : '';
+  const consultationHref = useMemo(() => {
+    const params = new URLSearchParams({ source: 'trip_planner' });
+    if (initialPlaceSlug && initialPlaceTitle) {
+      params.set('place', initialPlaceSlug);
+      params.set('placeName', initialPlaceTitle);
+    }
+    if (consultationNote) {
+      params.set('note', consultationNote);
+    }
+    return `/tu-van?${params.toString()}`;
+  }, [consultationNote, initialPlaceSlug, initialPlaceTitle]);
 
   const analyticsMetadata = () => ({
     area,
@@ -418,7 +434,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
             <div className="rounded-xl border border-error/30 bg-error-container px-4 py-3 text-body-sm text-on-error-container">
               <p>{error}</p>
               <Link
-                href={`/tu-van?source=trip_planner${initialPlace ? `&place=${initialPlace.slug}&placeName=${encodeURIComponent(initialPlace.title)}` : ''}`}
+                href={consultationHref}
                 className="mt-3 inline-flex items-center gap-1 font-semibold underline underline-offset-4"
               >
                 <Icon name="support_agent" size={16} />
@@ -532,7 +548,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                   </Link>
                 )}
                 <Link
-                  href={`/tu-van?source=trip_planner&note=${encodeURIComponent(result.output.title)}`}
+                  href={consultationHref}
                   className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-body-sm font-semibold text-on-primary hover:bg-primary/90"
                 >
                   <Icon name="support_agent" size={18} />

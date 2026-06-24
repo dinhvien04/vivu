@@ -17,8 +17,8 @@ interface AdminGuardProps {
  * user has one of the allowed roles. Otherwise shows a loading or denied state
  * and (for unauthenticated users) redirects to /dang-nhap with a `next` param.
  *
- * Note: the underlying API is not yet auth-gated, so this is a UX-level guard.
- * A follow-up will move admin endpoints behind the JwtAuthGuard + RolesGuard.
+ * Admin API endpoints are also protected by JwtAuthGuard + RolesGuard. This
+ * client guard keeps the UI state clear and redirects early.
  */
 export function AdminGuard({ children, allowedRoles = ['admin', 'editor'] }: AdminGuardProps) {
   const t = useTranslations('admin');

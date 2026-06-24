@@ -114,7 +114,8 @@ SENTRY_ENVIRONMENT=development
 ```
 
 `NEXT_IMAGE_REMOTE_HOSTS` là danh sách hostname cho `next/image`, phân tách bằng dấu
-phẩy, ví dụ `res.cloudinary.com,gia-lai-tourism-images.s3.ap-southeast-1.amazonaws.com`.
+phẩy, ví dụ
+`res.cloudinary.com,gia-lai-tourism-images.s3.ap-southeast-1.amazonaws.com,s3.ap-southeast-1.amazonaws.com`.
 Môi trường development vẫn có fallback rộng để không phá dữ liệu local; production nên
 set rõ host ảnh đang dùng.
 
