@@ -39,7 +39,7 @@ Nguoi dung gui form tu `/tu-van` hoac CTA tren detail/AI/trip planner. Backend:
 
 - Validate name va phone/Zalo bat buoc.
 - Co honeypot field `website`.
-- Rate limit theo IP hash, mac dinh `LEADS_RATE_LIMIT_PER_HOUR=5`.
+- Rate limit theo IP hash, mac dinh `LEADS_RATE_LIMIT_PER_HOUR=20`.
 - Khong luu IP/user-agent tho; chi luu hash.
 - Admin cap nhat status va internal note tai `/admin/leads`.
 
@@ -78,7 +78,7 @@ pnpm --filter @vivu/api prisma:generate
 ```env
 TRIP_PLANNER_DAILY_QUOTA_ANON=5
 TRIP_PLANNER_DAILY_QUOTA_USER=20
-LEADS_RATE_LIMIT_PER_HOUR=5
+LEADS_RATE_LIMIT_PER_HOUR=20
 ```
 
 ## Kiem thu thu cong

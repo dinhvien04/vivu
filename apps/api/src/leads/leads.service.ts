@@ -29,7 +29,7 @@ export class LeadsService {
     config: ConfigService,
     private readonly turnstile: TurnstileService,
   ) {
-    this.hourlyLimit = positiveInteger(config.get<string>('LEADS_RATE_LIMIT_PER_HOUR'), 5);
+    this.hourlyLimit = positiveInteger(config.get<string>('LEADS_RATE_LIMIT_PER_HOUR'), 20);
     this.hashSecret =
       config.get<string>('ABUSE_HASH_SECRET') ??
       config.get<string>('AI_QUOTA_HASH_SECRET') ??

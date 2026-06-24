@@ -48,6 +48,11 @@ export async function createLead(input: CreateLeadInput, bearer?: string | null)
     /* empty */
   }
   if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error(
+        'Bạn đã gửi nhiều yêu cầu tư vấn trong thời gian ngắn. Vui lòng thử lại sau hoặc liên hệ Vivu qua Zalo nếu cần gấp.',
+      );
+    }
     throw new Error(pickMessage(payload, 'Không gửi được thông tin tư vấn.'));
   }
 }

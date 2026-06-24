@@ -38,6 +38,9 @@ export async function createDataReport(input: CreateDataReportInput): Promise<vo
     /* empty */
   }
   if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error('Bạn đã gửi nhiều báo lỗi trong thời gian ngắn. Vui lòng thử lại sau.');
+    }
     throw new Error(pickMessage(payload, 'Không gửi được báo lỗi dữ liệu.'));
   }
 }

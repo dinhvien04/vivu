@@ -8,7 +8,7 @@ import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { LeadsService } from './leads.service';
 
-const LEADS_RATE_LIMIT_PER_HOUR = positiveInteger(process.env.LEADS_RATE_LIMIT_PER_HOUR, 5);
+const LEADS_RATE_LIMIT_PER_HOUR = positiveInteger(process.env.LEADS_RATE_LIMIT_PER_HOUR, 20);
 
 @ApiTags('leads')
 @Controller('leads')
