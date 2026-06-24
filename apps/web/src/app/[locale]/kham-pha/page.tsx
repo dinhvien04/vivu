@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Icon } from '@/components/icon';
+import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { PlaceCard } from '@/components/place-card';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
@@ -250,6 +251,7 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
       .filter((place) => matchesTopic(place, topic, locale))
       .filter((place) => matchesArea(place, area.keywords, locale))
       .filter((place) => matchesNeed(place, need, locale)) ?? [];
+  const geoPlaces = places.filter((place) => place.geo);
 
   return (
     <>
@@ -402,11 +404,27 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
           </div>
         )}
 
-        {placesResult && view === 'map' && (
-          <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-outline-variant bg-surface-container/40 px-6 text-center">
+        {placesResult && view === 'map' && geoPlaces.length > 0 && (
+          <>
+            <PlacesMapLoader places={geoPlaces} locale={locale} height="560px" />
+            <p className="mt-3 text-body-sm text-on-surface-variant">
+              {t.rich('map.geoCount', {
+                geo: geoPlaces.length,
+                total: places.length,
+                strong: (chunks) => <strong className="text-on-surface">{chunks}</strong>,
+              })}
+            </p>
+          </>
+        )}
+
+        {placesResult && view === 'map' && geoPlaces.length === 0 && (
+          <section className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-outline-variant bg-surface-container/40 px-6 text-center">
             <Icon name="map" className="!text-5xl text-primary" />
-            <p className="mt-4 font-h4 text-h4 text-on-surface">{t('map.updating')}</p>
-          </div>
+            <h2 className="mt-4 font-h4 text-h4 text-on-surface">{t('map.noGeoPlaces')}</h2>
+            <p className="mt-2 max-w-xl text-body-md text-on-surface-variant">
+              {t('explore.empty')}
+            </p>
+          </section>
         )}
 
         {placesResult && view === 'grid' && places.length === 0 && (
