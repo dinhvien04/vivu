@@ -68,6 +68,8 @@ export function AdminLiveStats() {
   const loading = !stats && !error;
   const empty = error ? '-' : 0;
   const vi = locale !== 'en';
+  const topLeadPlace = stats?.topLeadPlaces?.[0];
+  const topViewedPlace = stats?.topPlacesViewed?.[0];
 
   return (
     <>
@@ -90,11 +92,63 @@ export function AdminLiveStats() {
         loading={loading}
       />
       <StatCard
+        label={vi ? 'Lead mới' : 'New leads'}
+        value={error ? empty : (stats?.newLeads ?? 0)}
+        hint={vi ? 'Cần liên hệ hôm nay' : 'Need follow-up today'}
+        icon="mark_email_unread"
+        iconBg="bg-error-container/40"
+        iconColor="text-error"
+        loading={loading}
+      />
+      <StatCard
+        label={vi ? 'Đang tư vấn' : 'Planning leads'}
+        value={error ? empty : (stats?.planningLeads ?? 0)}
+        hint={
+          topLeadPlace
+            ? vi
+              ? `Địa danh tạo lead nhiều: ${topLeadPlace.placeSlug}`
+              : `Top lead place: ${topLeadPlace.placeSlug}`
+            : vi
+              ? 'Chưa có địa danh nổi bật'
+              : 'No top lead place yet'
+        }
+        icon="forum"
+        iconBg="bg-primary-container/40"
+        iconColor="text-primary"
+        loading={loading}
+      />
+      <StatCard
+        label={vi ? 'Báo lỗi mới' : 'New reports'}
+        value={error ? empty : (stats?.newDataReports ?? 0)}
+        hint={
+          vi
+            ? `${stats?.resolvedDataReports7d ?? 0} đã xử lý trong 7 ngày`
+            : `${stats?.resolvedDataReports7d ?? 0} resolved in 7 days`
+        }
+        icon="report"
+        iconBg="bg-tertiary-container/40"
+        iconColor="text-tertiary"
+        loading={loading}
+      />
+      <StatCard
+        label={vi ? 'AI cần xem lại' : 'AI review needed'}
+        value={error ? empty : (stats?.aiFeedbackIssues ?? 0) + (stats?.missingContextEvents ?? 0)}
+        hint={
+          vi
+            ? `${stats?.missingContextEvents ?? 0} lần thiếu dữ liệu`
+            : `${stats?.missingContextEvents ?? 0} missing-context events`
+        }
+        icon="psychology_alt"
+        iconBg="bg-secondary-container/60"
+        iconColor="text-secondary"
+        loading={loading}
+      />
+      <StatCard
         label={vi ? 'Lịch trình AI' : 'AI trip plans'}
         value={error ? empty : (stats?.totalTripPlans ?? 0)}
         hint={
           vi
-            ? `${stats?.tripPlansToday ?? 0} tao hom nay`
+            ? `${stats?.tripPlansToday ?? 0} tạo hôm nay`
             : `${stats?.tripPlansToday ?? 0} today`
         }
         icon="route"
@@ -103,9 +157,9 @@ export function AdminLiveStats() {
         loading={loading}
       />
       <StatCard
-        label={vi ? 'AI hom nay' : 'AI today'}
+        label={vi ? 'AI hôm nay' : 'AI today'}
         value={error ? empty : (stats?.aiRequestsToday ?? 0)}
-        hint={vi ? 'Luot dung AI chat trong ngay' : 'AI chat requests today'}
+        hint={vi ? 'Lượt dùng AI chat trong ngày' : 'AI chat requests today'}
         icon="auto_awesome"
         iconBg="bg-tertiary-container/40"
         iconColor="text-tertiary"
@@ -114,7 +168,13 @@ export function AdminLiveStats() {
       <StatCard
         label={t('statActiveUsers')}
         value={error ? empty : (stats?.activeUsers ?? 0)}
-        hint={t('statActiveUsersHint')}
+        hint={
+          topViewedPlace
+            ? vi
+              ? `Địa danh được xem nhiều: ${topViewedPlace.placeSlug}`
+              : `Top viewed: ${topViewedPlace.placeSlug}`
+            : t('statActiveUsersHint')
+        }
         icon="group"
         iconBg="bg-primary-container/40"
         iconColor="text-primary"

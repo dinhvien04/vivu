@@ -37,11 +37,23 @@ export class TripPlansController {
     return this.tripPlans.listMine(user.id);
   }
 
+  @Get('shared/:shareId')
+  getShared(@Param('shareId') shareId: string) {
+    return this.tripPlans.getShared(shareId);
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   getMine(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.tripPlans.getMine(user.id, id);
+  }
+
+  @Post(':id/share')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  share(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.tripPlans.share(user.id, id);
   }
 
   @Post(':id/save-to-collection')

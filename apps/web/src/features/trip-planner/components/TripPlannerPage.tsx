@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/components/auth-provider';
 import { Icon } from '@/components/icon';
@@ -10,6 +10,7 @@ import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import {
   generateTripPlan,
   saveTripPlanToCollection,
+  shareTripPlan,
   type GeneratedTripPlan,
 } from '@/lib/trip-planner-client';
 
@@ -150,6 +151,44 @@ function label(locale: Locale, item: { vi: string; en: string }) {
   return locale === 'en' ? item.en : item.vi;
 }
 
+function formatTripPlanForCopy(plan: GeneratedTripPlan['output']): string {
+  const lines = [plan.title, '', plan.summary, ''];
+  for (const day of plan.days) {
+    lines.push(`Ngày ${day.day}: ${day.theme}`);
+    for (const item of day.items) {
+      lines.push(
+        `- ${item.timeOfDay}: ${item.placeName} (${item.suggestedDuration})`,
+        `  ${item.reason}`,
+      );
+      if (item.travelNote) lines.push(`  Di chuyển: ${item.travelNote}`);
+      if (item.tips.length > 0) lines.push(`  Lưu ý: ${item.tips.join(', ')}`);
+    }
+    if (day.foodSuggestions.length > 0) {
+      lines.push(`  Ăn uống: ${day.foodSuggestions.join(', ')}`);
+    }
+    if (day.notes.length > 0) {
+      lines.push(`  Ghi chú: ${day.notes.join(' ')}`);
+    }
+    lines.push('');
+  }
+  if (plan.generalTips.length > 0) {
+    lines.push('Lưu ý chung:', ...plan.generalTips.map((tip) => `- ${tip}`), '');
+  }
+  if (plan.missingDataNote) {
+    lines.push(`Ghi chú dữ liệu: ${plan.missingDataNote}`, '');
+  }
+  lines.push('Tạo bằng Vivu');
+  return lines.filter((line, index, arr) => line.trim() || arr[index - 1]?.trim()).join('\n');
+}
+
+async function copyTextToClipboard(text: string): Promise<void> {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  throw new Error('Trình duyệt chưa hỗ trợ sao chép tự động.');
+}
+
 export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const locale = useLocale() as Locale;
   const tripPlannerT = useTranslations('tripPlanner');
@@ -171,8 +210,39 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [shareState, setShareState] = useState<'idle' | 'sharing' | 'copied'>('idle');
+  const [feedbackState, setFeedbackState] = useState<
+    'idle' | 'helpful' | 'wrong' | 'missing_info'
+  >('idle');
+  const trackedMissingPlanId = useRef<string | null>(null);
   const initialPlaceSlug = initialPlace?.slug;
   const initialPlaceTitle = initialPlace?.title;
+
+  const actionLabels = useMemo(() => {
+    const vi = locale !== 'en';
+    return {
+      save: vi ? 'Lưu lịch trình' : 'Save itinerary',
+      saved: vi ? 'Đã lưu lịch trình' : 'Saved',
+      share: vi ? 'Chia sẻ lịch trình' : 'Share itinerary',
+      sharing: vi ? 'Đang tạo link...' : 'Creating link...',
+      copyPlan: vi ? 'Sao chép lịch trình' : 'Copy itinerary',
+      copied: vi ? 'Đã sao chép' : 'Copied',
+      feedbackHelpful: vi ? 'Lịch trình hữu ích' : 'Helpful plan',
+      feedbackWrong: vi ? 'Lịch trình chưa ổn' : 'Needs improvement',
+      feedbackMissing: vi ? 'Thiếu dữ liệu' : 'Missing data',
+      feedbackThanks: vi ? 'Đã ghi nhận phản hồi.' : 'Feedback saved.',
+    };
+  }, [locale]);
+  const feedbackActions = useMemo<
+    Array<{ value: 'helpful' | 'wrong' | 'missing_info'; label: string; icon: string }>
+  >(
+    () => [
+      { value: 'helpful', label: actionLabels.feedbackHelpful, icon: 'thumb_up' },
+      { value: 'wrong', label: actionLabels.feedbackWrong, icon: 'thumb_down' },
+      { value: 'missing_info', label: actionLabels.feedbackMissing, icon: 'info' },
+    ],
+    [actionLabels],
+  );
 
   const selectedInterestLabels = useMemo(
     () =>
@@ -219,6 +289,25 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     hasInitialPlace: Boolean(initialPlace),
   });
 
+  useEffect(() => {
+    if (!result?.output.missingDataNote || trackedMissingPlanId.current === result.id) return;
+    trackedMissingPlanId.current = result.id;
+    void (async () => {
+      const token = await getAccessToken();
+      await trackAnalyticsEvent('trip_plan_missing_data', {
+        bearer: token,
+        placeSlug: initialPlace?.slug,
+        metadata: {
+          planId: result.id,
+          area,
+          days,
+          interests: interests.join(','),
+          hasInitialPlace: Boolean(initialPlace),
+        },
+      });
+    })();
+  }, [area, days, getAccessToken, initialPlace, interests, result]);
+
   const toggleInterest = (slug: string) => {
     setInterests((current) =>
       current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug],
@@ -245,6 +334,8 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     setNote(initialPlace ? `${initialNote}\n${example.note}` : example.note);
     setResult(null);
     setSaveState('idle');
+    setShareState('idle');
+    setFeedbackState('idle');
     setError(null);
   };
 
@@ -253,6 +344,8 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     setLoading(true);
     setError(null);
     setSaveState('idle');
+    setShareState('idle');
+    setFeedbackState('idle');
     let token: string | null = null;
     try {
       token = await getAccessToken();
@@ -313,6 +406,78 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
       setSaveState('idle');
       setError(err instanceof Error ? err.message : labels.error);
     }
+  };
+
+  const copyPlan = async () => {
+    if (!result) return;
+    try {
+      await copyTextToClipboard(formatTripPlanForCopy(result.output));
+      setShareState('copied');
+      const token = await getAccessToken();
+      await trackAnalyticsEvent('trip_plan_copied', {
+        bearer: token,
+        placeSlug: initialPlace?.slug,
+        metadata: {
+          planId: result.id,
+          area,
+          days,
+          isLoggedIn: Boolean(user),
+        },
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : labels.error);
+    }
+  };
+
+  const share = async () => {
+    if (!result || shareState === 'sharing') return;
+    const token = await getAccessToken();
+    if (!token) {
+      await copyPlan();
+      return;
+    }
+    setShareState('sharing');
+    try {
+      const shared = await shareTripPlan(result.id, token);
+      const path =
+        locale === 'en'
+          ? `/en/lich-trinh/chia-se/${shared.shareId}`
+          : `/lich-trinh/chia-se/${shared.shareId}`;
+      const shareUrl =
+        typeof window !== 'undefined' ? `${window.location.origin}${path}` : path;
+      await copyTextToClipboard(shareUrl);
+      setShareState('copied');
+      await trackAnalyticsEvent('trip_plan_shared', {
+        bearer: token,
+        placeSlug: initialPlace?.slug,
+        metadata: {
+          planId: result.id,
+          shareId: shared.shareId,
+          area,
+          days,
+        },
+      });
+    } catch (err) {
+      setShareState('idle');
+      setError(err instanceof Error ? err.message : labels.error);
+    }
+  };
+
+  const submitFeedback = async (value: 'helpful' | 'wrong' | 'missing_info') => {
+    if (!result) return;
+    setFeedbackState(value);
+    const token = await getAccessToken();
+    await trackAnalyticsEvent('trip_plan_feedback_submitted', {
+      bearer: token,
+      placeSlug: initialPlace?.slug,
+      metadata: {
+        value,
+        planId: result.id,
+        area,
+        days,
+        hasMissingData: Boolean(result.output.missingDataNote),
+      },
+    });
   };
 
   return (
@@ -529,23 +694,39 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                   {loading ? labels.generating : labels.regenerate}
                 </button>
                 {user ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={save}
+                      disabled={saveState !== 'idle'}
+                      className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-body-sm font-semibold text-primary transition hover:bg-primary-fixed disabled:opacity-60"
+                    >
+                      <Icon name={saveState === 'saved' ? 'check' : 'bookmark_add'} size={18} />
+                      {saveState === 'saved' ? actionLabels.saved : actionLabels.save}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={share}
+                      disabled={shareState === 'sharing'}
+                      className="inline-flex items-center gap-2 rounded-full border border-outline-variant px-4 py-2 text-body-sm font-semibold text-on-surface-variant transition hover:border-primary hover:text-primary disabled:opacity-60"
+                    >
+                      <Icon name={shareState === 'copied' ? 'check' : 'ios_share'} size={18} />
+                      {shareState === 'sharing'
+                        ? actionLabels.sharing
+                        : shareState === 'copied'
+                          ? actionLabels.copied
+                          : actionLabels.share}
+                    </button>
+                  </>
+                ) : (
                   <button
                     type="button"
-                    onClick={save}
-                    disabled={saveState !== 'idle'}
-                    className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-body-sm font-semibold text-primary transition hover:bg-primary-fixed disabled:opacity-60"
-                  >
-                    <Icon name={saveState === 'saved' ? 'check' : 'bookmark_add'} size={18} />
-                    {saveState === 'saved' ? labels.saved : labels.save}
-                  </button>
-                ) : (
-                  <Link
-                    href="/dang-nhap"
+                    onClick={copyPlan}
                     className="inline-flex items-center gap-2 rounded-full border border-outline-variant px-4 py-2 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
                   >
-                    <Icon name="login" size={18} />
-                    {labels.needLogin}
-                  </Link>
+                    <Icon name={shareState === 'copied' ? 'check' : 'content_copy'} size={18} />
+                    {shareState === 'copied' ? actionLabels.copied : actionLabels.copyPlan}
+                  </button>
                 )}
                 <Link
                   href={consultationHref}
@@ -561,6 +742,32 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                   <Icon name="travel_explore" size={18} />
                   {labels.exploreMore}
                 </Link>
+              </div>
+            </div>
+
+            <div className="mb-6 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="mr-1 text-body-sm font-semibold text-on-surface-variant">
+                  {locale === 'en' ? 'How was this itinerary?' : 'Lịch trình này thế nào?'}
+                </span>
+                {feedbackActions.map((action) => (
+                  <button
+                    key={action.value}
+                    type="button"
+                    onClick={() => submitFeedback(action.value)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-body-sm font-semibold transition ${
+                      feedbackState === action.value
+                        ? 'border-primary bg-primary text-on-primary'
+                        : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'
+                    }`}
+                  >
+                    <Icon name={action.icon} size={16} />
+                    {action.label}
+                  </button>
+                ))}
+                {feedbackState !== 'idle' && (
+                  <span className="text-body-sm text-primary">{actionLabels.feedbackThanks}</span>
+                )}
               </div>
             </div>
 

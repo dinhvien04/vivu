@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { randomBytes } from 'crypto';
 import type { FastifyRequest } from 'fastify';
 import { GeminiService } from '../gemini/gemini.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -40,7 +41,7 @@ export class TripPlansService {
     dto: GenerateTripPlanDto,
     request: FastifyRequest,
     user?: AuthenticatedUser,
-  ): Promise<{ data: { id: string; title: string; output: TripPlanOutput } }> {
+  ): Promise<{ data: { id: string; title: string; output: TripPlanOutput; shareId: string | null; isPublic: boolean } }> {
     await this.quota.consume(request, user);
 
     const candidates = await this.loadCandidatePlaces(dto);
@@ -67,17 +68,34 @@ export class TripPlansService {
           create: placeIds.map((placeId, index) => ({ placeId, position: index })),
         },
       },
-      select: { id: true, title: true },
+      select: { id: true, title: true, shareId: true, isPublic: true },
     });
 
-    return { data: { id: plan.id, title: plan.title, output } };
+    return {
+      data: {
+        id: plan.id,
+        title: plan.title,
+        output,
+        shareId: plan.shareId,
+        isPublic: plan.isPublic,
+      },
+    };
   }
 
   async listMine(userId: string) {
     const rows = await this.prisma.tripPlan.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true, input: true, output: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        title: true,
+        input: true,
+        output: true,
+        shareId: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     return { data: rows };
   }
@@ -85,10 +103,58 @@ export class TripPlansService {
   async getMine(userId: string, id: string) {
     const row = await this.prisma.tripPlan.findUnique({
       where: { id },
-      select: { id: true, userId: true, title: true, input: true, output: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        userId: true,
+        title: true,
+        input: true,
+        output: true,
+        shareId: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     if (!row) throw new NotFoundException('Không tìm thấy lịch trình.');
     if (row.userId !== userId) throw new ForbiddenException('Bạn không có quyền xem lịch trình này.');
+    return { data: row };
+  }
+
+  async share(userId: string, id: string) {
+    const plan = await this.prisma.tripPlan.findUnique({
+      where: { id },
+      select: { id: true, userId: true, title: true, shareId: true, isPublic: true },
+    });
+    if (!plan) throw new NotFoundException('Không tìm thấy lịch trình.');
+    if (plan.userId !== userId) throw new ForbiddenException('Bạn không có quyền chia sẻ lịch trình này.');
+
+    if (plan.shareId && plan.isPublic) {
+      return { data: { id: plan.id, title: plan.title, shareId: plan.shareId, isPublic: true } };
+    }
+
+    const shareId = plan.shareId ?? (await this.createUniqueShareId());
+    const updated = await this.prisma.tripPlan.update({
+      where: { id },
+      data: { shareId, isPublic: true },
+      select: { id: true, title: true, shareId: true, isPublic: true },
+    });
+    return { data: updated };
+  }
+
+  async getShared(shareId: string) {
+    const row = await this.prisma.tripPlan.findFirst({
+      where: { shareId, isPublic: true },
+      select: {
+        id: true,
+        title: true,
+        output: true,
+        shareId: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    if (!row) throw new NotFoundException('Không tìm thấy lịch trình chia sẻ.');
     return { data: row };
   }
 
@@ -154,6 +220,15 @@ export class TripPlansService {
         categories: { include: { category: true } },
       },
     });
+  }
+
+  private async createUniqueShareId(): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const shareId = randomBytes(12).toString('base64url');
+      const existing = await this.prisma.tripPlan.findUnique({ where: { shareId } });
+      if (!existing) return shareId;
+    }
+    return `${randomBytes(18).toString('base64url')}`;
   }
 }
 

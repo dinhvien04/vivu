@@ -15,6 +15,15 @@ export interface GeneratedTripPlan {
   id: string;
   title: string;
   output: TripPlanOutput;
+  shareId?: string | null;
+  isPublic?: boolean;
+}
+
+export interface SharedTripPlanResult {
+  id: string;
+  title: string;
+  shareId: string;
+  isPublic: boolean;
 }
 
 interface ErrorPayload {
@@ -90,5 +99,20 @@ export async function saveTripPlanToCollection(
   }
   const body = payload as { data?: { id: string; name: string; itemsCount: number } };
   if (!body.data) throw new Error('Không lưu được lịch trình vào sổ tay.');
+  return body.data;
+}
+
+export async function shareTripPlan(id: string, bearer: string): Promise<SharedTripPlanResult> {
+  const res = await fetch(`/api/trip-plans/${id}/share`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${bearer}` },
+    cache: 'no-store',
+  });
+  const payload = await readJson(res);
+  if (!res.ok) {
+    throw new Error(pickMessage(payload, 'Không tạo được liên kết chia sẻ lịch trình.'));
+  }
+  const body = payload as { data?: SharedTripPlanResult };
+  if (!body.data?.shareId) throw new Error('Không tạo được liên kết chia sẻ lịch trình.');
   return body.data;
 }

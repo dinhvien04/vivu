@@ -9,8 +9,15 @@ export interface AdminStats {
   totalLeads: number;
   aiRequestsToday: number;
   tripPlansToday: number;
+  newLeads: number;
+  planningLeads: number;
+  newDataReports: number;
+  resolvedDataReports7d: number;
+  aiFeedbackIssues: number;
+  missingContextEvents: number;
   leadsByStatus: Array<{ status: string; count: number }>;
   topPlacesViewed: Array<{ placeSlug: string; count: number }>;
+  topLeadPlaces: Array<{ placeSlug: string; count: number }>;
   topSearchQueries: Array<{ query: string; count: number }>;
 }
 

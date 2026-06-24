@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { sendAiChatMessage } from '../services/ai-chat.api';
-import type { ChatMessage } from '../types/ai-chat.types';
+import type { AiChatResponse, ChatMessage } from '../types/ai-chat.types';
 
 const SESSION_STORAGE_KEY = 'vivu.aiChat.sessionId';
 const MESSAGES_STORAGE_KEY = 'vivu.aiChat.messages';
@@ -55,6 +55,23 @@ function persistMessages(messages: ChatMessage[]): void {
   } catch {
     /* Ignore unavailable storage. */
   }
+}
+
+function topPlaceSlug(response?: AiChatResponse): string | undefined {
+  return (
+    response?.matched_images?.find((image) => image.place_slug)?.place_slug ??
+    response?.places?.find((place) => place.slug)?.slug
+  );
+}
+
+function hasMissingContext(response: AiChatResponse): boolean {
+  const answer = response.answer.toLocaleLowerCase('vi-VN');
+  return (
+    answer.includes('không đủ dữ liệu') ||
+    answer.includes('chưa có đủ dữ liệu') ||
+    answer.includes('khong du du lieu') ||
+    (response.input_type !== 'image_only' && (!response.sources || response.sources.length === 0))
+  );
 }
 
 export function useAiChat(errorMessage: string) {
@@ -117,10 +134,23 @@ export function useAiChat(errorMessage: string) {
           image: params.image,
           sessionId,
         });
+        const assistantId = createId('assistant');
+        if (hasMissingContext(response)) {
+          void trackAnalyticsEvent('ai_missing_context', {
+            placeSlug: topPlaceSlug(response),
+            metadata: {
+              messageId: assistantId,
+              inputType: response.input_type,
+              hasImage: Boolean(params.image),
+              hasText: Boolean(content),
+              hasSources: Boolean(response.sources?.length),
+            },
+          });
+        }
         setMessages((current) => [
           ...current,
           {
-            id: createId('assistant'),
+            id: assistantId,
             role: 'assistant',
             content: response.answer,
             response,
@@ -146,5 +176,21 @@ export function useAiChat(errorMessage: string) {
     [errorMessage, isSending, sessionId],
   );
 
-  return { isSending, messages, sendMessage };
+  const submitFeedback = useCallback(
+    async (message: ChatMessage, value: 'helpful' | 'wrong' | 'missing_info') => {
+      await trackAnalyticsEvent('ai_feedback_submitted', {
+        placeSlug: topPlaceSlug(message.response),
+        metadata: {
+          value,
+          messageId: message.id,
+          inputType: message.response?.input_type,
+          hasSources: Boolean(message.response?.sources?.length),
+          hasMatchedImages: Boolean(message.response?.matched_images?.length),
+        },
+      });
+    },
+    [],
+  );
+
+  return { isSending, messages, sendMessage, submitFeedback };
 }

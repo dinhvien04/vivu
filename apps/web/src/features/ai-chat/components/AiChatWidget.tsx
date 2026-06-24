@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Icon } from '@/components/icon';
 import { useAiChat } from '../hooks/useAiChat';
 import { ChatInput } from './ChatInput';
@@ -9,8 +9,9 @@ import { ChatMessages } from './ChatMessages';
 
 export function AiChatWidget() {
   const t = useTranslations('aiChat');
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
-  const { isSending, messages, sendMessage } = useAiChat(t('error'));
+  const { isSending, messages, sendMessage, submitFeedback } = useAiChat(t('error'));
   const suggestions = [t('suggestion1'), t('suggestion2'), t('suggestion3')];
 
   useEffect(() => {
@@ -37,6 +38,10 @@ export function AiChatWidget() {
     score: t('score'),
     detectedPlace: t('detectedPlace'),
     askFollowUp: t('askFollowUp'),
+    feedbackHelpful: locale === 'en' ? 'Helpful' : 'Hữu ích',
+    feedbackWrong: locale === 'en' ? 'Wrong' : 'Sai / chưa đúng',
+    feedbackMissing: locale === 'en' ? 'Missing info' : 'Thiếu thông tin',
+    feedbackThanks: locale === 'en' ? 'Feedback saved.' : 'Đã ghi nhận.',
     lowConfidence: (place: string, score: string) => t('lowConfidence', { place, score }),
   };
 
@@ -77,6 +82,7 @@ export function AiChatWidget() {
             isSending={isSending}
             suggestions={suggestions}
             onSuggestion={(question) => void sendMessage({ message: question })}
+            onFeedback={(message, value) => void submitFeedback(message, value)}
             labels={messageLabels}
           />
           <ChatInput

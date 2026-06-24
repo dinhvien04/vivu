@@ -9,8 +9,13 @@ function build(parts: {
   aiRequestsToday?: number;
   tripPlansToday?: number;
   leads?: Array<{ status: string }>;
+  newDataReports?: number;
+  resolvedDataReports7d?: number;
   placeViews?: Array<{ placeSlug: string | null }>;
+  leadPlaces?: Array<{ interestedPlaceSlug: string | null }>;
   searchEvents?: Array<{ metadata: unknown }>;
+  feedbackEvents?: Array<{ metadata: unknown }>;
+  missingContextEvents?: number;
   reviewers?: Array<{ userId: string }>;
   questioners?: Array<{ userId: string }>;
   answerers?: Array<{ userId: string }>;
@@ -22,11 +27,16 @@ function build(parts: {
     .fn()
     .mockResolvedValueOnce(parts.totalTripPlans ?? 0)
     .mockResolvedValueOnce(parts.tripPlansToday ?? 0);
-  const leadFindMany = jest.fn().mockResolvedValue(parts.leads ?? []);
   const analyticsEventFindMany = jest
     .fn()
     .mockResolvedValueOnce(parts.placeViews ?? [])
-    .mockResolvedValueOnce(parts.searchEvents ?? []);
+    .mockResolvedValueOnce(parts.searchEvents ?? [])
+    .mockResolvedValueOnce(parts.feedbackEvents ?? []);
+  const analyticsEventCount = jest.fn().mockResolvedValue(parts.missingContextEvents ?? 0);
+  const dataReportCount = jest
+    .fn()
+    .mockResolvedValueOnce(parts.newDataReports ?? 0)
+    .mockResolvedValueOnce(parts.resolvedDataReports7d ?? 0);
   const prisma = {
     place: { count: jest.fn().mockResolvedValue(parts.totalPlaces ?? 0) },
     review: {
@@ -38,7 +48,13 @@ function build(parts: {
     },
     lead: {
       count: jest.fn().mockResolvedValue(parts.totalLeads ?? 0),
-      findMany: leadFindMany,
+      findMany: jest
+        .fn()
+        .mockResolvedValueOnce(parts.leads ?? [])
+        .mockResolvedValueOnce(parts.leadPlaces ?? []),
+    },
+    dataReport: {
+      count: dataReportCount,
     },
     aiUsage: {
       aggregate: jest.fn().mockResolvedValue({
@@ -50,6 +66,7 @@ function build(parts: {
     },
     analyticsEvent: {
       findMany: analyticsEventFindMany,
+      count: analyticsEventCount,
     },
     question: { findMany: questionFindMany },
     answer: { findMany: answerFindMany },
@@ -63,8 +80,9 @@ function build(parts: {
     questionFindMany,
     answerFindMany,
     tripPlanCount,
-    leadFindMany,
     analyticsEventFindMany,
+    analyticsEventCount,
+    dataReportCount,
   };
 }
 
@@ -79,8 +97,15 @@ describe('AdminStatsService.snapshot', () => {
     expect(out.totalLeads).toBe(0);
     expect(out.aiRequestsToday).toBe(0);
     expect(out.tripPlansToday).toBe(0);
+    expect(out.newLeads).toBe(0);
+    expect(out.planningLeads).toBe(0);
+    expect(out.newDataReports).toBe(0);
+    expect(out.resolvedDataReports7d).toBe(0);
+    expect(out.aiFeedbackIssues).toBe(0);
+    expect(out.missingContextEvents).toBe(0);
     expect(out.leadsByStatus).toEqual([]);
     expect(out.topPlacesViewed).toEqual([]);
+    expect(out.topLeadPlaces).toEqual([]);
     expect(out.topSearchQueries).toEqual([]);
   });
 
@@ -92,6 +117,9 @@ describe('AdminStatsService.snapshot', () => {
       totalLeads: 5,
       aiRequestsToday: 12,
       tripPlansToday: 2,
+      newDataReports: 3,
+      resolvedDataReports7d: 4,
+      missingContextEvents: 6,
     });
     const out = await service.snapshot();
     expect(out.totalPlaces).toBe(42);
@@ -100,6 +128,9 @@ describe('AdminStatsService.snapshot', () => {
     expect(out.totalLeads).toBe(5);
     expect(out.aiRequestsToday).toBe(12);
     expect(out.tripPlansToday).toBe(2);
+    expect(out.newDataReports).toBe(3);
+    expect(out.resolvedDataReports7d).toBe(4);
+    expect(out.missingContextEvents).toBe(6);
   });
 
   it('returns ISO timestamp for computedAt', async () => {
@@ -152,7 +183,13 @@ describe('AdminStatsService.snapshot', () => {
 
   it('aggregates lead statuses, top place views and search queries', async () => {
     const { service } = build({
-      leads: [{ status: 'new' }, { status: 'new' }, { status: 'booked' }],
+      leads: [{ status: 'new' }, { status: 'new' }, { status: 'planning' }],
+      leadPlaces: [
+        { interestedPlaceSlug: 'ky-co' },
+        { interestedPlaceSlug: 'ky-co' },
+        { interestedPlaceSlug: 'bien-ho' },
+        { interestedPlaceSlug: null },
+      ],
       placeViews: [
         { placeSlug: 'bien-ho' },
         { placeSlug: 'bien-ho' },
@@ -165,21 +202,33 @@ describe('AdminStatsService.snapshot', () => {
         { metadata: { q: 'ky co' } },
         { metadata: { other: 'ignored' } },
       ],
+      feedbackEvents: [
+        { metadata: { value: 'wrong' } },
+        { metadata: { value: 'missing_info' } },
+        { metadata: { value: 'helpful' } },
+      ],
     });
 
     const out = await service.snapshot();
 
     expect(out.leadsByStatus).toEqual([
       { status: 'new', count: 2 },
-      { status: 'booked', count: 1 },
+      { status: 'planning', count: 1 },
     ]);
+    expect(out.newLeads).toBe(2);
+    expect(out.planningLeads).toBe(1);
     expect(out.topPlacesViewed).toEqual([
       { placeSlug: 'bien-ho', count: 2 },
       { placeSlug: 'ky-co', count: 1 },
+    ]);
+    expect(out.topLeadPlaces).toEqual([
+      { placeSlug: 'ky-co', count: 2 },
+      { placeSlug: 'bien-ho', count: 1 },
     ]);
     expect(out.topSearchQueries).toEqual([
       { query: 'bien ho', count: 2 },
       { query: 'ky co', count: 1 },
     ]);
+    expect(out.aiFeedbackIssues).toBe(2);
   });
 });

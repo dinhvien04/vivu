@@ -9,7 +9,7 @@ import { AuditLogsService, type ListAuditLogsResult } from './audit-logs.service
 @ApiTags('admin/audit-logs')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin', 'editor')
+@Roles('admin')
 @Controller('admin/audit-logs')
 export class AuditLogsController {
   constructor(private readonly svc: AuditLogsService) {}

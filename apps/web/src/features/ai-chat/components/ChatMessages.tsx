@@ -11,6 +11,7 @@ interface ChatMessagesProps {
   isSending: boolean;
   suggestions: string[];
   onSuggestion: (question: string) => void;
+  onFeedback?: (message: ChatMessage, value: 'helpful' | 'wrong' | 'missing_info') => void;
   labels: {
     emptyTitle: string;
     emptyLead: string;
@@ -25,6 +26,10 @@ interface ChatMessagesProps {
     score: string;
     detectedPlace: string;
     askFollowUp: string;
+    feedbackHelpful: string;
+    feedbackWrong: string;
+    feedbackMissing: string;
+    feedbackThanks: string;
     lowConfidence: (place: string, score: string) => string;
   };
 }
@@ -35,6 +40,7 @@ export function ChatMessages({
   isSending,
   suggestions,
   onSuggestion,
+  onFeedback,
   labels,
 }: ChatMessagesProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -95,7 +101,14 @@ export function ChatMessages({
           </div>
         </div>
       ) : (
-        messages.map((message) => <ChatBubble key={message.id} message={message} labels={labels} />)
+        messages.map((message) => (
+          <ChatBubble
+            key={message.id}
+            message={message}
+            labels={labels}
+            onFeedback={onFeedback}
+          />
+        ))
       )}
 
       {isSending && (

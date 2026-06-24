@@ -2,11 +2,9 @@
 
 Cập nhật: 24/06/2026.
 
-Mục tiêu của checklist này là chuẩn hóa 20 địa danh ưu tiên để web, bản đồ, tư vấn và AI trả lời
-đều có dữ liệu đủ dùng. Không hard-code dữ liệu này vào frontend; database/backend vẫn là nguồn
-dữ liệu chính.
+Checklist này chuẩn hóa 20 địa danh ưu tiên để web, bản đồ, tư vấn và AI có dữ liệu đủ dùng. Không hard-code dữ liệu này vào frontend; database/backend vẫn là nguồn chính.
 
-## Quy chuẩn cho mỗi địa danh
+## Quy Chuẩn Cho Mỗi Địa Danh
 
 - [ ] Vì sao nên đi.
 - [ ] Mùa đẹp.
@@ -19,327 +17,48 @@ dữ liệu chính.
 - [ ] FAQ.
 - [ ] Nguồn tham khảo.
 - [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
+- [ ] Ảnh gallery sạch.
 - [ ] Tọa độ đã kiểm.
+- [ ] RAG text đủ sâu.
+- [ ] AI test question pass.
 
-## Danh sách ưu tiên
+## Danh Sách Ưu Tiên
 
-### 1. Eo Gió
+1. Eo Gió
+2. Kỳ Co
+3. Cù Lao Xanh
+4. Biển Hồ
+5. Biển Hồ Chè
+6. Tháp Bánh Ít
+7. Đầm Thị Nại
+8. Bảo tàng Quang Trung
+9. Bãi Xép
+10. Biển Quy Nhơn
+11. Biển Quy Hòa
+12. Đồi cỏ hồng Đắk Đoa
+13. Chùa Ông Núi
+14. Tháp Đôi
+15. Ghềnh Ráng Tiên Sa
+16. Hòn Khô
+17. Nhơn Lý
+18. Nhơn Hải
+19. Bảo tàng tỉnh Gia Lai
+20. Núi lửa Chư Đăng Ya
 
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
+## Mẫu Kiểm Một Địa Danh
 
-### 2. Kỳ Co
+Sao chép block này cho từng địa danh khi biên tập dữ liệu:
 
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 3. Cù Lao Xanh
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 4. Biển Hồ
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 5. Biển Hồ Chè
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 6. Tháp Bánh Ít
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 7. Đầm Thị Nại
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 8. Bảo tàng Quang Trung
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 9. Bãi Xép
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 10. Biển Quy Nhơn
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 11. Biển Quy Hòa
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 12. Đồi cỏ hồng Đắk Đoa
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 13. Chùa Ông Núi
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 14. Tháp Đôi
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 15. Ghềnh Ráng Tiên Sa
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 16. Hòn Khô
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 17. Nhơn Lý
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 18. Nhơn Hải
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 19. Bảo tàng tỉnh Gia Lai
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
-
-### 20. Núi lửa Chư Đăng Ya
-
-- [ ] Vì sao nên đi.
-- [ ] Mùa đẹp.
-- [ ] Thời lượng tham quan.
-- [ ] Cách đi.
-- [ ] Điểm gần đó.
-- [ ] Hoạt động nên làm.
-- [ ] Lưu ý an toàn.
-- [ ] Gợi ý lịch trình 1 buổi / 1 ngày.
-- [ ] FAQ.
-- [ ] Nguồn tham khảo.
-- [ ] Ảnh hero đẹp.
-- [ ] Ảnh gallery đủ sạch.
-- [ ] Tọa độ đã kiểm.
+- [ ] Tên tiếng Việt đúng dấu.
+- [ ] Slug ổn định.
+- [ ] Category đúng.
+- [ ] Province dùng Gia Lai theo scope hiện tại, có thể ghi chú Bình Định cũ trong mô tả nếu cần.
+- [ ] Summary ngắn dưới 300 ký tự.
+- [ ] Description chỉ lấy phần giới thiệu địa điểm, không nhét tài liệu quá dài.
+- [ ] Hero image hiển thị được.
+- [ ] Gallery không có ảnh lỗi/đen/vỡ.
+- [ ] Tọa độ có confidence/source nếu chưa chắc.
+- [ ] Có ít nhất 3 câu hỏi AI test:
+  - Nơi này có gì đẹp?
+  - Nên đi mùa nào?
+  - Gợi ý lịch trình nửa ngày/1 ngày.

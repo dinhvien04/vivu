@@ -15,7 +15,7 @@ export function AiChatPage({ placeSlug }: { placeSlug?: string }) {
   const t = useTranslations('aiChat');
   const locale = useLocale() as Locale;
   const [contextPlaceTitle, setContextPlaceTitle] = useState<string | null>(null);
-  const { isSending, messages, sendMessage } = useAiChat(t('error'));
+  const { isSending, messages, sendMessage, submitFeedback } = useAiChat(t('error'));
   const suggestions = [t('suggestion1'), t('suggestion2'), t('suggestion3'), t('suggestion4')];
   const contextQuestion = contextPlaceTitle
     ? t('placeContextQuestion', { place: contextPlaceTitle })
@@ -53,6 +53,10 @@ export function AiChatPage({ placeSlug }: { placeSlug?: string }) {
     score: t('score'),
     detectedPlace: t('detectedPlace'),
     askFollowUp: t('askFollowUp'),
+    feedbackHelpful: locale === 'en' ? 'Helpful' : 'Hữu ích',
+    feedbackWrong: locale === 'en' ? 'Wrong' : 'Sai / chưa đúng',
+    feedbackMissing: locale === 'en' ? 'Missing info' : 'Thiếu thông tin',
+    feedbackThanks: locale === 'en' ? 'Feedback saved.' : 'Đã ghi nhận.',
     lowConfidence: (place: string, score: string) => t('lowConfidence', { place, score }),
   };
 
@@ -98,6 +102,7 @@ export function AiChatPage({ placeSlug }: { placeSlug?: string }) {
           isSending={isSending}
           suggestions={suggestions}
           onSuggestion={(question) => void sendMessage({ message: question })}
+          onFeedback={(message, value) => void submitFeedback(message, value)}
           labels={messageLabels}
         />
         <ChatInput

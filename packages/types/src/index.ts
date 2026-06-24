@@ -204,6 +204,8 @@ export interface TripPlan {
   title: string;
   input: unknown;
   output: TripPlanOutput;
+  shareId?: string | null;
+  isPublic?: boolean;
   createdAt: string;
   updatedAt: string;
 }

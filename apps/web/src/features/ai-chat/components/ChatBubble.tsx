@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 import { Icon } from '@/components/icon';
 import { Link } from '@/i18n/navigation';
 import type { ChatMessage } from '../types/ai-chat.types';
@@ -16,16 +19,23 @@ interface ChatBubbleLabels {
   score: string;
   detectedPlace: string;
   askFollowUp: string;
+  feedbackHelpful: string;
+  feedbackWrong: string;
+  feedbackMissing: string;
+  feedbackThanks: string;
   lowConfidence: (place: string, score: string) => string;
 }
 
 export function ChatBubble({
   message,
   labels,
+  onFeedback,
 }: {
   message: ChatMessage;
   labels: ChatBubbleLabels;
+  onFeedback?: (message: ChatMessage, value: 'helpful' | 'wrong' | 'missing_info') => void;
 }) {
+  const [feedback, setFeedback] = useState<'idle' | 'helpful' | 'wrong' | 'missing_info'>('idle');
   const assistant = message.role === 'assistant';
   const response = message.response;
   const topMatch = response?.matched_images?.[0];
@@ -36,6 +46,15 @@ export function ChatBubble({
     detectedName && topMatch?.score !== undefined && topMatch.score < 0.7
       ? labels.lowConfidence(detectedName, detectedScore ?? '')
       : null;
+  const feedbackActions: Array<{
+    value: 'helpful' | 'wrong' | 'missing_info';
+    label: string;
+    icon: string;
+  }> = [
+    { value: 'helpful', label: labels.feedbackHelpful, icon: 'thumb_up' },
+    { value: 'wrong', label: labels.feedbackWrong, icon: 'thumb_down' },
+    { value: 'missing_info', label: labels.feedbackMissing, icon: 'info' },
+  ];
 
   return (
     <article className={`flex items-start gap-3 ${assistant ? 'justify-start' : 'justify-end'}`}>
@@ -135,6 +154,31 @@ export function ChatBubble({
             showLess={labels.showLess}
             scoreLabel={labels.score}
           />
+        )}
+        {assistant && !message.error && onFeedback && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-outline-variant/40 pt-3">
+            {feedbackActions.map((action) => (
+              <button
+                key={action.value}
+                type="button"
+                onClick={() => {
+                  setFeedback(action.value);
+                  onFeedback(message, action.value);
+                }}
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition ${
+                  feedback === action.value
+                    ? 'border-primary bg-primary text-on-primary'
+                    : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'
+                }`}
+              >
+                <Icon name={action.icon} size={14} />
+                {action.label}
+              </button>
+            ))}
+            {feedback !== 'idle' && (
+              <span className="text-xs font-semibold text-primary">{labels.feedbackThanks}</span>
+            )}
+          </div>
         )}
       </div>
     </article>

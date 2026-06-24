@@ -10,7 +10,7 @@ import { LeadsService } from './leads.service';
 @ApiTags('admin/leads')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin', 'editor')
+@Roles('admin')
 @Controller('admin/leads')
 export class AdminLeadsController {
   constructor(private readonly leads: LeadsService) {}
