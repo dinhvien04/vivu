@@ -68,4 +68,25 @@ test.describe('public production smoke', () => {
     expect(text).not.toContain('/tai-khoan');
     expect(text).not.toContain('/lich-trinh/chia-se/');
   });
+
+  test('legal pages and contact page are available and clean from placeholder tags', async ({ page }) => {
+    const urls = ['/chinh-sach-bao-mat', '/dieu-khoan-su-dung', '/lien-he'];
+    for (const url of urls) {
+      const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+      expect(response?.ok()).toBeTruthy();
+      const bodyText = await page.locator('body').innerText();
+      expect(bodyText).not.toContain('TODO');
+      expect(bodyText).not.toContain('Placeholder');
+    }
+  });
+
+  test('footer does not contain any placeholder href="#" links', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const footerLinks = page.locator('footer a');
+    const count = await footerLinks.count();
+    for (let i = 0; i < count; i++) {
+      const href = await footerLinks.nth(i).getAttribute('href');
+      expect(href).not.toBe('#');
+    }
+  });
 });

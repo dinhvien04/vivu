@@ -27,6 +27,8 @@ Follow this checklist manually after deploying the main branch to Vercel to ensu
 - [ ] **sitemap.xml**: Open `/sitemap.xml` and ensure public routes are visible while private/admin/shared-itineraries paths are excluded.
 - [ ] **Google Search Console**: Verify sitemap submission.
 - [ ] **Legal Links**: Scroll to the footer and check that links to **Chính sách bảo mật**, **Điều khoản sử dụng**, and **Liên hệ** open their respective pages.
+- [ ] **No Placeholders**: Verify that no "TODO" or "Placeholder" text appears on public pages.
+- [ ] **Social Links**: Verify that footer social links render only if their environment variables are set, and link to correct target="_blank" destinations instead of "#".
 
 ## Phase 5: Monitoring & Quota Verification
 - [ ] **Uptime Monitors**: Set up uptime checkers pointing to health endpoints.

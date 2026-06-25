@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import type { Locale } from '@/i18n/routing';
+import { SUPPORT_EMAIL } from '@/lib/support';
 
 interface Props {
   params: Promise<{ locale: Locale }>;
@@ -67,11 +68,12 @@ export default async function PrivacyPolicyPage({ params }: Props) {
               <li><strong>Neon:</strong> Database storage.</li>
               <li><strong>AWS S3:</strong> Media and asset storage.</li>
               <li><strong>Qdrant & Gemini:</strong> Vector search index and AI response generation.</li>
+              <li><strong>Cloudflare Turnstile:</strong> Anti-spam verification for public forms such as consulting requests and data reports.</li>
             </ul>
 
             <h2 className="font-h2 text-h2 text-on-surface mt-8 mb-4">4. Data Deletion & Requests</h2>
             <p>
-              You have the right to request deletion or modification of your personal data at any time. To request deletion, please contact us at <a href="mailto:support@vivu.vn">support@vivu.vn</a> (Placeholder - TODO: configure official support inbox).
+              You have the right to request deletion or modification of your personal data at any time. To request deletion, please contact us at <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
             </p>
           </article>
         ) : (
@@ -92,7 +94,7 @@ export default async function PrivacyPolicyPage({ params }: Props) {
               <li><strong>Dữ liệu phản hồi:</strong> Đóng góp ý kiến, báo lỗi dữ liệu địa danh hoặc phản hồi về chất lượng dịch vụ.</li>
             </ul>
 
-            <h2 className="font-h2 text-h2 text-on-surface mt-8 mb-4">2. Mục đích sử dụng</h2>
+            <h2 className="font-h2 text-h2 text-on-surface mt-8 mb-4">2. Điều khoản sử dụng</h2>
             <p>Dữ liệu của bạn được sử dụng cho các mục đích cụ thể sau:</p>
             <ul>
               <li>Hỗ trợ tư vấn chuyến đi và gợi ý hành trình du lịch phù hợp.</li>
@@ -113,11 +115,12 @@ export default async function PrivacyPolicyPage({ params }: Props) {
               <li><strong>Neon:</strong> Lưu trữ cơ sở dữ liệu PostgreSQL.</li>
               <li><strong>AWS S3:</strong> Lưu trữ hình ảnh và tệp phương tiện.</li>
               <li><strong>Qdrant & Gemini:</strong> Tìm kiếm ngữ nghĩa và tạo lịch trình tự động bằng AI.</li>
+              <li><strong>Cloudflare Turnstile:</strong> Xác minh chống spam và bảo vệ các biểu mẫu công khai như tư vấn và báo lỗi dữ liệu.</li>
             </ul>
 
             <h2 className="font-h2 text-h2 text-on-surface mt-8 mb-4">4. Quyền chỉnh sửa và xóa dữ liệu</h2>
             <p>
-              Bạn có quyền yêu cầu chỉnh sửa hoặc xóa thông tin cá nhân của mình khỏi cơ sở dữ liệu của Vivu bất kỳ lúc nào. Vui lòng gửi yêu cầu về email <a href="mailto:support@vivu.vn">support@vivu.vn</a> (TODO: cấu hình hòm thư hỗ trợ chính thức).
+              Bạn có quyền yêu cầu chỉnh sửa hoặc xóa thông tin cá nhân của mình khỏi cơ sở dữ liệu của Vivu bất kỳ lúc nào. Vui lòng gửi yêu cầu về email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
             </p>
           </article>
         )}

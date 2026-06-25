@@ -5,6 +5,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { Icon } from '@/components/icon';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
+import { SUPPORT_EMAIL, HOTLINE_NUMBER } from '@/lib/support';
 
 interface Props {
   params: Promise<{ locale: Locale }>;
@@ -44,7 +45,7 @@ export default async function ContactPage({ params }: Props) {
                   <h3 className="font-bold text-on-surface m-0">Email Support</h3>
                 </div>
                 <p className="text-body-md text-on-surface-variant m-0">
-                  <a href="mailto:support@vivu.vn" className="hover:underline">support@vivu.vn</a> (TODO: setup official email)
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">{SUPPORT_EMAIL}</a>
                 </p>
               </div>
 
@@ -54,7 +55,7 @@ export default async function ContactPage({ params }: Props) {
                   <h3 className="font-bold text-on-surface m-0">Zalo Hotline</h3>
                 </div>
                 <p className="text-body-md text-on-surface-variant m-0">
-                  +84 (0) 999 999 999 (TODO: add hotline number)
+                  {HOTLINE_NUMBER}
                 </p>
               </div>
             </div>
@@ -88,7 +89,7 @@ export default async function ContactPage({ params }: Props) {
                   <h3 className="font-bold text-on-surface m-0">Gửi Email hỗ trợ</h3>
                 </div>
                 <p className="text-body-md text-on-surface-variant m-0">
-                  <a href="mailto:support@vivu.vn" className="hover:underline">support@vivu.vn</a> (TODO: cấu hình hòm thư hỗ trợ)
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">{SUPPORT_EMAIL}</a>
                 </p>
               </div>
 
@@ -98,7 +99,7 @@ export default async function ContactPage({ params }: Props) {
                   <h3 className="font-bold text-on-surface m-0">Kênh Zalo</h3>
                 </div>
                 <p className="text-body-md text-on-surface-variant m-0">
-                  +84 (0) 999 999 999 (TODO: cấu hình hotline)
+                  {HOTLINE_NUMBER}
                 </p>
               </div>
             </div>

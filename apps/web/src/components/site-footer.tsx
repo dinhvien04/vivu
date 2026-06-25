@@ -8,6 +8,9 @@ import { Icon } from './icon';
 export function SiteFooter() {
   const t = useTranslations();
   const year = new Date().getFullYear();
+  const fbUrl = (process.env.NEXT_PUBLIC_FACEBOOK_URL || '').trim();
+  const igUrl = (process.env.NEXT_PUBLIC_INSTAGRAM_URL || '').trim();
+  const ytUrl = (process.env.NEXT_PUBLIC_YOUTUBE_URL || '').trim();
 
   return (
     <footer className="border-t border-outline-variant bg-surface-container">
@@ -111,29 +114,43 @@ export function SiteFooter() {
       </div>
 
       <div className="mx-auto max-w-container-max border-t border-outline-variant/30 px-margin-mobile py-8 text-center md:px-margin-desktop">
-        <div className="mb-4 flex justify-center gap-6">
-          <a
-            href="#"
-            aria-label="Facebook"
-            className="text-on-secondary-fixed-variant transition-colors hover:text-primary"
-          >
-            <Icon name="public" />
-          </a>
-          <a
-            href="#"
-            aria-label="Instagram"
-            className="text-on-secondary-fixed-variant transition-colors hover:text-primary"
-          >
-            <Icon name="photo_camera" />
-          </a>
-          <a
-            href="#"
-            aria-label="YouTube"
-            className="text-on-secondary-fixed-variant transition-colors hover:text-primary"
-          >
-            <Icon name="smart_display" />
-          </a>
-        </div>
+        {(fbUrl || igUrl || ytUrl) && (
+          <div className="mb-4 flex justify-center gap-6">
+            {fbUrl && (
+              <a
+                href={fbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="text-on-secondary-fixed-variant transition-colors hover:text-primary"
+              >
+                <Icon name="public" />
+              </a>
+            )}
+            {igUrl && (
+              <a
+                href={igUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="text-on-secondary-fixed-variant transition-colors hover:text-primary"
+              >
+                <Icon name="photo_camera" />
+              </a>
+            )}
+            {ytUrl && (
+              <a
+                href={ytUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="text-on-secondary-fixed-variant transition-colors hover:text-primary"
+              >
+                <Icon name="smart_display" />
+              </a>
+            )}
+          </div>
+        )}
         <p className="text-[12px] text-outline">{t('footer.copyright', { year })}</p>
       </div>
     </footer>
