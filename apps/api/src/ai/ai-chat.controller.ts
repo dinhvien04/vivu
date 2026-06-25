@@ -54,6 +54,9 @@ export class AiChatController {
     },
   })
   chatRequest(@Req() request: FastifyRequest, @Body() body: AiChatDto) {
+    if (process.env.AI_FEATURE_ENABLED === 'false') {
+      throw new ServiceUnavailableException('Vivu AI đang tạm bảo trì, vui lòng thử lại sau.');
+    }
     return this.chat.handleRequest(request, body);
   }
 

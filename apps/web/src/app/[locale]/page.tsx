@@ -72,9 +72,8 @@ async function loadHomeData(locale: Locale): Promise<{
   return { hero, collections };
 }
 
-// The page depends on the places API, so it cannot be prerendered when the API
-// is unavailable in environments such as isolated CI runners.
-export const dynamic = 'force-dynamic';
+// The page depends on the places API, so it can be prerendered with a 60-second revalidation period.
+export const revalidate = 60;
 
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;

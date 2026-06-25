@@ -16,7 +16,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   `img-src 'self' data: blob: https: ${imgSrcExtra.join(' ')}`.trim(),
-  `connect-src 'self' ${apiOrigin ? apiOrigin : ''} ${turnstileEnabled ? turnstileOrigin : ''} ${connectSrcExtra.join(' ')}`.trim(),
+  `connect-src 'self' ${apiOrigin ? apiOrigin : ''} ${turnstileEnabled ? turnstileOrigin : ''} https://api.open-meteo.com ${connectSrcExtra.join(' ')}`.trim(),
   `frame-src 'self'${turnstileEnabled ? ` ${turnstileOrigin}` : ''}`,
   "media-src 'self' blob: https:",
   "worker-src 'self' blob:",
@@ -31,7 +31,7 @@ const contentSecurityPolicy = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   transpilePackages: ['@vivu/types'],
   allowedDevOrigins: ['127.0.0.1:3100', 'localhost:3100'],
   images: {

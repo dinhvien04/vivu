@@ -1,57 +1,28 @@
-# Vivu Backup And Restore
+# Backup and Disaster Recovery Plan
 
-Cập nhật: 24/06/2026.
+This guide outlines recovery steps for database failure, storage loss, and security breaches.
 
-## PostgreSQL / Neon
+## 1. Neon Database Backups
+- **Automatic Backups**: Neon performs automatic backups hourly/daily depending on your plan.
+- **Manual Backups (pg_dump)**:
+  ```bash
+  pg_dump -h ep-raspy-dust-ao0o5jfn-pooler.c-2.ap-southeast-1.aws.neon.tech -U neondb_owner -d neondb -F c -b -v -f vivu_backup.dump
+  ```
+- **Restore**:
+  ```bash
+  pg_restore -h ep-raspy-dust-ao0o5jfn-pooler.c-2.ap-southeast-1.aws.neon.tech -U neondb_owner -d neondb -v vivu_backup.dump
+  ```
 
-- Dữ liệu chính nằm trong PostgreSQL qua Prisma.
-- Cần bật backup/PITR theo gói Neon đang dùng.
-- Tối thiểu kiểm tra snapshot hằng ngày trước public beta.
-- Restore thử trên database staging trước khi đụng production.
+## 2. AWS S3 Storage versioning
+- Enable **Bucket Versioning** in the AWS console for `gia-lai-tourism-images` to prevent accidental deletions.
+- Keep a local mirror of critical media files.
 
-Quy trình restore khẩn cấp:
+## 3. Qdrant Cloud Recovery
+If the Qdrant Cloud collection gets corrupted or deleted, rebuild it from PostgreSQL metadata:
+- Command: `pnpm --filter @vivu/api reindex:meili` (if configured to push to Qdrant) or execute your local Qdrant pipeline script.
 
-1. Tạm dừng deploy/cron/script ghi dữ liệu nếu đang lỗi lan rộng.
-2. Tạo database branch/restore point từ Neon.
-3. Chạy `pnpm --filter @vivu/api prisma:generate`.
-4. Chạy smoke test API: `/api/v1/places`, `/api/v1/places/:slug`, auth/admin.
-5. Trỏ `DATABASE_URL` production sang DB đã restore nếu đã xác nhận.
-
-## S3
-
-- Bucket hiện dùng: `gia-lai-tourism-images`.
-- Ảnh/docs gốc nên bật versioning nếu ngân sách cho phép.
-- Không public secret AWS.
-- Nếu cần backup ngoài AWS: dùng `aws s3 sync s3://gia-lai-tourism-images <backup-target>` từ máy tin cậy.
-
-## Qdrant
-
-- Collections đang dùng:
-  - `text_collection_cloud`
-  - `image_collection_cloud`
-- Qdrant chỉ dùng cho AI retrieval, không phải database hiển thị chính.
-- Nếu mất collection, rebuild embedding từ dữ liệu S3/text bằng pipeline riêng. Không tạo collection lại từ frontend.
-- Cần lưu lại model/config đang dùng:
-  - Text: `intfloat/multilingual-e5-small`, query prefix `query: ...`
-  - Image: `qdrant/clip-vit-b-32-vision`
-  - Text-to-image: `qdrant/clip-vit-b-32-text`
-
-## Env And Secrets
-
-- Không commit `.env` thật.
-- Inventory secret nên nằm trong Vercel/AWS/Google/Qdrant console và password manager.
-- Rotate ngay khi nghi ngờ lộ:
-  - `JWT_ACCESS_SECRET`
-  - `JWT_REFRESH_SECRET`
-  - `GEMINI_API_KEY`
-  - `QDRANT_API_KEY`
-  - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
-  - `TURNSTILE_SECRET_KEY`
-
-## Disaster Recovery Checklist
-
-- DB mất: restore Neon snapshot/branch, kiểm tra Prisma schema/migration.
-- S3 mất ảnh: restore từ versioning/backup sync, kiểm tra hero/gallery top places.
-- Qdrant mất collection: tạm giữ web hoạt động từ DB, rebuild RAG sau.
-- Gemini key bị lộ: rotate key, giảm quota AI, redeploy API.
-- Admin account bị lộ: reset password, revoke refresh token, đổi role nếu cần, kiểm tra audit log.
+## 4. Emergency Secret Rotation
+If a secret is leaked, update it immediately in the **Vercel Project Settings**:
+1. **Gemini Key Leaked**: Rotate GCP API Key, set new `GEMINI_API_KEY`.
+2. **AWS Keys Leaked**: Deactivate access key in IAM console, generate new `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+3. **Database URL Leaked**: Reset the password in the Neon console immediately.

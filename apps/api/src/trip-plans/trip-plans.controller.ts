@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { FastifyRequest } from 'fastify';
@@ -27,6 +27,11 @@ export class TripPlansController {
     @Req() request: FastifyRequest,
     @CurrentUser() user?: AuthenticatedUser,
   ) {
+    if (process.env.TRIP_PLANNER_FEATURE_ENABLED === 'false') {
+      throw new ServiceUnavailableException(
+        'Tính năng tạo lịch trình AI đang tạm bảo trì, vui lòng gửi yêu cầu tư vấn để Vivu hỗ trợ.'
+      );
+    }
     return this.tripPlans.generate(dto, request, user);
   }
 

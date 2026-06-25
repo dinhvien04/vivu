@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export function GET() {
   return NextResponse.json(getBuildInfo(), {
     headers: {
-      'cache-control': 'no-store, max-age=0',
+      'cache-control': 'public, max-age=0, s-maxage=60',
     },
   });
 }
