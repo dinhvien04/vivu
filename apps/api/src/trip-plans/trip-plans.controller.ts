@@ -6,6 +6,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
 import { TripPlansService } from './trip-plans.service';
 
@@ -17,7 +18,10 @@ const TRIP_PLANNER_RATE_LIMIT_PER_MINUTE = positiveInteger(
 @ApiTags('trip-plans')
 @Controller('trip-plans')
 export class TripPlansController {
-  constructor(private readonly tripPlans: TripPlansService) {}
+  constructor(
+    private readonly tripPlans: TripPlansService,
+    private readonly audit: AuditLogsService,
+  ) {}
 
   @Post('generate')
   @Throttle({ default: { ttl: 60_000, limit: TRIP_PLANNER_RATE_LIMIT_PER_MINUTE } })
@@ -57,15 +61,29 @@ export class TripPlansController {
   @Post(':id/share')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  share(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.tripPlans.share(user.id, id);
+  async share(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const result = await this.tripPlans.share(user.id, id);
+    await this.audit.record({
+      actorId: user.id,
+      action: 'trip_plan.share',
+      entityType: 'trip_plan',
+      entityId: id,
+    });
+    return result;
   }
 
   @Post(':id/unshare')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  unshare(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.tripPlans.unshare(user.id, id);
+  async unshare(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const result = await this.tripPlans.unshare(user.id, id);
+    await this.audit.record({
+      actorId: user.id,
+      action: 'trip_plan.unshare',
+      entityType: 'trip_plan',
+      entityId: id,
+    });
+    return result;
   }
 
   @Post(':id/save-to-collection')

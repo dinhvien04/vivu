@@ -5,7 +5,7 @@ export class AiChatDto {
   @ApiPropertyOptional({ example: 'Biển Hồ Gia Lai có gì đẹp?' })
   @IsOptional()
   @IsString()
-  @MaxLength(4000)
+  @MaxLength(1000)
   message?: string;
 
   @ApiPropertyOptional({ name: 'session_id', example: 'demo-text-1' })
@@ -17,7 +17,7 @@ export class AiChatDto {
 
 export class AiDebugTextDto {
   @IsString()
-  @MaxLength(4000)
+  @MaxLength(1000)
   message: string;
 
   @IsOptional()
