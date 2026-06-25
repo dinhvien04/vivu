@@ -40,3 +40,16 @@ To prevent surprise billing, set up the following budget alerts:
 ### 4. Neon Database
 - Enable auto-suspend for development databases.
 - Set a compute limit scaling cap (e.g. max 1.0 CU or 2.0 CU) to prevent autoscaling cost spikes.
+
+---
+
+## 3. Rate Limiting & Anonymous Quotas
+
+To prevent bot spam from draining Gemini resources, Vivu implements global rate limiting for anonymous users:
+- **Rate Limit Store**: Configured via the `rate-limiter.store.ts` implementing two storage strategies:
+  - **In-Memory Store (Default/Dev)**: Stores rate limit state in local server memory. *Note: This is not shared across multiple Vercel serverless instances.*
+  - **Upstash Redis Store (Production)**: Uses a lightweight, dependency-free Lua script over REST HTTP to sync rate limit states globally across all serverless deployments.
+- **Default Thresholds**:
+  - AI Chat requests: 10 requests / 5 minutes per IP.
+  - Trip Planner requests: 3 requests / 1 hour per IP.
+

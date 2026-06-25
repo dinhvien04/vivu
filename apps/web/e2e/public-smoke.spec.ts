@@ -46,10 +46,10 @@ test.describe('public production smoke', () => {
     const response = await request.get('/robots.txt');
     expect(response.ok()).toBeTruthy();
     const text = await response.text();
-    expect(text).toContain('User-agent:');
-    expect(text).toContain('Disallow: /admin');
-    expect(text).toContain('Disallow: /api');
-    expect(text).toContain('Sitemap:');
+    expect(text.toLowerCase()).toContain('user-agent:');
+    expect(text.toLowerCase()).toContain('disallow: /admin');
+    expect(text.toLowerCase()).toContain('disallow: /api');
+    expect(text.toLowerCase()).toContain('sitemap:');
   });
 
   test('sitemap.xml includes public routes and excludes private/admin paths', async ({ request }) => {

@@ -77,20 +77,20 @@ export function SiteFooter() {
             <h5 className="text-label-caps font-bold text-primary">{t('footer.terms')}</h5>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/dieu-khoan-su-dung"
                   className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
                 >
                   {t('footer.terms')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/chinh-sach-bao-mat"
                   className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
                 >
                   {t('footer.privacy')}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -98,12 +98,12 @@ export function SiteFooter() {
             <h5 className="text-label-caps font-bold text-primary">{t('footer.contact')}</h5>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/lien-he"
                   className="text-on-secondary-fixed-variant transition-colors hover:text-primary hover:underline"
                 >
                   {t('footer.contact')}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
