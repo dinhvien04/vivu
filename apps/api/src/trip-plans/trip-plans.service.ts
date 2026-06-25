@@ -227,10 +227,15 @@ export class TripPlansService {
       ];
     }
 
+    const maxCandidates = (() => {
+      const parsed = Number(process.env.TRIP_PLANNER_MAX_CANDIDATES);
+      return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 40;
+    })();
+
     return this.prisma.place.findMany({
       where,
       orderBy: [{ isAiReady: 'desc' }, { updatedAt: 'desc' }],
-      take: 70,
+      take: maxCandidates,
       include: {
         region: true,
         categories: { include: { category: true } },

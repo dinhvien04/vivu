@@ -20,7 +20,7 @@ services:
       - '6379:6379'
 
   meilisearch:
-    image: getmeili/meilisearch:v1.10
+    image: getmeili/meilisearch:v1.10.2
     container_name: vivu-meilisearch
     restart: unless-stopped
     environment:

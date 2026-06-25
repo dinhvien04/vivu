@@ -182,6 +182,7 @@ export function PlacesMap({
   );
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedPlace?.id ?? null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [mapKey] = useState(() => `map-${Math.random()}`);
 
   const categories = useMemo(() => {
     const items = new Map<string, string>();
@@ -248,6 +249,7 @@ export function PlacesMap({
       style={{ height }}
     >
       <MapContainer
+        key={mapKey}
         center={center}
         zoom={zoom}
         scrollWheelZoom

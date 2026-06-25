@@ -128,7 +128,12 @@ export function LeadFormPage({
       });
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : labels.error);
+      const errMsg = err instanceof Error ? err.message : labels.error;
+      if (errMsg.includes('expired') || errMsg.includes('timeout-or-duplicate') || errMsg.includes('Turnstile') || errMsg.includes('token')) {
+        setError(locale === 'en' ? 'Verification session expired. Please verify again.' : 'Phiên xác minh đã hết hạn. Vui lòng xác minh lại.');
+      } else {
+        setError(errMsg);
+      }
       setTurnstileToken('');
       setTurnstileResetKey((value) => value + 1);
     } finally {

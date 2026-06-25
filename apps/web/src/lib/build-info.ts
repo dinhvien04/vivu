@@ -15,9 +15,8 @@ export interface BuildInfo {
   app: 'vivu-web';
   commitSha: string;
   commitMessage: string;
-  appVersion: string;
+  vercelEnv: string;
   buildTime: string;
-  environment: string;
   defaultLocale: string;
   siteUrl: string;
 }
@@ -27,9 +26,8 @@ export function getBuildInfo(): BuildInfo {
     app: 'vivu-web',
     commitSha: readEnv('VERCEL_GIT_COMMIT_SHA'),
     commitMessage: readEnv('VERCEL_GIT_COMMIT_MESSAGE'),
-    appVersion: readEnv('NEXT_PUBLIC_APP_VERSION'),
+    vercelEnv: process.env.VERCEL_ENV?.trim() || process.env.NODE_ENV || 'unknown',
     buildTime: BUILD_TIME,
-    environment: process.env.VERCEL_ENV?.trim() || process.env.NODE_ENV || 'unknown',
     defaultLocale: routing.defaultLocale,
     siteUrl: SITE_URL,
   };
