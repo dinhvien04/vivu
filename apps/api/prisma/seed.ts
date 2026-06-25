@@ -534,6 +534,125 @@ const PLACES: SeedPlace[] = [
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Active local seed data is intentionally scoped to Gia Lai, including the
+// former Binh Dinh area now used by the product.
+const ACTIVE_PLACES: SeedPlace[] = [
+  {
+    slug: 'bien-ho',
+    titleVi: 'Biển Hồ',
+    titleEn: 'Bien Ho Lake',
+    summaryVi: 'Hồ nước miệng núi lửa nổi bật giữa cao nguyên Pleiku.',
+    descriptionVi:
+      'Biển Hồ là một thắng cảnh quen thuộc của Pleiku, có mặt nước rộng, không khí mát và cảnh quan cao nguyên phù hợp để ngắm bình minh, chụp ảnh và kết hợp tham quan hàng thông trăm tuổi.',
+    regionSlug: 'tay-nguyen',
+    address: 'Pleiku, Gia Lai',
+    lat: 14.0577,
+    lng: 108.0086,
+    bestSeasons: ['winter', 'spring'],
+    categorySlugs: ['thac-suoi', 'nui-rung'],
+  },
+  {
+    slug: 'bien-ho-che',
+    titleVi: 'Biển Hồ Chè',
+    titleEn: 'Bien Ho Tea Hills',
+    summaryVi: 'Đồi chè xanh gần Biển Hồ, hợp đi dạo và chụp ảnh buổi sáng.',
+    descriptionVi:
+      'Biển Hồ Chè là vùng đồi chè xanh mát gần Pleiku. Đây là điểm dừng nhẹ nhàng cho lịch trình nửa ngày, thường được kết hợp với Biển Hồ và hàng thông trăm tuổi.',
+    regionSlug: 'tay-nguyen',
+    address: 'Pleiku, Gia Lai',
+    lat: 14.0595,
+    lng: 108.0025,
+    bestSeasons: ['winter', 'spring'],
+    categorySlugs: ['nui-rung', 'van-hoa'],
+  },
+  {
+    slug: 'thac-phu-cuong',
+    titleVi: 'Thác Phú Cường',
+    titleEn: 'Phu Cuong Waterfall',
+    summaryVi: 'Thác nước lớn trên nền đá bazan, nổi bật sau mùa mưa.',
+    descriptionVi:
+      'Thác Phú Cường là một điểm thiên nhiên nổi tiếng của Gia Lai với dòng nước đổ mạnh qua vách đá bazan. Du khách nên kiểm tra thời tiết và đường đi trước khi ghé.',
+    regionSlug: 'tay-nguyen',
+    address: 'Chư Sê, Gia Lai',
+    lat: 13.7857,
+    lng: 108.2087,
+    bestSeasons: ['summer', 'autumn'],
+    categorySlugs: ['thac-suoi', 'nui-rung'],
+  },
+  {
+    slug: 'ky-co',
+    titleVi: 'Kỳ Co',
+    titleEn: 'Ky Co',
+    summaryVi: 'Bãi biển xanh trong ở khu vực Quy Nhơn, hợp tắm biển và chụp ảnh.',
+    descriptionVi:
+      'Kỳ Co là bãi biển nổi bật của khu vực Quy Nhơn, có nước xanh và cảnh quan đá ven biển. Điểm này thường được kết hợp cùng Eo Gió trong lịch trình biển đảo.',
+    regionSlug: 'mien-trung',
+    address: 'Quy Nhơn, Gia Lai (Bình Định cũ)',
+    lat: 13.9536,
+    lng: 109.2794,
+    bestSeasons: ['spring', 'summer'],
+    categorySlugs: ['bien-dao'],
+  },
+  {
+    slug: 'eo-gio',
+    titleVi: 'Eo Gió',
+    titleEn: 'Eo Gio',
+    summaryVi: 'Cung đường ven biển với vách đá và góc nhìn rộng ra biển.',
+    descriptionVi:
+      'Eo Gió là thắng cảnh ven biển nổi tiếng ở Quy Nhơn, nổi bật với vách đá ôm lấy eo biển và đường đi bộ ven núi nhìn xuống nước xanh.',
+    regionSlug: 'mien-trung',
+    address: 'Nhơn Lý, Quy Nhơn, Gia Lai (Bình Định cũ)',
+    lat: 13.8895,
+    lng: 109.2883,
+    bestSeasons: ['spring', 'summer'],
+    categorySlugs: ['bien-dao'],
+  },
+  {
+    slug: 'thap-doi',
+    titleVi: 'Tháp Đôi',
+    titleEn: 'Twin Cham Towers',
+    summaryVi: 'Cụm tháp Chăm nằm trong đô thị Quy Nhơn.',
+    descriptionVi:
+      'Tháp Đôi là di tích kiến trúc Chăm tiêu biểu ở Quy Nhơn. Điểm này phù hợp cho lịch trình tìm hiểu văn hóa Chăm và các di tích trong khu vực.',
+    regionSlug: 'mien-trung',
+    address: 'Quy Nhơn, Gia Lai (Bình Định cũ)',
+    lat: 13.7829,
+    lng: 109.2199,
+    bestSeasons: ['spring', 'winter'],
+    categorySlugs: ['di-san', 'van-hoa'],
+  },
+  {
+    slug: 'bao-tang-quang-trung',
+    titleVi: 'Bảo tàng Quang Trung',
+    titleEn: 'Quang Trung Museum',
+    summaryVi: 'Không gian lịch sử gắn với phong trào Tây Sơn.',
+    descriptionVi:
+      'Bảo tàng Quang Trung là điểm tham quan lịch sử quan trọng ở vùng Tây Sơn, phù hợp với du khách muốn tìm hiểu văn hóa, lịch sử và các câu chuyện về phong trào Tây Sơn.',
+    regionSlug: 'mien-trung',
+    address: 'Tây Sơn, Gia Lai (Bình Định cũ)',
+    lat: 13.9258,
+    lng: 108.8937,
+    bestSeasons: ['spring', 'winter'],
+    categorySlugs: ['di-san', 'van-hoa'],
+  },
+  {
+    slug: 'suoi-da-vang',
+    titleVi: 'Suối Đá Vàng',
+    titleEn: 'Suoi Da Vang',
+    summaryVi: 'Điểm thiên nhiên gần Bãi Xép, còn được biết đến với tên Tuyệt tình Cốc.',
+    descriptionVi:
+      'Suối Đá Vàng là điểm thiên nhiên gần khu vực Bãi Xép, Quy Nhơn. Dữ liệu tọa độ hiện ở mức đại diện, nên nên kiểm tra đường đi thực tế trước khi ghé.',
+    regionSlug: 'mien-trung',
+    address: 'Quy Nhơn, Gia Lai (Bình Định cũ)',
+    lat: 13.689065,
+    lng: 109.221062,
+    bestSeasons: ['spring', 'summer'],
+    categorySlugs: ['thac-suoi', 'nui-rung'],
+  },
+];
+
+const LEGACY_DEMO_PLACE_SLUGS = PLACES.map((place) => place.slug);
+
 // Seed runner
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -556,11 +675,11 @@ async function main() {
     });
   }
 
-  console.log(`▶︎ Seeding ${PLACES.length} places...`);
+  console.log(`▶︎ Seeding ${ACTIVE_PLACES.length} Gia Lai places...`);
   const regionMap = new Map((await prisma.region.findMany()).map((r) => [r.slug, r.id]));
   const categoryMap = new Map((await prisma.category.findMany()).map((c) => [c.slug, c.id]));
 
-  for (const p of PLACES) {
+  for (const p of ACTIVE_PLACES) {
     const regionId = regionMap.get(p.regionSlug);
     if (!regionId) {
       console.warn(`   skip ${p.slug}: region "${p.regionSlug}" not found`);
@@ -579,6 +698,7 @@ async function main() {
         lat: p.lat,
         lng: p.lng,
         bestSeasons: p.bestSeasons,
+        province: 'Gia Lai',
         status: 'published',
       },
       create: {
@@ -592,6 +712,7 @@ async function main() {
         lat: p.lat,
         lng: p.lng,
         bestSeasons: p.bestSeasons,
+        province: 'Gia Lai',
         status: 'published',
       },
     });
@@ -607,8 +728,20 @@ async function main() {
     }
   }
 
-  const total = await prisma.place.count();
-  console.log(`✔︎ Seed done. Total places: ${total}`);
+  const activeSeedSlugs = new Set(ACTIVE_PLACES.map((place) => place.slug));
+  const legacyDemoSlugsToArchive = LEGACY_DEMO_PLACE_SLUGS.filter((slug) => !activeSeedSlugs.has(slug));
+  if (legacyDemoSlugsToArchive.length > 0) {
+    const archived = await prisma.place.updateMany({
+      where: { slug: { in: legacyDemoSlugsToArchive } },
+      data: { status: 'archived' },
+    });
+    if (archived.count > 0) {
+      console.log(`▶︎ Archived ${archived.count} legacy nationwide demo places.`);
+    }
+  }
+
+  const total = await prisma.place.count({ where: { status: 'published' } });
+  console.log(`✔︎ Seed done. Published places: ${total}`);
 }
 
 main()

@@ -33,6 +33,7 @@ const contentSecurityPolicy = [
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@vivu/types'],
+  allowedDevOrigins: ['127.0.0.1:3100', 'localhost:3100'],
   images: {
     remotePatterns: imageRemotePatterns,
   },
