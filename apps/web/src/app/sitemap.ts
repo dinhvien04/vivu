@@ -15,6 +15,10 @@ const STATIC_PATHS: {
   { path: '/tu-van', changeFrequency: 'monthly', priority: 0.55 },
   { path: '/ai-chat', changeFrequency: 'weekly', priority: 0.8 },
   { path: '/tim-kiem', changeFrequency: 'weekly', priority: 0.6 },
+  { path: '/chinh-sach-bao-mat', changeFrequency: 'monthly', priority: 0.3 },
+  { path: '/dieu-khoan-su-dung', changeFrequency: 'monthly', priority: 0.3 },
+  { path: '/lien-he', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/hoi-dap', changeFrequency: 'weekly', priority: 0.7 },
 ];
 
 /**
