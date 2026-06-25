@@ -198,99 +198,124 @@ export function LeadFormPage({
         onSubmit={submit}
         className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-premium"
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.name}</span>
-            <input
-              required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={120}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.phone}</span>
-            <input
-              required
-              value={phoneOrZalo}
-              onChange={(event) => setPhoneOrZalo(event.target.value)}
-              maxLength={50}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.email}</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              maxLength={254}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.place}</span>
-            <input
-              value={placeName}
-              onChange={(event) => setPlaceName(event.target.value)}
-              maxLength={200}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.area}</span>
-            <input
-              value={area}
-              onChange={(event) => setArea(event.target.value)}
-              maxLength={160}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">
-              {labels.travelDate}
-            </span>
-            <input
-              type="date"
-              value={travelDate}
-              onChange={(event) => setTravelDate(event.target.value)}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.people}</span>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={peopleCount}
-              onChange={(event) => setPeopleCount(Number(event.target.value))}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-label-md font-semibold text-on-surface">{labels.budget}</span>
-            <input
-              value={budget}
-              onChange={(event) => setBudget(event.target.value)}
-              maxLength={200}
-              className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-        </div>
+        <div className="space-y-6">
+          {/* Section 1: Contact Info */}
+          <fieldset className="space-y-4">
+            <legend className="text-body-md font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant/30 pb-1 w-full">
+              {locale === 'en' ? 'Contact Information' : 'Thông tin liên hệ'}
+            </legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="text-label-md font-semibold text-on-surface">{labels.name}</span>
+                <input
+                  required
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  maxLength={120}
+                  className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+              <label className="block">
+                <span className="text-label-md font-semibold text-on-surface">{labels.phone}</span>
+                <input
+                  required
+                  value={phoneOrZalo}
+                  onChange={(event) => setPhoneOrZalo(event.target.value)}
+                  maxLength={50}
+                  className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="text-label-md font-semibold text-on-surface">{labels.email}</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  maxLength={254}
+                  className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+            </div>
+          </fieldset>
 
-        <label className="mt-4 block">
-          <span className="text-label-md font-semibold text-on-surface">{labels.note}</span>
-          <textarea
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            rows={5}
-            maxLength={1000}
-            placeholder={labels.notePlaceholder}
-            className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-        </label>
+          {/* Section 2: Travel Requirements */}
+          <fieldset className="space-y-4">
+            <legend className="text-body-md font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant/30 pb-1 w-full">
+              {locale === 'en' ? 'Travel Requirements' : 'Nhu cầu chuyến đi'}
+            </legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="text-label-md font-semibold text-on-surface">{labels.place}</span>
+                <input
+                  value={placeName}
+                  onChange={(event) => setPlaceName(event.target.value)}
+                  maxLength={200}
+                  className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+              <label className="block">
+                <span className="text-label-md font-semibold text-on-surface">{labels.area}</span>
+                <input
+                  value={area}
+                  onChange={(event) => setArea(event.target.value)}
+                  maxLength={160}
+                  className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+              <label className="block">
+                <span className="text-label-md font-semibold text-on-surface">
+                  {labels.travelDate}
+                </span>
+                <input
+                  type="date"
+                  value={travelDate}
+                  onChange={(event) => setTravelDate(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+              <div className="grid gap-4 grid-cols-2">
+                <label className="block">
+                  <span className="text-label-md font-semibold text-on-surface">{labels.people}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={peopleCount}
+                    onChange={(event) => setPeopleCount(Number(event.target.value))}
+                    className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-label-md font-semibold text-on-surface">{labels.budget}</span>
+                  <input
+                    value={budget}
+                    onChange={(event) => setBudget(event.target.value)}
+                    maxLength={200}
+                    className="mt-2 w-full rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </label>
+              </div>
+            </div>
+          </fieldset>
+
+          {/* Section 3: Extra Notes */}
+          <fieldset className="space-y-4">
+            <legend className="text-body-md font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant/30 pb-1 w-full">
+              {locale === 'en' ? 'Extra Notes' : 'Ghi chú thêm'}
+            </legend>
+            <label className="block">
+              <span className="text-label-md font-semibold text-on-surface">{labels.note}</span>
+              <textarea
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                rows={5}
+                maxLength={1000}
+                placeholder={labels.notePlaceholder}
+                className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </label>
+          </fieldset>
+        </div>
 
         <label className="sr-only">
           Website

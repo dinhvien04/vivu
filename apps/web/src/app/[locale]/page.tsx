@@ -128,41 +128,43 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             <p className="max-w-2xl font-sans text-body-lg leading-relaxed text-on-surface-variant">
               {t('home.heroLead')}
             </p>
-            <div className="flex flex-wrap gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-4">
               <TrackedLink
                 href="/lich-trinh"
                 eventType="home_trip_planner_cta_clicked"
                 analyticsMetadata={{ surface: 'hero' }}
-                className="inline-flex items-center rounded-lg bg-primary-container px-8 py-4 text-body-md font-semibold text-on-primary-container shadow-premium transition-all hover:scale-105 hover:shadow-hover active:scale-95"
+                className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-[1.03] hover:bg-primary/90 hover:shadow-hover active:scale-95"
               >
                 {t('home.heroCta')}
               </TrackedLink>
+              <Link
+                href="/kham-pha"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-outline px-8 text-body-md font-semibold text-on-surface transition-all hover:border-primary hover:text-primary active:scale-95"
+              >
+                {t('home.exploreCta')}
+              </Link>
               <TrackedLink
                 href="/tu-van?source=home"
                 eventType="home_consulting_cta_clicked"
                 analyticsMetadata={{ surface: 'hero' }}
-                className="inline-flex items-center rounded-lg border border-primary/60 bg-primary-fixed px-8 py-4 text-body-md font-semibold text-primary shadow-sm transition-colors hover:bg-primary-fixed-dim"
+                className="inline-flex h-12 items-center justify-center gap-1 text-body-md font-semibold text-primary transition-all hover:underline"
               >
-                {t('home.consultCta')}
+                <span>{t('home.consultCta')}</span>
+                <Icon name="arrow_forward" className="!text-lg" />
               </TrackedLink>
-              <Link
-                href="/kham-pha"
-                className="inline-flex items-center rounded-lg border border-outline-variant px-8 py-4 text-body-md font-semibold text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
-              >
-                {t('home.exploreCta')}
-              </Link>
             </div>
           </div>
           <Link
             href={heroHref}
             className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-xl shadow-premium"
           >
-            <div className="absolute inset-0 z-10 bg-gradient-to-tr from-primary/20 to-transparent" />
+            {/* Dark gradient overlay for bottom text readability */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             {heroImage ? (
               <img
                 src={heroImage}
                 alt={heroAlt}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
@@ -170,10 +172,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               </div>
             )}
             {hero && (
-              <div className="absolute bottom-4 left-4 right-4 z-20 rounded-lg bg-black/40 px-4 py-2 text-white backdrop-blur-sm">
-                <p className="text-label-caps uppercase">{t('home.heroPick')}</p>
-                <p className="font-h4 text-h4">{placeTitle(hero, locale)}</p>
-                {heroSummary && <p className="text-body-md opacity-90">{heroSummary}</p>}
+              <div className="absolute bottom-0 inset-x-0 z-20 px-6 pb-6 pt-12 text-white">
+                <p className="text-label-caps uppercase text-primary-fixed font-semibold tracking-wider">{t('home.heroPick')}</p>
+                <p className="font-h3 text-2xl font-bold mt-1">{placeTitle(hero, locale)}</p>
+                {heroSummary && <p className="text-body-md mt-2 line-clamp-2 text-white/90 font-light">{heroSummary}</p>}
               </div>
             )}
           </Link>

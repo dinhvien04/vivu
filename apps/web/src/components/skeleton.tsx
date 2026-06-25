@@ -21,7 +21,7 @@ export function Skeleton({ className = '', ...rest }: HTMLAttributes<HTMLDivElem
 export function PlaceCardSkeleton() {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface">
-      <Skeleton className="aspect-video w-full" />
+      <Skeleton className="aspect-[4/3] w-full" />
       <div className="flex flex-1 flex-col gap-3 p-4">
         <Skeleton className="h-3 w-20" />
         <Skeleton className="h-6 w-3/4" />

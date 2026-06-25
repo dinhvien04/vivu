@@ -819,82 +819,134 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-8">
               {result.output.days.map((day) => (
                 <section
                   key={day.day}
-                  className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5"
+                  className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-sm"
                 >
-                  <h3 className="font-h3 text-h3 text-on-surface">
-                    {labels.day} {day.day}: {day.theme}
-                  </h3>
-                  <ol className="mt-4 space-y-4">
-                    {day.items.map((item, index) => (
-                      <li key={`${day.day}-${index}`} className="rounded-xl bg-surface p-4">
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <p className="text-overline uppercase tracking-overline text-primary">
-                              {item.timeOfDay} - {item.suggestedDuration}
-                            </p>
-                            <h4 className="mt-1 text-lg font-bold text-on-surface">
-                              {item.placeName}
-                            </h4>
-                            <p className="mt-2 text-body-md text-on-surface-variant">
-                              {item.reason}
-                            </p>
-                          </div>
-                          {item.placeSlug && (
-                            <div className="flex flex-shrink-0 flex-wrap gap-2">
-                              <Link
-                                href={`/dia-diem/${item.placeSlug}`}
-                                className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-primary hover:bg-primary-fixed"
-                              >
-                                {labels.viewPlace}
-                                <Icon name="arrow_forward" size={16} />
-                              </Link>
-                              <Link
-                                href={`/ban-do?place=${item.placeSlug}`}
-                                className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
-                              >
-                                <Icon name="map" size={16} />
-                                {labels.viewMap}
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                        {item.travelNote && (
-                          <p className="mt-3 rounded-lg bg-secondary-container/60 px-3 py-2 text-body-sm text-on-secondary-container">
-                            {item.travelNote}
-                          </p>
-                        )}
-                        {item.tips.length > 0 && (
-                          <ul className="mt-3 flex flex-wrap gap-2">
-                            {item.tips.map((tip) => (
-                              <li
-                                key={tip}
-                                className="rounded-full bg-primary-fixed px-3 py-1 text-xs text-primary"
-                              >
-                                {tip}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
+                  <div className="flex items-center gap-3 border-b border-outline-variant/30 pb-4 mb-6">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary font-bold text-lg">
+                      {day.day}
+                    </span>
+                    <div>
+                      <h3 className="font-h3 text-xl font-bold text-on-surface">
+                        {labels.day} {day.day}
+                      </h3>
+                      <p className="text-body-sm text-on-surface-variant font-medium">{day.theme}</p>
+                    </div>
+                  </div>
 
-                  {day.foodSuggestions.length > 0 && (
-                    <p className="mt-4 text-body-sm text-on-surface-variant">
-                      <span className="font-semibold text-on-surface">{labels.food}: </span>
-                      {day.foodSuggestions.join(', ')}
-                    </p>
-                  )}
-                  {day.notes.length > 0 && (
-                    <p className="mt-2 text-body-sm text-on-surface-variant">
-                      <span className="font-semibold text-on-surface">{labels.notes}: </span>
-                      {day.notes.join(' ')}
-                    </p>
-                  )}
+                  <div className="relative border-l-2 border-primary-container pl-6 ml-5 space-y-8">
+                    {day.items.map((item, index) => {
+                      let timeIcon = 'schedule';
+                      const timeLower = item.timeOfDay.toLowerCase();
+                      if (timeLower.includes('sáng') || timeLower.includes('morning')) {
+                        timeIcon = 'wb_sunny';
+                      } else if (timeLower.includes('trưa') || timeLower.includes('lunch') || timeLower.includes('noon')) {
+                        timeIcon = 'restaurant';
+                      } else if (timeLower.includes('chiều') || timeLower.includes('afternoon')) {
+                        timeIcon = 'filter_drama';
+                      } else if (timeLower.includes('tối') || timeLower.includes('night') || timeLower.includes('evening')) {
+                        timeIcon = 'bedtime';
+                      }
+
+                      return (
+                        <div key={`${day.day}-${index}`} className="relative">
+                          {/* Timeline Dot Icon */}
+                          <span className="absolute -left-[37px] top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary-container text-primary border-2 border-surface shadow-sm">
+                            <Icon name={timeIcon} className="!text-[12px]" />
+                          </span>
+
+                          <div className="rounded-2xl border border-outline-variant/30 bg-surface p-5 shadow-sm hover:border-primary/45 transition-colors">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-label-caps uppercase font-bold tracking-wider text-primary text-xs bg-primary-fixed/50 px-2 py-0.5 rounded">
+                                    {item.timeOfDay}
+                                  </span>
+                                  {item.suggestedDuration && (
+                                    <span className="inline-flex items-center gap-1 text-body-xs text-on-surface-variant">
+                                      <Icon name="timer" className="!text-xs text-outline" />
+                                      {item.suggestedDuration}
+                                    </span>
+                                  )}
+                                </div>
+                                <h4 className="font-h4 text-lg font-bold text-on-surface">
+                                  {item.placeName}
+                                </h4>
+                                <p className="text-body-md text-on-surface-variant leading-relaxed">
+                                  {item.reason}
+                                </p>
+                              </div>
+
+                              {item.placeSlug && (
+                                <div className="flex flex-shrink-0 flex-wrap gap-2">
+                                  <Link
+                                    href={`/dia-diem/${item.placeSlug}`}
+                                    className="inline-flex h-9 items-center gap-1 rounded-full border border-outline-variant px-4 py-1.5 text-body-sm font-semibold text-primary hover:bg-primary-fixed"
+                                  >
+                                    <span>{labels.viewPlace}</span>
+                                    <Icon name="arrow_forward" className="!text-base" />
+                                  </Link>
+                                  <Link
+                                    href={`/ban-do?place=${item.placeSlug}`}
+                                    className="inline-flex h-9 items-center gap-1 rounded-full border border-outline-variant px-4 py-1.5 text-body-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
+                                  >
+                                    <Icon name="map" className="!text-base" />
+                                    <span>{labels.viewMap}</span>
+                                  </Link>
+                                </div>
+                              )}
+                            </div>
+
+                            {item.travelNote && (
+                              <div className="mt-4 flex items-start gap-2 rounded-xl bg-secondary-container/40 px-4 py-2.5 text-body-sm text-on-secondary-container">
+                                <Icon name="directions_car" className="text-primary mt-0.5 !text-base shrink-0" />
+                                <p>{item.travelNote}</p>
+                              </div>
+                            )}
+
+                            {item.tips.length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-1.5">
+                                {item.tips.map((tip) => (
+                                  <span
+                                    key={tip}
+                                    className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant"
+                                  >
+                                    <Icon name="tips_and_updates" className="!text-xs text-amber-500" />
+                                    {tip}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Day Footer metadata (Food & Notes) */}
+                  <div className="mt-6 border-t border-outline-variant/30 pt-4 space-y-2">
+                    {day.foodSuggestions.length > 0 && (
+                      <div className="flex items-start gap-2 text-body-sm text-on-surface-variant">
+                        <Icon name="restaurant" className="text-primary mt-0.5 !text-base shrink-0" />
+                        <p>
+                          <span className="font-semibold text-on-surface">{labels.food}: </span>
+                          {day.foodSuggestions.join(', ')}
+                        </p>
+                      </div>
+                    )}
+                    {day.notes.length > 0 && (
+                      <div className="flex items-start gap-2 text-body-sm text-on-surface-variant">
+                        <Icon name="info" className="text-outline mt-0.5 !text-base shrink-0" />
+                        <p>
+                          <span className="font-semibold text-on-surface">{labels.notes}: </span>
+                          {day.notes.join(' ')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </section>
               ))}
             </div>

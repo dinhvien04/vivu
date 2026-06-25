@@ -31,15 +31,15 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
   return (
     <Link
       href={`/dia-diem/${place.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface transition-shadow hover:shadow-lg"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface transition-all duration-300 hover:shadow-premium hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none"
     >
-      <div className={`relative bg-surface-container ${compact ? 'aspect-[4/3]' : 'aspect-video'}`}>
+      <div className="relative bg-surface-container aspect-[4/3] w-full overflow-hidden">
         <Image
           src={heroSrc}
           alt={title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">

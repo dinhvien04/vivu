@@ -84,7 +84,7 @@ export function SiteHeader() {
                   <li key={item.href} className="shrink-0">
                     <Link
                       href={item.href}
-                      className={
+                      className={`outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded ${
                         isConsulting
                           ? active
                             ? 'whitespace-nowrap rounded-full bg-primary px-3 py-2 font-semibold text-on-primary shadow-sm xl:px-4'
@@ -92,7 +92,7 @@ export function SiteHeader() {
                         : active
                           ? 'whitespace-nowrap border-b-2 border-primary pb-1 font-semibold text-primary'
                           : 'whitespace-nowrap font-medium text-on-surface-variant transition-colors hover:text-primary'
-                      }
+                      }`}
                     >
                       {t(`nav.${item.labelKey}`)}
                     </Link>
