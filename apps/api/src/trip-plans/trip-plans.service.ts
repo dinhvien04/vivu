@@ -141,6 +141,22 @@ export class TripPlansService {
     return { data: updated };
   }
 
+  async unshare(userId: string, id: string) {
+    const plan = await this.prisma.tripPlan.findUnique({
+      where: { id },
+      select: { id: true, userId: true },
+    });
+    if (!plan) throw new NotFoundException('Không tìm thấy lịch trình.');
+    if (plan.userId !== userId) throw new ForbiddenException('Bạn không có quyền tắt chia sẻ lịch trình này.');
+
+    const updated = await this.prisma.tripPlan.update({
+      where: { id },
+      data: { shareId: null, isPublic: false },
+      select: { id: true, title: true, shareId: true, isPublic: true },
+    });
+    return { data: updated };
+  }
+
   async getShared(shareId: string) {
     const row = await this.prisma.tripPlan.findFirst({
       where: { shareId, isPublic: true },

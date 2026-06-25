@@ -11,6 +11,7 @@ import {
   generateTripPlan,
   saveTripPlanToCollection,
   shareTripPlan,
+  unshareTripPlan,
   type GeneratedTripPlan,
 } from '@/lib/trip-planner-client';
 
@@ -211,6 +212,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const [loading, setLoading] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'copied'>('idle');
+  const [sharedId, setSharedId] = useState<string | null>(null);
   const [feedbackState, setFeedbackState] = useState<
     'idle' | 'helpful' | 'wrong' | 'missing_info'
   >('idle');
@@ -224,6 +226,9 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
       save: vi ? 'Lưu lịch trình' : 'Save itinerary',
       saved: vi ? 'Đã lưu lịch trình' : 'Saved',
       share: vi ? 'Chia sẻ lịch trình' : 'Share itinerary',
+      unshare: vi ? 'Tắt chia sẻ' : 'Turn off sharing',
+      unsharing: vi ? 'Đang tắt chia sẻ...' : 'Turning off sharing...',
+      unshared: vi ? 'Đã tắt chia sẻ' : 'Sharing off',
       sharing: vi ? 'Đang tạo link...' : 'Creating link...',
       copyPlan: vi ? 'Sao chép lịch trình' : 'Copy itinerary',
       copied: vi ? 'Đã sao chép' : 'Copied',
@@ -335,6 +340,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     setResult(null);
     setSaveState('idle');
     setShareState('idle');
+    setSharedId(null);
     setFeedbackState('idle');
     setError(null);
   };
@@ -345,6 +351,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     setError(null);
     setSaveState('idle');
     setShareState('idle');
+    setSharedId(null);
     setFeedbackState('idle');
     let token: string | null = null;
     try {
@@ -439,6 +446,8 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     setShareState('sharing');
     try {
       const shared = await shareTripPlan(result.id, token);
+      if (!shared.shareId) throw new Error('Không tạo được liên kết chia sẻ lịch trình.');
+      setSharedId(shared.shareId);
       const path =
         locale === 'en'
           ? `/en/lich-trinh/chia-se/${shared.shareId}`
@@ -478,6 +487,34 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
         hasMissingData: Boolean(result.output.missingDataNote),
       },
     });
+  };
+
+  const unshare = async () => {
+    if (!result || shareState === 'sharing') return;
+    const token = await getAccessToken();
+    if (!token) {
+      setError(labels.needLogin);
+      return;
+    }
+    setShareState('sharing');
+    try {
+      await unshareTripPlan(result.id, token);
+      setSharedId(null);
+      setShareState('idle');
+      await trackAnalyticsEvent('trip_plan_shared', {
+        bearer: token,
+        placeSlug: initialPlace?.slug,
+        metadata: {
+          planId: result.id,
+          action: 'unshare',
+          area,
+          days,
+        },
+      });
+    } catch (err) {
+      setShareState('idle');
+      setError(err instanceof Error ? err.message : labels.error);
+    }
   };
 
   return (
@@ -717,6 +754,17 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                           ? actionLabels.copied
                           : actionLabels.share}
                     </button>
+                    {sharedId && (
+                      <button
+                        type="button"
+                        onClick={unshare}
+                        disabled={shareState === 'sharing'}
+                        className="inline-flex items-center gap-2 rounded-full border border-error/40 px-4 py-2 text-body-sm font-semibold text-error transition hover:bg-error-container disabled:opacity-60"
+                      >
+                        <Icon name="link_off" size={18} />
+                        {shareState === 'sharing' ? actionLabels.unsharing : actionLabels.unshare}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <button

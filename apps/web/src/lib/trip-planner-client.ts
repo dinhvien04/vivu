@@ -22,7 +22,7 @@ export interface GeneratedTripPlan {
 export interface SharedTripPlanResult {
   id: string;
   title: string;
-  shareId: string;
+  shareId: string | null;
   isPublic: boolean;
 }
 
@@ -114,5 +114,20 @@ export async function shareTripPlan(id: string, bearer: string): Promise<SharedT
   }
   const body = payload as { data?: SharedTripPlanResult };
   if (!body.data?.shareId) throw new Error('Không tạo được liên kết chia sẻ lịch trình.');
+  return body.data;
+}
+
+export async function unshareTripPlan(id: string, bearer: string): Promise<SharedTripPlanResult> {
+  const res = await fetch(`/api/trip-plans/${id}/unshare`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${bearer}` },
+    cache: 'no-store',
+  });
+  const payload = await readJson(res);
+  if (!res.ok) {
+    throw new Error(pickMessage(payload, 'Không tắt được chia sẻ lịch trình.'));
+  }
+  const body = payload as { data?: SharedTripPlanResult };
+  if (!body.data) throw new Error('Không tắt được chia sẻ lịch trình.');
   return body.data;
 }

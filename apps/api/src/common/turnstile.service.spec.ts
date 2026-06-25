@@ -16,6 +16,25 @@ function request(): FastifyRequest {
   } as unknown as FastifyRequest;
 }
 
+function exceptionMessage(error: unknown): string {
+  const response =
+    error instanceof BadRequestException ? error.getResponse() : { message: undefined };
+  if (typeof response === 'string') return response;
+  const message = (response as { message?: unknown }).message;
+  if (Array.isArray(message)) return message.join(' ');
+  return typeof message === 'string' ? message : '';
+}
+
+async function expectBadRequestWithSpam(promise: Promise<unknown>): Promise<void> {
+  try {
+    await promise;
+    throw new Error('Expected BadRequestException');
+  } catch (error) {
+    expect(error).toBeInstanceOf(BadRequestException);
+    expect(exceptionMessage(error).toLowerCase()).toContain('spam');
+  }
+}
+
 describe('TurnstileService', () => {
   const originalFetch = globalThis.fetch;
 
@@ -38,7 +57,13 @@ describe('TurnstileService', () => {
       config({ TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'secret' }),
     );
 
-    await expect(service.verify(undefined, request())).rejects.toBeInstanceOf(BadRequestException);
+    await expectBadRequestWithSpam(service.verify(undefined, request()));
+  });
+
+  it('returns a friendly error when the secret key is missing', async () => {
+    const service = new TurnstileService(config({ TURNSTILE_ENABLED: 'true' }));
+
+    await expectBadRequestWithSpam(service.verify('token', request()));
   });
 
   it('accepts a successful Cloudflare verification response', async () => {
@@ -70,6 +95,6 @@ describe('TurnstileService', () => {
       ),
     }) as unknown as typeof fetch;
 
-    await expect(service.verify('bad-token', request())).rejects.toBeInstanceOf(BadRequestException);
+    await expectBadRequestWithSpam(service.verify('bad-token', request()));
   });
 });

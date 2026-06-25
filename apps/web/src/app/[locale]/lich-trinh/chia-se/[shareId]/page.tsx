@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: plan ? `${plan.output.title} · Vivu` : 'Lịch trình chia sẻ · Vivu',
     description: plan?.output.summary ?? 'Lịch trình du lịch Gia Lai được chia sẻ từ Vivu.',
+    robots: { index: false, follow: false },
   };
 }
 

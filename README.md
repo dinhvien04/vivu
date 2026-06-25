@@ -79,6 +79,7 @@ Các địa chỉ local:
 - Web: <http://localhost:3000>
 - API: <http://localhost:4000/api/v1>
 - Swagger: <http://localhost:4000/docs>
+- Build info: <http://localhost:3000/build-info>
 
 ## Biến môi trường
 
@@ -155,6 +156,9 @@ GET  /api/v1/search/suggest
 POST /api/v1/ai/chat
 POST /api/v1/trip-plans/generate
 GET  /api/v1/trip-plans
+GET  /api/v1/trip-plans/shared/:shareId
+POST /api/v1/trip-plans/:id/share
+POST /api/v1/trip-plans/:id/unshare
 POST /api/v1/trip-plans/:id/save-to-collection
 POST /api/v1/leads
 GET  /api/v1/admin/leads
@@ -188,7 +192,12 @@ pnpm typecheck
 pnpm build
 pnpm --filter @vivu/api test
 pnpm --filter @vivu/api test:int
+pnpm --filter @vivu/web test:e2e:list
 ```
+
+Playwright smoke tests chạy qua `pnpm e2e:web`; set `E2E_BASE_URL` để trỏ tới
+production hoặc bỏ trống để Playwright tự khởi động web local. Xem thêm
+[`docs/PRODUCTION_SMOKE_TEST.md`](docs/PRODUCTION_SMOKE_TEST.md).
 
 Integration test dùng Testcontainers nên cần Docker đang chạy.
 
@@ -202,6 +211,8 @@ Integration test dùng Testcontainers nên cần Docker đang chạy.
 - [Security hardening](docs/SECURITY.md)
 - [Business MVP](docs/BUSINESS_MVP.md)
 - [Deploy checklist](docs/DEPLOY_CHECKLIST.md)
+- [Production smoke test](docs/PRODUCTION_SMOKE_TEST.md)
+- [Production migration checklist](docs/PRODUCTION_MIGRATION_CHECKLIST.md)
 
 ## Quy ước an toàn
 

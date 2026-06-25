@@ -56,6 +56,13 @@ export class TripPlansController {
     return this.tripPlans.share(user.id, id);
   }
 
+  @Post(':id/unshare')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  unshare(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.tripPlans.unshare(user.id, id);
+  }
+
   @Post(':id/save-to-collection')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

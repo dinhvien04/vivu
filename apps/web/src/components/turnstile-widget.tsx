@@ -77,5 +77,5 @@ export function TurnstileWidget({ siteKey, onToken, resetKey }: TurnstileWidgetP
 
   if (!siteKey) return null;
 
-  return <div ref={containerRef} className="min-h-[65px]" />;
+  return <div ref={containerRef} data-testid="turnstile-widget" className="min-h-[65px]" />;
 }

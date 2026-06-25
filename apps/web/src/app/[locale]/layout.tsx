@@ -5,6 +5,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { AuthProvider } from '@/components/auth-provider';
 import { ThemeProvider, THEME_PREFLIGHT_SCRIPT } from '@/components/theme-provider';
 import { routing } from '@/i18n/routing';
+import { getBuildInfo } from '@/lib/build-info';
 import { SITE_URL } from '@/lib/site-url';
 import '../globals.css';
 
@@ -74,10 +75,12 @@ export default async function LocaleLayout({
   }
   setRequestLocale(locale);
   const messages = await getMessages();
+  const buildInfo = getBuildInfo();
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
+        <meta name="vivu-build-sha" content={buildInfo.commitSha} />
         {/* Apply the theme class before hydration to prevent a light-mode flash. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_PREFLIGHT_SCRIPT }} />
       </head>
