@@ -102,6 +102,26 @@ describe('TripPlansService sharing', () => {
     expect(prisma.tripPlan.update).not.toHaveBeenCalled();
   });
 
+  it('blocks a non-owner from sharing an itinerary', async () => {
+    const prisma = {
+      tripPlan: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'plan-1',
+          userId: 'owner-1',
+          title: 'Owner plan',
+          shareId: null,
+          isPublic: false,
+        }),
+        update: jest.fn(),
+      },
+    };
+
+    await expect(makeService(prisma).share('user-1', 'plan-1')).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(prisma.tripPlan.update).not.toHaveBeenCalled();
+  });
+
   it('returns 404 before revoking a missing itinerary', async () => {
     const prisma = {
       tripPlan: {

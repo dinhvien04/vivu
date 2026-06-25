@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { AiChatController } from './ai-chat.controller';
 
 function config(values: Record<string, string | undefined>) {
@@ -8,6 +8,25 @@ function config(values: Record<string, string | undefined>) {
 }
 
 describe('AiChatController production hardening', () => {
+  const originalAiFeatureEnabled = process.env.AI_FEATURE_ENABLED;
+
+  afterEach(() => {
+    if (originalAiFeatureEnabled === undefined) {
+      delete process.env.AI_FEATURE_ENABLED;
+    } else {
+      process.env.AI_FEATURE_ENABLED = originalAiFeatureEnabled;
+    }
+  });
+
+  it('returns 503 when the AI kill switch is disabled', () => {
+    process.env.AI_FEATURE_ENABLED = 'false';
+    const controller = createController({ NODE_ENV: 'production' });
+
+    expect(() =>
+      controller.chatRequest({} as never, { message: 'Bien Ho co gi dep?' }),
+    ).toThrow(ServiceUnavailableException);
+  });
+
   it('returns only a simple public health payload in production', () => {
     const controller = createController({
       NODE_ENV: 'production',

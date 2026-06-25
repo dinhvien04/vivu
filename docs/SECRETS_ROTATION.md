@@ -4,7 +4,8 @@ This document details the list of credentials used by Vivu and instructions for 
 
 ## 1. Secrets Inventory
 - `DATABASE_URL` / `DIRECT_DATABASE_URL`: Prisma connection strings to Neon PostgreSQL.
-- `JWT_SECRET`: Signature key for encoding/decoding JWT auth tokens.
+- `JWT_ACCESS_SECRET`: Signature key for short-lived JWT access tokens.
+- `JWT_REFRESH_SECRET`: Reserved refresh-token secret/config value. Current refresh tokens are random values stored in the database as hashes.
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`: AWS credentials for S3 media storage.
 - `GEMINI_API_KEY`: API key for Gemini LLM query processing.
 - `QDRANT_URL` / `QDRANT_API_KEY`: Connection details for Qdrant Vector database.
@@ -24,13 +25,19 @@ This document details the list of credentials used by Vivu and instructions for 
 3. Redeploy the API service.
 4. Deactivate and delete the leaked credentials from IAM settings.
 
-### Scenario C: JWT Secret Leak
+### Scenario C: JWT Access Secret Leak
 1. Generate a new cryptographically strong random string (e.g., using `openssl rand -base64 32`).
-2. Update `JWT_SECRET` in the API configuration.
+2. Update `JWT_ACCESS_SECRET` in the API configuration.
 3. Redeploy the API project.
 4. *Impact*: This will invalidate all active sessions immediately, forcing users to log in again.
+5. Revoke active refresh tokens if you suspect full account/session compromise.
 
-### Scenario D: Database URL Leak
+### Scenario D: Refresh Token Store or Refresh Secret Leak
+1. Rotate `JWT_REFRESH_SECRET` if it is used by deployment checks or future refresh-token signing.
+2. Revoke all rows in the refresh token table or force users to log in again.
+3. Redeploy the API project and verify `/api/auth/refresh` behavior.
+
+### Scenario E: Database URL Leak
 1. Reset the connection credentials/password in Neon console.
 2. Update `DATABASE_URL` and `DIRECT_DATABASE_URL` settings in Vercel.
 3. Redeploy the services.

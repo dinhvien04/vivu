@@ -26,7 +26,8 @@ Configure these variables in your **Vercel API Project**:
 |---|---|---|
 | `DATABASE_URL` | Connection pool URL for Neon Database. | `postgresql://neondb_owner:...-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require` (Pooled connection recommended for serverless) |
 | `DIRECT_DATABASE_URL` | Non-pooled direct database URL. | `postgresql://neondb_owner:...ap-southeast-1.aws.neon.tech/neondb?sslmode=require` (Use only during migrations) |
-| `JWT_SECRET` | Secret key used for signing JWT login tokens. | Generates a secure random 32-character hex key. |
+| `JWT_ACCESS_SECRET` | Secret key used for signing short-lived JWT access tokens. | Generate a strong random value, e.g. `openssl rand -base64 48`. |
+| `JWT_REFRESH_SECRET` | Reserved refresh-token secret for compatibility/config checks. Refresh tokens are stored server-side as hashes. | Generate a strong random value and keep it separate from `JWT_ACCESS_SECRET`. |
 | `GEMINI_API_KEY` | Google AI Studio Gemini API Key. | Secure key for generating AI plans/chat. |
 | `TURNSTILE_ENABLED` | Toggle Turnstile verification in API. | `true` |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile Secret Key. | Cloudflare backend verification secret key. |
@@ -36,5 +37,5 @@ Configure these variables in your **Vercel API Project**:
 ---
 
 > [!WARNING]
-> - Never expose backend secrets (like `DATABASE_URL`, `JWT_SECRET`, `GEMINI_API_KEY`, `TURNSTILE_SECRET_KEY`) to the frontend web application. Only prefix frontend-safe environment variables with `NEXT_PUBLIC_`.
+> - Never expose backend secrets (like `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `GEMINI_API_KEY`, `TURNSTILE_SECRET_KEY`) to the frontend web application. Only prefix frontend-safe environment variables with `NEXT_PUBLIC_`.
 > - Always restart the local dev server after changing `.env.local` or `.env` files for the variables to take effect.
