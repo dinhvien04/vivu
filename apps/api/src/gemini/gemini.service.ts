@@ -20,6 +20,13 @@ export interface GenerateTravelAnswerParams {
   }>;
 }
 
+interface GenerateTextOptions {
+  temperature?: number;
+  maxOutputTokens?: number;
+  responseMimeType?: string;
+  responseJsonSchema?: unknown;
+}
+
 @Injectable()
 export class GeminiService {
   readonly model: string;
@@ -55,7 +62,7 @@ export class GeminiService {
 
   async generateText(
     prompt: string,
-    options: { temperature?: number; maxOutputTokens?: number } = {},
+    options: GenerateTextOptions = {},
   ): Promise<string> {
     this.assertConfigured();
 
@@ -68,6 +75,10 @@ export class GeminiService {
             config: {
               temperature: options.temperature ?? 0.2,
               maxOutputTokens: options.maxOutputTokens ?? this.maxOutputTokens,
+              ...(options.responseMimeType ? { responseMimeType: options.responseMimeType } : {}),
+              ...(options.responseJsonSchema
+                ? { responseJsonSchema: options.responseJsonSchema }
+                : {}),
             },
           }),
           this.timeoutMs,

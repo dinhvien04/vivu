@@ -7,20 +7,19 @@ export function parseTripPlanOutput(raw: string, allowedSlugs: Set<string>): Tri
   const candidate = extractJson(raw);
   let parsed: unknown;
   try {
-    parsed = JSON.parse(candidate);
+    parsed = parseJson(candidate);
   } catch {
     try {
-      parsed = JSON.parse(candidate.replace(/,\s*([}\]])/g, '$1'));
+      parsed = parseJson(candidate.replace(/,\s*([}\]])/g, '$1'));
     } catch {
-      throw new BadGatewayException('AI chưa trả về lịch trình đúng định dạng. Vui lòng thử lại.');
+      throw invalidFormatException();
     }
   }
 
-  if (!isRecord(parsed)) {
-    throw new BadGatewayException('AI chưa trả về lịch trình đúng định dạng. Vui lòng thử lại.');
-  }
+  const root = normalizeRoot(parsed);
+  if (!root) throw invalidFormatException();
 
-  const days = toArray(parsed.days)
+  const days = toArray(root.days ?? root.itinerary ?? root.schedule)
     .map((day, index) => normalizeDay(day, index + 1, allowedSlugs))
     .filter((day): day is TripPlanDay => Boolean(day));
 
@@ -29,18 +28,22 @@ export function parseTripPlanOutput(raw: string, allowedSlugs: Set<string>): Tri
   }
 
   return {
-    title: toText(parsed.title, 'Lịch trình du lịch Gia Lai cùng Vivu'),
-    summary: toText(parsed.summary, 'Vivu đã tạo lịch trình dựa trên dữ liệu địa danh hiện có.'),
+    title: toText(root.title, 'Lịch trình du lịch Gia Lai cùng Vivu'),
+    summary: toText(root.summary, 'Vivu đã tạo lịch trình dựa trên dữ liệu địa danh hiện có.'),
     days,
-    generalTips: toStringArray(parsed.generalTips).slice(0, 8),
+    generalTips: toStringArray(root.generalTips).slice(0, 8),
     missingDataNote:
-      typeof parsed.missingDataNote === 'string' && parsed.missingDataNote.trim()
-        ? parsed.missingDataNote.trim()
+      typeof root.missingDataNote === 'string' && root.missingDataNote.trim()
+        ? root.missingDataNote.trim()
         : null,
   };
 }
 
-function normalizeDay(value: unknown, fallbackDay: number, allowedSlugs: Set<string>): TripPlanDay | null {
+function normalizeDay(
+  value: unknown,
+  fallbackDay: number,
+  allowedSlugs: Set<string>,
+): TripPlanDay | null {
   if (!isRecord(value)) return null;
   const items = toArray(value.items)
     .map((item) => normalizeItem(item, allowedSlugs))
@@ -79,10 +82,83 @@ function extractJson(raw: string): string {
   const trimmed = raw.trim();
   const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fenced?.[1]) return fenced[1].trim();
-  const start = trimmed.indexOf('{');
-  const end = trimmed.lastIndexOf('}');
-  if (start >= 0 && end > start) return trimmed.slice(start, end + 1);
+  const balanced = extractBalancedJson(trimmed);
+  if (balanced) return balanced;
   return trimmed;
+}
+
+function parseJson(candidate: string): unknown {
+  const parsed = JSON.parse(candidate);
+  if (typeof parsed === 'string') {
+    const nested = extractJson(parsed);
+    if (nested !== parsed || /^[\s[{]/.test(nested)) return parseJson(nested);
+  }
+  return parsed;
+}
+
+function normalizeRoot(value: unknown): Record<string, unknown> | null {
+  if (isRecord(value)) return value;
+  if (Array.isArray(value)) return { days: value };
+  return null;
+}
+
+function extractBalancedJson(text: string): string | null {
+  let best: { start: number; end: number } | null = null;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char !== '{' && char !== '[') continue;
+    const end = findBalancedEnd(text, index);
+    if (end === -1) continue;
+    if (!best || index < best.start) best = { start: index, end };
+  }
+  return best ? text.slice(best.start, best.end + 1) : null;
+}
+
+function findBalancedEnd(text: string, start: number): number {
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let index = start; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push('}');
+      continue;
+    }
+
+    if (char === '[') {
+      stack.push(']');
+      continue;
+    }
+
+    if (char === '}' || char === ']') {
+      if (stack.pop() !== char) return -1;
+      if (stack.length === 0) return index;
+    }
+  }
+
+  return -1;
+}
+
+function invalidFormatException(): BadGatewayException {
+  return new BadGatewayException('AI chưa trả về lịch trình đúng định dạng. Vui lòng thử lại.');
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

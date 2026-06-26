@@ -52,8 +52,9 @@ export class TripPlansService {
     const allowedSlugs = new Set(candidates.map((place) => place.slug));
     const prompt = buildTripPlannerPrompt(dto, candidates);
     const raw = await this.gemini.generateText(prompt, {
-      temperature: 0.25,
-      maxOutputTokens: 1800,
+      temperature: 0.15,
+      maxOutputTokens: tripPlannerMaxOutputTokens(),
+      responseMimeType: 'application/json',
     });
     const output = parseTripPlanOutput(raw, allowedSlugs);
     const placeIds = collectPlaceIds(output, candidates);
@@ -273,11 +274,17 @@ function buildTripPlannerPrompt(dto: GenerateTripPlanDto, places: CandidatePlace
     'Trả về JSON hợp lệ, không markdown, không giải thích ngoài JSON.',
     'Schema bắt buộc:',
     '{"title":string,"summary":string,"days":[{"day":number,"theme":string,"items":[{"timeOfDay":"morning|noon|afternoon|evening","placeName":string,"placeSlug":string|null,"reason":string,"suggestedDuration":string,"travelNote":string,"tips":string[]}],"foodSuggestions":string[],"notes":string[]}],"generalTips":string[],"missingDataNote":string|null}',
+    'Return exactly one JSON object matching the schema. The root must be an object with a days array, not a top-level array.',
     '',
     `LANGUAGE: ${dto.locale ?? 'vi'}`,
     `INPUT: ${JSON.stringify(dto)}`,
     `VIVU_PLACES: ${JSON.stringify(placeContext)}`,
   ].join('\n');
+}
+
+function tripPlannerMaxOutputTokens(): number {
+  const parsed = Number(process.env.TRIP_PLANNER_MAX_OUTPUT_TOKENS);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 3200;
 }
 
 function collectPlaceIds(output: TripPlanOutput, places: CandidatePlace[]): string[] {
