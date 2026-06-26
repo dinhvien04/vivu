@@ -5,11 +5,13 @@ This guide explains how to verify which commit is running on production for both
 ## Web Application Verification
 
 Open the following endpoint in your browser or query it via curl:
+
 ```bash
 curl https://vivu-web.vercel.app/build-info
 ```
 
 ### Expected Response Format
+
 ```json
 {
   "app": "vivu-web",
@@ -27,11 +29,13 @@ curl https://vivu-web.vercel.app/build-info
 ## API Backend Verification
 
 Query the API build-info endpoint:
+
 ```bash
 curl https://vivu-api.vercel.app/api/v1/build-info
 ```
 
 ### Expected Response Format
+
 ```json
 {
   "app": "vivu-api",

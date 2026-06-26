@@ -66,6 +66,7 @@ describe('PlacesService.listNearby — integration (PostGIS)', () => {
           lat: p.lat,
           lng: p.lng,
           status: 'published',
+          heroImageUrl: `https://images.example/${p.slug}.jpg`,
         },
       });
     }

@@ -37,7 +37,9 @@ export class AnalyticsService {
   }
 }
 
-function sanitizeMetadata(value: Record<string, unknown> | undefined): Prisma.InputJsonValue | undefined {
+function sanitizeMetadata(
+  value: Record<string, unknown> | undefined,
+): Prisma.InputJsonValue | undefined {
   if (!value) return undefined;
   const out: Record<string, string | number | boolean | null> = {};
   for (const [key, raw] of Object.entries(value).slice(0, 20)) {

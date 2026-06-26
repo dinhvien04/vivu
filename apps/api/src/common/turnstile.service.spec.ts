@@ -90,9 +90,11 @@ describe('TurnstileService', () => {
       config({ TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'secret' }),
     );
     globalThis.fetch = jest.fn().mockResolvedValue({
-      text: jest.fn().mockResolvedValue(
-        JSON.stringify({ success: false, 'error-codes': ['invalid-input-response'] }),
-      ),
+      text: jest
+        .fn()
+        .mockResolvedValue(
+          JSON.stringify({ success: false, 'error-codes': ['invalid-input-response'] }),
+        ),
     }) as unknown as typeof fetch;
 
     await expectBadRequestWithSpam(service.verify('bad-token', request()));

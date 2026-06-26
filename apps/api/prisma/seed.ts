@@ -729,7 +729,9 @@ async function main() {
   }
 
   const activeSeedSlugs = new Set(ACTIVE_PLACES.map((place) => place.slug));
-  const legacyDemoSlugsToArchive = LEGACY_DEMO_PLACE_SLUGS.filter((slug) => !activeSeedSlugs.has(slug));
+  const legacyDemoSlugsToArchive = LEGACY_DEMO_PLACE_SLUGS.filter(
+    (slug) => !activeSeedSlugs.has(slug),
+  );
   if (legacyDemoSlugsToArchive.length > 0) {
     const archived = await prisma.place.updateMany({
       where: { slug: { in: legacyDemoSlugsToArchive } },

@@ -36,7 +36,8 @@ function pickMessage(payload: unknown, fallback: string): string {
     const message = (payload as ErrorPayload).message;
     if (Array.isArray(message) && message.length > 0) return message[0]!;
     if (typeof message === 'string') return message;
-    if (typeof (payload as ErrorPayload).error === 'string') return (payload as ErrorPayload).error!;
+    if (typeof (payload as ErrorPayload).error === 'string')
+      return (payload as ErrorPayload).error!;
   }
   return fallback;
 }

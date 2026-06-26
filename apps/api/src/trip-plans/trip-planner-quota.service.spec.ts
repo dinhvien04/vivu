@@ -19,7 +19,10 @@ describe('TripPlannerQuotaService', () => {
       },
     };
     const config = { get: jest.fn().mockReturnValue(undefined) };
-    const service = new TripPlannerQuotaService(prisma as never, config as unknown as ConfigService);
+    const service = new TripPlannerQuotaService(
+      prisma as never,
+      config as unknown as ConfigService,
+    );
 
     await expect(service.consume(makeRequest())).resolves.toBeUndefined();
 
@@ -38,7 +41,10 @@ describe('TripPlannerQuotaService', () => {
       },
     };
     const config = { get: jest.fn().mockReturnValue(undefined) };
-    const service = new TripPlannerQuotaService(prisma as never, config as unknown as ConfigService);
+    const service = new TripPlannerQuotaService(
+      prisma as never,
+      config as unknown as ConfigService,
+    );
 
     let thrown: unknown;
     try {

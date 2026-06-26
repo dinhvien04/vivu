@@ -165,7 +165,9 @@ export class AdminStatsService {
   }
 }
 
-function countLeadStatuses(rows: Array<{ status: string }>): Array<{ status: string; count: number }> {
+function countLeadStatuses(
+  rows: Array<{ status: string }>,
+): Array<{ status: string; count: number }> {
   const counts = new Map<string, number>();
   for (const row of rows) {
     counts.set(row.status, (counts.get(row.status) ?? 0) + 1);

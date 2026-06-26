@@ -7,13 +7,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleInit() {
     const url = process.env.DATABASE_URL || '';
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+    const isProduction =
+      process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
     if (isProduction) {
       try {
         const hostname = url.split('@')[1]?.split('/')[0]?.split('?')[0];
         if (hostname && hostname.includes('neon.tech') && !hostname.includes('-pooler')) {
           this.logger.warn(
-            'Production DATABASE_URL appears to use a direct Neon connection. Use pooled -pooler URL for API runtime; keep direct URL for migrations.'
+            'Production DATABASE_URL appears to use a direct Neon connection. Use pooled -pooler URL for API runtime; keep direct URL for migrations.',
           );
         }
       } catch {

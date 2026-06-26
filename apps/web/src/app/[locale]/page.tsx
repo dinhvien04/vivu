@@ -56,18 +56,18 @@ async function loadHomeData(locale: Locale): Promise<{
     .filter((place) => place.id !== hero?.id && place.heroImageUrl)
     .slice(0, 4)
     .map((place) => {
-    const title = placeTitle(place, locale);
-    return {
-      title,
-      href: `/dia-diem/${place.slug}`,
-      image: transformCloudinary(place.heroImageUrl, {
-        width: 600,
-        height: 800,
-        crop: 'fill',
-      }),
-      alt: title,
-    };
-  });
+      const title = placeTitle(place, locale);
+      return {
+        title,
+        href: `/dia-diem/${place.slug}`,
+        image: transformCloudinary(place.heroImageUrl, {
+          width: 600,
+          height: 800,
+          crop: 'fill',
+        }),
+        alt: title,
+      };
+    });
 
   return { hero, collections };
 }
@@ -115,10 +115,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
         {/* Hero */}
@@ -173,9 +170,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             )}
             {hero && (
               <div className="absolute bottom-0 inset-x-0 z-20 px-6 pb-6 pt-12 text-white">
-                <p className="text-label-caps uppercase text-primary-fixed font-semibold tracking-wider">{t('home.heroPick')}</p>
+                <p className="text-label-caps uppercase text-primary-fixed font-semibold tracking-wider">
+                  {t('home.heroPick')}
+                </p>
                 <p className="font-h3 text-2xl font-bold mt-1">{placeTitle(hero, locale)}</p>
-                {heroSummary && <p className="text-body-md mt-2 line-clamp-2 text-white/90 font-light">{heroSummary}</p>}
+                {heroSummary && (
+                  <p className="text-body-md mt-2 line-clamp-2 text-white/90 font-light">
+                    {heroSummary}
+                  </p>
+                )}
               </div>
             )}
           </Link>

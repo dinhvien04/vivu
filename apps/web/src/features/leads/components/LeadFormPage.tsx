@@ -49,7 +49,9 @@ function text(locale: Locale) {
       : 'Example: 2 days 1 night, beaches and Cham towers, food suggestions...',
     submit: vi ? 'Gửi yêu cầu tư vấn' : 'Send request',
     submitting: vi ? 'Đang gửi...' : 'Sending...',
-    successTitle: vi ? 'Vivu đã nhận yêu cầu tư vấn của bạn.' : 'Vivu received your consultation request.',
+    successTitle: vi
+      ? 'Vivu đã nhận yêu cầu tư vấn của bạn.'
+      : 'Vivu received your consultation request.',
     successLead: vi
       ? 'Thông tin đã được ghi nhận trong hệ thống để đội ngũ Vivu xử lý.'
       : 'Your information has been recorded in the system for the Vivu team to process.',
@@ -58,7 +60,9 @@ function text(locale: Locale) {
     privacy: vi
       ? 'Thông tin liên hệ chỉ dùng để tư vấn chuyến đi, không hiển thị công khai.'
       : 'Contact data is used only for trip consultation and is not public.',
-    planFirst: vi ? 'Chưa có lịch trình? Tạo lịch trình AI trước.' : 'No itinerary yet? Create an AI itinerary first.',
+    planFirst: vi
+      ? 'Chưa có lịch trình? Tạo lịch trình AI trước.'
+      : 'No itinerary yet? Create an AI itinerary first.',
   };
 }
 
@@ -130,8 +134,17 @@ export function LeadFormPage({
       setSuccess(true);
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : labels.error;
-      if (errMsg.includes('expired') || errMsg.includes('timeout-or-duplicate') || errMsg.includes('Turnstile') || errMsg.includes('token')) {
-        setError(locale === 'en' ? 'Verification session expired. Please verify again.' : 'Phiên xác minh đã hết hạn. Vui lòng xác minh lại.');
+      if (
+        errMsg.includes('expired') ||
+        errMsg.includes('timeout-or-duplicate') ||
+        errMsg.includes('Turnstile') ||
+        errMsg.includes('token')
+      ) {
+        setError(
+          locale === 'en'
+            ? 'Verification session expired. Please verify again.'
+            : 'Phiên xác minh đã hết hạn. Vui lòng xác minh lại.',
+        );
       } else {
         setError(errMsg);
       }
@@ -276,7 +289,9 @@ export function LeadFormPage({
               </label>
               <div className="grid gap-4 grid-cols-2">
                 <label className="block">
-                  <span className="text-label-md font-semibold text-on-surface">{labels.people}</span>
+                  <span className="text-label-md font-semibold text-on-surface">
+                    {labels.people}
+                  </span>
                   <input
                     type="number"
                     min={1}
@@ -287,7 +302,9 @@ export function LeadFormPage({
                   />
                 </label>
                 <label className="block">
-                  <span className="text-label-md font-semibold text-on-surface">{labels.budget}</span>
+                  <span className="text-label-md font-semibold text-on-surface">
+                    {labels.budget}
+                  </span>
                   <input
                     value={budget}
                     onChange={(event) => setBudget(event.target.value)}

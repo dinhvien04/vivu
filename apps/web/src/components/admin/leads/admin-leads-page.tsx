@@ -56,10 +56,10 @@ export function AdminLeadsPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const opts = useMemo<ListLeadsOptions>(() => ({ status, q: q.trim() || undefined, pageSize: 50 }), [
-    q,
-    status,
-  ]);
+  const opts = useMemo<ListLeadsOptions>(
+    () => ({ status, q: q.trim() || undefined, pageSize: 50 }),
+    [q, status],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -194,7 +194,8 @@ export function AdminLeadsPage() {
                     </span>
                   </div>
                   <p className="mt-2 text-body-sm text-on-surface-variant">
-                    Phone/Zalo: <span className="font-semibold text-on-surface">{lead.phoneOrZalo}</span>
+                    Phone/Zalo:{' '}
+                    <span className="font-semibold text-on-surface">{lead.phoneOrZalo}</span>
                   </p>
                   {lead.email && (
                     <p className="text-body-sm text-on-surface-variant">
@@ -217,7 +218,9 @@ export function AdminLeadsPage() {
                   <p>Ngày đi: {formatDate(lead.travelDate)}</p>
                   <p>Số người: {lead.peopleCount ?? '-'}</p>
                   <p>Ngân sách: {lead.budget ?? '-'}</p>
-                  {lead.note && <p className="mt-2 rounded-lg bg-surface-container p-2">{lead.note}</p>}
+                  {lead.note && (
+                    <p className="mt-2 rounded-lg bg-surface-container p-2">{lead.note}</p>
+                  )}
                 </div>
 
                 <div className="space-y-3">
@@ -303,7 +306,10 @@ export function AdminLeadsPage() {
                     onClick={() => void copyContact(selectedLead)}
                     className="inline-flex items-center gap-1 rounded-full border border-outline-variant px-3 py-1.5 text-body-sm font-semibold text-primary"
                   >
-                    <Icon name={copiedId === selectedLead.id ? 'check' : 'content_copy'} size={16} />
+                    <Icon
+                      name={copiedId === selectedLead.id ? 'check' : 'content_copy'}
+                      size={16}
+                    />
                     {copiedId === selectedLead.id ? 'Đã copy' : 'Copy'}
                   </button>
                 </div>
@@ -312,10 +318,18 @@ export function AdminLeadsPage() {
               <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Info label="Email" value={selectedLead.email ?? '-'} />
                 <Info label="Nguồn" value={selectedLead.source} />
-                <Info label="Địa danh" value={selectedLead.interestedPlaceName ?? selectedLead.interestedPlaceSlug ?? '-'} />
+                <Info
+                  label="Địa danh"
+                  value={
+                    selectedLead.interestedPlaceName ?? selectedLead.interestedPlaceSlug ?? '-'
+                  }
+                />
                 <Info label="Khu vực" value={selectedLead.area ?? '-'} />
                 <Info label="Ngày đi" value={formatDate(selectedLead.travelDate)} />
-                <Info label="Số người" value={selectedLead.peopleCount ? String(selectedLead.peopleCount) : '-'} />
+                <Info
+                  label="Số người"
+                  value={selectedLead.peopleCount ? String(selectedLead.peopleCount) : '-'}
+                />
                 <Info label="Ngân sách" value={selectedLead.budget ?? '-'} />
                 <Info label="Tạo lúc" value={formatDate(selectedLead.createdAt)} />
               </dl>
@@ -349,7 +363,9 @@ export function AdminLeadsPage() {
                 </label>
 
                 <label className="block">
-                  <span className="text-label-md font-semibold text-on-surface">Ghi chú nội bộ</span>
+                  <span className="text-label-md font-semibold text-on-surface">
+                    Ghi chú nội bộ
+                  </span>
                   <textarea
                     defaultValue={selectedLead.internalNote ?? ''}
                     rows={5}

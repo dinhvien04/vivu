@@ -7,7 +7,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { DataReportsService } from './data-reports.service';
-import { ListDataReportsQueryDto, UpdateDataReportStatusDto } from './dto/list-data-reports.query.dto';
+import {
+  ListDataReportsQueryDto,
+  UpdateDataReportStatusDto,
+} from './dto/list-data-reports.query.dto';
 
 @ApiTags('admin/data-reports')
 @ApiBearerAuth()

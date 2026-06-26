@@ -3,6 +3,7 @@
 This guide outlines recovery steps for database failure, storage loss, and security breaches.
 
 ## 1. Neon Database Backups
+
 - **Automatic Backups**: Neon performs automatic backups hourly/daily depending on your plan.
 - **Manual Backups (pg_dump)**:
   ```bash
@@ -14,15 +15,20 @@ This guide outlines recovery steps for database failure, storage loss, and secur
   ```
 
 ## 2. AWS S3 Storage versioning
+
 - Enable **Bucket Versioning** in the AWS console for `gia-lai-tourism-images` to prevent accidental deletions.
 - Keep a local mirror of critical media files.
 
 ## 3. Qdrant Cloud Recovery
+
 If the Qdrant Cloud collection gets corrupted or deleted, rebuild it from PostgreSQL metadata:
+
 - Command: `pnpm --filter @vivu/api reindex:meili` (if configured to push to Qdrant) or execute your local Qdrant pipeline script.
 
 ## 4. Emergency Secret Rotation
+
 If a secret is leaked, update it immediately in the **Vercel Project Settings**:
+
 1. **Gemini Key Leaked**: Rotate GCP API Key, set new `GEMINI_API_KEY`.
 2. **AWS Keys Leaked**: Deactivate access key in IAM console, generate new `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 3. **Database URL Leaked**: Reset the password in the Neon console immediately.

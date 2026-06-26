@@ -89,9 +89,9 @@ export function SiteHeader() {
                           ? active
                             ? 'whitespace-nowrap rounded-full bg-primary px-3 py-2 font-semibold text-on-primary shadow-sm xl:px-4'
                             : 'whitespace-nowrap rounded-full border border-primary/40 bg-primary-fixed px-3 py-2 font-semibold text-primary transition-colors hover:bg-primary-fixed-dim xl:px-4'
-                        : active
-                          ? 'whitespace-nowrap border-b-2 border-primary pb-1 font-semibold text-primary'
-                          : 'whitespace-nowrap font-medium text-on-surface-variant transition-colors hover:text-primary'
+                          : active
+                            ? 'whitespace-nowrap border-b-2 border-primary pb-1 font-semibold text-primary'
+                            : 'whitespace-nowrap font-medium text-on-surface-variant transition-colors hover:text-primary'
                       }`}
                     >
                       {t(`nav.${item.labelKey}`)}
@@ -198,9 +198,9 @@ export function SiteHeader() {
                         ? 'bg-primary font-semibold text-on-primary shadow-sm'
                         : isConsulting
                           ? 'border border-primary/40 bg-primary-fixed font-semibold text-primary hover:bg-primary-fixed-dim'
-                      : active
-                        ? 'bg-primary-fixed font-semibold text-primary'
-                        : 'font-medium text-on-surface hover:bg-surface-container'
+                          : active
+                            ? 'bg-primary-fixed font-semibold text-primary'
+                            : 'font-medium text-on-surface hover:bg-surface-container'
                     }`}
                   >
                     {t(`nav.${item.labelKey}`)}

@@ -41,16 +41,16 @@ Repo hiện chưa có screenshot thật, nên README chưa nhúng ảnh để tr
 
 ## Công Nghệ
 
-| Phần | Công nghệ |
-| --- | --- |
-| Monorepo | pnpm workspaces, Turborepo |
+| Phần     | Công nghệ                                                          |
+| -------- | ------------------------------------------------------------------ |
+| Monorepo | pnpm workspaces, Turborepo                                         |
 | Frontend | Next.js 15, React 18, TypeScript, Tailwind CSS, next-intl, Leaflet |
-| Backend | NestJS 11, Fastify, Prisma |
-| Database | PostgreSQL, PostGIS |
-| Search | Meilisearch, fallback PostgreSQL |
-| Storage | AWS S3 presigned URLs, Cloudinary legacy support |
-| AI | Qdrant Cloud Inference, Gemini |
-| QA | ESLint, TypeScript, Jest, Playwright |
+| Backend  | NestJS 11, Fastify, Prisma                                         |
+| Database | PostgreSQL, PostGIS                                                |
+| Search   | Meilisearch, fallback PostgreSQL                                   |
+| Storage  | AWS S3 presigned URLs, Cloudinary legacy support                   |
+| AI       | Qdrant Cloud Inference, Gemini                                     |
+| QA       | ESLint, TypeScript, Jest, Playwright                               |
 
 ## Cấu Trúc Repo
 

@@ -1,9 +1,25 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { LEAD_SOURCES } from './create-lead.dto';
 
-export const LEAD_STATUSES = ['new', 'contacted', 'planning', 'booked', 'cancelled', 'spam'] as const;
+export const LEAD_STATUSES = [
+  'new',
+  'contacted',
+  'planning',
+  'booked',
+  'cancelled',
+  'spam',
+] as const;
 
 export class ListLeadsQueryDto {
   @ApiPropertyOptional({ enum: LEAD_STATUSES })

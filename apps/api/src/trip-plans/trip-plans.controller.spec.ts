@@ -18,9 +18,7 @@ describe('TripPlansController production hardening', () => {
     const tripPlans = { generate: jest.fn() };
     const controller = new TripPlansController(tripPlans as never, {} as never);
 
-    expect(() => controller.generate(validDto(), {} as never)).toThrow(
-      ServiceUnavailableException,
-    );
+    expect(() => controller.generate(validDto(), {} as never)).toThrow(ServiceUnavailableException);
     expect(tripPlans.generate).not.toHaveBeenCalled();
   });
 });

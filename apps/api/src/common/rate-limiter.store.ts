@@ -63,7 +63,9 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
       const resJson = (await response.json()) as { result?: number | null };
       return resJson.result === 1;
     } catch (err) {
-      this.logger.error(`Upstash rate limiting failed: ${err instanceof Error ? err.message : err}. Falling open.`);
+      this.logger.error(
+        `Upstash rate limiting failed: ${err instanceof Error ? err.message : err}. Falling open.`,
+      );
       return true;
     }
   }

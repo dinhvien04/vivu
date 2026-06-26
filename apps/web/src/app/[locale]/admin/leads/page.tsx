@@ -13,11 +13,7 @@ export async function generateMetadata({
   return { title: locale === 'en' ? 'Leads' : 'Lead tư vấn' };
 }
 
-export default async function AdminLeadsRoute({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}) {
+export default async function AdminLeadsRoute({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   return <AdminLeadsPage />;

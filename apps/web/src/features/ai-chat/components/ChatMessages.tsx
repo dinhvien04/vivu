@@ -102,12 +102,7 @@ export function ChatMessages({
         </div>
       ) : (
         messages.map((message) => (
-          <ChatBubble
-            key={message.id}
-            message={message}
-            labels={labels}
-            onFeedback={onFeedback}
-          />
+          <ChatBubble key={message.id} message={message} labels={labels} onFeedback={onFeedback} />
         ))
       )}
 

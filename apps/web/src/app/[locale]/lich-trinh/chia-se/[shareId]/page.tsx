@@ -76,9 +76,7 @@ export default async function SharedTripPlanPage({ params }: PageProps) {
           {vi ? 'Lịch trình chia sẻ' : 'Shared itinerary'}
         </p>
         <h1 className="mt-2 font-h1 text-h1 text-on-surface">{plan.output.title}</h1>
-        <p className="mt-3 max-w-3xl text-body-lg text-on-surface-variant">
-          {plan.output.summary}
-        </p>
+        <p className="mt-3 max-w-3xl text-body-lg text-on-surface-variant">{plan.output.summary}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
             href="/lich-trinh"
@@ -108,7 +106,10 @@ export default async function SharedTripPlanPage({ params }: PageProps) {
             </h2>
             <ol className="mt-4 space-y-4">
               {day.items.map((item, index) => (
-                <li key={`${day.day}-${index}`} className="rounded-2xl bg-surface-container-lowest p-4">
+                <li
+                  key={`${day.day}-${index}`}
+                  className="rounded-2xl bg-surface-container-lowest p-4"
+                >
                   <p className="text-overline uppercase tracking-overline text-primary">
                     {item.timeOfDay} · {item.suggestedDuration}
                   </p>
@@ -139,9 +140,7 @@ export default async function SharedTripPlanPage({ params }: PageProps) {
         <aside className="mt-8 rounded-3xl border border-primary/20 bg-primary-fixed/30 p-5 sm:p-6">
           {plan.output.generalTips.length > 0 && (
             <>
-              <h2 className="font-bold text-on-surface">
-                {vi ? 'Lưu ý chung' : 'General tips'}
-              </h2>
+              <h2 className="font-bold text-on-surface">{vi ? 'Lưu ý chung' : 'General tips'}</h2>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-body-sm text-on-surface-variant">
                 {plan.output.generalTips.map((tip) => (
                   <li key={tip}>{tip}</li>

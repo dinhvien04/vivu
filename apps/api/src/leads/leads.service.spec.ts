@@ -42,7 +42,9 @@ describe('LeadsService', () => {
 
   it('does not persist honeypot submissions', async () => {
     const prisma = { lead: { create: jest.fn() } };
-    const config = { get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)) };
+    const config = {
+      get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)),
+    };
     const turnstile = { verify: jest.fn() };
     const service = new LeadsService(prisma as never, config as never, turnstile as never);
 
@@ -66,7 +68,9 @@ describe('LeadsService', () => {
         create: jest.fn().mockResolvedValue({ id: 'lead-1' }),
       },
     };
-    const config = { get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)) };
+    const config = {
+      get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)),
+    };
     const turnstile = { verify: jest.fn().mockResolvedValue(undefined) };
     const service = new LeadsService(prisma as never, config as never, turnstile as never);
 

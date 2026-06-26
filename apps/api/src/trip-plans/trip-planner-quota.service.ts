@@ -4,7 +4,12 @@ import { AiUsageKeyType } from '@prisma/client';
 import type { FastifyRequest } from 'fastify';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
-import { getClientIp, hashWithSecret, positiveInteger, utcDateOnly } from '../common/request-fingerprint';
+import {
+  getClientIp,
+  hashWithSecret,
+  positiveInteger,
+  utcDateOnly,
+} from '../common/request-fingerprint';
 
 @Injectable()
 export class TripPlannerQuotaService {
@@ -27,7 +32,10 @@ export class TripPlannerQuotaService {
 
   async consume(request: FastifyRequest, user?: AuthenticatedUser): Promise<void> {
     const identity = user
-      ? { keyType: AiUsageKeyType.user, keyHash: hashWithSecret(`user:${user.id}`, this.hashSecret) }
+      ? {
+          keyType: AiUsageKeyType.user,
+          keyHash: hashWithSecret(`user:${user.id}`, this.hashSecret),
+        }
       : {
           keyType: AiUsageKeyType.ip,
           keyHash: hashWithSecret(`ip:${getClientIp(request)}`, this.hashSecret),

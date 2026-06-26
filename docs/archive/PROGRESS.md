@@ -25,14 +25,14 @@ Cập nhật: 24/06/2026.
 - [x] Lead capture với route `/tu-van`, endpoint `POST /api/v1/leads` và admin `/admin/leads`.
 - [x] Homepage/navigation đã đưa Trip Planner và Lead capture ra public UI.
 - [x] Public Business MVP UI đã polish: hero ưu tiên địa danh đẹp, CTA tư vấn nổi bật,
-  Trip Planner có mẫu gợi ý, sticky action bar và analytics click/lead/report.
+      Trip Planner có mẫu gợi ý, sticky action bar và analytics click/lead/report.
 - [x] Data report cho trang chi tiết địa danh.
 - [x] Analytics event có hash session/IP và dashboard admin mở rộng.
 - [x] SEO sitemap cho route kinh doanh và JSON-LD cho trang chi tiết.
 - [x] Deploy checklist đã bổ sung luồng lịch trình → lead → admin, báo lỗi dữ liệu → admin,
-  smoke test ảnh production và checklist SEO.
+      smoke test ảnh production và checklist SEO.
 - [x] Trip Planner truyền note lịch trình và địa danh sang form tư vấn khi người dùng bấm
-  `Gửi yêu cầu tư vấn`.
+      `Gửi yêu cầu tư vấn`.
 - [x] Tài liệu production image allowlist đã ghi đủ host Cloudinary/S3 đang dùng.
 - [x] Header public web đã chỉnh responsive để menu desktop không xuống dòng ở viewport vừa.
 
@@ -68,7 +68,7 @@ Cập nhật: 24/06/2026.
 - [ ] Thay điểm đại diện `luy-da-co-phu-ha` khi có tọa độ khảo sát chính thức.
 - [ ] Theo dõi tỷ lệ lỗi S3/presigned URL trên production.
 - [ ] Test thủ công định kỳ full flow production user → admin: tạo lịch trình, gửi lead,
-  báo lỗi dữ liệu, kiểm tra `/admin/leads` và `/admin/bao-loi`.
+      báo lỗi dữ liệu, kiểm tra `/admin/leads` và `/admin/bao-loi`.
 - [ ] Bổ sung dashboard quan sát latency API và AI.
 - [ ] Chạy integration test định kỳ trong CI có Docker.
 - [ ] Rà soát chất lượng mô tả địa danh khi dữ liệu S3 thay đổi.

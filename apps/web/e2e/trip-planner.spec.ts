@@ -34,7 +34,9 @@ const mockedPlan = {
   },
 };
 
-test('trip planner renders a mocked generated itinerary without calling Gemini', async ({ page }) => {
+test('trip planner renders a mocked generated itinerary without calling Gemini', async ({
+  page,
+}) => {
   await page.route('**/api/auth/refresh', (route) =>
     route.fulfill({
       status: 204,

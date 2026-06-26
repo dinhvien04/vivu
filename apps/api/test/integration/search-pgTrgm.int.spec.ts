@@ -49,6 +49,7 @@ describe('SearchService.suggest — integration (pg_trgm fallback)', () => {
           summaryVi: 'sum',
           regionId: region.id,
           status: 'published',
+          heroImageUrl: `https://images.example/${p.slug}.jpg`,
         },
       });
     }

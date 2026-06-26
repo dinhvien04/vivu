@@ -147,9 +147,7 @@ export function AdminLiveStats() {
         label={vi ? 'Lịch trình AI' : 'AI trip plans'}
         value={error ? empty : (stats?.totalTripPlans ?? 0)}
         hint={
-          vi
-            ? `${stats?.tripPlansToday ?? 0} tạo hôm nay`
-            : `${stats?.tripPlansToday ?? 0} today`
+          vi ? `${stats?.tripPlansToday ?? 0} tạo hôm nay` : `${stats?.tripPlansToday ?? 0} today`
         }
         icon="route"
         iconBg="bg-secondary-container/60"

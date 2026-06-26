@@ -41,7 +41,15 @@ export class TripPlansService {
     dto: GenerateTripPlanDto,
     request: FastifyRequest,
     user?: AuthenticatedUser,
-  ): Promise<{ data: { id: string; title: string; output: TripPlanOutput; shareId: string | null; isPublic: boolean } }> {
+  ): Promise<{
+    data: {
+      id: string;
+      title: string;
+      output: TripPlanOutput;
+      shareId: string | null;
+      isPublic: boolean;
+    };
+  }> {
     await this.quota.consume(request, user);
 
     const candidates = await this.loadCandidatePlaces(dto);
@@ -117,7 +125,8 @@ export class TripPlansService {
       },
     });
     if (!row) throw new NotFoundException('Không tìm thấy lịch trình.');
-    if (row.userId !== userId) throw new ForbiddenException('Bạn không có quyền xem lịch trình này.');
+    if (row.userId !== userId)
+      throw new ForbiddenException('Bạn không có quyền xem lịch trình này.');
     return { data: row };
   }
 
@@ -127,7 +136,8 @@ export class TripPlansService {
       select: { id: true, userId: true, title: true, shareId: true, isPublic: true },
     });
     if (!plan) throw new NotFoundException('Không tìm thấy lịch trình.');
-    if (plan.userId !== userId) throw new ForbiddenException('Bạn không có quyền chia sẻ lịch trình này.');
+    if (plan.userId !== userId)
+      throw new ForbiddenException('Bạn không có quyền chia sẻ lịch trình này.');
 
     if (plan.shareId && plan.isPublic) {
       return { data: { id: plan.id, title: plan.title, shareId: plan.shareId, isPublic: true } };
@@ -148,7 +158,8 @@ export class TripPlansService {
       select: { id: true, userId: true },
     });
     if (!plan) throw new NotFoundException('Không tìm thấy lịch trình.');
-    if (plan.userId !== userId) throw new ForbiddenException('Bạn không có quyền tắt chia sẻ lịch trình này.');
+    if (plan.userId !== userId)
+      throw new ForbiddenException('Bạn không có quyền tắt chia sẻ lịch trình này.');
 
     const updated = await this.prisma.tripPlan.update({
       where: { id },
@@ -181,7 +192,8 @@ export class TripPlansService {
       include: { places: { orderBy: { position: 'asc' }, include: { place: true } } },
     });
     if (!plan) throw new NotFoundException('Không tìm thấy lịch trình.');
-    if (plan.userId !== userId) throw new ForbiddenException('Bạn không có quyền lưu lịch trình này.');
+    if (plan.userId !== userId)
+      throw new ForbiddenException('Bạn không có quyền lưu lịch trình này.');
 
     const collection = await this.prisma.collection.create({
       data: {
@@ -211,7 +223,11 @@ export class TripPlansService {
     const where: Prisma.PlaceWhereInput = {
       status: 'published',
       province: { equals: PUBLIC_PROVINCE, mode: 'insensitive' },
-      OR: [{ heroImageUrl: { not: null } }, { heroImageS3Key: { not: null } }, { lat: { not: null } }],
+      OR: [
+        { heroImageUrl: { not: null } },
+        { heroImageS3Key: { not: null } },
+        { lat: { not: null } },
+      ],
     };
 
     const areaKeywords = dto.area && dto.area !== 'all' ? AREA_KEYWORDS[dto.area] : undefined;

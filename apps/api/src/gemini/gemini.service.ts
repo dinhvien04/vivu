@@ -60,10 +60,7 @@ export class GeminiService {
     });
   }
 
-  async generateText(
-    prompt: string,
-    options: GenerateTextOptions = {},
-  ): Promise<string> {
+  async generateText(prompt: string, options: GenerateTextOptions = {}): Promise<string> {
     this.assertConfigured();
 
     for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt += 1) {

@@ -22,9 +22,9 @@ describe('AiChatController production hardening', () => {
     process.env.AI_FEATURE_ENABLED = 'false';
     const controller = createController({ NODE_ENV: 'production' });
 
-    expect(() =>
-      controller.chatRequest({} as never, { message: 'Bien Ho co gi dep?' }),
-    ).toThrow(ServiceUnavailableException);
+    expect(() => controller.chatRequest({} as never, { message: 'Bien Ho co gi dep?' })).toThrow(
+      ServiceUnavailableException,
+    );
   });
 
   it('returns only a simple public health payload in production', () => {

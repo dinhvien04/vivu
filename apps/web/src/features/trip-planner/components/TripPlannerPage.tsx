@@ -213,9 +213,9 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'copied'>('idle');
   const [sharedId, setSharedId] = useState<string | null>(null);
-  const [feedbackState, setFeedbackState] = useState<
-    'idle' | 'helpful' | 'wrong' | 'missing_info'
-  >('idle');
+  const [feedbackState, setFeedbackState] = useState<'idle' | 'helpful' | 'wrong' | 'missing_info'>(
+    'idle',
+  );
   const trackedMissingPlanId = useRef<string | null>(null);
   const initialPlaceSlug = initialPlace?.slug;
   const initialPlaceTitle = initialPlace?.title;
@@ -452,8 +452,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
         locale === 'en'
           ? `/en/lich-trinh/chia-se/${shared.shareId}`
           : `/lich-trinh/chia-se/${shared.shareId}`;
-      const shareUrl =
-        typeof window !== 'undefined' ? `${window.location.origin}${path}` : path;
+      const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}${path}` : path;
       await copyTextToClipboard(shareUrl);
       setShareState('copied');
       await trackAnalyticsEvent('trip_plan_shared', {
@@ -667,9 +666,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
               <Icon name="route" size={42} />
             </div>
             <h2 className="mt-5 font-h3 text-h3 text-on-surface">{labels.result}</h2>
-            <p className="mt-2 max-w-md text-body-md text-on-surface-variant">
-              {labels.emptyLead}
-            </p>
+            <p className="mt-2 max-w-md text-body-md text-on-surface-variant">{labels.emptyLead}</p>
             <div className="mt-6 grid w-full max-w-2xl gap-3 md:grid-cols-3">
               {examples.map((example) => (
                 <button
@@ -690,9 +687,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                 </button>
               ))}
             </div>
-            <p className="mt-5 max-w-lg text-body-sm text-on-surface-variant">
-              {labels.dataNote}
-            </p>
+            <p className="mt-5 max-w-lg text-body-sm text-on-surface-variant">{labels.dataNote}</p>
           </div>
         )}
 
@@ -833,7 +828,9 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                       <h3 className="font-h3 text-xl font-bold text-on-surface">
                         {labels.day} {day.day}
                       </h3>
-                      <p className="text-body-sm text-on-surface-variant font-medium">{day.theme}</p>
+                      <p className="text-body-sm text-on-surface-variant font-medium">
+                        {day.theme}
+                      </p>
                     </div>
                   </div>
 
@@ -843,11 +840,19 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                       const timeLower = item.timeOfDay.toLowerCase();
                       if (timeLower.includes('sáng') || timeLower.includes('morning')) {
                         timeIcon = 'wb_sunny';
-                      } else if (timeLower.includes('trưa') || timeLower.includes('lunch') || timeLower.includes('noon')) {
+                      } else if (
+                        timeLower.includes('trưa') ||
+                        timeLower.includes('lunch') ||
+                        timeLower.includes('noon')
+                      ) {
                         timeIcon = 'restaurant';
                       } else if (timeLower.includes('chiều') || timeLower.includes('afternoon')) {
                         timeIcon = 'filter_drama';
-                      } else if (timeLower.includes('tối') || timeLower.includes('night') || timeLower.includes('evening')) {
+                      } else if (
+                        timeLower.includes('tối') ||
+                        timeLower.includes('night') ||
+                        timeLower.includes('evening')
+                      ) {
                         timeIcon = 'bedtime';
                       }
 
@@ -902,7 +907,10 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
 
                             {item.travelNote && (
                               <div className="mt-4 flex items-start gap-2 rounded-xl bg-secondary-container/40 px-4 py-2.5 text-body-sm text-on-secondary-container">
-                                <Icon name="directions_car" className="text-primary mt-0.5 !text-base shrink-0" />
+                                <Icon
+                                  name="directions_car"
+                                  className="text-primary mt-0.5 !text-base shrink-0"
+                                />
                                 <p>{item.travelNote}</p>
                               </div>
                             )}
@@ -914,7 +922,10 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                                     key={tip}
                                     className="inline-flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant"
                                   >
-                                    <Icon name="tips_and_updates" className="!text-xs text-amber-500" />
+                                    <Icon
+                                      name="tips_and_updates"
+                                      className="!text-xs text-amber-500"
+                                    />
                                     {tip}
                                   </span>
                                 ))}
@@ -930,7 +941,10 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
                   <div className="mt-6 border-t border-outline-variant/30 pt-4 space-y-2">
                     {day.foodSuggestions.length > 0 && (
                       <div className="flex items-start gap-2 text-body-sm text-on-surface-variant">
-                        <Icon name="restaurant" className="text-primary mt-0.5 !text-base shrink-0" />
+                        <Icon
+                          name="restaurant"
+                          className="text-primary mt-0.5 !text-base shrink-0"
+                        />
                         <p>
                           <span className="font-semibold text-on-surface">{labels.food}: </span>
                           {day.foodSuggestions.join(', ')}

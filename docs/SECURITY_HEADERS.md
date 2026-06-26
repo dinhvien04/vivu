@@ -3,7 +3,9 @@
 This document describes the headers and CSP policy configured on the Next.js web application.
 
 ## 1. Configured Headers
+
 Vivu appends the following headers on all client pages via `apps/web/next.config.mjs`:
+
 - **Content-Security-Policy**: Controls the resources browser is allowed to fetch or execute.
 - **X-Content-Type-Options: `nosniff`**: Prevents the browser from MIME-sniffing a response away from the declared content-type.
 - **Referrer-Policy: `strict-origin-when-cross-origin`**: Controls how much referrer information is sent with requests.
@@ -16,7 +18,9 @@ Vivu appends the following headers on all client pages via `apps/web/next.config
   - `usb=()` (Disabled)
 
 ## 2. Content Security Policy (CSP) Specifications
+
 The CSP directives are configured as follows:
+
 - `default-src 'self'`: Default fallback for fetching files/scripts to our own domain.
 - `script-src`: Restricts scripts to self, inline blocks (required by Next.js), and `https://challenges.cloudflare.com` (Turnstile).
 - `style-src`: Restricts styles to self, inline styles, and Google Fonts CSS.

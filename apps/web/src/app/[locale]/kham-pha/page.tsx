@@ -201,11 +201,7 @@ function matchesArea(place: Place, keywords: readonly string[], locale: Locale):
   return keywords.some((keyword) => haystack.includes(normalize(keyword)));
 }
 
-function matchesNeed(
-  place: Place,
-  need: (typeof NEED_FILTERS)[number],
-  locale: Locale,
-): boolean {
+function matchesNeed(place: Place, need: (typeof NEED_FILTERS)[number], locale: Locale): boolean {
   if (need.categorySlugs.length === 0 && need.keywords.length === 0) return true;
 
   const slugs = new Set<string>(need.categorySlugs);

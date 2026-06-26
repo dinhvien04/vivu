@@ -85,8 +85,17 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
       window.setTimeout(() => setOpen(false), 900);
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : labels.error;
-      if (errMsg.includes('expired') || errMsg.includes('timeout-or-duplicate') || errMsg.includes('Turnstile') || errMsg.includes('token')) {
-        setStatus(locale === 'en' ? 'Verification session expired. Please verify again.' : 'Phiên xác minh đã hết hạn. Vui lòng xác minh lại.');
+      if (
+        errMsg.includes('expired') ||
+        errMsg.includes('timeout-or-duplicate') ||
+        errMsg.includes('Turnstile') ||
+        errMsg.includes('token')
+      ) {
+        setStatus(
+          locale === 'en'
+            ? 'Verification session expired. Please verify again.'
+            : 'Phiên xác minh đã hết hạn. Vui lòng xác minh lại.',
+        );
       } else {
         setStatus(errMsg);
       }

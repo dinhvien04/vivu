@@ -4,11 +4,7 @@ import { LeadSource, LeadStatus, Prisma } from '@prisma/client';
 import type { FastifyRequest } from 'fastify';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
-import {
-  hashRequestIp,
-  hashUserAgent,
-  positiveInteger,
-} from '../common/request-fingerprint';
+import { hashRequestIp, hashUserAgent, positiveInteger } from '../common/request-fingerprint';
 import { TurnstileService } from '../common/turnstile.service';
 import { sanitizeText, sanitizeRequiredText } from '../common/sanitize';
 import type { CreateLeadDto } from './dto/create-lead.dto';

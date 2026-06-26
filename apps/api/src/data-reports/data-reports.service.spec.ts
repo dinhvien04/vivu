@@ -14,7 +14,9 @@ function request(): FastifyRequest {
 
 function config(overrides: Record<string, string> = {}) {
   return {
-    get: jest.fn((key: string) => overrides[key] ?? (key === 'ABUSE_HASH_SECRET' ? 'secret' : undefined)),
+    get: jest.fn(
+      (key: string) => overrides[key] ?? (key === 'ABUSE_HASH_SECRET' ? 'secret' : undefined),
+    ),
   };
 }
 

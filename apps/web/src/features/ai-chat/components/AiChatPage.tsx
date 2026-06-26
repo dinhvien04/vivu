@@ -125,7 +125,9 @@ export function AiChatPage({ placeSlug }: { placeSlug?: string }) {
           className="inline-flex items-center gap-2 rounded-full border border-primary px-4 py-2 text-body-sm font-semibold text-primary transition hover:bg-primary-fixed"
         >
           <Icon name="support_agent" size={17} />
-          {locale === 'en' ? 'Need human help? Request consultation' : 'Cần người tư vấn? Gửi yêu cầu'}
+          {locale === 'en'
+            ? 'Need human help? Request consultation'
+            : 'Cần người tư vấn? Gửi yêu cầu'}
         </Link>
       </div>
     </div>

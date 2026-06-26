@@ -45,7 +45,9 @@ export default async function ContactPage({ params }: Props) {
                   <h3 className="font-bold text-on-surface m-0">Email Support</h3>
                 </div>
                 <p className="text-body-md text-on-surface-variant m-0">
-                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">{SUPPORT_EMAIL}</a>
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">
+                    {SUPPORT_EMAIL}
+                  </a>
                 </p>
               </div>
 
@@ -54,9 +56,7 @@ export default async function ContactPage({ params }: Props) {
                   <Icon name="chat" className="text-primary" />
                   <h3 className="font-bold text-on-surface m-0">Zalo Hotline</h3>
                 </div>
-                <p className="text-body-md text-on-surface-variant m-0">
-                  {HOTLINE_NUMBER}
-                </p>
+                <p className="text-body-md text-on-surface-variant m-0">{HOTLINE_NUMBER}</p>
               </div>
             </div>
 
@@ -65,7 +65,8 @@ export default async function ContactPage({ params }: Props) {
                 <Icon name="support_agent" /> Need a tailored trip plan?
               </h2>
               <p className="mb-4">
-                Our local experts can help design the perfect Gia Lai adventure for you. Submit a request through our consulting board.
+                Our local experts can help design the perfect Gia Lai adventure for you. Submit a
+                request through our consulting board.
               </p>
               <Link
                 href="/tu-van?source=contact"
@@ -79,7 +80,8 @@ export default async function ContactPage({ params }: Props) {
           <article className="prose prose-slate max-w-none">
             <h1 className="font-h1 text-h1 text-on-surface mb-6">Liên hệ với chúng tôi</h1>
             <p className="text-body-lg text-on-surface-variant mb-8">
-              Bạn có thắc mắc, đóng góp ý kiến hoặc cần hỗ trợ thông tin du lịch Gia Lai? Hãy kết nối với đội ngũ phát triển Vivu!
+              Bạn có thắc mắc, đóng góp ý kiến hoặc cần hỗ trợ thông tin du lịch Gia Lai? Hãy kết
+              nối với đội ngũ phát triển Vivu!
             </p>
 
             <div className="grid gap-6 sm:grid-cols-2 mb-10">
@@ -89,7 +91,9 @@ export default async function ContactPage({ params }: Props) {
                   <h3 className="font-bold text-on-surface m-0">Gửi Email hỗ trợ</h3>
                 </div>
                 <p className="text-body-md text-on-surface-variant m-0">
-                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">{SUPPORT_EMAIL}</a>
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:underline">
+                    {SUPPORT_EMAIL}
+                  </a>
                 </p>
               </div>
 
@@ -98,9 +102,7 @@ export default async function ContactPage({ params }: Props) {
                   <Icon name="chat" className="text-primary" />
                   <h3 className="font-bold text-on-surface m-0">Kênh Zalo</h3>
                 </div>
-                <p className="text-body-md text-on-surface-variant m-0">
-                  {HOTLINE_NUMBER}
-                </p>
+                <p className="text-body-md text-on-surface-variant m-0">{HOTLINE_NUMBER}</p>
               </div>
             </div>
 
@@ -109,7 +111,8 @@ export default async function ContactPage({ params }: Props) {
                 <Icon name="support_agent" /> Bạn cần thiết kế chuyến đi riêng?
               </h2>
               <p className="mb-4">
-                Đội ngũ của chúng tôi luôn sẵn lòng tư vấn miễn phí và thiết kế hành trình du lịch Gia Lai độc bản dành riêng cho bạn.
+                Đội ngũ của chúng tôi luôn sẵn lòng tư vấn miễn phí và thiết kế hành trình du lịch
+                Gia Lai độc bản dành riêng cho bạn.
               </p>
               <Link
                 href="/tu-van?source=contact"

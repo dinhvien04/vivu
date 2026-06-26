@@ -67,9 +67,10 @@ export default async function globalSetup(): Promise<void> {
 
   // 1) Prisma db push — schema tables/columns/enums/indexes Prisma biết.
   const apiDir = resolve(__dirname, '..', '..');
+  const prismaCliPath = resolve(apiDir, 'node_modules', 'prisma', 'build', 'index.js');
   const result = spawnSync(
-    'npx',
-    ['prisma', 'db', 'push', '--skip-generate', '--accept-data-loss'],
+    process.execPath,
+    [prismaCliPath, 'db', 'push', '--skip-generate', '--accept-data-loss'],
     {
       cwd: apiDir,
       env: { ...process.env, DATABASE_URL: url },
@@ -79,7 +80,7 @@ export default async function globalSetup(): Promise<void> {
   );
   if (result.status !== 0) {
     throw new Error(
-      `[int] prisma db push failed (exit ${result.status}):\n${result.stdout}\n${result.stderr}`,
+      `[int] prisma db push failed (exit ${result.status}): ${result.error?.message ?? 'unknown error'}\n${result.stdout}\n${result.stderr}`,
     );
   }
 

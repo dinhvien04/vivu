@@ -178,11 +178,7 @@ export function AdminDataReportsPage() {
           <ul className="divide-y divide-outline-variant/30">
             {rows.map((report) => (
               <li key={report.id} className="grid gap-4 p-5 lg:grid-cols-[1fr,240px]">
-                <button
-                  type="button"
-                  onClick={() => setSelected(report)}
-                  className="text-left"
-                >
+                <button type="button" onClick={() => setSelected(report)} className="text-left">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-bold text-on-surface">{report.placeSlug}</h2>
                     <span

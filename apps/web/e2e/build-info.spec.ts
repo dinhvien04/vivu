@@ -18,7 +18,9 @@ test.describe('build info', () => {
 
       if (expectedCommit) {
         if (expectedCommit.startsWith('64ff124')) {
-          expect(body.commitSha === expectedCommit || (body.commitSha as string).startsWith('64ff124')).toBeTruthy();
+          expect(
+            body.commitSha === expectedCommit || (body.commitSha as string).startsWith('64ff124'),
+          ).toBeTruthy();
         } else {
           expect(body.commitSha).toBe(expectedCommit);
         }

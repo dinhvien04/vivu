@@ -13,9 +13,6 @@ describe('admin controller role metadata', () => {
   });
 
   it('allows editors to manage data reports', () => {
-    expect(Reflect.getMetadata(ROLES_KEY, AdminDataReportsController)).toEqual([
-      'admin',
-      'editor',
-    ]);
+    expect(Reflect.getMetadata(ROLES_KEY, AdminDataReportsController)).toEqual(['admin', 'editor']);
   });
 });
