@@ -75,7 +75,7 @@ export function TurnstileWidget({ siteKey, onToken, resetKey }: TurnstileWidgetP
     };
   }, [siteKey, resetKey]);
 
-  if (!siteKey) return null;
+  if (!siteKey || process.env.NEXT_PUBLIC_TURNSTILE_ENABLED === 'false') return null;
 
   return <div ref={containerRef} data-testid="turnstile-widget" className="min-h-[65px]" />;
 }
