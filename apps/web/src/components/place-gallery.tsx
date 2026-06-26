@@ -42,7 +42,8 @@ const LIGHTBOX_ZOOM_STEP = 0.25;
 
 export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps) {
   const t = useTranslations('gallery');
-  const slides = useMemo<Slide[]>(() => {
+  const [brokenSlideIds, setBrokenSlideIds] = useState<Set<string>>(() => new Set());
+  const allSlides = useMemo<Slide[]>(() => {
     const list: Slide[] = [];
     const seen = new Set<string>();
     if (heroImageUrl) {
@@ -56,6 +57,10 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
     }
     return list;
   }, [heroImageUrl, photos, title]);
+  const slides = useMemo(
+    () => allSlides.filter((slide) => !brokenSlideIds.has(slide.id)),
+    [allSlides, brokenSlideIds],
+  );
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -78,6 +83,15 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
     setLightboxZoom(1);
     setLightboxPan({ x: 0, y: 0 });
     setIsDraggingLightbox(false);
+  }, []);
+
+  const markSlideBroken = useCallback((slideId: string) => {
+    setBrokenSlideIds((current) => {
+      if (current.has(slideId)) return current;
+      const next = new Set(current);
+      next.add(slideId);
+      return next;
+    });
   }, []);
 
   const goPrev = useCallback(() => {
@@ -224,6 +238,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
             src={heroSrc}
             alt={current.alt}
             fill
+            onError={() => markSlideBroken(current.id)}
             priority={safeIndex === 0}
             sizes="(max-width: 1280px) 100vw, 1280px"
             className="object-cover"
@@ -292,6 +307,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
                     alt={slide.alt}
                     fill
                     sizes="128px"
+                    onError={() => markSlideBroken(slide.id)}
                     className="object-cover"
                   />
                 </button>
@@ -366,6 +382,7 @@ export function PlaceGallery({ heroImageUrl, photos, title }: PlaceGalleryProps)
               width={1920}
               height={1080}
               sizes="100vw"
+              onError={() => markSlideBroken(current.id)}
               draggable={false}
               className="max-h-full max-w-full select-none object-contain transition-transform duration-150 ease-out"
               style={{

@@ -22,7 +22,9 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
 
   const title = placeTitle(place, locale);
   const summary = placeSummary(place, locale);
+  const usesVietnameseFallback = locale === 'en' && (!place.titleEn || !place.summaryEn);
   const badges = [
+    usesVietnameseFallback ? 'Vietnamese copy' : null,
     locale === 'en' ? 'Image' : 'Có ảnh',
     place.geo ? (locale === 'en' ? 'Coordinates' : 'Có tọa độ') : null,
     place.isAiReady ? (locale === 'en' ? 'AI data' : 'Có dữ liệu AI') : null,

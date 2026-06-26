@@ -9,9 +9,9 @@ export class UpdateLeadStatusDto {
 }
 
 export class UpdateLeadNoteDto {
-  @ApiPropertyOptional({ maxLength: 2000 })
+  @ApiPropertyOptional({ maxLength: 1000 })
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(1000)
   internalNote?: string;
 }

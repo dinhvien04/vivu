@@ -44,7 +44,18 @@ export default async function MapPage({
           <h1 className="mt-2 font-h1 text-h1 text-on-surface">{t('title')}</h1>
           <p className="mt-3 max-w-3xl text-body text-on-surface-variant">{t('lead')}</p>
         </header>
-        {geoPlaces.length > 0 ? (
+        {!result ? (
+          <section className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-error/40 bg-error-container px-6 text-center text-on-error-container">
+            <h2 className="font-h3 text-h3">
+              {locale === 'en' ? 'Could not load map data' : 'Không tải được dữ liệu bản đồ'}
+            </h2>
+            <p className="mt-3 max-w-xl text-body-md">
+              {locale === 'en'
+                ? 'Please refresh the page or try again later.'
+                : 'Vui lòng tải lại trang hoặc thử lại sau ít phút.'}
+            </p>
+          </section>
+        ) : geoPlaces.length > 0 ? (
           <>
             <PlacesMapLoader
               places={geoPlaces}

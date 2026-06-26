@@ -21,6 +21,7 @@ interface LeadFormPageProps {
 
 const SOURCES: LeadSource[] = ['place_detail', 'ai_chat', 'trip_planner', 'home', 'other'];
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const NOTE_MAX_LENGTH = 1000;
 
 function safeSource(value?: string): LeadSource {
   return SOURCES.includes(value as LeadSource) ? (value as LeadSource) : 'other';
@@ -309,10 +310,13 @@ export function LeadFormPage({
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 rows={5}
-                maxLength={1000}
+                maxLength={NOTE_MAX_LENGTH}
                 placeholder={labels.notePlaceholder}
                 className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
+              <span className="mt-1 block text-right text-xs text-on-surface-variant">
+                {note.length}/{NOTE_MAX_LENGTH}
+              </span>
             </label>
           </fieldset>
         </div>

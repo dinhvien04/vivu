@@ -55,7 +55,7 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, 200);
+    }, 350);
     return () => {
       cancelled = true;
       controller.abort();
@@ -145,8 +145,8 @@ export function SearchHero({ initialQuery = '', compact = false, placeholder }: 
         placeholder={placeholder ?? t('searchPlaceholder')}
         className={
           compact
-            ? 'w-full rounded-full border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-4 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
-            : 'flex-1 bg-transparent px-4 py-3 text-body-lg text-on-surface focus:outline-none'
+            ? 'w-full rounded-full border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-4 text-body-md placeholder:text-on-surface-variant/80 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
+            : 'flex-1 bg-transparent px-4 py-3 text-body-lg text-on-surface placeholder:text-on-surface-variant/80 focus:outline-none'
         }
       />
       {!compact && (

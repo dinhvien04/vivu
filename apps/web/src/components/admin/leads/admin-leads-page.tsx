@@ -20,6 +20,7 @@ const STATUSES: Array<{ value: LeadStatus | ''; label: string }> = [
   { value: 'cancelled', label: 'Hủy' },
   { value: 'spam', label: 'Spam' },
 ];
+const INTERNAL_NOTE_MAX_LENGTH = 1000;
 
 function formatDate(value: string | null): string {
   if (!value) return '-';
@@ -253,6 +254,7 @@ export function AdminLeadsPage() {
                   <textarea
                     defaultValue={lead.internalNote ?? ''}
                     rows={3}
+                    maxLength={INTERNAL_NOTE_MAX_LENGTH}
                     placeholder="Ghi chú nội bộ..."
                     className="w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-2 outline-none focus:border-primary"
                     onBlur={(event) => {
@@ -351,6 +353,7 @@ export function AdminLeadsPage() {
                   <textarea
                     defaultValue={selectedLead.internalNote ?? ''}
                     rows={5}
+                    maxLength={INTERNAL_NOTE_MAX_LENGTH}
                     placeholder="Ghi chú nội bộ..."
                     className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-3 py-2 outline-none focus:border-primary"
                     onBlur={(event) => {

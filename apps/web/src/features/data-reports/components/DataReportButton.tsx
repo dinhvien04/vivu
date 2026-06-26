@@ -22,6 +22,7 @@ const TYPES: Array<{ value: DataReportType; vi: string; en: string }> = [
   { value: 'other', vi: 'Khác', en: 'Other' },
 ];
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const REPORT_MESSAGE_MAX_LENGTH = 1000;
 
 function text(locale: Locale) {
   const vi = locale !== 'en';
@@ -167,9 +168,12 @@ export function DataReportButton({ placeSlug, placeTitle }: DataReportButtonProp
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
                   rows={4}
-                  maxLength={1000}
+                  maxLength={REPORT_MESSAGE_MAX_LENGTH}
                   className="mt-2 w-full resize-none rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
+                <span className="mt-1 block text-right text-xs text-on-surface-variant">
+                  {message.length}/{REPORT_MESSAGE_MAX_LENGTH}
+                </span>
               </label>
 
               <label className="block">

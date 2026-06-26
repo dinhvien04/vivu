@@ -151,7 +151,7 @@ export function SiteFooter() {
             )}
           </div>
         )}
-        <p className="text-[12px] text-outline">{t('footer.copyright', { year })}</p>
+        <p className="text-[12px] text-on-surface-variant">{t('footer.copyright', { year })}</p>
       </div>
     </footer>
   );

@@ -8,6 +8,7 @@ import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { NearbyPlaceActions } from '@/components/nearby-place-actions';
 import { PlaceCard } from '@/components/place-card';
 import { PlaceGallery } from '@/components/place-gallery';
+import { PlaceShareActions } from '@/components/place-share-actions';
 import { PlaceViewTracker } from '@/components/place-view-tracker';
 import { QaSection } from '@/components/qa-section';
 import { ReviewsSection } from '@/components/reviews-section';
@@ -141,6 +142,8 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   const summary = placeSummary(place, locale);
   const description = placeDescription(place, locale);
   const publicDescription = summary ?? firstPublicParagraph(description);
+  const usesVietnameseFallback =
+    locale === 'en' && (!place.titleEn || !place.summaryEn || !place.descriptionEn);
 
   const categoriesText =
     place.categories && place.categories.length > 0
@@ -215,14 +218,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             </div>
             <div className="flex gap-3">
               <FavoriteButton placeId={place.id} variant="icon" />
-              <button
-                type="button"
-                aria-label={t('place.shareSoon')}
-                disabled
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest text-primary shadow-md transition-transform disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Icon name="share" />
-              </button>
+              <PlaceShareActions title={title} variant="icon" />
             </div>
           </div>
         </section>
@@ -250,6 +246,12 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="font-h2 text-h2 text-on-surface">{t('place.introTitle')}</h2>
               </div>
+              {usesVietnameseFallback && (
+                <p className="mb-4 rounded-xl border border-primary/30 bg-primary-fixed px-4 py-3 text-body-sm text-on-primary-fixed">
+                  English copy for this destination is still being updated. Vivu is showing the
+                  available Vietnamese content for now.
+                </p>
+              )}
               <div className="prose prose-lg max-w-none whitespace-pre-line text-body-lg leading-relaxed text-on-surface-variant">
                 {publicDescription || (
                   <span className="italic text-outline">{t('place.descriptionPending')}</span>
@@ -360,17 +362,10 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                 </TrackedLink>
                 <FavoriteButton placeId={place.id} />
                 <AddToCollectionButton placeId={place.id} placeTitle={title} />
-                <button
-                  type="button"
-                  disabled
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant py-3 font-bold text-on-surface-variant transition-all disabled:cursor-not-allowed disabled:opacity-60"
-                  aria-label={t('place.shareSoon')}
-                >
-                  <Icon name="share" className="!text-base" />
-                  <span>{t('place.share')}</span>
-                </button>
                 <DataReportButton placeSlug={place.slug} placeTitle={title} />
               </div>
+
+              <PlaceShareActions title={title} />
 
               {/* Categories */}
               {place.categories && place.categories.length > 0 && (

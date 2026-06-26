@@ -6,12 +6,16 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useAuth } from './auth-provider';
 import { Icon } from './icon';
 
+interface HeaderAccountProps {
+  variant?: 'desktop' | 'drawer';
+}
+
 /**
  * Right-side account widget in the desktop SiteHeader. Shows:
  * - When logged out: a "Đăng nhập" button.
  * - When logged in: avatar + name + dropdown with profile / admin / logout.
  */
-export function HeaderAccount() {
+export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
   const t = useTranslations('common');
   const { user, loading, logout } = useAuth();
   const router = useRouter();
@@ -36,6 +40,14 @@ export function HeaderAccount() {
   }, [pathname]);
 
   if (loading) {
+    if (variant === 'drawer') {
+      return (
+        <div className="space-y-3">
+          <span className="block h-11 w-full animate-pulse rounded-lg bg-surface-container" />
+          <span className="block h-10 w-3/4 animate-pulse rounded-lg bg-surface-container" />
+        </div>
+      );
+    }
     return (
       <span
         aria-hidden="true"
@@ -52,14 +64,76 @@ export function HeaderAccount() {
     return (
       <Link
         href={`/dang-nhap${next}`}
-        className="hidden whitespace-nowrap rounded-full px-4 py-2 text-body-md font-semibold text-primary transition-colors hover:bg-primary-fixed sm:inline-flex"
+        className={
+          variant === 'drawer'
+            ? 'flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container'
+            : 'hidden whitespace-nowrap rounded-full px-4 py-2 text-body-md font-semibold text-primary transition-colors hover:bg-primary-fixed sm:inline-flex'
+        }
       >
+        {variant === 'drawer' && <Icon name="login" size={20} />}
         {t('signIn')}
       </Link>
     );
   }
 
   const initial = user.name.trim().charAt(0).toUpperCase() || 'V';
+
+  if (variant === 'drawer') {
+    const itemClass =
+      'flex items-center gap-3 rounded-lg px-3 py-3 text-body-md font-medium text-on-surface transition-colors hover:bg-surface-container';
+    return (
+      <div className="space-y-3">
+        <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-on-primary">
+              {initial}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-body-md font-semibold text-on-surface">{user.name}</p>
+              <p className="truncate text-body-sm text-on-surface-variant">{user.email}</p>
+            </div>
+          </div>
+        </div>
+        <nav aria-label={t('accountMenu', { name: user.name })} className="space-y-1">
+          <Link href="/tai-khoan" className={itemClass}>
+            <Icon name="person" size={20} className="text-outline" />
+            {t('accountProfile')}
+          </Link>
+          <Link href="/tai-khoan/yeu-thich" className={itemClass}>
+            <Icon name="favorite" size={20} className="text-outline" />
+            {t('accountFavorites')}
+          </Link>
+          <Link href="/so-tay" className={itemClass}>
+            <Icon name="collections_bookmark" size={20} className="text-outline" />
+            {t('accountCollections')}
+          </Link>
+          <Link href="/tai-khoan/cai-dat" className={itemClass}>
+            <Icon name="settings" size={20} className="text-outline" />
+            {t('accountSettings')}
+          </Link>
+          {(user.role === 'admin' || user.role === 'editor') && (
+            <Link href="/admin" className={itemClass}>
+              <Icon name="admin_panel_settings" size={20} className="text-outline" />
+              {t('accountAdmin')}
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={async () => {
+              await logout();
+              setOpen(false);
+              router.replace('/');
+              router.refresh();
+            }}
+            className={`${itemClass} w-full`}
+          >
+            <Icon name="logout" size={20} className="text-outline" />
+            {t('signOut')}
+          </button>
+        </nav>
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className="relative">

@@ -24,7 +24,7 @@ export class CreateDataReportDto {
   @MaxLength(1000)
   message!: string;
 
-  @ApiPropertyOptional({ maxLength: 160 })
+  @ApiPropertyOptional({ maxLength: 254 })
   @IsOptional()
   @IsString()
   @MaxLength(254)

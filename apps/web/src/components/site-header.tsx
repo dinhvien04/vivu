@@ -215,13 +215,7 @@ export function SiteHeader() {
             <LocaleToggle />
           </div>
           <div className="border-t border-outline-variant/30 pt-4">
-            <Link
-              href="/dang-nhap"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-3 font-semibold text-on-primary transition-colors hover:bg-primary-container"
-            >
-              <Icon name="login" size={20} />
-              {t('common.signIn')} / {t('common.signUp')}
-            </Link>
+            <HeaderAccount variant="drawer" />
           </div>
         </nav>
       </aside>
