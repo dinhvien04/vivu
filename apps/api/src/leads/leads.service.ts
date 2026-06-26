@@ -10,6 +10,7 @@ import {
   positiveInteger,
 } from '../common/request-fingerprint';
 import { TurnstileService } from '../common/turnstile.service';
+import { sanitizeText, sanitizeRequiredText } from '../common/sanitize';
 import type { CreateLeadDto } from './dto/create-lead.dto';
 import type { ListLeadsQueryDto } from './dto/list-leads.query.dto';
 
@@ -49,16 +50,16 @@ export class LeadsService {
 
     const lead = await this.prisma.lead.create({
       data: {
-        name: dto.name.trim(),
-        phoneOrZalo: dto.phoneOrZalo.trim(),
-        email: dto.email?.trim() || null,
-        interestedPlaceSlug: dto.interestedPlaceSlug?.trim() || null,
-        interestedPlaceName: dto.interestedPlaceName?.trim() || null,
-        area: dto.area?.trim() || null,
+        name: sanitizeRequiredText(dto.name),
+        phoneOrZalo: sanitizeRequiredText(dto.phoneOrZalo),
+        email: sanitizeText(dto.email),
+        interestedPlaceSlug: sanitizeText(dto.interestedPlaceSlug),
+        interestedPlaceName: sanitizeText(dto.interestedPlaceName),
+        area: sanitizeText(dto.area),
         travelDate: dto.travelDate ? new Date(dto.travelDate) : null,
         peopleCount: dto.peopleCount ?? null,
-        budget: dto.budget?.trim() || null,
-        note: dto.note?.trim() || null,
+        budget: sanitizeText(dto.budget),
+        note: sanitizeText(dto.note),
         source: (dto.source ?? 'other') as LeadSource,
         ipHash,
         userAgentHash: hashUserAgent(request, this.hashSecret),

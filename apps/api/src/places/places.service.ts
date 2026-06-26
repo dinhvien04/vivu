@@ -158,9 +158,27 @@ export class PlacesService {
         orderBy,
         skip: filtersByRating ? undefined : skip,
         take: filtersByRating ? undefined : pageSize,
-        include: {
+        select: {
+          id: true,
+          locationKey: true,
+          slug: true,
+          titleVi: true,
+          titleEn: true,
+          summaryVi: true,
+          summaryEn: true,
+          regionId: true,
+          province: true,
+          lat: true,
+          lng: true,
+          bestSeasons: true,
+          status: true,
+          heroImageUrl: true,
+          heroImageS3Key: true,
+          isAiReady: true,
           region: true,
           categories: { include: { category: true } },
+          createdAt: true,
+          updatedAt: true,
         },
       }),
       filtersByRating ? Promise.resolve(0) : this.prisma.place.count({ where }),
@@ -185,7 +203,13 @@ export class PlacesService {
 
     let enriched = await Promise.all(
       rows.map(async (p) => {
-        const out = toApiPlace({ ...p, photos: [] } as PlaceWithRelations);
+        const out = toApiPlace({
+          ...p,
+          descriptionVi: null,
+          descriptionEn: null,
+          aliases: [],
+          photos: [],
+        } as PlaceWithRelations);
         out.photos = undefined;
         out.rating = ratingByPlaceId.get(p.id) ?? { count: 0, average: 0 };
         return this.withPresignedMedia(out);
@@ -276,27 +300,13 @@ export class PlacesService {
       return null;
     }
 
-    const images = new Map<string, PlaceImage>();
-    const addImage = async (params: {
-      id: string;
-      s3Key: string;
-      alt: string | null;
-      position: number;
-      isCover: boolean;
-    }) => {
-      if (images.has(params.s3Key)) return;
-      images.set(params.s3Key, {
-        id: params.id,
-        s3Key: params.s3Key,
-        url: await this.s3.getPresignedGetUrl(params.s3Key),
-        alt: params.alt,
-        position: params.position,
-        isCover: params.isCover,
-      });
-    };
+    const uniquePhotos = new Map<
+      string,
+      { id: string; s3Key: string; alt: string | null; position: number; isCover: boolean }
+    >();
 
     if (place.heroImageS3Key) {
-      await addImage({
+      uniquePhotos.set(place.heroImageS3Key, {
         id: 'hero',
         s3Key: place.heroImageS3Key,
         alt: place.titleVi,
@@ -307,16 +317,29 @@ export class PlacesService {
 
     for (const photo of place.photos) {
       if (!photo.s3Key) continue;
-      await addImage({
-        id: photo.id,
-        s3Key: photo.s3Key,
-        alt: photo.alt,
-        position: photo.position,
-        isCover: photo.isCover,
-      });
+      if (!uniquePhotos.has(photo.s3Key)) {
+        uniquePhotos.set(photo.s3Key, {
+          id: photo.id,
+          s3Key: photo.s3Key,
+          alt: photo.alt,
+          position: photo.position,
+          isCover: photo.isCover,
+        });
+      }
     }
 
-    return [...images.values()].sort((a, b) => a.position - b.position);
+    const resultImages = await Promise.all(
+      [...uniquePhotos.values()].map(async (item) => ({
+        id: item.id,
+        s3Key: item.s3Key,
+        url: await this.s3.getPresignedGetUrl(item.s3Key),
+        alt: item.alt,
+        position: item.position,
+        isCover: item.isCover,
+      })),
+    );
+
+    return resultImages.sort((a, b) => a.position - b.position);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RegionsService } from './regions.service';
 
@@ -8,6 +8,7 @@ export class RegionsController {
   constructor(private readonly regionsService: RegionsService) {}
 
   @Get()
+  @Header('Cache-Control', 'public, max-age=3600')
   @ApiOkResponse({ description: 'Danh sách vùng miền (sorted by parent + name).' })
   async list() {
     return { data: await this.regionsService.list() };

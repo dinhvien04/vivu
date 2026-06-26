@@ -5,6 +5,7 @@ import type { FastifyRequest } from 'fastify';
 import { hashRequestIp, positiveInteger } from '../common/request-fingerprint';
 import { TurnstileService } from '../common/turnstile.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { sanitizeText, sanitizeRequiredText } from '../common/sanitize';
 import type { CreateDataReportDto } from './dto/create-data-report.dto';
 import type { ListDataReportsQueryDto } from './dto/list-data-reports.query.dto';
 
@@ -42,10 +43,10 @@ export class DataReportsService {
 
     const row = await this.prisma.dataReport.create({
       data: {
-        placeSlug: dto.placeSlug.trim(),
+        placeSlug: sanitizeRequiredText(dto.placeSlug),
         type: dto.type as DataReportType,
-        message: dto.message.trim(),
-        contact: dto.contact?.trim() || null,
+        message: sanitizeRequiredText(dto.message),
+        contact: sanitizeText(dto.contact),
       },
       select: { id: true },
     });
