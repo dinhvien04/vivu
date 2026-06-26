@@ -320,20 +320,14 @@ Ghi chú:
 
 ## Tài Liệu
 
-- [Business MVP](docs/BUSINESS_MVP.md)
-- [Production verify](docs/PRODUCTION_VERIFY.md)
-- [Production smoke test](docs/PRODUCTION_SMOKE_TEST.md)
-- [Production final checklist](docs/PRODUCTION_FINAL_CHECKLIST.md)
-- [Production migration checklist](docs/PRODUCTION_MIGRATION_CHECKLIST.md)
-- [Cost guardrails](docs/COST_GUARDRAILS.md)
-- [Monitoring checklist](docs/MONITORING_CHECKLIST.md)
-- [Backup and restore](docs/BACKUP_RESTORE.md)
-- [Security headers](docs/SECURITY_HEADERS.md)
-- [Auth security audit](docs/AUTH_SECURITY_AUDIT.md)
-- [Secrets rotation](docs/SECRETS_ROTATION.md)
-- [Dependency security](docs/DEPENDENCY_SECURITY.md)
-- [Trip planner scale plan](docs/TRIP_PLANNER_SCALE_PLAN.md)
-- [SEO checklist](docs/SEO_CHECKLIST.md)
+- [Mục lục tài liệu](docs/README.md)
+- [Tổng quan hệ thống](docs/overview.md)
+- [Chạy local](docs/local-development.md)
+- [Biến môi trường](docs/environment.md)
+- [Data pipeline](docs/data-pipeline.md)
+- [API routes](docs/api-routes.md)
+- [Deploy & vận hành](docs/operations.md)
+- [Security](docs/SECURITY.md)
 
 ## Quy Ước An Toàn
 
