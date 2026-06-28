@@ -177,68 +177,70 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <SiteHeader />
-      <main className="mx-auto max-w-container-max px-margin-mobile py-6 md:px-margin-desktop md:py-10 space-y-12">
+      <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
         
         {/* 1. HERO SECTION WITH IMAGE & GLASSMORPHISM OVERLAY */}
-        <section className="relative overflow-hidden rounded-3xl shadow-xl bg-surface-container-high group">
+        <section className="relative overflow-hidden rounded-3xl shadow-2xl bg-surface-container-high group border border-outline-variant/30">
           {/* Gallery Background */}
           <div className="relative z-0">
             <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={title} />
           </div>
 
-          {/* Floating glassmorphic info card */}
+          {/* Floating glassmorphic info card with enhanced gradient overlays */}
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-neutral-950 via-neutral-950/70 to-transparent p-6 pt-24 text-white flex flex-col md:flex-row md:items-end md:justify-between gap-6 pointer-events-none"
+            className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent p-6 md:p-8 pt-32 text-white flex flex-col md:flex-row md:items-end md:justify-between gap-6 pointer-events-none"
           >
-            <div className="space-y-3 pointer-events-auto max-w-2xl">
+            <div className="space-y-4 pointer-events-auto max-w-3xl">
               {/* Breadcrumb */}
               <nav
                 aria-label="Breadcrumb"
-                className="flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-white/70"
+                className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/60"
               >
                 <Link href="/" className="hover:text-white transition-colors">
                   {t('place.breadcrumbHome')}
                 </Link>
-                <Icon name="chevron_right" className="!text-sm text-white/40" />
+                <Icon name="chevron_right" className="!text-sm text-white/30" />
                 <Link href="/kham-pha" className="hover:text-white transition-colors">
                   {t('place.breadcrumbExplore')}
                 </Link>
-                <Icon name="chevron_right" className="!text-sm text-white/40" />
-                <span className="text-white/90 font-black">{title}</span>
+                <Icon name="chevron_right" className="!text-sm text-white/30" />
+                <span className="text-white/80 font-black">{title}</span>
               </nav>
 
-              <h1 className="text-3xl md:text-5xl font-black tracking-tight drop-shadow-sm">
-                {title}
-                {locale !== 'en' && place.titleEn && (
-                  <span className="block md:inline-block md:ml-3 text-lg md:text-2xl font-normal text-white/70">
-                    ({place.titleEn})
-                  </span>
-                )}
-              </h1>
+              <div className="space-y-2">
+                <h1 className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-lg leading-tight">
+                  {title}
+                  {locale !== 'en' && place.titleEn && (
+                    <span className="block md:inline-block md:ml-4 text-xl md:text-3xl font-medium text-white/65">
+                      ({place.titleEn})
+                    </span>
+                  )}
+                </h1>
 
-              {place.address && (
-                <p className="inline-flex items-center gap-1.5 text-sm md:text-base text-white/80">
-                  <Icon name="location_on" className="!text-lg text-primary" />
-                  {place.address}
-                </p>
-              )}
+                {place.address && (
+                  <p className="inline-flex items-center gap-2 text-sm md:text-lg text-white/75">
+                    <Icon name="location_on" className="!text-xl text-primary" />
+                    <span>{place.address}</span>
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Quick Hero Actions */}
             <div className="flex flex-wrap gap-3 pointer-events-auto">
               <Link
                 href={`/lich-trinh?place=${place.slug}`}
-                className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-on-primary transition-all hover:bg-primary-container hover:scale-105 active:scale-95 shadow-lg"
+                className="flex items-center gap-2.5 rounded-2xl bg-primary px-6 py-4 font-bold text-on-primary transition-all hover:bg-primary/95 hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/20"
               >
-                <Icon name="route" className="!text-lg" />
+                <Icon name="route" className="!text-xl" />
                 <span>{t('place.planTrip')}</span>
               </Link>
               <Link
                 href={`/ai-chat?place=${place.slug}`}
-                className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 font-bold text-white transition-all hover:bg-white/20 hover:scale-105 active:scale-95 shadow-lg"
+                className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-6 py-4 font-bold text-white transition-all hover:bg-white/25 hover:scale-105 active:scale-95 shadow-lg"
               >
-                <Icon name="auto_awesome" className="!text-lg" />
+                <Icon name="auto_awesome" className="!text-xl" />
                 <span>{t('place.askAi')}</span>
               </Link>
               <div className="flex gap-2">
@@ -250,7 +252,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         </section>
 
         {/* 2. QUICK INFO GRID */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           <QuickInfoCard 
             icon="location_on" 
             label={t('place.region') || "Khu vực"} 
@@ -394,29 +396,29 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         </div>
 
         {/* 4. CONVERSION CTAS SECTION */}
-        <section className="bg-gradient-to-br from-primary/10 via-secondary-container/30 to-surface-container-high p-8 md:p-12 rounded-3xl border border-outline-variant/30 text-center space-y-8">
-          <div className="max-w-2xl mx-auto space-y-3">
-            <h2 className="text-3xl font-black text-on-surface tracking-tight">
-              Khám phá {title} cùng trợ lý Vivu
+        <section className="bg-gradient-to-br from-primary/10 via-secondary-container/20 to-surface-container-high p-8 md:p-14 rounded-3xl border border-outline-variant/30 text-center space-y-8 shadow-sm">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <h2 className="text-3xl md:text-4xl font-black text-on-surface tracking-tight leading-tight">
+              Bắt đầu hành trình của bạn tại {title}
             </h2>
-            <p className="text-on-surface-variant text-base md:text-lg">
-              Lên kế hoạch hành trình hoàn hảo với AI Trip Planner, nhận tư vấn miễn phí từ đội ngũ chuyên gia hoặc chat trực tuyến về điểm đến này.
+            <p className="text-on-surface-variant text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+              Lập kế hoạch lịch trình cá nhân hóa tức thì với AI Trip Planner, nhận tư vấn miễn phí từ đội ngũ chuyên gia hoặc chat trực tuyến về điểm đến này.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href={`/lich-trinh?place=${place.slug}`}
-              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-4 font-bold text-on-primary transition-all hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg"
+              className="flex items-center gap-2 rounded-2xl bg-primary px-8 py-4.5 font-bold text-on-primary transition-all hover:bg-primary/95 hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/20"
             >
-              <Icon name="route" className="!text-lg" />
+              <Icon name="route" className="!text-xl" />
               <span>Tạo lịch trình có địa danh này</span>
             </Link>
             
             <Link
               href={`/ai-chat?place=${place.slug}`}
-              className="flex items-center gap-2 rounded-xl bg-surface-container-lowest border border-outline-variant px-6 py-4 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
+              className="flex items-center gap-2 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-4.5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
             >
-              <Icon name="auto_awesome" className="!text-lg text-primary" />
+              <Icon name="auto_awesome" className="!text-xl text-primary" />
               <span>Chat với Vivu AI về nơi này</span>
             </Link>
 
@@ -424,11 +426,27 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
               eventType="detail_consulting_clicked"
               placeSlug={place.slug}
-              className="flex items-center gap-2 rounded-xl bg-surface-container-lowest border border-outline-variant px-6 py-4 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
+              className="flex items-center gap-2 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-4.5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
             >
-              <Icon name="support_agent" className="!text-lg text-primary" />
+              <Icon name="support_agent" className="!text-xl text-primary" />
               <span>Gửi yêu cầu tư vấn chuyến đi</span>
             </TrackedLink>
+          </div>
+
+          {/* Trust Signals */}
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm font-semibold text-on-surface-variant/80 border-t border-outline-variant/30 max-w-lg mx-auto">
+            <span className="flex items-center gap-1">
+              <Icon name="check_circle" className="!text-base text-primary" />
+              <span>Miễn phí sử dụng</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Icon name="check_circle" className="!text-base text-primary" />
+              <span>Dữ liệu xác thực bởi Vivu</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Icon name="check_circle" className="!text-base text-primary" />
+              <span>Hỗ trợ tư vấn 24/7</span>
+            </span>
           </div>
         </section>
 
