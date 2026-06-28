@@ -99,4 +99,89 @@ test.describe('public production smoke', () => {
       expect(href).not.toBe('#');
     }
   });
+
+  test('/dia-diem/suoi-da-vang detail page renders correctly without crash', async ({ page }) => {
+    // Mock APIs to ensure data is returned for suo-da-vang in E2E
+    await page.route('**/api/places/suoi-da-vang', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'suoi-da-vang-id',
+          slug: 'suoi-da-vang',
+          titleVi: 'Suối Đá Vàng',
+          titleEn: 'Suoi Da Vang',
+          summaryVi: 'Điểm tham quan dã ngoại tuyệt vời.',
+          summaryEn: 'Great picnic spot.',
+          descriptionVi: 'Suối Đá Vàng tại Gia Lai.',
+          descriptionEn: 'Golden Rock Stream in Gia Lai.',
+          heroImageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+          address: 'Kông Chro, Gia Lai',
+          province: 'Gia Lai',
+          bestSeasons: [11, 12, 1, 2, 3, 4],
+          isAiReady: true,
+          categories: [{ id: 'cat-1', slug: 'danh-lam-thang-canh', nameVi: 'Danh lam thắng cảnh', icon: 'landscape' }],
+          geo: { lat: 13.98, lng: 108.01 },
+          photos: [],
+        }),
+      })
+    );
+    await page.route('**/api/places/suoi-da-vang/reviews*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [], meta: { total: 0 } }),
+      })
+    );
+    await page.route('**/api/places/suoi-da-vang/questions*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [], meta: { total: 0 } }),
+      })
+    );
+    await page.route('**/api/places/nearby*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      })
+    );
+
+    const response = await page.goto('/dia-diem/suoi-da-vang', { waitUntil: 'domcontentloaded' });
+    expect(response?.ok()).toBeTruthy();
+
+    // Verify Title
+    await expect(page.getByRole('heading', { name: /Suối Đá Vàng/i, level: 1 })).toBeVisible();
+
+    // Verify Hero CTAs
+    await expect(page.getByRole('link', { name: /Thêm vào lịch trình|Tạo lịch trình|Plan trip/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Hỏi Vivu AI|Ask AI/i }).first()).toBeVisible();
+
+    // Verify Quick Info Grid
+    await expect(page.locator('body')).toContainText('Vùng miền');
+    await expect(page.locator('body')).toContainText('Giá vé');
+
+    // Verify Conversion Section
+    await expect(page.locator('body')).toContainText('Bắt đầu hành trình của bạn tại Suối Đá Vàng');
+    await expect(page.locator('body')).toContainText('Dựa trên dữ liệu thực tế từ 67 địa danh');
+  });
+
+  test('no horizontal scroll on key routes at mobile viewport', async ({ page }) => {
+    // Set typical mobile viewport
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    const testUrls = ['/', '/kham-pha', '/lich-trinh'];
+    for (const url of testUrls) {
+      await page.goto(url, { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle');
+
+      // Check if page width exceeds viewport width
+      const hasHorizontalScroll = await page.evaluate(() => {
+        return document.documentElement.scrollWidth > window.innerWidth;
+      });
+      expect(hasHorizontalScroll).toBeFalsy();
+    }
+  });
 });
+
