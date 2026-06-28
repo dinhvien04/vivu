@@ -189,10 +189,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-950/40 to-neutral-950/10 pointer-events-none z-10" />
 
           {/* Floating glassmorphic info card with enhanced gradient overlays */}
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 inset-x-0 p-5 sm:p-8 md:p-12 text-white flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 sm:gap-8 pointer-events-none z-20"
-          >
+          <div className="absolute bottom-0 inset-x-0 p-5 sm:p-8 md:p-12 text-white flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 sm:gap-8 pointer-events-none z-20">
             <div className="space-y-4 pointer-events-auto max-w-4xl">
               {/* Breadcrumb — hidden on very small screens to save space */}
               <nav
@@ -230,20 +227,29 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             </div>
 
             {/* Quick Hero Actions — stack on mobile, row on larger */}
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 pointer-events-auto w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 pointer-events-auto w-full sm:w-auto">
               <Link
                 href={`/lich-trinh?place=${place.slug}`}
-                className="flex items-center justify-center gap-2.5 rounded-2xl bg-primary min-h-[44px] px-6 sm:px-7 py-3 sm:py-4 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 duration-200 ease-out"
+                className="flex items-center justify-center gap-2 rounded-xl bg-primary min-h-[44px] px-6 py-3 font-bold text-on-primary transition-all hover:bg-primary/95 hover:scale-[1.02] hover:-translate-y-0.5 active:scale-98 shadow-md shadow-primary/20 duration-200"
               >
                 <Icon name="route" className="!text-xl" />
                 <span>{t('place.planTrip')}</span>
               </Link>
+              <TrackedLink
+                href={`/tu-van?source=place_detail_hero&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
+                eventType="detail_consulting_clicked"
+                placeSlug={place.slug}
+                className="flex items-center justify-center gap-2 rounded-xl bg-white text-on-surface min-h-[44px] px-5 py-3 font-bold transition-all hover:bg-surface-container-low hover:scale-[1.02] hover:-translate-y-0.5 active:scale-98 shadow-md duration-200"
+              >
+                <Icon name="support_agent" className="!text-xl text-primary" />
+                <span>Gửi tư vấn</span>
+              </TrackedLink>
               <Link
                 href={`/ai-chat?place=${place.slug}`}
-                className="flex items-center justify-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 min-h-[44px] px-6 sm:px-7 py-3 sm:py-4 font-bold text-white transition-all hover:bg-white/20 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg duration-200 ease-out"
+                className="flex items-center justify-center gap-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 min-h-[44px] px-5 py-3 font-semibold text-white transition-all hover:bg-white/20 hover:scale-[1.02] hover:-translate-y-0.5 active:scale-98 shadow-sm duration-200"
               >
                 <Icon name="auto_awesome" className="!text-xl" />
-                <span>{t('place.askAi')}</span>
+                <span>Hỏi Vivu AI</span>
               </Link>
               <div className="flex gap-2 justify-center sm:justify-start">
                 <FavoriteButton placeId={place.id} variant="icon" />
@@ -406,7 +412,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               Bắt đầu hành trình của bạn tại {title}
             </h2>
             <p className="text-on-surface-variant text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-              Lập kế hoạch lịch trình cá nhân hóa tức thì với AI Trip Planner, nhận tư vấn miễn phí từ đội ngũ chuyên gia hoặc chat trực tuyến về điểm đến này.
+              Vivu có thể gợi ý lịch trình phù hợp với thời gian, ngân sách và sở thích của bạn.
             </p>
           </div>
           
@@ -449,8 +455,8 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               <span>Có ảnh, tọa độ và dữ liệu AI</span>
             </span>
             <span className="flex items-center gap-2">
-              <Icon name="verified" className="!text-lg text-primary" />
-              <span>Miễn phí • Không cần đăng ký</span>
+              <Icon name="lock" className="!text-lg text-primary" />
+              <span>Thông tin liên hệ không hiển thị công khai</span>
             </span>
           </div>
         </section>

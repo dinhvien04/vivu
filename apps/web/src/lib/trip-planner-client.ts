@@ -42,6 +42,15 @@ function pickMessage(payload: unknown, fallback: string): string {
   return fallback;
 }
 
+export class TripPlannerError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = 'TripPlannerError';
+  }
+}
+
 async function readJson(res: Response): Promise<unknown> {
   try {
     return await res.json();
@@ -65,10 +74,13 @@ export async function generateTripPlan(
   });
   const payload = await readJson(res);
   if (!res.ok) {
-    throw new Error(pickMessage(payload, 'Không tạo được lịch trình. Vui lòng thử lại.'));
+    throw new TripPlannerError(
+      pickMessage(payload, 'Không tạo được lịch trình. Vui lòng thử lại.'),
+      res.status,
+    );
   }
   const body = payload as { data?: GeneratedTripPlan };
-  if (!body?.data) throw new Error('Không tạo được lịch trình.');
+  if (!body?.data) throw new TripPlannerError('Không tạo được lịch trình.', res.status);
   return body.data;
 }
 

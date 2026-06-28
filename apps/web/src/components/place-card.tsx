@@ -33,7 +33,7 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
   return (
     <Link
       href={`/dia-diem/${place.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant bg-surface transition-all duration-300 hover:shadow-premium hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none"
     >
       <div className="relative bg-surface-container aspect-[4/3] w-full overflow-hidden">
         <Image
@@ -44,28 +44,28 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-4">
+      <div className="flex flex-1 flex-col gap-1.5 p-5">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-overline uppercase tracking-overline text-primary">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
             {place.province || 'Gia Lai'}
           </span>
           {place.rating && place.rating.count > 0 && (
-            <span className="inline-flex items-center gap-1 text-body-sm font-semibold text-on-surface">
-              <Icon name="star" className="!text-base text-amber-500" />
+            <span className="inline-flex items-center gap-1 text-body-sm font-bold text-on-surface">
+              <Icon name="star" className="!text-base text-amber-500 animate-pulse" />
               {place.rating.average.toFixed(1)}
-              <span className="font-normal text-on-surface-variant">({place.rating.count})</span>
+              <span className="font-normal text-on-surface-variant text-xs">({place.rating.count})</span>
             </span>
           )}
         </div>
-        <h3 className="font-h4 text-h4 text-on-surface">{title}</h3>
+        <h3 className="font-bold text-lg text-on-surface line-clamp-1 group-hover:text-primary transition-colors duration-200">{title}</h3>
         {summary && (
-          <p className="mt-1 line-clamp-2 text-body-sm text-on-surface-variant">{summary}</p>
+          <p className="line-clamp-2 text-body-sm text-on-surface-variant leading-relaxed">{summary}</p>
         )}
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-auto pt-3 flex flex-wrap gap-1.5">
           {badges.map((badge) => (
             <span
               key={badge}
-              className="rounded-full bg-surface-container px-2 py-1 text-[11px] font-semibold text-on-surface-variant"
+              className="rounded-full bg-primary/5 border border-primary/10 px-2.5 py-0.5 text-[10px] font-bold text-primary tracking-wide"
             >
               {badge}
             </span>

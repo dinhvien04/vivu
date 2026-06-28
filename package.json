@@ -13,7 +13,7 @@
     "lint": "turbo run lint",
     "prisma:generate": "pnpm --filter @vivu/api prisma:generate",
     "typecheck": "pnpm prisma:generate && turbo run typecheck",
-    "e2e:web": "pnpm --filter @vivu/web test:e2e",
+    "e2e:web": "pnpm --filter @vivu/web build && pnpm --filter @vivu/web test:e2e",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --end-of-line auto",

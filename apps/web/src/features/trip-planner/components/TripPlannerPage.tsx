@@ -13,6 +13,7 @@ import {
   shareTripPlan,
   unshareTripPlan,
   type GeneratedTripPlan,
+  TripPlannerError,
 } from '@/lib/trip-planner-client';
 
 interface TripPlannerPageProps {
@@ -209,6 +210,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
   const [interests, setInterests] = useState<string[]>(['bien-dao', 'di-tich']);
   const [result, setResult] = useState<GeneratedTripPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'copied'>('idle');
@@ -343,12 +345,14 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
     setSharedId(null);
     setFeedbackState('idle');
     setError(null);
+    setErrorStatus(null);
   };
 
   const submit = async () => {
     if (loading) return;
     setLoading(true);
     setError(null);
+    setErrorStatus(null);
     setSaveState('idle');
     setShareState('idle');
     setSharedId(null);
@@ -393,6 +397,11 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
         },
       });
       setError(err instanceof Error ? err.message : labels.error);
+      if (err instanceof TripPlannerError) {
+        setErrorStatus(err.status);
+      } else {
+        setErrorStatus(500);
+      }
     } finally {
       setLoading(false);
     }
@@ -632,13 +641,19 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
           </label>
 
           {error && (
-            <div className="rounded-xl border border-error/30 bg-error-container px-4 py-3 text-body-sm text-on-error-container">
-              <p>{error}</p>
+            <div className="rounded-xl border border-error/30 bg-error-container px-4 py-3.5 text-body-sm text-on-error-container space-y-2.5">
+              {errorStatus === 429 ? (
+                <p className="font-bold">Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình. Vui lòng đăng nhập hoặc thử lại sau.</p>
+              ) : errorStatus === 503 ? (
+                <p className="font-bold">Dịch vụ Trí tuệ Nhân tạo (Gemini AI) hiện tại đang bảo trì để nâng cấp hệ thống. Vui lòng sử dụng tính năng gửi tư vấn.</p>
+              ) : (
+                <p className="font-bold">{error}</p>
+              )}
               <Link
                 href={consultationHref}
-                className="mt-3 inline-flex items-center gap-1 font-semibold underline underline-offset-4"
+                className="inline-flex items-center gap-1.5 font-bold text-primary hover:underline underline-offset-4"
               >
-                <Icon name="support_agent" size={16} />
+                <Icon name="support_agent" size={18} />
                 {labels.errorConsultCta}
               </Link>
             </div>
