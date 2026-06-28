@@ -14,9 +14,10 @@ Dự án ưu tiên dữ liệu địa danh, ảnh, tọa độ, bản đồ và 
 
 ## Screenshots
 
-> TODO: cập nhật ảnh chụp giao diện production.
-
-Repo hiện chưa có screenshot thật, nên README chưa nhúng ảnh để tránh link gãy. Placeholder nằm tại `docs/screenshots/`.
+![Vivu homepage](docs/screenshots/homepage.png)
+![AI Trip Planner](docs/screenshots/trip-planner.png)
+![Place detail](docs/screenshots/place-detail.png)
+![Mobile homepage](docs/screenshots/mobile-homepage.png)
 
 ## Tính Năng Chính
 
