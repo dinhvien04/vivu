@@ -176,26 +176,28 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
-      <SiteHeader />
-      <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
+          <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
         
         {/* 1. HERO SECTION WITH IMAGE & GLASSMORPHISM OVERLAY */}
-        <section className="relative overflow-hidden rounded-3xl shadow-2xl bg-surface-container-high group border border-outline-variant/30">
+        <section className="relative overflow-hidden rounded-[2rem] shadow-2xl bg-surface-container-high group border border-outline-variant/30 aspect-[16/7] md:aspect-[21/9] lg:aspect-[24/9]">
           {/* Gallery Background */}
-          <div className="relative z-0">
+          <div className="relative z-0 h-full w-full">
             <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={title} />
           </div>
+
+          {/* Premium Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-950/40 to-neutral-950/10 pointer-events-none z-10" />
 
           {/* Floating glassmorphic info card with enhanced gradient overlays */}
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent p-6 md:p-8 pt-32 text-white flex flex-col md:flex-row md:items-end md:justify-between gap-6 pointer-events-none"
+            className="absolute bottom-0 inset-x-0 p-8 md:p-12 text-white flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 pointer-events-none z-20"
           >
-            <div className="space-y-4 pointer-events-auto max-w-3xl">
+            <div className="space-y-4 pointer-events-auto max-w-4xl">
               {/* Breadcrumb */}
               <nav
                 aria-label="Breadcrumb"
-                className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/60"
+                className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50"
               >
                 <Link href="/" className="hover:text-white transition-colors">
                   {t('place.breadcrumbHome')}
@@ -212,14 +214,14 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                 <h1 className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-lg leading-tight">
                   {title}
                   {locale !== 'en' && place.titleEn && (
-                    <span className="block md:inline-block md:ml-4 text-xl md:text-3xl font-medium text-white/65">
+                    <span className="block md:inline-block md:ml-4 text-xl md:text-3xl font-medium text-white/60">
                       ({place.titleEn})
                     </span>
                   )}
                 </h1>
 
                 {place.address && (
-                  <p className="inline-flex items-center gap-2 text-sm md:text-lg text-white/75">
+                  <p className="inline-flex items-center gap-2 text-sm md:text-lg text-white/70">
                     <Icon name="location_on" className="!text-xl text-primary" />
                     <span>{place.address}</span>
                   </p>
@@ -231,14 +233,14 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             <div className="flex flex-wrap gap-3 pointer-events-auto">
               <Link
                 href={`/lich-trinh?place=${place.slug}`}
-                className="flex items-center gap-2.5 rounded-2xl bg-primary px-6 py-4 font-bold text-on-primary transition-all hover:bg-primary/95 hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/20"
+                className="flex items-center gap-2.5 rounded-2xl bg-primary px-7 py-4 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 duration-200 ease-out"
               >
                 <Icon name="route" className="!text-xl" />
                 <span>{t('place.planTrip')}</span>
               </Link>
               <Link
                 href={`/ai-chat?place=${place.slug}`}
-                className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-6 py-4 font-bold text-white transition-all hover:bg-white/25 hover:scale-105 active:scale-95 shadow-lg"
+                className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-7 py-4 font-bold text-white transition-all hover:bg-white/20 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg duration-200 ease-out"
               >
                 <Icon name="auto_awesome" className="!text-xl" />
                 <span>{t('place.askAi')}</span>
@@ -396,19 +398,20 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         </div>
 
         {/* 4. CONVERSION CTAS SECTION */}
-        <section className="bg-gradient-to-br from-primary/10 via-secondary-container/20 to-surface-container-high p-8 md:p-14 rounded-3xl border border-outline-variant/30 text-center space-y-8 shadow-sm">
+        <section className="bg-gradient-to-br from-primary/[0.04] via-secondary-container/[0.08] to-surface-container-high/60 p-10 md:p-16 rounded-[2.5rem] border border-outline-variant/40 text-center space-y-10 shadow-[0_8px_30px_rgba(0,0,0,0.02)]">
           <div className="max-w-2xl mx-auto space-y-4">
-            <h2 className="text-3xl md:text-4xl font-black text-on-surface tracking-tight leading-tight">
+            <h2 className="text-3xl md:text-5xl font-black text-on-surface tracking-tight leading-tight">
               Bắt đầu hành trình của bạn tại {title}
             </h2>
             <p className="text-on-surface-variant text-base md:text-lg max-w-xl mx-auto leading-relaxed">
               Lập kế hoạch lịch trình cá nhân hóa tức thì với AI Trip Planner, nhận tư vấn miễn phí từ đội ngũ chuyên gia hoặc chat trực tuyến về điểm đến này.
             </p>
           </div>
+          
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href={`/lich-trinh?place=${place.slug}`}
-              className="flex items-center gap-2 rounded-2xl bg-primary px-8 py-4.5 font-bold text-on-primary transition-all hover:bg-primary/95 hover:scale-105 active:scale-95 shadow-lg hover:shadow-primary/20"
+              className="flex items-center gap-3 rounded-2xl bg-primary px-8 py-5 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 duration-200 ease-out"
             >
               <Icon name="route" className="!text-xl" />
               <span>Tạo lịch trình có địa danh này</span>
@@ -416,7 +419,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             
             <Link
               href={`/ai-chat?place=${place.slug}`}
-              className="flex items-center gap-2 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-4.5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
+              className="flex items-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
             >
               <Icon name="auto_awesome" className="!text-xl text-primary" />
               <span>Chat với Vivu AI về nơi này</span>
@@ -426,7 +429,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
               eventType="detail_consulting_clicked"
               placeSlug={place.slug}
-              className="flex items-center gap-2 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-4.5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
+              className="flex items-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
             >
               <Icon name="support_agent" className="!text-xl text-primary" />
               <span>Gửi yêu cầu tư vấn chuyến đi</span>
@@ -434,18 +437,14 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           </div>
 
           {/* Trust Signals */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-6 text-sm font-semibold text-on-surface-variant/80 border-t border-outline-variant/30 max-w-lg mx-auto">
-            <span className="flex items-center gap-1">
-              <Icon name="check_circle" className="!text-base text-primary" />
-              <span>Miễn phí sử dụng</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-8 text-sm font-bold text-on-surface-variant/80 border-t border-outline-variant/30 max-w-xl mx-auto">
+            <span className="flex items-center gap-2">
+              <Icon name="check_circle" className="!text-lg text-primary" />
+              <span>Dựa trên dữ liệu thực tế từ 67 địa danh của Vivu</span>
             </span>
-            <span className="flex items-center gap-1">
-              <Icon name="check_circle" className="!text-base text-primary" />
-              <span>Dữ liệu xác thực bởi Vivu</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <Icon name="check_circle" className="!text-base text-primary" />
-              <span>Hỗ trợ tư vấn 24/7</span>
+            <span className="flex items-center gap-2">
+              <Icon name="verified" className="!text-lg text-primary" />
+              <span>Miễn phí • Không cần đăng ký</span>
             </span>
           </div>
         </section>
@@ -491,15 +490,15 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
 function QuickInfoCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-sm hover:-translate-y-1 transition-all">
-      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+    <div className="flex items-center gap-5 bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300 ease-out group">
+      <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/5 text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-300 shadow-inner">
         <Icon name={icon} className="!text-2xl" />
       </div>
-      <div>
-        <span className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant/75">
+      <div className="space-y-0.5">
+        <span className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant/80">
           {label}
         </span>
-        <span className="block font-black text-on-surface text-sm md:text-base mt-0.5">
+        <span className="block font-black text-on-surface text-base md:text-lg leading-tight">
           {value}
         </span>
       </div>
