@@ -162,3 +162,21 @@ body {
   background-color: rgb(var(--color-selection-bg));
   color: rgb(var(--color-selection-fg));
 }
+
+/* Smooth scrolling for anchor links (respects reduced-motion) */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Keyboard focus-visible ring — applied via Tailwind utilities but this
+   ensures a consistent fallback for any interactive element that lacks
+   explicit ring styling. */
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}

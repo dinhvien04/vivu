@@ -649,9 +649,9 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
               type="button"
               onClick={submit}
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-on-primary transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary min-h-[48px] px-5 py-3 font-bold text-on-primary transition-all hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70 shadow-md hover:shadow-lg active:scale-95"
             >
-              <Icon name="auto_awesome" size={20} />
+              <Icon name="auto_awesome" size={20} className={loading ? 'animate-spin' : ''} />
               {loading ? labels.generating : labels.generate}
             </button>
             <p className="mt-2 text-center text-xs text-outline">{labels.quota}</p>
@@ -667,13 +667,13 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
             </div>
             <h2 className="mt-5 font-h3 text-h3 text-on-surface">{labels.result}</h2>
             <p className="mt-2 max-w-md text-body-md text-on-surface-variant">{labels.emptyLead}</p>
-            <div className="mt-6 grid w-full max-w-2xl gap-3 md:grid-cols-3">
+            <div className="mt-6 grid w-full max-w-2xl gap-4 md:grid-cols-3">
               {examples.map((example) => (
                 <button
                   key={example.title}
                   type="button"
                   onClick={() => applyExample(example)}
-                  className="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4 text-left transition hover:border-primary hover:bg-primary-fixed/40"
+                  className="rounded-2xl border border-outline-variant/50 bg-surface-container-lowest p-4 text-left transition-all duration-300 hover:shadow-card-hover hover:border-primary hover:-translate-y-1"
                 >
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed text-primary">
                     <Icon name="auto_awesome" size={18} />
@@ -692,16 +692,24 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
         )}
 
         {loading && (
-          <div className="space-y-4">
-            {[0, 1, 2].map((item) => (
-              <div key={item} className="rounded-2xl border border-outline-variant/30 p-5">
-                <div className="h-5 w-1/3 animate-pulse rounded bg-surface-container" />
-                <div className="mt-4 space-y-3">
-                  <div className="h-4 w-full animate-pulse rounded bg-surface-container" />
-                  <div className="h-4 w-2/3 animate-pulse rounded bg-surface-container" />
+          <div className="space-y-6">
+            <div className="space-y-4">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="rounded-2xl border border-outline-variant/30 p-5 bg-surface-container-lowest shadow-card">
+                  <div className="h-5 w-1/3 animate-pulse rounded bg-surface-container" />
+                  <div className="mt-4 space-y-3">
+                    <div className="h-4 w-full animate-pulse rounded bg-surface-container" />
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-surface-container" />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="flex flex-col items-center justify-center py-4 gap-2">
+              <Icon name="auto_awesome" className="text-primary animate-spin !text-3xl" />
+              <p className="text-center font-semibold text-body-md text-primary animate-pulse">
+                {locale === 'en' ? 'Vivu is finding the best destinations for you...' : 'Vivu đang chọn địa danh phù hợp...'}
+              </p>
+            </div>
           </div>
         )}
 

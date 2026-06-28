@@ -78,8 +78,12 @@ const config: Config = {
         h1: ['48px', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '700' }],
         h2: ['32px', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '700' }],
         h3: ['24px', { lineHeight: '1.4', letterSpacing: '0', fontWeight: '600' }],
+        h4: ['20px', { lineHeight: '1.4', letterSpacing: '0', fontWeight: '600' }],
         'body-lg': ['18px', { lineHeight: '1.6', letterSpacing: '0', fontWeight: '400' }],
         'body-md': ['16px', { lineHeight: '1.6', letterSpacing: '0', fontWeight: '400' }],
+        'body-sm': ['14px', { lineHeight: '1.5', letterSpacing: '0', fontWeight: '400' }],
+        'body-xs': ['12px', { lineHeight: '1.4', letterSpacing: '0', fontWeight: '400' }],
+        overline: ['11px', { lineHeight: '1.0', letterSpacing: '0.08em', fontWeight: '600' }],
         'label-caps': ['12px', { lineHeight: '1.0', letterSpacing: '0.05em', fontWeight: '600' }],
       },
       borderRadius: {
@@ -103,6 +107,8 @@ const config: Config = {
       boxShadow: {
         premium: '0 4px 20px rgba(0, 102, 204, 0.15)',
         hover: '0 8px 30px rgba(0, 102, 204, 0.2)',
+        card: '0 2px 12px -2px rgba(0, 0, 0, 0.06)',
+        'card-hover': '0 8px 24px -4px rgba(0, 0, 0, 0.12)',
       },
     },
   },

@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ExploreSearch } from '@/components/explore-search';
+import { EmptyState } from '@/components/empty-state';
 import { Icon } from '@/components/icon';
 import { PlacesMapLoader } from '@/components/map/places-map-loader';
 import { PlaceCard } from '@/components/place-card';
@@ -427,8 +428,12 @@ export default async function KhamPhaPage({ params, searchParams }: PageProps) {
         )}
 
         {placesResult && view === 'grid' && places.length === 0 && (
-          <div className="rounded-lg bg-surface-container p-6 text-body-md text-on-surface-variant">
-            {t('explore.empty')}
+          <div className="py-8">
+            <EmptyState
+              icon="search_off"
+              title={locale === 'en' ? 'No destinations found' : 'Không tìm thấy địa danh'}
+              description={t('explore.empty')}
+            />
           </div>
         )}
 

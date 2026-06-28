@@ -120,7 +120,7 @@ export function ReviewsSection({
         {user ? (
           <Link
             href={writeHref}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white hover:bg-primary/90"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary min-h-[44px] px-5 py-2.5 font-bold text-white hover:bg-primary/90 transition-all hover:scale-[1.02] shadow-sm hover:shadow-md"
           >
             <Icon name="rate_review" className="!text-base" />
             {t('writeBtn')}
@@ -128,7 +128,7 @@ export function ReviewsSection({
         ) : (
           <Link
             href={`/dang-nhap?next=${encodeURIComponent(writeHref)}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-medium text-on-surface-variant hover:bg-surface-container"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-outline-variant min-h-[44px] px-5 py-2.5 font-bold text-on-surface-variant hover:bg-surface-container transition-all hover:scale-[1.02]"
           >
             <Icon name="login" className="!text-base" />
             {t('signInBtn')}
@@ -139,17 +139,19 @@ export function ReviewsSection({
       {error && (
         <div
           role="alert"
-          className="mb-4 rounded-lg border border-error/40 bg-error-container px-4 py-3 text-body-sm text-on-error-container"
+          className="mb-4 rounded-xl border border-error/40 bg-error-container px-4 py-3 text-body-sm text-on-error-container"
         >
           {error}
         </div>
       )}
 
       {reviews.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container/40 p-8 text-center">
-          <Icon name="rate_review" className="!text-3xl text-outline" />
-          <h3 className="mt-2 font-h4 text-h4 text-on-surface">{t('emptyTitle')}</h3>
-          <p className="mt-1 text-body-md text-on-surface-variant">{t('emptyLead')}</p>
+        <div className="rounded-2xl border border-dashed border-outline-variant bg-surface-container-lowest p-10 text-center shadow-card">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/5 text-primary">
+            <Icon name="rate_review" className="!text-3xl" />
+          </div>
+          <h3 className="mt-4 font-bold text-lg text-on-surface">{t('emptyTitle')}</h3>
+          <p className="mt-2 text-body-md text-on-surface-variant max-w-sm mx-auto">{t('emptyLead')}</p>
         </div>
       ) : (
         <ul className="space-y-4">
@@ -158,11 +160,11 @@ export function ReviewsSection({
             return (
               <li
                 key={r.id}
-                className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"
+                className="rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-5 shadow-card hover:shadow-card-hover transition-all duration-300"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container text-primary">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container text-primary ring-2 ring-primary/10">
                       {r.user.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -171,7 +173,7 @@ export function ReviewsSection({
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
-                        <span className="font-semibold">{r.user.name.charAt(0).toUpperCase()}</span>
+                        <span className="font-semibold text-sm">{r.user.name.charAt(0).toUpperCase()}</span>
                       )}
                     </div>
                     <div>
@@ -181,7 +183,7 @@ export function ReviewsSection({
                   </div>
                   <Stars rating={r.rating} label={t('starsAria', { rating: r.rating })} />
                 </div>
-                <p className="mt-3 whitespace-pre-line text-body-md leading-relaxed text-on-surface">
+                <p className="mt-3 whitespace-pre-line text-body-md leading-relaxed text-on-surface-variant">
                   {r.content}
                 </p>
                 {isOwner && (
@@ -189,7 +191,7 @@ export function ReviewsSection({
                     <button
                       type="button"
                       onClick={() => handleDelete(r.id)}
-                      className="inline-flex items-center gap-1 rounded-lg px-3 py-1 text-body-sm text-error hover:bg-error-container/40"
+                      className="inline-flex items-center gap-1 rounded-xl min-h-[36px] px-3 py-1.5 text-body-sm text-error hover:bg-error-container/40 transition-colors"
                     >
                       <Icon name="delete" className="!text-sm" />
                       {t('deleteBtn')}

@@ -179,7 +179,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
         
         {/* 1. HERO SECTION WITH IMAGE & GLASSMORPHISM OVERLAY */}
-        <section className="relative overflow-hidden rounded-[2rem] shadow-2xl bg-surface-container-high group border border-outline-variant/30 aspect-[16/7] md:aspect-[21/9] lg:aspect-[24/9]">
+        <section className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] shadow-2xl bg-surface-container-high group border border-outline-variant/30 aspect-[16/9] sm:aspect-[16/7] md:aspect-[21/9] lg:aspect-[24/9]">
           {/* Gallery Background */}
           <div className="relative z-0 h-full w-full">
             <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={title} />
@@ -191,13 +191,13 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           {/* Floating glassmorphic info card with enhanced gradient overlays */}
           <div 
             onClick={(e) => e.stopPropagation()}
-            className="absolute bottom-0 inset-x-0 p-8 md:p-12 text-white flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 pointer-events-none z-20"
+            className="absolute bottom-0 inset-x-0 p-5 sm:p-8 md:p-12 text-white flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 sm:gap-8 pointer-events-none z-20"
           >
             <div className="space-y-4 pointer-events-auto max-w-4xl">
-              {/* Breadcrumb */}
+              {/* Breadcrumb — hidden on very small screens to save space */}
               <nav
                 aria-label="Breadcrumb"
-                className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50"
+                className="hidden sm:flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-white/50"
               >
                 <Link href="/" className="hover:text-white transition-colors">
                   {t('place.breadcrumbHome')}
@@ -211,7 +211,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               </nav>
 
               <div className="space-y-2">
-                <h1 className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-lg leading-tight">
+                <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tight drop-shadow-lg leading-tight">
                   {title}
                   {locale !== 'en' && place.titleEn && (
                     <span className="block md:inline-block md:ml-4 text-xl md:text-3xl font-medium text-white/60">
@@ -229,23 +229,23 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Quick Hero Actions */}
-            <div className="flex flex-wrap gap-3 pointer-events-auto">
+            {/* Quick Hero Actions — stack on mobile, row on larger */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 pointer-events-auto w-full sm:w-auto">
               <Link
                 href={`/lich-trinh?place=${place.slug}`}
-                className="flex items-center gap-2.5 rounded-2xl bg-primary px-7 py-4 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 duration-200 ease-out"
+                className="flex items-center justify-center gap-2.5 rounded-2xl bg-primary min-h-[44px] px-6 sm:px-7 py-3 sm:py-4 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 duration-200 ease-out"
               >
                 <Icon name="route" className="!text-xl" />
                 <span>{t('place.planTrip')}</span>
               </Link>
               <Link
                 href={`/ai-chat?place=${place.slug}`}
-                className="flex items-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 px-7 py-4 font-bold text-white transition-all hover:bg-white/20 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg duration-200 ease-out"
+                className="flex items-center justify-center gap-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 min-h-[44px] px-6 sm:px-7 py-3 sm:py-4 font-bold text-white transition-all hover:bg-white/20 hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg duration-200 ease-out"
               >
                 <Icon name="auto_awesome" className="!text-xl" />
                 <span>{t('place.askAi')}</span>
               </Link>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-center sm:justify-start">
                 <FavoriteButton placeId={place.id} variant="icon" />
                 <PlaceShareActions title={title} variant="icon" />
               </div>
@@ -254,7 +254,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         </section>
 
         {/* 2. QUICK INFO GRID */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <QuickInfoCard 
             icon="location_on" 
             label={t('place.region') || "Khu vực"} 
@@ -410,10 +410,10 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             </p>
           </div>
           
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 w-full sm:w-auto">
             <Link
               href={`/lich-trinh?place=${place.slug}`}
-              className="flex items-center gap-3 rounded-2xl bg-primary px-8 py-5 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 duration-200 ease-out"
+              className="flex items-center justify-center gap-3 rounded-2xl bg-primary min-h-[44px] w-full sm:w-auto px-8 py-4 sm:py-5 font-black text-on-primary transition-all hover:bg-primary/90 hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 duration-200 ease-out"
             >
               <Icon name="route" className="!text-xl" />
               <span>Tạo lịch trình có địa danh này</span>
@@ -421,7 +421,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             
             <Link
               href={`/ai-chat?place=${place.slug}`}
-              className="flex items-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
+              className="flex items-center justify-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant min-h-[44px] w-full sm:w-auto px-8 py-4 sm:py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
             >
               <Icon name="auto_awesome" className="!text-xl text-primary" />
               <span>Chat với Vivu AI về nơi này</span>
@@ -431,7 +431,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
               eventType="detail_consulting_clicked"
               placeSlug={place.slug}
-              className="flex items-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant px-8 py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
+              className="flex items-center justify-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant min-h-[44px] w-full sm:w-auto px-8 py-4 sm:py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
             >
               <Icon name="support_agent" className="!text-xl text-primary" />
               <span>Gửi yêu cầu tư vấn chuyến đi</span>
@@ -439,10 +439,14 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           </div>
 
           {/* Trust Signals */}
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-8 text-sm font-bold text-on-surface-variant/80 border-t border-outline-variant/30 max-w-xl mx-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-8 text-sm font-bold text-on-surface-variant/80 border-t border-outline-variant/30 max-w-2xl mx-auto">
             <span className="flex items-center gap-2">
               <Icon name="check_circle" className="!text-lg text-primary" />
-              <span>Dựa trên dữ liệu thực tế từ 67 địa danh của Vivu</span>
+              <span>Dựa trên dữ liệu thực tế từ 67 địa danh</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <Icon name="photo_library" className="!text-lg text-primary" />
+              <span>Có ảnh, tọa độ và dữ liệu AI</span>
             </span>
             <span className="flex items-center gap-2">
               <Icon name="verified" className="!text-lg text-primary" />
@@ -467,7 +471,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             </div>
             <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {related.slice(0, 3).map((p) => (
-                <li key={p.id} className="relative group overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-sm hover:shadow-md transition-all">
+                <li key={p.id} className="relative group overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-card hover:shadow-card-hover transition-all duration-300">
                   <PlaceCard place={p} locale={locale} />
                   <NearbyPlaceActions
                     placeSlug={p.slug}
@@ -491,17 +495,21 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 }
 
 function QuickInfoCard({ icon, label, value }: { icon: string; label: string; value: string }) {
+  const displayValue = value?.trim() || 'Đang cập nhật';
+  const isEmpty = !value?.trim();
   return (
-    <div className="flex items-center gap-5 bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 transition-all duration-300 ease-out group">
-      <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/5 text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-300 shadow-inner">
+    <div className="flex items-center gap-4 sm:gap-5 bg-surface-container-lowest p-4 sm:p-6 rounded-2xl border border-outline-variant/30 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 ease-out group focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
+      <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/5 text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors duration-300 shrink-0">
         <Icon name={icon} className="!text-2xl" />
       </div>
-      <div className="space-y-0.5">
+      <div className="space-y-0.5 min-w-0">
         <span className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant/80">
           {label}
         </span>
-        <span className="block font-black text-on-surface text-base md:text-lg leading-tight">
-          {value}
+        <span className={`block font-black text-base md:text-lg leading-tight truncate ${
+          isEmpty ? 'italic font-normal text-outline' : 'text-on-surface'
+        }`}>
+          {displayValue}
         </span>
       </div>
     </div>

@@ -80,7 +80,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
           <button
             type="button"
             onClick={() => setShowForm((s) => !s)}
-            className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-label-md font-semibold text-primary transition-colors hover:bg-primary-container"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary min-h-[44px] px-5 py-2 text-label-md font-bold text-primary transition-all hover:bg-primary-container hover:scale-[1.02]"
           >
             <Icon name={showForm ? 'close' : 'help_outline'} className="!text-base" />
             {showForm ? t('cancelBtn') : t('askBtn')}
@@ -88,7 +88,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
         ) : (
           <Link
             href={`/dang-nhap?next=/dia-diem/${placeSlug}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-label-md font-semibold text-primary transition-colors hover:bg-primary-container"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary min-h-[44px] px-5 py-2 text-label-md font-bold text-primary transition-all hover:bg-primary-container hover:scale-[1.02]"
           >
             <Icon name="login" className="!text-base" />
             {t('signInBtn')}
@@ -99,7 +99,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
       {showForm && user && (
         <form
           onSubmit={handleSubmit}
-          className="mb-6 rounded-2xl border border-outline-variant bg-surface px-5 py-5"
+          className="mb-6 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest px-5 py-5 shadow-card"
         >
           <textarea
             value={content}
@@ -107,14 +107,14 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             rows={3}
             maxLength={1000}
             placeholder={t('placeholder')}
-            className="w-full resize-y rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-2 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full resize-y rounded-xl border border-outline-variant bg-surface px-3 py-2.5 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-label-caps text-on-surface-variant">{content.trim().length}/1000</p>
+            <p className="text-label-caps text-on-surface-variant font-medium">{content.trim().length}/1000</p>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary min-h-[44px] px-6 py-2.5 font-bold text-white transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Icon name="send" className="!text-base" />
               {submitting ? t('submittingBtn') : t('submitBtn')}
@@ -126,7 +126,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
       {error && (
         <div
           role="alert"
-          className="mb-4 rounded-lg border border-error/40 bg-error-container px-4 py-3 text-body-md text-on-error-container"
+          className="mb-4 rounded-xl border border-error/40 bg-error-container px-4 py-3 text-body-md text-on-error-container"
         >
           {error}
         </div>
@@ -139,16 +139,16 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
           {questions.slice(0, 5).map((q) => (
             <li
               key={q.id}
-              className="rounded-2xl border border-outline-variant bg-surface px-5 py-4 transition-all hover:border-primary/40"
+              className="rounded-2xl border border-outline-variant/30 bg-surface-container-lowest px-5 py-4 shadow-card hover:shadow-card-hover hover:border-primary/30 transition-all duration-300"
             >
               <Link href={`/hoi-dap/${q.id}`} className="block">
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-label-caps text-on-surface-variant">
-                  <span className="font-medium text-on-surface">{q.user.name}</span>
+                  <span className="font-semibold text-on-surface">{q.user.name}</span>
                   <span>•</span>
                   <span>{formatRelative(q.createdAt)}</span>
                 </div>
-                <p className="font-sans text-body-md text-on-surface line-clamp-2">{q.content}</p>
-                <p className="mt-2 inline-flex items-center gap-1 text-label-md text-secondary">
+                <p className="font-sans text-body-md text-on-surface line-clamp-2 leading-relaxed">{q.content}</p>
+                <p className="mt-2 inline-flex items-center gap-1 text-label-md text-secondary font-bold">
                   <Icon name="comment" className="!text-base" />
                   {t('answersCount', { count: q.answersCount })}
                 </p>
@@ -159,7 +159,7 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             <li>
               <Link
                 href={`/hoi-dap?placeSlug=${placeSlug}`}
-                className="inline-flex items-center gap-1 text-label-md font-semibold text-primary hover:underline"
+                className="inline-flex items-center gap-1 text-label-md font-bold text-primary hover:underline min-h-[36px]"
               >
                 {t('viewAll', { total })}
                 <Icon name="arrow_forward" className="!text-base" />
