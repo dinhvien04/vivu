@@ -367,33 +367,35 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           </div>
 
           {/* Right Column (Sidebar Utilities) */}
-          <aside className="lg:col-span-4 space-y-6">
-            {/* Weather Widget */}
-            {place.geo && <WeatherWidget lat={place.geo.lat} lng={place.geo.lng} />}
+          <aside className="lg:col-span-4">
+            <div className="lg:sticky lg:top-28 space-y-6">
+              {/* Weather Widget */}
+              {place.geo && <WeatherWidget lat={place.geo.lat} lng={place.geo.lng} />}
 
-            {/* Action Tools */}
-            <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm space-y-4">
-              <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/30">Tiện ích</h3>
-              <AddToCollectionButton placeId={place.id} placeTitle={title} />
-              <DataReportButton placeSlug={place.slug} placeTitle={title} />
-            </div>
-
-            {/* Categories tags list */}
-            {place.categories && place.categories.length > 0 && (
-              <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm space-y-4">
-                <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/30">{t('place.category')}</h3>
-                <ul className="flex flex-wrap gap-2">
-                  {place.categories.map((c) => (
-                    <li key={c.id}>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3.5 py-1 text-xs font-bold text-on-secondary-container">
-                        {c.icon && <Icon name={c.icon} className="!text-sm" />}
-                        {placeCategoryName(c, locale)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+              {/* Action Tools */}
+              <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] space-y-4 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
+                <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/20">Tiện ích</h3>
+                <AddToCollectionButton placeId={place.id} placeTitle={title} />
+                <DataReportButton placeSlug={place.slug} placeTitle={title} />
               </div>
-            )}
+
+              {/* Categories tags list */}
+              {place.categories && place.categories.length > 0 && (
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] space-y-4 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
+                  <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/20">{t('place.category')}</h3>
+                  <ul className="flex flex-wrap gap-2">
+                    {place.categories.map((c) => (
+                      <li key={c.id}>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3.5 py-1 text-xs font-bold text-on-secondary-container hover:scale-105 transition-transform duration-200 cursor-default">
+                          {c.icon && <Icon name={c.icon} className="!text-sm" />}
+                          {placeCategoryName(c, locale)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </aside>
         </div>
 
