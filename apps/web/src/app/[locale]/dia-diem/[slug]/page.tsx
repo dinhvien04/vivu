@@ -177,74 +177,113 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <SiteHeader />
-      <main className="mx-auto max-w-container-max px-margin-mobile py-section-gap md:px-margin-desktop">
-        {/* Breadcrumb */}
-        <nav
-          aria-label="Breadcrumb"
-          className="flex flex-wrap items-center gap-2 text-overline uppercase tracking-overline text-on-surface-variant"
-        >
-          <Link href="/" className="hover:text-primary">
-            {t('place.breadcrumbHome')}
-          </Link>
-          <Icon name="chevron_right" className="!text-base" />
-          <Link href="/kham-pha" className="hover:text-primary">
-            {t('place.breadcrumbExplore')}
-          </Link>
-          <Icon name="chevron_right" className="!text-base" />
-          <span className="text-primary">{title}</span>
-        </nav>
+      <main className="mx-auto max-w-container-max px-margin-mobile py-6 md:px-margin-desktop md:py-10 space-y-12">
+        
+        {/* 1. HERO SECTION WITH IMAGE & GLASSMORPHISM OVERLAY */}
+        <section className="relative overflow-hidden rounded-3xl shadow-xl bg-surface-container-high group">
+          {/* Gallery Background */}
+          <div className="relative z-0">
+            <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={title} />
+          </div>
 
-        {/* Title block */}
-        <section className="mb-10 mt-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h1 className="font-h1 text-h1 text-on-surface">
+          {/* Floating glassmorphic info card */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-neutral-950 via-neutral-950/70 to-transparent p-6 pt-24 text-white flex flex-col md:flex-row md:items-end md:justify-between gap-6 pointer-events-none"
+          >
+            <div className="space-y-3 pointer-events-auto max-w-2xl">
+              {/* Breadcrumb */}
+              <nav
+                aria-label="Breadcrumb"
+                className="flex flex-wrap items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-white/70"
+              >
+                <Link href="/" className="hover:text-white transition-colors">
+                  {t('place.breadcrumbHome')}
+                </Link>
+                <Icon name="chevron_right" className="!text-sm text-white/40" />
+                <Link href="/kham-pha" className="hover:text-white transition-colors">
+                  {t('place.breadcrumbExplore')}
+                </Link>
+                <Icon name="chevron_right" className="!text-sm text-white/40" />
+                <span className="text-white/90 font-black">{title}</span>
+              </nav>
+
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight drop-shadow-sm">
                 {title}
                 {locale !== 'en' && place.titleEn && (
-                  <span className="ml-2 font-normal text-on-surface-variant">
+                  <span className="block md:inline-block md:ml-3 text-lg md:text-2xl font-normal text-white/70">
                     ({place.titleEn})
                   </span>
                 )}
               </h1>
+
               {place.address && (
-                <p className="mt-2 inline-flex items-center gap-1 text-body-md text-on-surface-variant">
-                  <Icon name="location_on" className="!text-base text-primary" />
+                <p className="inline-flex items-center gap-1.5 text-sm md:text-base text-white/80">
+                  <Icon name="location_on" className="!text-lg text-primary" />
                   {place.address}
                 </p>
               )}
             </div>
-            <div className="flex gap-3">
-              <FavoriteButton placeId={place.id} variant="icon" />
-              <PlaceShareActions title={title} variant="icon" />
+
+            {/* Quick Hero Actions */}
+            <div className="flex flex-wrap gap-3 pointer-events-auto">
+              <Link
+                href={`/lich-trinh?place=${place.slug}`}
+                className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-on-primary transition-all hover:bg-primary-container hover:scale-105 active:scale-95 shadow-lg"
+              >
+                <Icon name="route" className="!text-lg" />
+                <span>{t('place.planTrip')}</span>
+              </Link>
+              <Link
+                href={`/ai-chat?place=${place.slug}`}
+                className="flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 font-bold text-white transition-all hover:bg-white/20 hover:scale-105 active:scale-95 shadow-lg"
+              >
+                <Icon name="auto_awesome" className="!text-lg" />
+                <span>{t('place.askAi')}</span>
+              </Link>
+              <div className="flex gap-2">
+                <FavoriteButton placeId={place.id} variant="icon" />
+                <PlaceShareActions title={title} variant="icon" />
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Hero gallery */}
-        <section className="mb-12">
-          <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={title} />
+        {/* 2. QUICK INFO GRID */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <QuickInfoCard 
+            icon="location_on" 
+            label={t('place.region') || "Khu vực"} 
+            value={place.region ? (locale === 'en' ? place.region.nameEn : place.region.nameVi) : "Gia Lai"} 
+          />
+          <QuickInfoCard 
+            icon="calendar_month" 
+            label={t('place.bestSeason')} 
+            value={formatSeasonMonths(place.bestSeasons, locale)} 
+          />
+          <QuickInfoCard 
+            icon="category" 
+            label={t('place.category')} 
+            value={categoriesText} 
+          />
+          <QuickInfoCard 
+            icon="payments" 
+            label="Giá vé" 
+            value="Miễn phí" 
+          />
         </section>
 
-        <div className="grid grid-cols-1 gap-gutter lg:grid-cols-12">
-          {/* Left column */}
-          <div className="lg:col-span-8">
-            {/* Meta cards */}
-            <div className="mb-12 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <MetaCard
-                icon="calendar_month"
-                label={t('place.bestSeason')}
-                value={formatSeasonMonths(place.bestSeasons, locale)}
-              />
-              <MetaCard icon="category" label={t('place.category')} value={categoriesText} />
-            </div>
-
+        {/* 3. TWO COLUMN CONTENT */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          {/* Left Column (Main Info) */}
+          <div className="lg:col-span-8 space-y-10">
             {/* Description */}
-            <section className="mb-12">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="font-h2 text-h2 text-on-surface">{t('place.introTitle')}</h2>
-              </div>
+            <section className="bg-surface-container-lowest p-6 md:p-8 rounded-2xl border border-outline-variant/30 shadow-sm space-y-6">
+              <h2 className="text-2xl font-bold text-on-surface border-b pb-4 border-outline-variant/30">
+                {t('place.introTitle')}
+              </h2>
               {usesVietnameseFallback && (
-                <p className="mb-4 rounded-xl border border-primary/30 bg-primary-fixed px-4 py-3 text-body-sm text-on-primary-fixed">
+                <p className="rounded-xl border border-primary/30 bg-primary-fixed px-4 py-3 text-body-sm text-on-primary-fixed">
                   English copy for this destination is still being updated. Vivu is showing the
                   available Vietnamese content for now.
                 </p>
@@ -256,31 +295,44 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               </div>
             </section>
 
-            {/* Map */}
-            <section className="mb-12">
-              <h2 className="mb-6 font-h2 text-h2 text-on-surface">{t('place.mapTitle')}</h2>
+            {/* Map & Directions */}
+            <section className="bg-surface-container-lowest p-6 md:p-8 rounded-2xl border border-outline-variant/30 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b pb-4 border-outline-variant/30">
+                <h2 className="text-2xl font-bold text-on-surface">{t('place.mapTitle')}</h2>
+                {place.geo && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${place.geo.lat},${place.geo.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline transition-all"
+                  >
+                    <Icon name="navigation" className="!text-sm" />
+                    <span>Chỉ đường</span>
+                  </a>
+                )}
+              </div>
               {place.geo ? (
-                <>
-                  <PlacesMapLoader
-                    places={[place]}
-                    locale={locale}
-                    center={[place.geo.lat, place.geo.lng]}
-                    zoom={12}
-                    height="400px"
-                  />
-                  <p className="mt-3 text-body-sm text-on-surface-variant">
-                    <span className="font-semibold text-on-surface">{place.address ?? title}</span>
-                    <span className="mx-2 text-outline">·</span>
-                    {place.geo.lat.toFixed(4)}°N, {place.geo.lng.toFixed(4)}°E
-                    <span className="mx-2 text-outline">·</span>
-                    {t('place.mapCta')}{' '}
+                <div className="space-y-4">
+                  <div className="overflow-hidden rounded-xl border border-outline-variant/30">
+                    <PlacesMapLoader
+                      places={[place]}
+                      locale={locale}
+                      center={[place.geo.lat, place.geo.lng]}
+                      zoom={12}
+                      height="380px"
+                    />
+                  </div>
+                  <p className="text-body-sm text-on-surface-variant flex items-center gap-2">
+                    <Icon name="explore" className="!text-base text-primary" />
+                    <span className="font-semibold text-on-surface">{place.geo.lat.toFixed(4)}°N, {place.geo.lng.toFixed(4)}°E</span>
+                    <span className="text-outline">·</span>
                     <Link href="/ban-do" className="font-semibold text-primary hover:underline">
                       {t('place.mapCtaLink')}
                     </Link>
                   </p>
-                </>
+                </div>
               ) : (
-                <div className="relative flex h-[300px] flex-col items-center justify-center rounded-xl border border-outline-variant bg-surface-container/40 text-on-surface-variant md:h-[400px]">
+                <div className="relative flex h-[300px] flex-col items-center justify-center rounded-xl border border-outline-variant bg-surface-container/40 text-on-surface-variant md:h-[350px]">
                   <Icon
                     name="location_on"
                     className="!text-5xl text-primary"
@@ -310,96 +362,93 @@ export default async function PlaceDetailPage({ params }: PageProps) {
             />
           </div>
 
-          {/* Right sidebar */}
-          <aside className="lg:col-span-4">
-            <div className="sticky top-24 space-y-6">
-              {/* Best season summary */}
-              <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-h4 text-h4 text-on-surface">{t('place.idealTimeTitle')}</h3>
-                  <Icon name="wb_sunny" className="text-primary" />
-                </div>
-                <p className="font-bold text-on-surface">
-                  {formatSeasonMonths(place.bestSeasons, locale)}
-                </p>
-                <p className="mt-1 text-body-sm text-on-surface-variant">
-                  {place.bestSeasons.length > 0
-                    ? t('place.idealTimeNote')
-                    : t('place.idealTimeAnyTime')}
-                </p>
-              </div>
+          {/* Right Column (Sidebar Utilities) */}
+          <aside className="lg:col-span-4 space-y-6">
+            {/* Weather Widget */}
+            {place.geo && <WeatherWidget lat={place.geo.lat} lng={place.geo.lng} />}
 
-              {/* Weather widget */}
-              {place.geo && <WeatherWidget lat={place.geo.lat} lng={place.geo.lng} />}
-
-              {/* Action buttons */}
-              <div className="space-y-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
-                <Link
-                  href={`/ai-chat?place=${place.slug}`}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-bold text-on-primary transition-colors hover:bg-primary-container"
-                >
-                  <Icon name="auto_awesome" className="!text-base" />
-                  <span>{t('place.askAi')}</span>
-                </Link>
-                <Link
-                  href={`/lich-trinh?place=${place.slug}`}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary px-4 py-3 font-bold text-primary transition-colors hover:bg-primary-fixed"
-                >
-                  <Icon name="route" className="!text-base" />
-                  <span>{t('place.planTrip')}</span>
-                </Link>
-                <TrackedLink
-                  href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
-                  eventType="detail_consulting_clicked"
-                  placeSlug={place.slug}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-outline-variant py-3 font-bold text-on-surface transition-all hover:border-primary hover:text-primary"
-                >
-                  <Icon name="support_agent" className="!text-base" />
-                  <span>{t('place.consultTrip')}</span>
-                </TrackedLink>
-                <FavoriteButton placeId={place.id} />
-                <AddToCollectionButton placeId={place.id} placeTitle={title} />
-                <DataReportButton placeSlug={place.slug} placeTitle={title} />
-              </div>
-
-              <PlaceShareActions title={title} />
-
-              {/* Categories */}
-              {place.categories && place.categories.length > 0 && (
-                <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm">
-                  <h3 className="mb-3 font-h4 text-h4 text-on-surface">{t('place.category')}</h3>
-                  <ul className="flex flex-wrap gap-2">
-                    {place.categories.map((c) => (
-                      <li key={c.id}>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-secondary-container px-3 py-1 text-body-sm text-on-secondary-container">
-                          {c.icon && <Icon name={c.icon} className="!text-base" />}
-                          {placeCategoryName(c, locale)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {/* Action Tools */}
+            <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm space-y-4">
+              <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/30">Tiện ích</h3>
+              <AddToCollectionButton placeId={place.id} placeTitle={title} />
+              <DataReportButton placeSlug={place.slug} placeTitle={title} />
             </div>
+
+            {/* Categories tags list */}
+            {place.categories && place.categories.length > 0 && (
+              <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm space-y-4">
+                <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/30">{t('place.category')}</h3>
+                <ul className="flex flex-wrap gap-2">
+                  {place.categories.map((c) => (
+                    <li key={c.id}>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3.5 py-1 text-xs font-bold text-on-secondary-container">
+                        {c.icon && <Icon name={c.icon} className="!text-sm" />}
+                        {placeCategoryName(c, locale)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </aside>
         </div>
 
-        {/* Related places */}
+        {/* 4. CONVERSION CTAS SECTION */}
+        <section className="bg-gradient-to-br from-primary/10 via-secondary-container/30 to-surface-container-high p-8 md:p-12 rounded-3xl border border-outline-variant/30 text-center space-y-8">
+          <div className="max-w-2xl mx-auto space-y-3">
+            <h2 className="text-3xl font-black text-on-surface tracking-tight">
+              Khám phá {title} cùng trợ lý Vivu
+            </h2>
+            <p className="text-on-surface-variant text-base md:text-lg">
+              Lên kế hoạch hành trình hoàn hảo với AI Trip Planner, nhận tư vấn miễn phí từ đội ngũ chuyên gia hoặc chat trực tuyến về điểm đến này.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href={`/lich-trinh?place=${place.slug}`}
+              className="flex items-center gap-2 rounded-xl bg-primary px-6 py-4 font-bold text-on-primary transition-all hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg"
+            >
+              <Icon name="route" className="!text-lg" />
+              <span>Tạo lịch trình có địa danh này</span>
+            </Link>
+            
+            <Link
+              href={`/ai-chat?place=${place.slug}`}
+              className="flex items-center gap-2 rounded-xl bg-surface-container-lowest border border-outline-variant px-6 py-4 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
+            >
+              <Icon name="auto_awesome" className="!text-lg text-primary" />
+              <span>Chat với Vivu AI về nơi này</span>
+            </Link>
+
+            <TrackedLink
+              href={`/tu-van?source=place_detail&place=${place.slug}&placeName=${encodeURIComponent(title)}`}
+              eventType="detail_consulting_clicked"
+              placeSlug={place.slug}
+              className="flex items-center gap-2 rounded-xl bg-surface-container-lowest border border-outline-variant px-6 py-4 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 active:scale-95 shadow-md"
+            >
+              <Icon name="support_agent" className="!text-lg text-primary" />
+              <span>Gửi yêu cầu tư vấn chuyến đi</span>
+            </TrackedLink>
+          </div>
+        </section>
+
+        {/* 5. NEARBY PLACES */}
         {related.length > 0 && (
-          <section className="mt-section-gap">
-            <div className="mb-8 flex items-center justify-between">
-              <h2 className="font-h2 text-h2 text-on-surface">
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b pb-4 border-outline-variant/30">
+              <h2 className="text-2xl font-bold text-on-surface">
                 {relatedMode === 'nearby'
                   ? t('place.relatedTitleNearby')
                   : t('place.relatedTitleNearby')}
               </h2>
-              <Link href="/kham-pha" className="font-semibold text-primary hover:underline">
-                {t('common.viewAll')}
+              <Link href="/kham-pha" className="font-semibold text-primary hover:underline flex items-center gap-1 transition-all">
+                <span>{t('common.viewAll')}</span>
+                <Icon name="arrow_forward" className="!text-sm" />
               </Link>
             </div>
-            <ul className="grid grid-cols-1 gap-gutter md:grid-cols-2 lg:grid-cols-3">
-              {related.map((p) => (
-                <li key={p.id} className="relative">
+            <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {related.slice(0, 3).map((p) => (
+                <li key={p.id} className="relative group overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-sm hover:shadow-md transition-all">
                   <PlaceCard place={p} locale={locale} />
                   <NearbyPlaceActions
                     placeSlug={p.slug}
@@ -407,7 +456,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                     locale={locale}
                   />
                   {typeof p.distanceKm === 'number' && (
-                    <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-surface-container/95 px-2 py-1 text-overline tracking-overline text-on-surface shadow">
+                    <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-surface-container/95 px-2.5 py-1 text-xs font-bold text-on-surface shadow-sm">
                       {t('place.distanceKm', { km: p.distanceKm.toFixed(1) })}
                     </span>
                   )}
@@ -422,14 +471,20 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   );
 }
 
-function MetaCard({ icon, label, value }: { icon: string; label: string; value: string }) {
+function QuickInfoCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-6 text-center shadow-sm">
-      <Icon name={icon} className="!text-3xl text-primary" />
-      <span className="mt-3 text-overline uppercase tracking-overline text-on-surface-variant">
-        {label}
-      </span>
-      <span className="mt-1 font-bold text-on-surface">{value}</span>
+    <div className="flex items-center gap-4 bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-sm hover:-translate-y-1 transition-all">
+      <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+        <Icon name={icon} className="!text-2xl" />
+      </div>
+      <div>
+        <span className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant/75">
+          {label}
+        </span>
+        <span className="block font-black text-on-surface text-sm md:text-base mt-0.5">
+          {value}
+        </span>
+      </div>
     </div>
   );
 }
