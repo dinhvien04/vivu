@@ -28,4 +28,6 @@ Thư mục này chứa tài liệu cũ, ghi chú tiến độ, các checklist đ
 - `SEO_SEARCH_CONSOLE.md` - Hướng dẫn thiết lập Search Console.
 - `TOP_PLACES_DATA_CHECKLIST.md` - Checklist chuẩn bị dữ liệu địa danh chính.
 - `TURNSTILE_SETUP.md` - Tài liệu cấu hình Cloudflare Turnstile ban đầu.
+- `PROGRESS.md` - Nhật ký tiến độ phát triển ban đầu.
 - `quality.md` - Tài liệu quản lý chất lượng mã nguồn cũ.
+- Và các tài liệu legacy khác của dự án.

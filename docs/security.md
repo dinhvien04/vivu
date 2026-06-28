@@ -39,7 +39,7 @@ Hệ thống Vivu sử dụng mô hình xác thực kép kết hợp JSON Web To
 ## 2. Bảo vệ Biểu mẫu & Phòng chống Lạm dụng (Form Security & Anti-Abuse)
 
 ### A. Tích hợp Cloudflare Turnstile
-*   Các form gửi thông tin ra bên ngoài như Đăng ký tài khoản, Gửi yêu cầu tư vấn (`/tu-van`), Báo lỗi dữ liệu (`Data Report`) đều được bảo vệ bởi Cloudflare Turnstile.
+*   Các form public đã/đang áp dụng Turnstile tùy cấu hình, tối thiểu gồm Tư vấn (`/tu-van`) và Báo lỗi dữ liệu. Nếu bật đăng ký public, register cũng nên dùng Turnstile và rate limit.
 *   **Quy trình xác thực**:
     1.  Người dùng hoàn thành captcha trên trình duyệt, Turnstile sinh ra một token.
     2.  Token được gửi lên backend kèm theo dữ liệu form.
@@ -77,7 +77,8 @@ const securityHeaders = [
 ];
 ```
 
-*   **Content-Security-Policy (CSP)**: Giới hạn các domain mà trình duyệt được phép tải tài nguyên (scripts, images, stylesheets). Việc này giúp ngăn chặn triệt để tấn công XSS Injection các mã độc từ server lạ vào trang web.
+*   **Content-Security-Policy (CSP)**: Giới hạn các domain mà trình duyệt được phép tải tài nguyên (scripts, images, stylesheets). Việc này giúp giảm rủi ro XSS/code injection từ server lạ vào trang web.
+    *   *Lưu ý*: `'unsafe-inline'` chỉ nên được xem là cấu hình tương thích tạm thời cho Next.js/third-party widget nếu chưa triển khai nonce/hash. Khi có thời gian, ưu tiên chuyển sang CSP nonce/hash để giảm rủi ro XSS.
 *   **X-Frame-Options: DENY**: Ngăn chặn trang web bị nhúng vào thẻ `<iframe>` của các trang web giả mạo khác, loại bỏ nguy cơ tấn công Clickjacking.
 
 ---
@@ -96,4 +97,4 @@ const securityHeaders = [
     *   Kích hoạt redeploy dự án API.
     *   Thực hiện upload thử ảnh, đăng nhập thử để đảm bảo hệ thống nhận key mới thành công.
 4.  **Bước 4: Thu hồi khóa cũ**:
-    *   Sau 24 giờ, tiến hành vô hiệu hóa (Deactivate) và xóa bỏ các key cũ trên AWS Console và thu hồi JWT secret cũ.
+    *   Tiến hành vô hiệu hóa (Deactivate) và xóa bỏ các key cũ trên AWS Console và thu hồi JWT secret cũ. Thời gian chuyển đổi phụ thuộc vào token TTL/session policy; nếu secret bị lộ nghiêm trọng, ưu tiên revoke ngay và force logout.

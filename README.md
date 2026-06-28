@@ -342,7 +342,7 @@ Ghi chú:
 
 ## Maintainer
 
-- Nguyễn Đình Viên
+- Nguyễn Đình Viễn
 - GitHub: [@dinhvien04](https://github.com/dinhvien04)
 - Email hỗ trợ: cấu hình qua `NEXT_PUBLIC_SUPPORT_EMAIL`
 
