@@ -1,184 +1,74 @@
-# Tổng quan hệ thống Vivu
+# Tổng quan hệ thống Vivu (Project Overview)
 
-## 1. Mục tiêu
+## 1. Giới thiệu Dự án
+Vivu là một giải pháp chuyển đổi số toàn diện cho ngành du lịch tại khu vực tỉnh Gia Lai mới (bao gồm cả các đơn vị hành chính thuộc Bình Định cũ được sát nhập theo scope dữ liệu của dự án). Nền tảng được thiết kế nhằm giải quyết bài toán tiếp cận thông tin du lịch chính xác, cung cấp công cụ tự động lập kế hoạch hành trình bằng trí tuệ nhân tạo (AI Trip Planner), và tối ưu hóa chuyển đổi kinh doanh thông qua hệ thống CRM thu thập Lead và báo cáo dữ liệu trực tiếp.
 
-Vivu là hệ thống tra cứu và khám phá địa danh Gia Lai. Người dùng có thể xem
-địa điểm, ảnh, bản đồ, tìm kiếm, đánh giá, lưu vào sổ tay và hỏi trợ lý AI bằng
-văn bản hoặc hình ảnh.
-
-Ba nguyên tắc dữ liệu:
-
-1. PostgreSQL là nguồn dữ liệu chính cho giao diện.
-2. S3 lưu ảnh; mọi quyền truy cập ảnh được cấp qua backend.
-3. Qdrant chỉ phục vụ AI retrieval, không thay thế database nghiệp vụ.
-
-## 2. Kiến trúc
-
-```text
-Browser
-   |
-   v
-Next.js Web
-   |
-   v
-NestJS API
-   |---- PostgreSQL/PostGIS
-   |---- Meilisearch
-   |---- AWS S3
-   |---- Qdrant Cloud Inference
-   `---- Google Gemini
+```
+                  ┌─────────────────────────────────┐
+                  │          Browser Client         │
+                  │   Next.js 14 Web (App Router)   │
+                  └────────────────┬────────────────┘
+                                   │
+                         Same-Origin Proxy
+                                   │
+                                   v
+                  ┌─────────────────────────────────┐
+                  │          NestJS Gateway         │
+                  │      (Fastify HTTP Server)      │
+                  └──────┬───┬───┬───┬───┬───┬──────┘
+         ┌───────────────┘   │   │   │   │   └───────────────┐
+         v                   v   v   v   v                   v
+┌──────────────────┐   ┌─────────┐   │   │   ┌───────────────┐   ┌────────────────┐
+│ PostgreSQL/PostGIS│   │  AWS S3 │   │   │   │  Meilisearch  │   │  Google Gemini │
+│  (Prisma ORM)    │   │ (Images)│   │   │   │(Search Engine)│   │ (Gemini Flash) │
+└──────────────────┘   └─────────┘   │   │   └───────────────┘   └────────────────┘
+                                     v   v
+                      ┌─────────────────────────┐
+                      │  Qdrant Cloud Inference │
+                      │ (Vector Text / Vision)  │
+                      └─────────────────────────┘
 ```
 
-Frontend chỉ giao tiếp với API Vivu. Các dịch vụ có khóa bí mật đều được gọi
-từ backend.
+---
 
-## 3. Frontend
+## 2. Phạm vi dữ liệu & Nguyên tắc thiết kế (Data Scope & Guidelines)
 
-Thư mục: `apps/web`
+Dự án Vivu tuân thủ nghiêm ngặt **Ba nguyên tắc dữ liệu cốt lõi**:
+1.  **PostgreSQL (với PostGIS)**: Là nguồn dữ liệu nghiệp vụ duy nhất (Source of Truth) được sử dụng để hiển thị thông tin trên Client. Mọi danh mục, khu vực, đánh giá, thông tin liên hệ và báo lỗi đều được lưu trữ và truy vấn từ đây.
+2.  **AWS S3**: Lưu trữ toàn bộ tài nguyên hình ảnh địa danh. Client không có quyền đọc trực tiếp từ S3 bucket để đảm bảo an ninh thông tin. Tất cả hình ảnh hiển thị trên frontend được backend cấp quyền truy cập gián tiếp thông qua S3 Presigned URL có giới hạn thời gian (TTL).
+3.  **Qdrant Cloud**: Chỉ phục vụ mục đích truy vấn tìm kiếm vector ngữ cảnh (Vector Retrieval) cho chatbot AI và tính năng RAG. Qdrant hoàn toàn không lưu trữ dữ liệu nghiệp vụ và không thay thế cho PostgreSQL.
 
-- Next.js 14 App Router
-- TypeScript và Tailwind CSS
-- `next-intl` cho tiếng Việt/tiếng Anh
-- Leaflet cho bản đồ
-- Next route handlers dùng làm same-origin proxy cho các luồng cần cookie hoặc
-  upload
+---
 
-Các route chính:
+## 3. Các phân hệ và Luồng tính năng chi tiết
 
-| Route              | Chức năng                    |
-| ------------------ | ---------------------------- |
-| `/`                | Trang chủ Gia Lai            |
-| `/kham-pha`        | Danh sách và bộ lọc địa danh |
-| `/dia-diem/[slug]` | Chi tiết, gallery, đánh giá  |
-| `/ban-do`          | Bản đồ địa danh có tọa độ    |
-| `/tim-kiem`        | Tìm kiếm                     |
-| `/ai-chat`         | Chat AI bằng text/ảnh        |
-| `/hoi-dap`         | Hỏi đáp cộng đồng            |
-| `/so-tay`          | Bộ sưu tập cá nhân           |
-| `/tai-khoan`       | Tài khoản                    |
-| `/admin`           | Quản trị                     |
+### A. Phân hệ Khám phá & Bản đồ (Explore & Map)
+*   **Trang Khám Phá (`/kham-pha`)**: Cung cấp bộ lọc đa chiều (danh mục địa điểm, địa bàn quận/huyện/thành phố). Giao diện tối ưu trải nghiệm người dùng bằng cách xử lý triệt để các trạng thái tải dữ liệu (Skeleton loading), xử lý lỗi API mượt mà và ẩn các thẻ ảnh bị lỗi thay vì hiển thị hình ảnh lỗi.
+*   **Trang Chi Tiết Địa Danh (`/dia-diem/[slug]`)**: Chứa thông tin mô tả chi tiết, bộ sưu tập hình ảnh (photo gallery), danh sách đánh giá từ cộng đồng, bản đồ vị trí thực tế của địa điểm và nút Báo lỗi dữ liệu tích hợp để người dùng phản hồi thông tin sai lệch trực tiếp cho ban quản trị.
+*   **Trang Bản Đồ (`/ban-do`)**: Sử dụng thư viện Leaflet vẽ bản đồ tương tác hiển thị các địa danh du lịch. Hệ thống chỉ hiển thị marker cho các địa danh đã được kiểm chứng và có tọa độ (Vĩ độ/Kinh độ) hợp lệ trong database. Nếu tọa độ không hợp lệ, hệ thống sẽ ẩn hoặc chuyển sang trạng thái đang cập nhật để tránh định vị sai cho khách du lịch.
 
-Ảnh không hợp lệ hoặc không tải được sẽ không tạo thẻ ảnh lỗi trên giao diện.
-Ảnh người dùng chọn cho AI được nén phía client trước khi upload.
+### B. Phân hệ Trợ lý AI Du lịch (AI Chat RAG)
+Tích hợp tại trang `/ai-chat`, cho phép du khách trò chuyện và hỏi thông tin về du lịch Gia Lai. Hệ thống sử dụng mô hình RAG (Retrieval-Augmented Generation) để đảm bảo câu trả lời của AI bám sát dữ liệu thực tế:
+*   **Chế độ chỉ nhập văn bản (Text-only)**: Trích xuất context liên quan từ Qdrant Cloud dựa trên độ tương đồng ngữ nghĩa của câu hỏi, gửi kèm prompt sang Gemini để sinh câu trả lời bằng tiếng Việt.
+*   **Chế độ chỉ gửi ảnh (Image-only)**: Client tự động nén dung lượng ảnh trước khi tải lên (giữ dưới 700 KB). Backend sử dụng model vision của Qdrant Cloud để đối chiếu đặc trưng ảnh. Nếu phát hiện địa điểm trùng khớp với độ tin cậy cao, hệ thống trả thẳng thông tin địa danh đó mà không cần gọi Gemini.
+*   **Chế độ kết hợp (Image + Text)**: Xác định địa điểm thông qua ảnh trước, sau đó dùng chính ID của địa điểm đó làm bộ lọc (metadata filter) để thu hẹp không gian tìm kiếm context văn bản trong Qdrant Cloud trước khi gửi yêu cầu đến Gemini.
 
-## 4. Backend
+### C. Phân hệ Lên lịch trình tự động (AI Trip Planner)
+Tích hợp tại trang `/lich-trinh`, cho phép lập kế hoạch hành trình du lịch tối ưu:
+*   Người dùng cung cấp: Số ngày đi, khu vực mong muốn, phương tiện di chuyển và sở thích cá nhân.
+*   Backend truy vấn danh sách địa điểm thực tế từ PostgreSQL rồi gửi kèm chỉ thị (system prompt) cho Gemini để sắp xếp.
+*   Hệ thống thực hiện kiểm tra chéo (cross-validation) ở backend, loại bỏ bất kỳ địa điểm nào bị Gemini tự biên soạn (ảo giác) không khớp với dữ liệu thực tế trong database trước khi trả lịch trình về cho người dùng.
 
-Thư mục: `apps/api`
+### D. Phân hệ CRM & Quản trị (CRM & Admin Panel)
+*   **Thu thập khách hàng tiềm năng (Lead Capture) (`/tu-van`)**: Cho phép khách hàng gửi thông tin liên hệ khi có nhu cầu đặt tour hoặc tư vấn chuyến đi riêng.
+*   **Báo lỗi dữ liệu (Data Report)**: Nơi tiếp nhận thông tin phản ánh sai sót về hình ảnh, mô tả hoặc tọa độ địa danh trên trang chi tiết.
+*   **Admin Dashboard (`/admin`)**: Cổng quản trị dành cho vận hành viên để quản lý danh sách địa danh, phê duyệt/ẩn đánh giá, xem thống kê tương tác thời gian thực (real-time analytics) và xử lý danh sách lead/report thông qua giao diện cập nhật trạng thái trực quan.
 
-- NestJS 10 chạy trên Fastify
-- Prisma quản lý dữ liệu PostgreSQL
-- PostGIS hỗ trợ truy vấn địa điểm gần nhất
-- JWT access/refresh token
-- Swagger tại `/docs`
-- Rate limiting và validation cho request
+---
 
-Các nhóm module chính:
+## 4. Đường dẫn triển khai (Production Environments)
 
-- `places`, `regions`, `categories`
-- `search`
-- `auth`, `users`
-- `favorites`, `collections`
-- `reviews`, `qna`
-- `admin-*`, `audit-log`
-- `storage`
-- `qdrant`, `gemini`, `ai`
-
-## 5. Dữ liệu địa danh
-
-Mỗi địa danh có tối thiểu:
-
-- `locationKey`
-- `slug`
-- `name`
-- `province`
-- `description`
-- `heroImageS3Key`
-- `latitude`, `longitude` nếu đã xác minh
-- `qdrantPlaceSlug`
-- `isAiReady`
-
-`sync-locations-from-s3.ts` đọc folder cấp một trong bucket, chuẩn hóa metadata
-và upsert vào database. `sync-place-coordinates.ts` cập nhật tọa độ từ file JSON
-đã kiểm tra.
-
-API công khai lọc theo phạm vi Gia Lai của dự án. Các địa danh thuộc khu vực
-Bình Định cũ được quản lý theo quy ước dữ liệu hành chính hiện tại của dự án.
-
-## 6. Ảnh và cache
-
-Bucket S3 không được gọi trực tiếp từ frontend. Backend sinh presigned URL với
-thời hạn cấu hình bởi `S3_PRESIGNED_EXPIRES_IN`.
-
-Để giảm số lần ký URL:
-
-- URL được cache trong bộ nhớ.
-- Cache tự làm mới trước khi URL hết hạn.
-- `S3_PRESIGNED_CACHE_MAX_ENTRIES` giới hạn số entry, mặc định `2000`.
-
-Regions và categories cũng được cache trong bộ nhớ với
-`REFERENCE_DATA_CACHE_TTL_MS`, mặc định 5 phút.
-
-Cache là tối ưu theo từng instance. Dữ liệu nguồn vẫn nằm trong database/S3 nên
-không phụ thuộc cache để đảm bảo tính đúng đắn.
-
-## 7. Tìm kiếm
-
-Meilisearch cung cấp tìm kiếm nhanh và gợi ý. Khi Meilisearch không khả dụng,
-backend có đường fallback PostgreSQL để tính năng tìm kiếm cơ bản vẫn hoạt động.
-
-Sau khi thay đổi dữ liệu lớn:
-
-```bash
-pnpm --filter @vivu/api reindex:meili
-```
-
-## 8. AI Chat
-
-Endpoint:
-
-```text
-POST /api/v1/ai/chat
-Content-Type: multipart/form-data
-```
-
-Ba chế độ:
-
-1. Text-only: truy vấn text collection, đưa context vào Gemini.
-2. Image-only: truy vấn image collection và trả địa danh khớp.
-3. Image + text: nhận diện địa danh trước, sau đó lọc text context theo
-   `place_slug`.
-
-Qdrant Cloud Inference chịu trách nhiệm embedding truy vấn. Backend không tải
-model embedding local.
-
-Gemini được yêu cầu:
-
-- trả lời tiếng Việt;
-- chỉ dựa trên context Qdrant;
-- nói rõ khi thiếu dữ liệu;
-- không tự bịa giá vé, giờ mở cửa hoặc địa chỉ.
-
-Chi tiết triển khai xem [AI_DEPLOYMENT.md](AI_DEPLOYMENT.md).
-
-## 9. Triển khai
-
-Thứ tự khuyến nghị:
-
-1. Cấu hình và deploy API.
-2. Kiểm tra health, database, S3, Qdrant và Gemini.
-3. Cấu hình `NEXT_PUBLIC_API_URL` cho web.
-4. Deploy web.
-5. Chạy smoke test các route chính và ba chế độ AI.
-
-Production:
-
-- Web: <https://vivu-web.vercel.app>
-- API: <https://vivu-api.vercel.app>
-
-## 10. Bảo mật
-
-- Khóa AWS, Qdrant và Gemini chỉ nằm trong backend env.
-- Không log secret, token hoặc nội dung `.env`.
-- Presigned URL có thời hạn và không được lưu như URL vĩnh viễn.
-- Upload ảnh có giới hạn dung lượng và loại MIME.
-- Endpoint admin yêu cầu quyền phù hợp.
+*   **Giao diện Web công khai**: [https://vivu-web.vercel.app](https://vivu-web.vercel.app)
+*   **Cổng API Gateway**: [https://vivu-api.vercel.app](https://vivu-api.vercel.app)
+*   **Trang thông tin build Web**: [https://vivu-web.vercel.app/build-info](https://vivu-web.vercel.app/build-info)
+*   **Trang thông tin build API**: [https://vivu-api.vercel.app/api/v1/build-info](https://vivu-api.vercel.app/api/v1/build-info)

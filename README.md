@@ -318,16 +318,18 @@ Ghi chú:
 - Playwright smoke tests dùng `E2E_BASE_URL` khi kiểm thử against deployed app.
 - E2E không nên gọi Gemini thật nếu đang chạy CI hoặc smoke test không cần AI live.
 
-## Tài Liệu
+## Tài liệu
 
 - [Mục lục tài liệu](docs/README.md)
-- [Tổng quan hệ thống](docs/overview.md)
+- [Tổng quan dự án](docs/overview.md)
+- [Kiến trúc hệ thống](docs/architecture.md)
 - [Chạy local](docs/local-development.md)
 - [Biến môi trường](docs/environment.md)
 - [Data pipeline](docs/data-pipeline.md)
-- [API routes](docs/api-routes.md)
-- [Deploy & vận hành](docs/operations.md)
-- [Security](docs/SECURITY.md)
+- [Vận hành production](docs/operations.md)
+- [Security](docs/security.md)
+- [Testing](docs/testing.md)
+- [Troubleshooting](docs/troubleshooting.md)
 
 ## Quy Ước An Toàn
 
