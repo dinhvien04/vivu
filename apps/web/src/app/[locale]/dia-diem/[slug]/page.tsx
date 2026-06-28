@@ -176,12 +176,11 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
-          <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
-        
+      <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
         {/* 1. HERO SECTION WITH IMAGE & GLASSMORPHISM OVERLAY */}
-        <section className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] shadow-2xl bg-surface-container-high group border border-outline-variant/30 aspect-[16/9] sm:aspect-[16/7] md:aspect-[21/9] lg:aspect-[24/9]">
+        <section className="group relative min-h-[540px] overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-high shadow-2xl sm:aspect-[16/7] sm:min-h-0 sm:rounded-[2rem] md:aspect-[21/9] lg:aspect-[24/9]">
           {/* Gallery Background */}
-          <div className="relative z-0 h-full w-full">
+          <div className="absolute inset-0 z-0">
             <PlaceGallery heroImageUrl={place.heroImageUrl} photos={photos} title={title} />
           </div>
 
@@ -261,26 +260,24 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
         {/* 2. QUICK INFO GRID */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <QuickInfoCard 
-            icon="location_on" 
-            label={t('place.region') || "Khu vực"} 
-            value={place.region ? (locale === 'en' ? place.region.nameEn : place.region.nameVi) : "Gia Lai"} 
+          <QuickInfoCard
+            icon="location_on"
+            label={t('place.region') || 'Khu vực'}
+            value={
+              place.region
+                ? locale === 'en'
+                  ? place.region.nameEn
+                  : place.region.nameVi
+                : 'Gia Lai'
+            }
           />
-          <QuickInfoCard 
-            icon="calendar_month" 
-            label={t('place.bestSeason')} 
-            value={formatSeasonMonths(place.bestSeasons, locale)} 
+          <QuickInfoCard
+            icon="calendar_month"
+            label={t('place.bestSeason')}
+            value={formatSeasonMonths(place.bestSeasons, locale)}
           />
-          <QuickInfoCard 
-            icon="category" 
-            label={t('place.category')} 
-            value={categoriesText} 
-          />
-          <QuickInfoCard 
-            icon="payments" 
-            label="Giá vé" 
-            value="Miễn phí" 
-          />
+          <QuickInfoCard icon="category" label={t('place.category')} value={categoriesText} />
+          <QuickInfoCard icon="payments" label="Giá vé" value="Miễn phí" />
         </section>
 
         {/* 3. TWO COLUMN CONTENT */}
@@ -334,7 +331,9 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                   </div>
                   <p className="text-body-sm text-on-surface-variant flex items-center gap-2">
                     <Icon name="explore" className="!text-base text-primary" />
-                    <span className="font-semibold text-on-surface">{place.geo.lat.toFixed(4)}°N, {place.geo.lng.toFixed(4)}°E</span>
+                    <span className="font-semibold text-on-surface">
+                      {place.geo.lat.toFixed(4)}°N, {place.geo.lng.toFixed(4)}°E
+                    </span>
                     <span className="text-outline">·</span>
                     <Link href="/ban-do" className="font-semibold text-primary hover:underline">
                       {t('place.mapCtaLink')}
@@ -380,7 +379,9 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
               {/* Action Tools */}
               <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] space-y-4 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-                <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/20">Tiện ích</h3>
+                <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/20">
+                  Tiện ích
+                </h3>
                 <AddToCollectionButton placeId={place.id} placeTitle={title} />
                 <DataReportButton placeSlug={place.slug} placeTitle={title} />
               </div>
@@ -388,7 +389,9 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               {/* Categories tags list */}
               {place.categories && place.categories.length > 0 && (
                 <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] space-y-4 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-                  <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/20">{t('place.category')}</h3>
+                  <h3 className="font-bold text-lg text-on-surface border-b pb-2 border-outline-variant/20">
+                    {t('place.category')}
+                  </h3>
                   <ul className="flex flex-wrap gap-2">
                     {place.categories.map((c) => (
                       <li key={c.id}>
@@ -415,7 +418,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               Vivu có thể gợi ý lịch trình phù hợp với thời gian, ngân sách và sở thích của bạn.
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 w-full sm:w-auto">
             <Link
               href={`/lich-trinh?place=${place.slug}`}
@@ -424,7 +427,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
               <Icon name="route" className="!text-xl" />
               <span>Tạo lịch trình có địa danh này</span>
             </Link>
-            
+
             <Link
               href={`/ai-chat?place=${place.slug}`}
               className="flex items-center justify-center gap-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant min-h-[44px] w-full sm:w-auto px-8 py-4 sm:py-5 font-bold text-on-surface transition-all hover:bg-surface hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg duration-200 ease-out"
@@ -470,14 +473,20 @@ export default async function PlaceDetailPage({ params }: PageProps) {
                   ? t('place.relatedTitleNearby')
                   : t('place.relatedTitleNearby')}
               </h2>
-              <Link href="/kham-pha" className="font-semibold text-primary hover:underline flex items-center gap-1 transition-all">
+              <Link
+                href="/kham-pha"
+                className="font-semibold text-primary hover:underline flex items-center gap-1 transition-all"
+              >
                 <span>{t('common.viewAll')}</span>
                 <Icon name="arrow_forward" className="!text-sm" />
               </Link>
             </div>
             <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {related.slice(0, 3).map((p) => (
-                <li key={p.id} className="relative group overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-card hover:shadow-card-hover transition-all duration-300">
+                <li
+                  key={p.id}
+                  className="relative group overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-card hover:shadow-card-hover transition-all duration-300"
+                >
                   <PlaceCard place={p} locale={locale} />
                   <NearbyPlaceActions
                     placeSlug={p.slug}
@@ -512,9 +521,11 @@ function QuickInfoCard({ icon, label, value }: { icon: string; label: string; va
         <span className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant/80">
           {label}
         </span>
-        <span className={`block font-black text-base md:text-lg leading-tight truncate ${
-          isEmpty ? 'italic font-normal text-outline' : 'text-on-surface'
-        }`}>
+        <span
+          className={`block font-black text-base md:text-lg leading-tight truncate ${
+            isEmpty ? 'italic font-normal text-outline' : 'text-on-surface'
+          }`}
+        >
           {displayValue}
         </span>
       </div>

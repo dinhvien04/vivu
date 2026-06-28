@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 const externalBaseUrl = process.env.E2E_BASE_URL?.replace(/\/+$/, '');
 const baseURL = externalBaseUrl || 'http://localhost:3100';
+const apiBaseUrl =
+  process.env.E2E_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'https://vivu-api.vercel.app';
 
 export default defineConfig({
   testDir: './e2e',
@@ -17,12 +19,12 @@ export default defineConfig({
   webServer: externalBaseUrl
     ? undefined
     : {
-        command: 'pnpm exec next start -p 3100',
+        command: 'pnpm exec next dev -p 3100',
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         env: {
-          NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:4000',
+          NEXT_PUBLIC_API_URL: apiBaseUrl,
           NEXT_PUBLIC_SITE_URL: baseURL,
         },
       },

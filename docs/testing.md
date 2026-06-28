@@ -75,12 +75,16 @@ Kiểm thử E2E sử dụng Playwright để mô phỏng hành vi của ngườ
 *   **Cấu hình chính**: Xem chi tiết tại file `apps/web/playwright.config.ts`.
 *   **Lệnh chạy test**:
     ```bash
-    # Chạy test E2E trỏ về ứng dụng đang chạy ở local port 3000
+    # Local/dev friendly: Playwright tự động chạy Next dev ở port 3100
+    pnpm --filter @vivu/web test:e2e
+
+    # Từ root workspace, script này trỏ vào app web
     pnpm e2e:web
 
     # Chạy test E2E trỏ về ứng dụng trên môi trường production
     E2E_BASE_URL=https://vivu-web.vercel.app pnpm e2e:web
     ```
+    Khi không có `E2E_BASE_URL`, `apps/web/playwright.config.ts` dùng `pnpm exec next dev -p 3100` để tránh lỗi `next start` khi chưa có production build. E2E smoke mặc định dùng `https://vivu-api.vercel.app` làm API công khai; đặt `E2E_API_URL` hoặc `NEXT_PUBLIC_API_URL` nếu cần trỏ về API local.
 *   **Nguyên tắc viết E2E test**:
     *   Sử dụng thuộc tính `data-testid` trên các thẻ HTML để làm bộ định vị (selectors) thay vì sử dụng CSS class (vì class dễ bị thay đổi khi cập nhật giao diện).
     *   *Ví dụ*: `page.locator('[data-testid="btn-submit-lead"]').click()`.

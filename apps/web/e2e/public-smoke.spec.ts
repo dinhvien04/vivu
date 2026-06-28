@@ -1,4 +1,40 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
+
+async function openHeroLightbox(page: Page) {
+  const openButton = page.getByTestId('gallery-open-image').first();
+  await expect(openButton).toBeVisible();
+
+  const box = await openButton.boundingBox();
+  expect(box).not.toBeNull();
+  await openButton.click({
+    position: {
+      x: Math.min(24, box!.width / 2),
+      y: Math.min(24, box!.height / 2),
+    },
+  });
+  await expect(page.getByTestId('photo-lightbox')).toBeVisible();
+}
+
+async function expectLightboxCoversHeroCtas(page: Page) {
+  const coverage = await page.evaluate(() => {
+    const lightbox = document.querySelector('[data-testid="photo-lightbox"]');
+    const selectors = [
+      'a[href^="/lich-trinh?place="]',
+      'a[href^="/tu-van?source=place_detail_hero"]',
+      'a[href^="/ai-chat?place="]',
+    ];
+
+    return selectors.map((selector) => {
+      const cta = document.querySelector(selector);
+      if (!lightbox || !cta) return { selector, covered: false };
+      const rect = cta.getBoundingClientRect();
+      const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return { selector, covered: Boolean(top && (top === lightbox || lightbox.contains(top))) };
+    });
+  });
+
+  expect(coverage.every((item) => item.covered)).toBeTruthy();
+}
 
 test.describe('public production smoke', () => {
   test('Vietnamese home stays on the default locale, exposes build meta, and shows key widgets', async ({
@@ -120,32 +156,39 @@ test.describe('public production smoke', () => {
           province: 'Gia Lai',
           bestSeasons: [11, 12, 1, 2, 3, 4],
           isAiReady: true,
-          categories: [{ id: 'cat-1', slug: 'danh-lam-thang-canh', nameVi: 'Danh lam thắng cảnh', icon: 'landscape' }],
+          categories: [
+            {
+              id: 'cat-1',
+              slug: 'danh-lam-thang-canh',
+              nameVi: 'Danh lam thắng cảnh',
+              icon: 'landscape',
+            },
+          ],
           geo: { lat: 13.98, lng: 108.01 },
           photos: [],
         }),
-      })
+      }),
     );
     await page.route('**/api/places/suoi-da-vang/reviews*', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ data: [], meta: { total: 0 } }),
-      })
+      }),
     );
     await page.route('**/api/places/suoi-da-vang/questions*', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ data: [], meta: { total: 0 } }),
-      })
+      }),
     );
     await page.route('**/api/places/nearby*', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([]),
-      })
+      }),
     );
 
     const response = await page.goto('/dia-diem/suoi-da-vang', { waitUntil: 'domcontentloaded' });
@@ -155,8 +198,44 @@ test.describe('public production smoke', () => {
     await expect(page.getByRole('heading', { name: /Suối Đá Vàng/i, level: 1 })).toBeVisible();
 
     // Verify Hero CTAs
-    await expect(page.getByRole('link', { name: /Thêm vào lịch trình|Tạo lịch trình|Plan trip/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /Thêm vào lịch trình|Tạo lịch trình|Plan trip/i }).first(),
+    ).toBeVisible();
     await expect(page.getByRole('link', { name: /Hỏi Vivu AI|Ask AI/i }).first()).toBeVisible();
+    await expect(page.locator('a[href^="/tu-van?source=place_detail_hero"]').first()).toBeVisible();
+
+    await openHeroLightbox(page);
+    await expect(page.getByTestId('photo-lightbox-close')).toBeVisible();
+    await expect(page.getByTestId('photo-lightbox-close')).toBeFocused();
+    await expect(page.getByTestId('photo-lightbox-zoom')).toBeVisible();
+
+    if ((await page.getByTestId('photo-lightbox-counter').count()) > 0) {
+      await expect(page.getByTestId('photo-lightbox-counter')).toBeVisible();
+      await expect(page.getByTestId('photo-lightbox-prev')).toBeVisible();
+      await expect(page.getByTestId('photo-lightbox-next')).toBeVisible();
+    }
+
+    const lightboxLayer = await page.evaluate(() => {
+      const lightbox = document.querySelector('[data-testid="photo-lightbox"]');
+      return {
+        parentIsBody: lightbox?.parentElement === document.body,
+        zIndex: lightbox ? Number(getComputedStyle(lightbox).zIndex) : 0,
+        bodyOverflow: document.body.style.overflow,
+        documentOverflow: document.documentElement.style.overflow,
+      };
+    });
+    expect(lightboxLayer.parentIsBody).toBeTruthy();
+    expect(lightboxLayer.zIndex).toBeGreaterThanOrEqual(1000);
+    expect(lightboxLayer.bodyOverflow).toBe('hidden');
+    expect(lightboxLayer.documentOverflow).toBe('hidden');
+    await expectLightboxCoversHeroCtas(page);
+
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('photo-lightbox')).toBeHidden();
+    await expect(page.getByTestId('gallery-open-image').first()).toBeFocused();
+    await expect(page.locator('a[href^="/lich-trinh?place=suoi-da-vang"]').first()).toBeVisible();
+    await expect(page.locator('a[href^="/tu-van?source=place_detail_hero"]').first()).toBeVisible();
+    await expect(page.locator('a[href^="/ai-chat?place=suoi-da-vang"]').first()).toBeVisible();
 
     // Verify Quick Info Grid
     await expect(page.locator('body')).toContainText('Vùng miền');
@@ -167,11 +246,31 @@ test.describe('public production smoke', () => {
     await expect(page.locator('body')).toContainText('Dựa trên dữ liệu thực tế từ 67 địa danh');
   });
 
+  test('/dia-diem/suoi-da-vang lightbox is usable on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const response = await page.goto('/dia-diem/suoi-da-vang', { waitUntil: 'domcontentloaded' });
+    expect(response?.ok()).toBeTruthy();
+    await page.waitForLoadState('networkidle');
+
+    await openHeroLightbox(page);
+    await expect(page.getByTestId('photo-lightbox-close')).toBeVisible();
+    await expect(page.getByTestId('photo-lightbox-close')).toBeFocused();
+
+    const hasHorizontalScroll = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(hasHorizontalScroll).toBeFalsy();
+
+    await page.getByTestId('photo-lightbox-close').click();
+    await expect(page.getByTestId('photo-lightbox')).toBeHidden();
+    await expect(page.locator('a[href^="/lich-trinh?place=suoi-da-vang"]').first()).toBeVisible();
+  });
+
   test('no horizontal scroll on key routes at mobile viewport', async ({ page }) => {
     // Set typical mobile viewport
     await page.setViewportSize({ width: 390, height: 844 });
 
-    const testUrls = ['/', '/kham-pha', '/lich-trinh'];
+    const testUrls = ['/', '/kham-pha', '/dia-diem/suoi-da-vang', '/lich-trinh'];
     for (const url of testUrls) {
       await page.goto(url, { waitUntil: 'domcontentloaded' });
       await page.waitForLoadState('networkidle');
@@ -184,4 +283,3 @@ test.describe('public production smoke', () => {
     }
   });
 });
-
