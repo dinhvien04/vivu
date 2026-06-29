@@ -97,3 +97,32 @@ Tài liệu này cung cấp mô tả chi tiết, giá trị mặc định, mục
     *   *Mô tả*: Khóa công khai của Cloudflare Turnstile hiển thị widget bảo mật trên giao diện.
 *   **`NEXT_PUBLIC_SUPPORT_EMAIL`**
     *   *Mô tả*: Địa chỉ email hiển thị tại các trang Liên hệ, Điều khoản dịch vụ.
+---
+
+## 4. Clerk Auth Migration Variables
+
+Clerk owns sign-in, sign-up, session cookies, and OAuth. Neon/Postgres is still
+the source of Vivu app users, roles, profile fields, and business data.
+
+Backend `apps/api/.env`:
+
+* `CLERK_SECRET_KEY`: server-side Clerk API key. Required when the API must fetch
+  Clerk user profile data for `/auth/me` or webhook sync.
+* `CLERK_PUBLISHABLE_KEY`: public Clerk key mirrored for deployment visibility.
+* `CLERK_JWT_KEY`: optional Clerk JWT public key for networkless token verification.
+* `CLERK_WEBHOOK_SECRET`: Svix signing secret for `POST /api/v1/webhooks/clerk`.
+* `CLERK_ALLOWED_ORIGINS`: comma-separated frontend origins allowed in Clerk
+  session token `azp`, for example `https://vivu-web.vercel.app,http://localhost:3000`.
+
+Frontend `apps/web/.env.local`:
+
+* `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: enables ClerkProvider, Clerk auth UI, and
+  Clerk middleware protection.
+* `CLERK_SECRET_KEY`: required by Clerk middleware in the Next.js runtime.
+* `NEXT_PUBLIC_CLERK_SIGN_IN_URL`: `/dang-nhap`.
+* `NEXT_PUBLIC_CLERK_SIGN_UP_URL`: `/dang-ky`.
+* `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` and
+  `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`: default post-auth redirect targets.
+
+Never commit real Clerk secrets. Roles remain in the `User.role` column and must
+be changed through trusted DB/admin workflows only.

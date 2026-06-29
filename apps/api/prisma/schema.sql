@@ -35,12 +35,14 @@ CREATE TYPE "ReviewStatus" AS ENUM ('visible', 'hidden', 'reported');
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
+    "clerkUserId" TEXT,
     "email" TEXT NOT NULL,
-    "passwordHash" TEXT NOT NULL,
+    "passwordHash" TEXT,
     "name" TEXT NOT NULL,
     "avatarUrl" TEXT,
     "role" "Role" NOT NULL DEFAULT 'user',
     "locale" TEXT NOT NULL DEFAULT 'vi',
+    "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -222,6 +224,9 @@ CREATE TABLE "Favorite" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_clerkUserId_key" ON "User"("clerkUserId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RefreshToken_tokenHash_key" ON "RefreshToken"("tokenHash");

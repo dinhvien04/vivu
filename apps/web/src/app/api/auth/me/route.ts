@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   if (!bearer) {
     return NextResponse.json({ message: 'Thiếu access token' }, { status: 401 });
   }
-  const { status, body } = await callApi('/auth/me/profile', {
+  const { status, body } = await callApi('/auth/me', {
     method: 'GET',
     bearer,
   });

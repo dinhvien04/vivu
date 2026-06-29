@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth as useClerkAuth, useClerk } from '@clerk/nextjs';
 import {
   createContext,
   useCallback,
@@ -31,8 +32,16 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  if (CLERK_ENABLED) {
+    return <ClerkBackedAuthProvider>{children}</ClerkBackedAuthProvider>;
+  }
+  return <LegacyAuthProvider>{children}</LegacyAuthProvider>;
+}
+
+function LegacyAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<auth.AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const accessTokenRef = useRef<string | null>(null);
@@ -121,6 +130,146 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     }),
     [user, loading, applySession, clearSession, getAccessToken],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
+  const { isLoaded, isSignedIn, getToken } = useClerkAuth();
+  const { signOut } = useClerk();
+  const [user, setUser] = useState<auth.AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const accessTokenRef = useRef<string | null>(null);
+  const expiresAtRef = useRef<number>(0);
+
+  const applySession = useCallback((session: auth.AuthSession) => {
+    accessTokenRef.current = session.accessToken;
+    expiresAtRef.current = Date.now() + session.expiresIn * 1000 - 30_000;
+    setUser(session.user);
+  }, []);
+
+  const clearSession = useCallback(() => {
+    accessTokenRef.current = null;
+    expiresAtRef.current = 0;
+    setUser(null);
+  }, []);
+
+  const loadClerkUser = useCallback(async (): Promise<void> => {
+    const token = await getToken();
+    if (!token) {
+      clearSession();
+      return;
+    }
+    accessTokenRef.current = token;
+    expiresAtRef.current = Date.now() + 60_000;
+    const me = await auth.fetchMe(token);
+    if (me) {
+      setUser(me);
+    } else {
+      clearSession();
+    }
+  }, [clearSession, getToken]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      if (isSignedIn) {
+        await loadClerkUser().catch(() => clearSession());
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      // Rollback path: keep legacy httpOnly refresh-cookie auth working until
+      // the Clerk migration is fully cut over.
+      const refreshed = await auth.refresh();
+      if (cancelled) return;
+      if (!refreshed) {
+        clearSession();
+        setLoading(false);
+        return;
+      }
+      accessTokenRef.current = refreshed.accessToken;
+      expiresAtRef.current = Date.now() + refreshed.expiresIn * 1000 - 30_000;
+      const me = await auth.fetchMe(refreshed.accessToken);
+      if (cancelled) return;
+      if (me) setUser(me);
+      else clearSession();
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [clearSession, isLoaded, isSignedIn, loadClerkUser]);
+
+  const getAccessToken = useCallback(async (): Promise<string | null> => {
+    if (isLoaded && isSignedIn) {
+      const token = await getToken();
+      if (!token) {
+        clearSession();
+        return null;
+      }
+      accessTokenRef.current = token;
+      expiresAtRef.current = Date.now() + 60_000;
+      return token;
+    }
+    if (accessTokenRef.current && expiresAtRef.current > Date.now()) {
+      return accessTokenRef.current;
+    }
+    const refreshed = await auth.refresh();
+    if (!refreshed) {
+      clearSession();
+      return null;
+    }
+    accessTokenRef.current = refreshed.accessToken;
+    expiresAtRef.current = Date.now() + refreshed.expiresIn * 1000 - 30_000;
+    return accessTokenRef.current;
+  }, [clearSession, getToken, isLoaded, isSignedIn]);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      loading,
+      login: async (input) => {
+        const session = await auth.login(input);
+        applySession(session);
+        return session.user;
+      },
+      register: async (input) => {
+        const session = await auth.register(input);
+        applySession(session);
+        return session.user;
+      },
+      logout: async () => {
+        await Promise.all([
+          auth.logout(),
+          isSignedIn ? signOut().catch(() => undefined) : Promise.resolve(),
+        ]);
+        clearSession();
+      },
+      getAccessToken,
+      reloadUser: async () => {
+        const token = await getAccessToken();
+        if (!token) {
+          clearSession();
+          return;
+        }
+        const me = await auth.fetchMe(token);
+        if (me) setUser(me);
+        else clearSession();
+      },
+    }),
+    [
+      user,
+      loading,
+      applySession,
+      clearSession,
+      getAccessToken,
+      isSignedIn,
+      signOut,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

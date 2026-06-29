@@ -110,6 +110,14 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  getMe(@CurrentUser() user: AuthenticatedUser): AuthenticatedUser {
+    return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('me/profile')
   @ApiBearerAuth()
   async getProfile(@CurrentUser() user: AuthenticatedUser) {

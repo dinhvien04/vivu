@@ -95,14 +95,16 @@ enum AnalyticsEventType {
 
 model User {
   id           String   @id @default(cuid())
+  clerkUserId  String?  @unique
   email        String   @unique
-  passwordHash String
+  passwordHash String?
   name         String
   avatarUrl    String?
   bio          String?
   location     String?
   role         Role     @default(user)
   locale       String   @default("vi")
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

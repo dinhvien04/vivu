@@ -189,3 +189,41 @@ Tài liệu này cung cấp chi tiết về định dạng URL, phương thức 
       "message": "Gửi yêu cầu tư vấn thành công!"
     }
     ```
+---
+
+## 5. Auth And Clerk Webhooks
+
+### A. Current User Sync
+
+* **Endpoint**: `GET /auth/me`
+* **Headers**: `Authorization: Bearer <Clerk session token>` or legacy Vivu JWT.
+* **Behavior**:
+  * Clerk token is verified first.
+  * The API maps Clerk `sub` to `User.clerkUserId`.
+  * If this is the first Clerk request to `/auth/me`, the API creates or links a
+    DB `User` and defaults new users to role `user`.
+  * Existing `admin`/`editor` roles in DB are preserved.
+* **Response (200 OK)**:
+  ```json
+  {
+    "id": "clx...",
+    "clerkUserId": "user_...",
+    "email": "user@example.com",
+    "name": "Vivu User",
+    "role": "user",
+    "avatarUrl": null,
+    "bio": null,
+    "location": null,
+    "createdAt": "2026-06-29T00:00:00.000Z"
+  }
+  ```
+
+### B. Clerk Webhook
+
+* **Endpoint**: `POST /webhooks/clerk`
+* **Headers**: `svix-id`, `svix-timestamp`, `svix-signature`.
+* **Events**: `user.created`, `user.updated`, `user.deleted`.
+* **Security**: the API verifies Svix signature with `CLERK_WEBHOOK_SECRET` and
+  never trusts Clerk role metadata for Vivu authorization.
+* **Delete behavior**: `user.deleted` sets `User.deletedAt`; it does not hard
+  delete reviews, collections, favorites, leads, or audit data.

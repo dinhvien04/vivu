@@ -1,13 +1,17 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { SignIn } from '@clerk/nextjs';
+import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { Icon } from '@/components/icon';
 import { Link, useRouter } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
 import { AuthError } from '@/lib/auth-client';
+
+const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function LoginPage() {
   return (
@@ -26,11 +30,41 @@ function LoginCardSkeleton() {
 }
 
 function LoginForm() {
+  const search = useSearchParams();
+  const next = search?.get('next') ?? '/';
+  return CLERK_ENABLED ? <ClerkLoginCard next={next} /> : <LegacyLoginForm next={next} />;
+}
+
+function ClerkLoginCard({ next }: { next: string }) {
+  const locale = useLocale();
+  const signInPath = locale === routing.defaultLocale ? '/dang-nhap' : `/${locale}/dang-nhap`;
+  const signUpPath = locale === routing.defaultLocale ? '/dang-ky' : `/${locale}/dang-ky`;
+
+  return (
+    <div className="w-full max-w-[440px] rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-4 shadow-[0_24px_60px_-32px_rgba(15,30,55,0.35)] md:p-8">
+      <div className="mb-6 flex flex-col items-center gap-2 text-center">
+        <span className="font-h1 text-h1 font-bold tracking-tight text-primary">Vivu</span>
+      </div>
+      <SignIn
+        routing="path"
+        path={signInPath}
+        signUpUrl={`${signUpPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
+        appearance={{
+          elements: {
+            rootBox: 'mx-auto w-full',
+            cardBox: 'shadow-none border-0 bg-transparent',
+            card: 'shadow-none border-0 bg-transparent p-0',
+          },
+        }}
+      />
+    </div>
+  );
+}
+
+function LegacyLoginForm({ next }: { next: string }) {
   const t = useTranslations('auth');
   const { login } = useAuth();
   const router = useRouter();
-  const search = useSearchParams();
-  const next = search?.get('next') ?? '/';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
