@@ -176,6 +176,7 @@ export default async function PlaceDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
+      <SiteHeader />
       <main className="mx-auto max-w-container-max px-margin-mobile py-8 md:px-margin-desktop md:py-12 space-y-16">
         {/* 1. HERO SECTION WITH IMAGE & GLASSMORPHISM OVERLAY */}
         <section className="group relative min-h-[540px] overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-high shadow-2xl sm:aspect-[16/7] sm:min-h-0 sm:rounded-[2rem] md:aspect-[21/9] lg:aspect-[24/9]">

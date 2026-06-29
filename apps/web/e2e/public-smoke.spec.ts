@@ -194,6 +194,9 @@ test.describe('public production smoke', () => {
     const response = await page.goto('/dia-diem/suoi-da-vang', { waitUntil: 'domcontentloaded' });
     expect(response?.ok()).toBeTruthy();
 
+    await expect(page.getByRole('banner')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Vivu' }).first()).toBeVisible();
+
     // Verify Title
     await expect(page.getByRole('heading', { name: /Suối Đá Vàng/i, level: 1 })).toBeVisible();
 
