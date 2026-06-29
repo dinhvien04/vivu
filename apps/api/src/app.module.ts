@@ -10,6 +10,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ClerkWebhooksModule } from './webhooks/clerk-webhooks.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CollectionsModule } from './collections/collections.module';
 import { HealthController } from './common/health.controller';
@@ -42,6 +43,7 @@ import { TripPlansModule } from './trip-plans/trip-plans.module';
     PrismaModule,
     CloudinaryModule,
     AuthModule,
+    ClerkWebhooksModule,
     PlacesModule,
     RegionsModule,
     CategoriesModule,

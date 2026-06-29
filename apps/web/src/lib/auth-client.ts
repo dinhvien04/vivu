@@ -1,6 +1,7 @@
 /** Browser-side auth helpers. All calls go to /api/auth/* (Next route handlers). */
 export interface AuthUser {
   id: string;
+  clerkUserId?: string | null;
   email: string;
   name: string;
   role: string;

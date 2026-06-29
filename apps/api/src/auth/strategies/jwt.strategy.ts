@@ -14,6 +14,7 @@ export interface JwtPayload {
 
 export interface AuthenticatedUser {
   id: string;
+  clerkUserId: string | null;
   email: string;
   name: string;
   role: string;
@@ -45,6 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       where: { id: payload.sub },
       select: {
         id: true,
+        clerkUserId: true,
         email: true,
         name: true,
         role: true,
@@ -52,11 +54,25 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         bio: true,
         location: true,
         createdAt: true,
+        deletedAt: true,
       },
     });
     if (!user) {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
-    return user;
+    if (user.deletedAt) {
+      throw new UnauthorizedException('TÃ i khoáº£n Ä‘Ã£ bá»‹ vÃ´ hiá»‡u hÃ³a');
+    }
+    return {
+      id: user.id,
+      clerkUserId: user.clerkUserId,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      location: user.location,
+      createdAt: user.createdAt,
+    };
   }
 }

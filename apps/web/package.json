@@ -12,6 +12,7 @@
     "test:e2e:list": "playwright test --list"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.9",
     "@vivu/types": "workspace:*",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",

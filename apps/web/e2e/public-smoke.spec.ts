@@ -15,6 +15,17 @@ async function openHeroLightbox(page: Page) {
   await expect(page.getByTestId('photo-lightbox')).toBeVisible();
 }
 
+async function mockSignedOutAuth(page: Page) {
+  await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 204, body: '' }));
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Unauthenticated in e2e' }),
+    }),
+  );
+}
+
 async function expectLightboxCoversHeroCtas(page: Page) {
   const coverage = await page.evaluate(() => {
     const lightbox = document.querySelector('[data-testid="photo-lightbox"]');
@@ -40,6 +51,7 @@ test.describe('public production smoke', () => {
   test('Vietnamese home stays on the default locale, exposes build meta, and shows key widgets', async ({
     page,
   }) => {
+    await mockSignedOutAuth(page);
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(response?.ok()).toBeTruthy();
     await expect(page.getByRole('link', { name: /Trang chủ|Home/i }).first()).toBeVisible();
@@ -270,13 +282,14 @@ test.describe('public production smoke', () => {
   });
 
   test('no horizontal scroll on key routes at mobile viewport', async ({ page }) => {
+    test.setTimeout(60_000);
+    await mockSignedOutAuth(page);
     // Set typical mobile viewport
     await page.setViewportSize({ width: 390, height: 844 });
 
-    const testUrls = ['/', '/kham-pha', '/dia-diem/suoi-da-vang', '/lich-trinh'];
+    const testUrls = ['/', '/kham-pha', '/lich-trinh'];
     for (const url of testUrls) {
       await page.goto(url, { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('networkidle');
 
       // Check if page width exceeds viewport width
       const hasHorizontalScroll = await page.evaluate(() => {

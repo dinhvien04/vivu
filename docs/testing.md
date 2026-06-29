@@ -105,3 +105,18 @@ Khi một test case E2E bị lỗi trên CI/CD hoặc local, thực hiện các 
     ```bash
     npx playwright show-trace apps/web/test-results/xxxx/trace.zip
     ```
+---
+
+## 7. Clerk Auth Migration Coverage
+
+Unit tests cover the Clerk auth bridge without network calls:
+
+* mocked Clerk token verification and `/auth/me` style upsert;
+* exact-email link that preserves existing `admin`/`editor` DB roles;
+* missing token rejection;
+* Clerk webhook invalid signature, `user.created`, and `user.deleted`.
+
+Frontend E2E should keep public pages reachable with no Clerk keys. When Clerk
+keys are enabled in a dedicated environment, add signed-out header, protected
+redirect, and post-login `/auth/me` assertions with mocked Clerk/browser state.
+Do not call real Gemini or paid AI APIs from E2E.

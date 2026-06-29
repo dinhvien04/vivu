@@ -98,3 +98,24 @@ const securityHeaders = [
     *   Thực hiện upload thử ảnh, đăng nhập thử để đảm bảo hệ thống nhận key mới thành công.
 4.  **Bước 4: Thu hồi khóa cũ**:
     *   Tiến hành vô hiệu hóa (Deactivate) và xóa bỏ các key cũ trên AWS Console và thu hồi JWT secret cũ. Thời gian chuyển đổi phụ thuộc vào token TTL/session policy; nếu secret bị lộ nghiêm trọng, ưu tiên revoke ngay và force logout.
+---
+
+## 5. Clerk Authentication Migration Policy
+
+Clerk is the session and identity provider for new sign-in/sign-up flows. The
+NestJS API still authorizes every protected request from the Neon/Postgres
+`User` row:
+
+* A valid Clerk session token proves identity only.
+* The API maps Clerk `sub` to `User.clerkUserId`, then reads `User.role`.
+* New Clerk users are created with DB role `user`.
+* Existing `admin` and `editor` users keep their DB role when linked by exact
+  email match or `clerkUserId`.
+* Frontend role, Clerk metadata, and Clerk Organizations are not trusted for
+  Vivu authorization.
+* Legacy JWT/password auth remains available during migration for rollback.
+* Clerk webhook `user.deleted` soft-disables the DB user via `User.deletedAt`
+  instead of hard deleting business data.
+
+Admin/editor promotion remains a trusted DB operation, e.g. the existing
+`pnpm --filter @vivu/api promote:admin` script or a reviewed admin tool.

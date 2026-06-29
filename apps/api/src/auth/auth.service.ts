@@ -25,6 +25,7 @@ export interface AuthTokens {
 
 export interface PublicUser {
   id: string;
+  clerkUserId: string | null;
   email: string;
   name: string;
   role: string;
@@ -36,6 +37,7 @@ export interface PublicUser {
 
 const USER_PUBLIC_SELECT = {
   id: true,
+  clerkUserId: true,
   email: true,
   name: true,
   role: true,
@@ -99,7 +101,7 @@ export class AuthService {
     this.assertLoginNotLocked(email);
 
     const found = await this.prisma.user.findUnique({ where: { email } });
-    if (!found) {
+    if (!found || found.deletedAt || !found.passwordHash) {
       this.recordLoginFailure(email);
       throw new UnauthorizedException(INVALID_LOGIN_MESSAGE);
     }
@@ -111,6 +113,7 @@ export class AuthService {
     this.clearLoginFailures(email);
     const user: PublicUser = {
       id: found.id,
+      clerkUserId: found.clerkUserId,
       email: found.email,
       name: found.name,
       role: found.role,
@@ -232,6 +235,9 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
+    if (!user.passwordHash) {
+      throw new UnauthorizedException('TÃ i khoáº£n nÃ y Ä‘ang dÃ¹ng Clerk Ä‘á»ƒ Ä‘Äƒng nháº­p');
+    }
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!ok) {
       throw new UnauthorizedException('Mật khẩu hiện tại không đúng');
@@ -286,6 +292,9 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new UnauthorizedException('Tài khoản không tồn tại');
+    }
+    if (!user.passwordHash) {
+      throw new UnauthorizedException('TÃ i khoáº£n nÃ y Ä‘ang dÃ¹ng Clerk Ä‘á»ƒ Ä‘Äƒng nháº­p');
     }
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {

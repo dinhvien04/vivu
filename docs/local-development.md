@@ -139,3 +139,38 @@ Khi chạy full local lần đầu tiên, cơ sở dữ liệu của bạn sẽ 
     ```bash
     E2E_BASE_URL=http://localhost:3000 pnpm e2e:web
     ```
+---
+
+## 6. Local Clerk Auth Setup
+
+Clerk is optional for local development. If `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+is empty, the web app keeps the legacy local auth fallback so existing smoke
+tests and dev flows still work.
+
+To test Clerk locally:
+
+1. Create a Clerk application and set these values:
+   ```env
+   # apps/web/.env.local
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+   CLERK_SECRET_KEY=sk_test_...
+   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/dang-nhap
+   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/dang-ky
+   NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+   NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+
+   # apps/api/.env
+   CLERK_SECRET_KEY=sk_test_...
+   CLERK_JWT_KEY=
+   CLERK_WEBHOOK_SECRET=whsec_...
+   CLERK_ALLOWED_ORIGINS=http://localhost:3000
+   ```
+2. Run the migration before testing against an existing DB:
+   ```bash
+   pnpm --filter @vivu/api prisma migrate deploy
+   pnpm --filter @vivu/api prisma:generate
+   ```
+3. Start API and web, sign in through `/dang-nhap`, then confirm
+   `GET /api/v1/auth/me` returns a DB user with `clerkUserId` and `role`.
+4. For webhooks, expose the API with a tunnel and configure Clerk to call:
+   `https://<tunnel>/api/v1/webhooks/clerk`.

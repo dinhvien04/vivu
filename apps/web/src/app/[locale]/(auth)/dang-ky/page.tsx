@@ -1,6 +1,7 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { SignUp } from '@clerk/nextjs';
+import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
 import { useAuth } from '@/components/auth-provider';
@@ -8,9 +9,11 @@ import { GoogleAuthButton } from '@/components/google-auth-button';
 import { Icon } from '@/components/icon';
 import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link, useRouter } from '@/i18n/navigation';
+import { routing } from '@/i18n/routing';
 import { AuthError } from '@/lib/auth-client';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function RegisterPage() {
   return (
@@ -29,11 +32,41 @@ function RegisterCardSkeleton() {
 }
 
 function RegisterForm() {
+  const search = useSearchParams();
+  const next = search?.get('next') ?? '/';
+  return CLERK_ENABLED ? <ClerkRegisterCard next={next} /> : <LegacyRegisterForm next={next} />;
+}
+
+function ClerkRegisterCard({ next }: { next: string }) {
+  const locale = useLocale();
+  const signUpPath = locale === routing.defaultLocale ? '/dang-ky' : `/${locale}/dang-ky`;
+  const signInPath = locale === routing.defaultLocale ? '/dang-nhap' : `/${locale}/dang-nhap`;
+
+  return (
+    <div className="w-full max-w-[440px] rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-4 shadow-[0_24px_60px_-32px_rgba(15,30,55,0.35)] md:p-8">
+      <div className="mb-6 flex flex-col items-center gap-2 text-center">
+        <span className="font-h1 text-h1 font-bold tracking-tight text-primary">Vivu</span>
+      </div>
+      <SignUp
+        routing="path"
+        path={signUpPath}
+        signInUrl={`${signInPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
+        appearance={{
+          elements: {
+            rootBox: 'mx-auto w-full',
+            cardBox: 'shadow-none border-0 bg-transparent',
+            card: 'shadow-none border-0 bg-transparent p-0',
+          },
+        }}
+      />
+    </div>
+  );
+}
+
+function LegacyRegisterForm({ next }: { next: string }) {
   const t = useTranslations('auth');
   const { register } = useAuth();
   const router = useRouter();
-  const search = useSearchParams();
-  const next = search?.get('next') ?? '/';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
