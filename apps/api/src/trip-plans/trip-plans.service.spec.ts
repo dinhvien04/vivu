@@ -16,33 +16,38 @@ function makeService(prisma: unknown, aiText: unknown = {}, quota: unknown = {})
 describe('TripPlansService generation', () => {
   it('generates a plan through the text provider and stores sanitized output', async () => {
     const aiText = {
-      generateTripPlan: jest.fn().mockResolvedValue(
-        JSON.stringify({
-          title: 'One day in Gia Lai',
-          summary: 'A short Vivu plan',
-          days: [
-            {
-              day: 1,
-              theme: 'Lake',
-              items: [
-                {
-                  timeOfDay: 'morning',
-                  placeName: 'Bien Ho',
-                  placeSlug: 'bien-ho',
-                  reason: 'Scenic',
-                  suggestedDuration: '2h',
-                  travelNote: 'Go early',
-                  tips: ['Bring water'],
-                },
-              ],
-              foodSuggestions: [],
-              notes: [],
-            },
-          ],
-          generalTips: [],
-          missingDataNote: null,
-        }),
-      ),
+      generateTripPlan: jest
+        .fn()
+        .mockImplementation(
+          async (_prompt: string, _options: unknown, transform: (raw: string) => unknown) =>
+            transform(
+              JSON.stringify({
+                title: 'One day in Gia Lai',
+                summary: 'A short Vivu plan',
+                days: [
+                  {
+                    day: 1,
+                    theme: 'Lake',
+                    items: [
+                      {
+                        timeOfDay: 'morning',
+                        placeName: 'Bien Ho',
+                        placeSlug: 'bien-ho',
+                        reason: 'Scenic',
+                        suggestedDuration: '2h',
+                        travelNote: 'Go early',
+                        tips: ['Bring water'],
+                      },
+                    ],
+                    foodSuggestions: [],
+                    notes: [],
+                  },
+                ],
+                generalTips: [],
+                missingDataNote: null,
+              }),
+            ),
+        ),
     };
     const prisma = prismaForGenerate();
 
@@ -66,6 +71,7 @@ describe('TripPlansService generation', () => {
         maxOutputTokens: expect.any(Number),
         responseMimeType: 'application/json',
       }),
+      expect.any(Function),
     );
     expect(prisma.tripPlan.create).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -59,12 +59,15 @@ export class TripPlansService {
 
     const allowedSlugs = new Set(candidates.map((place) => place.slug));
     const prompt = buildTripPlannerPrompt(dto, candidates);
-    const raw = await this.aiText.generateTripPlan(prompt, {
-      temperature: 0.15,
-      maxOutputTokens: tripPlannerMaxOutputTokens(),
-      responseMimeType: 'application/json',
-    });
-    const output = parseTripPlanOutput(raw, allowedSlugs);
+    const output = await this.aiText.generateTripPlan(
+      prompt,
+      {
+        temperature: 0.15,
+        maxOutputTokens: tripPlannerMaxOutputTokens(),
+        responseMimeType: 'application/json',
+      },
+      (raw) => parseTripPlanOutput(raw, allowedSlugs),
+    );
     const placeIds = collectPlaceIds(output, candidates);
 
     const plan = await this.prisma.tripPlan.create({

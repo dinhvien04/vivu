@@ -1,4 +1,4 @@
-import { HttpStatus } from '@nestjs/common';
+import { BadGatewayException, HttpStatus } from '@nestjs/common';
 import type { GeminiService } from '../gemini/gemini.service';
 import { AiTextGenerationService } from './ai-text-generation.service';
 import { ConduitAiException, type ConduitAiService } from './conduit-ai.service';
@@ -9,11 +9,15 @@ describe('AiTextGenerationService', () => {
     conduit.generateText.mockResolvedValue('{"title":"Plan","days":[]}');
 
     await expect(
-      service.generateTripPlan('planner prompt', {
-        temperature: 0.15,
-        maxOutputTokens: 3200,
-        responseMimeType: 'application/json',
-      }),
+      service.generateTripPlan(
+        'planner prompt',
+        {
+          temperature: 0.15,
+          maxOutputTokens: 3200,
+          responseMimeType: 'application/json',
+        },
+        (raw) => raw,
+      ),
     ).resolves.toBe('{"title":"Plan","days":[]}');
 
     expect(conduit.generateText).toHaveBeenCalledWith(
@@ -32,7 +36,9 @@ describe('AiTextGenerationService', () => {
     conduit.generateText.mockRejectedValue(conduitError(402, 'Tài khoản AI đã hết credit.'));
     gemini.generateText.mockResolvedValue('gemini plan');
 
-    await expect(service.generateTripPlan('planner prompt')).resolves.toBe('gemini plan');
+    await expect(service.generateTripPlan('planner prompt', {}, (raw) => raw)).resolves.toBe(
+      'gemini plan',
+    );
 
     expect(gemini.generateText).toHaveBeenCalledWith('planner prompt', {});
   });
@@ -41,11 +47,31 @@ describe('AiTextGenerationService', () => {
     const { service, conduit, gemini } = makeService({ geminiConfigured: false });
     conduit.generateText.mockRejectedValue(conduitError(402, 'Tài khoản AI đã hết credit.'));
 
-    await expect(service.generateTripPlan('planner prompt')).rejects.toThrow(
+    await expect(service.generateTripPlan('planner prompt', {}, (raw) => raw)).rejects.toThrow(
       'Tài khoản AI đã hết credit.',
     );
 
     expect(gemini.generateText).not.toHaveBeenCalled();
+  });
+
+  it('falls back to Gemini when Conduit returns invalid structured output', async () => {
+    const { service, conduit, gemini } = makeService();
+    conduit.generateText.mockResolvedValue('not-json');
+    gemini.generateText.mockResolvedValue('{"title":"Gemini plan"}');
+    const parse = jest.fn((raw: string) => {
+      try {
+        return JSON.parse(raw) as { title: string };
+      } catch {
+        throw new BadGatewayException('AI output is not valid JSON.');
+      }
+    });
+
+    await expect(service.generateTripPlan('planner prompt', {}, parse)).resolves.toEqual({
+      title: 'Gemini plan',
+    });
+
+    expect(parse).toHaveBeenCalledTimes(2);
+    expect(gemini.generateText).toHaveBeenCalledWith('planner prompt', {});
   });
 
   it('uses Conduit for AI Chat text-only generation when enabled', async () => {
