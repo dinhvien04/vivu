@@ -70,6 +70,10 @@ describe('TripPlansService generation', () => {
         temperature: 0.15,
         maxOutputTokens: expect.any(Number),
         responseMimeType: 'application/json',
+        responseJsonSchema: expect.objectContaining({
+          type: 'object',
+          required: expect.arrayContaining(['title', 'summary', 'days']),
+        }),
       }),
       expect.any(Function),
     );
@@ -83,7 +87,7 @@ describe('TripPlansService generation', () => {
     );
   });
 
-  it('does not store a plan when the text provider returns a friendly credit error', async () => {
+  it('stores a local fallback plan when AI providers are unavailable', async () => {
     const aiText = {
       generateTripPlan: jest
         .fn()
@@ -91,11 +95,19 @@ describe('TripPlansService generation', () => {
     };
     const prisma = prismaForGenerate();
 
-    await expect(makeService(prisma, aiText).generate(validDto(), {} as never)).rejects.toThrow(
-      'Tài khoản AI đã hết credit.',
+    await expect(makeService(prisma, aiText).generate(validDto(), {} as never)).resolves.toMatchObject(
+      {
+        data: {
+          id: 'plan-1',
+          output: {
+            days: [{ day: 1, items: [{ placeSlug: 'bien-ho' }] }],
+            missingDataNote: expect.stringContaining('AI'),
+          },
+        },
+      },
     );
 
-    expect(prisma.tripPlan.create).not.toHaveBeenCalled();
+    expect(prisma.tripPlan.create).toHaveBeenCalled();
   });
 });
 

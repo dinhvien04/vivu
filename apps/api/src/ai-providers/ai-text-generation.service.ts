@@ -84,12 +84,8 @@ export class AiTextGenerationService {
       if (!this.gemini.isConfigured()) throw normalizeAiError(conduitError);
 
       try {
-        const raw = await options.geminiCall();
-        return options.transform(raw);
+        return await this.callGemini(options.purpose, options.geminiCall, options.transform);
       } catch (geminiError) {
-        this.logProviderFailure('gemini', options.purpose, geminiError, {
-          fallback: 'none',
-        });
         throw selectFinalError(conduitError, geminiError);
       }
     }
@@ -100,12 +96,30 @@ export class AiTextGenerationService {
     geminiCall: () => Promise<string>,
     transform: (raw: string) => T,
   ): Promise<T> {
-    try {
-      return transform(await geminiCall());
-    } catch (error) {
-      this.logProviderFailure('gemini', purpose, error, { fallback: 'none' });
-      throw normalizeAiError(error);
+    const maxAttempts = purpose === 'trip_planner' ? 2 : 1;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        return transform(await geminiCall());
+      } catch (error) {
+        lastError = error;
+        const retryStructuredOutput =
+          purpose === 'trip_planner' &&
+          error instanceof HttpException &&
+          error.getStatus() === HttpStatus.BAD_GATEWAY &&
+          attempt < maxAttempts;
+
+        this.logProviderFailure('gemini', purpose, error, {
+          fallback: retryStructuredOutput ? 'gemini_retry' : 'none',
+          attempt: String(attempt),
+        });
+
+        if (!retryStructuredOutput) throw normalizeAiError(error);
+      }
     }
+
+    throw normalizeAiError(lastError);
   }
 
   private logProviderFailure(

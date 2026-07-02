@@ -3,6 +3,70 @@ import type { TripPlanDay, TripPlanItem, TripPlanOutput, TripTimeOfDay } from '.
 
 const TIMES: TripTimeOfDay[] = ['morning', 'noon', 'afternoon', 'evening'];
 
+export const TRIP_PLAN_RESPONSE_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    title: { type: 'string' },
+    summary: { type: 'string' },
+    days: {
+      type: 'array',
+      minItems: 1,
+      items: {
+        type: 'object',
+        properties: {
+          day: { type: 'integer' },
+          theme: { type: 'string' },
+          items: {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              properties: {
+                timeOfDay: {
+                  type: 'string',
+                  enum: TIMES,
+                },
+                placeName: { type: 'string' },
+                placeSlug: { type: 'string' },
+                reason: { type: 'string' },
+                suggestedDuration: { type: 'string' },
+                travelNote: { type: 'string' },
+                tips: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+              },
+              required: [
+                'timeOfDay',
+                'placeName',
+                'reason',
+                'suggestedDuration',
+                'travelNote',
+                'tips',
+              ],
+            },
+          },
+          foodSuggestions: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          notes: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+        required: ['day', 'theme', 'items', 'foodSuggestions', 'notes'],
+      },
+    },
+    generalTips: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    missingDataNote: { type: 'string' },
+  },
+  required: ['title', 'summary', 'days', 'generalTips'],
+} as const;
+
 export function parseTripPlanOutput(raw: string, allowedSlugs: Set<string>): TripPlanOutput {
   const candidate = extractJson(raw);
   let parsed: unknown;

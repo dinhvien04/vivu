@@ -1,7 +1,23 @@
 import { BadGatewayException } from '@nestjs/common';
-import { parseTripPlanOutput } from './trip-plan-json';
+import { parseTripPlanOutput, TRIP_PLAN_RESPONSE_JSON_SCHEMA } from './trip-plan-json';
 
 describe('parseTripPlanOutput', () => {
+  it('defines a structured-output schema with required itinerary arrays', () => {
+    expect(TRIP_PLAN_RESPONSE_JSON_SCHEMA).toMatchObject({
+      type: 'object',
+      required: expect.arrayContaining(['title', 'summary', 'days']),
+      properties: {
+        days: {
+          type: 'array',
+          minItems: 1,
+          items: {
+            required: expect.arrayContaining(['day', 'theme', 'items']),
+          },
+        },
+      },
+    });
+  });
+
   it('keeps only place slugs from the allowed set', () => {
     const raw = JSON.stringify({
       title: 'Plan',

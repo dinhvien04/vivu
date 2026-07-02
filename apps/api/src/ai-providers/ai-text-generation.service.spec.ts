@@ -74,6 +74,28 @@ describe('AiTextGenerationService', () => {
     expect(gemini.generateText).toHaveBeenCalledWith('planner prompt', {});
   });
 
+  it('retries Gemini once when its Trip Planner output is invalid', async () => {
+    const { service, conduit, gemini } = makeService();
+    conduit.generateText.mockRejectedValue(conduitError(402, 'AI credit exhausted.'));
+    gemini.generateText
+      .mockResolvedValueOnce('{"days":[]}')
+      .mockResolvedValueOnce('{"days":[{"items":[{"placeName":"Bien Ho"}]}]}');
+    const parse = jest.fn((raw: string) => {
+      const parsed = JSON.parse(raw) as { days?: Array<{ items?: unknown[] }> };
+      if (!parsed.days?.[0]?.items?.length) {
+        throw new BadGatewayException('AI did not return a usable itinerary.');
+      }
+      return parsed;
+    });
+
+    await expect(service.generateTripPlan('planner prompt', {}, parse)).resolves.toEqual({
+      days: [{ items: [{ placeName: 'Bien Ho' }] }],
+    });
+
+    expect(gemini.generateText).toHaveBeenCalledTimes(2);
+    expect(parse).toHaveBeenCalledTimes(2);
+  });
+
   it('uses Conduit for AI Chat text-only generation when enabled', async () => {
     const { service, conduit, gemini } = makeService();
     conduit.generateText.mockResolvedValue('Câu trả lời từ Conduit');
