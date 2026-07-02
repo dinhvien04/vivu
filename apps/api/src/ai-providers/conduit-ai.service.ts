@@ -35,6 +35,12 @@ interface ConduitRequestBody {
   max_tokens: number;
 }
 
+interface ConduitFetchResponse {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+}
+
 const DEFAULT_BASE_URL = 'https://conduit.ozdoev.net/api/v1';
 const DEFAULT_MODEL = 'gpt-5';
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -141,7 +147,7 @@ export class ConduitAiService {
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const response = (await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           authorization: `Bearer ${this.apiKey}`,
@@ -149,7 +155,7 @@ export class ConduitAiService {
         },
         body: JSON.stringify(body),
         signal: controller.signal,
-      });
+      })) as unknown as ConduitFetchResponse;
 
       if (!response.ok) {
         throw new ConduitAiException(definitionForStatus(response.status), response.status);
