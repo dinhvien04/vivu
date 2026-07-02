@@ -9,15 +9,19 @@ const imgSrcExtra = splitSources(process.env.CSP_IMG_SRC_EXTRA);
 const imageRemotePatterns = getImageRemotePatterns();
 const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 const turnstileOrigin = 'https://challenges.cloudflare.com';
+const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+const clerkOrigins = clerkEnabled
+  ? ['https://*.clerk.accounts.dev', 'https://*.clerk.dev', 'https://*.clerk.com']
+  : [];
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}${turnstileEnabled ? ` ${turnstileOrigin}` : ''}`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  `script-src 'self' 'unsafe-inline'${isProduction ? '' : " 'unsafe-eval'"}${turnstileEnabled ? ` ${turnstileOrigin}` : ''} ${clerkOrigins.join(' ')}`.trim(),
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${clerkOrigins.join(' ')}`.trim(),
   "font-src 'self' data: https://fonts.gstatic.com",
   `img-src 'self' data: blob: https: ${imgSrcExtra.join(' ')}`.trim(),
-  `connect-src 'self' ${apiOrigin ? apiOrigin : ''} ${turnstileEnabled ? turnstileOrigin : ''} https://api.open-meteo.com ${connectSrcExtra.join(' ')}`.trim(),
-  `frame-src 'self'${turnstileEnabled ? ` ${turnstileOrigin}` : ''}`,
+  `connect-src 'self' ${apiOrigin ? apiOrigin : ''} ${turnstileEnabled ? turnstileOrigin : ''} https://api.open-meteo.com ${clerkOrigins.join(' ')} ${connectSrcExtra.join(' ')}`.trim(),
+  `frame-src 'self'${turnstileEnabled ? ` ${turnstileOrigin}` : ''} ${clerkOrigins.join(' ')}`.trim(),
   "media-src 'self' blob: https:",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
