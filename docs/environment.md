@@ -121,8 +121,10 @@ Frontend `apps/web/.env.local`:
 * `CLERK_SECRET_KEY`: required by Clerk middleware in the Next.js runtime.
 * `NEXT_PUBLIC_CLERK_SIGN_IN_URL`: `/dang-nhap`.
 * `NEXT_PUBLIC_CLERK_SIGN_UP_URL`: `/dang-ky`.
-* `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` and
-  `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`: default post-auth redirect targets.
+* `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` and
+  `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL`: default post-auth redirect
+  targets. The Vivu auth pages also pass a validated `next` path directly to
+  Clerk so email verification always completes with a navigation.
 
 The frontend uses Clerk's prebuilt `SignIn`, `SignUp`, and `UserButton`
 components inside Vivu-owned shell components. Vietnamese pages pass Clerk's

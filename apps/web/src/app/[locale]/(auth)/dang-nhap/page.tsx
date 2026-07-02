@@ -11,6 +11,7 @@ import { Icon } from '@/components/icon';
 import { Link, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthError } from '@/lib/auth-client';
+import { getLocalizedAuthRedirect, getSafeAuthRedirect } from '@/lib/auth-redirect';
 import { vivuClerkAppearance } from '@/lib/clerk-appearance';
 
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
@@ -36,24 +37,23 @@ function LoginCardSkeleton() {
 
 function LoginForm() {
   const search = useSearchParams();
-  const next = search?.get('next') ?? '/';
+  const next = getSafeAuthRedirect(search?.get('next') ?? null, '/');
   return CLERK_ENABLED ? <ClerkLoginCard next={next} /> : <LegacyLoginForm next={next} />;
 }
 
 function ClerkLoginCard({ next }: { next: string }) {
   const locale = useLocale();
-  const router = useRouter();
-  const { isLoaded: clerkLoaded } = useClerkAuth();
-  const { user, loading } = useVivuAuth();
+  const { isLoaded: clerkLoaded, isSignedIn } = useClerkAuth();
+  const { reloadUser } = useVivuAuth();
   const signInPath = locale === routing.defaultLocale ? '/dang-nhap' : `/${locale}/dang-nhap`;
   const signUpPath = locale === routing.defaultLocale ? '/dang-ky' : `/${locale}/dang-ky`;
+  const redirectUrl = getLocalizedAuthRedirect(next, locale);
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace(next || '/');
-      router.refresh();
-    }
-  }, [loading, next, router, user]);
+    if (!clerkLoaded || !isSignedIn) return;
+    void reloadUser();
+    window.location.replace(redirectUrl);
+  }, [clerkLoaded, isSignedIn, redirectUrl, reloadUser]);
 
   return (
     <AuthShell mode="login">
@@ -63,6 +63,8 @@ function ClerkLoginCard({ next }: { next: string }) {
             routing="path"
             path={signInPath}
             signUpUrl={`${signUpPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
+            forceRedirectUrl={redirectUrl}
+            fallbackRedirectUrl={redirectUrl}
             appearance={vivuClerkAppearance}
           />
         ) : (

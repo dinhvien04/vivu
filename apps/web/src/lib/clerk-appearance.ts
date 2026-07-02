@@ -16,7 +16,9 @@ export const vivuClerkAppearance = {
     rootBox: 'w-full',
     cardBox: 'w-full border-0 bg-transparent shadow-none',
     card: 'w-full border-0 bg-transparent p-0 shadow-none',
-    header: 'hidden',
+    header: 'mb-6 text-center sm:text-left',
+    headerTitle: 'text-h3 font-bold text-on-surface',
+    headerSubtitle: 'mt-2 text-body-md leading-relaxed text-on-surface-variant',
     footer: 'pt-4 !bg-none !bg-transparent',
     footerAction: 'bg-transparent',
     footerActionText: 'text-on-surface-variant',
@@ -40,8 +42,10 @@ export const vivuClerkAppearance = {
     identityPreviewEditButton: 'text-primary',
     alert: 'rounded border border-error/20 bg-error-container text-on-error-container',
     formResendCodeLink: 'font-semibold text-primary',
+    otpCodeFieldInputs: 'justify-center gap-2 sm:justify-start',
+    otpCodeFieldInputContainer: 'rounded bg-transparent shadow-none',
     otpCodeFieldInput:
-      'rounded border border-outline-variant/40 bg-surface-container-low text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/25',
+      'h-12 w-11 rounded border-2 !border-outline-variant !bg-surface-container-lowest text-center text-h4 font-bold !text-on-surface caret-primary shadow-sm outline-none focus:!border-primary focus:ring-4 focus:ring-primary/20',
   },
 } as const;
 

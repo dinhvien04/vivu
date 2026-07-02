@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth as useClerkAuth, useClerk } from '@clerk/nextjs';
+import { useAuth as useClerkAuth, useClerk, useUser as useClerkUser } from '@clerk/nextjs';
 import {
   createContext,
   useCallback,
@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import * as auth from '../lib/auth-client';
+import { clerkUserToAuthUser } from '../lib/clerk-user';
 
 interface AuthContextValue {
   user: auth.AuthUser | null;
@@ -137,6 +138,7 @@ function LegacyAuthProvider({ children }: { children: ReactNode }) {
 
 function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, getToken } = useClerkAuth();
+  const { isLoaded: clerkUserLoaded, user: clerkUser } = useClerkUser();
   const { signOut } = useClerk();
   const [user, setUser] = useState<auth.AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,10 +157,15 @@ function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const clerkProfile = useMemo<auth.AuthUser | null>(() => {
+    if (!clerkUser) return null;
+    return clerkUserToAuthUser(clerkUser);
+  }, [clerkUser]);
+
   const loadClerkUser = useCallback(async (): Promise<void> => {
     const token = await getToken();
     if (!token) {
-      clearSession();
+      setUser(clerkProfile);
       return;
     }
     accessTokenRef.current = token;
@@ -167,18 +174,19 @@ function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
     if (me) {
       setUser(me);
     } else {
-      clearSession();
+      setUser(clerkProfile);
     }
-  }, [clearSession, getToken]);
+  }, [clerkProfile, getToken]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || (isSignedIn && !clerkUserLoaded)) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
       if (isSignedIn) {
-        await loadClerkUser().catch(() => clearSession());
-        if (!cancelled) setLoading(false);
+        setUser((current) => current ?? clerkProfile);
+        setLoading(false);
+        await loadClerkUser().catch(() => setUser(clerkProfile));
         return;
       }
 
@@ -202,13 +210,13 @@ function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [clearSession, isLoaded, isSignedIn, loadClerkUser]);
+  }, [clearSession, clerkProfile, clerkUserLoaded, isLoaded, isSignedIn, loadClerkUser]);
 
   const getAccessToken = useCallback(async (): Promise<string | null> => {
     if (isLoaded && isSignedIn) {
       const token = await getToken();
       if (!token) {
-        clearSession();
+        setUser(clerkProfile);
         return null;
       }
       accessTokenRef.current = token;
@@ -226,7 +234,7 @@ function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
     accessTokenRef.current = refreshed.accessToken;
     expiresAtRef.current = Date.now() + refreshed.expiresIn * 1000 - 30_000;
     return accessTokenRef.current;
-  }, [clearSession, getToken, isLoaded, isSignedIn]);
+  }, [clearSession, clerkProfile, getToken, isLoaded, isSignedIn]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -258,18 +266,11 @@ function ClerkBackedAuthProvider({ children }: { children: ReactNode }) {
         }
         const me = await auth.fetchMe(token);
         if (me) setUser(me);
+        else if (isSignedIn) setUser(clerkProfile);
         else clearSession();
       },
     }),
-    [
-      user,
-      loading,
-      applySession,
-      clearSession,
-      getAccessToken,
-      isSignedIn,
-      signOut,
-    ],
+    [user, loading, applySession, clearSession, getAccessToken, isSignedIn, clerkProfile, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -12,6 +12,7 @@ import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthError } from '@/lib/auth-client';
+import { getLocalizedAuthRedirect, getSafeAuthRedirect } from '@/lib/auth-redirect';
 import { vivuClerkAppearance } from '@/lib/clerk-appearance';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -38,24 +39,23 @@ function RegisterCardSkeleton() {
 
 function RegisterForm() {
   const search = useSearchParams();
-  const next = search?.get('next') ?? '/';
+  const next = getSafeAuthRedirect(search?.get('next') ?? null, '/tai-khoan');
   return CLERK_ENABLED ? <ClerkRegisterCard next={next} /> : <LegacyRegisterForm next={next} />;
 }
 
 function ClerkRegisterCard({ next }: { next: string }) {
   const locale = useLocale();
-  const router = useRouter();
-  const { isLoaded: clerkLoaded } = useClerkAuth();
-  const { user, loading } = useVivuAuth();
+  const { isLoaded: clerkLoaded, isSignedIn } = useClerkAuth();
+  const { reloadUser } = useVivuAuth();
   const signUpPath = locale === routing.defaultLocale ? '/dang-ky' : `/${locale}/dang-ky`;
   const signInPath = locale === routing.defaultLocale ? '/dang-nhap' : `/${locale}/dang-nhap`;
+  const redirectUrl = getLocalizedAuthRedirect(next, locale);
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace(next || '/');
-      router.refresh();
-    }
-  }, [loading, next, router, user]);
+    if (!clerkLoaded || !isSignedIn) return;
+    void reloadUser();
+    window.location.replace(redirectUrl);
+  }, [clerkLoaded, isSignedIn, redirectUrl, reloadUser]);
 
   return (
     <AuthShell mode="register">
@@ -65,6 +65,8 @@ function ClerkRegisterCard({ next }: { next: string }) {
             routing="path"
             path={signUpPath}
             signInUrl={`${signInPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
+            forceRedirectUrl={redirectUrl}
+            fallbackRedirectUrl={redirectUrl}
             appearance={vivuClerkAppearance}
           />
         ) : (
