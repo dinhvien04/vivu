@@ -86,98 +86,122 @@ function LegacyRegisterForm({ next }: { next: string }) {
   }
 
   return (
-    <div className="w-full max-w-[440px] rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-[0_24px_60px_-32px_rgba(15,30,55,0.35)] md:p-12">
+    <div className="w-full max-w-[450px] rounded-3xl border border-white/20 dark:border-neutral-800/40 bg-white/70 dark:bg-neutral-950/75 backdrop-blur-xl p-8 md:p-10 shadow-[0_32px_80px_-24px_rgba(0,0,0,0.12)] transition-all duration-300 hover:shadow-[0_32px_80px_-16px_rgba(0,0,0,0.18)]">
       <div className="mb-8 flex flex-col items-center gap-2 text-center">
-        <span className="font-h1 text-h1 font-bold tracking-tight text-primary">Vivu</span>
-        <p className="text-body-md text-on-surface-variant">{t('registerTagline')}</p>
+        <span className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
+          Vivu
+        </span>
+        <p className="text-body-md font-medium text-neutral-500 dark:text-neutral-400">
+          {t('registerTagline')}
+        </p>
       </div>
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
-        <div className="flex flex-col gap-2">
-          <label className="font-label-caps text-on-surface-variant" htmlFor="name">
-            {t('displayName').toUpperCase()}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="name">
+            {t('displayName')}
           </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            autoComplete="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t('namePlaceholder')}
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-on-surface-variant/75 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
-          />
+          <div className="relative flex items-center">
+            <span className="absolute left-3.5 flex items-center text-neutral-400 dark:text-neutral-500">
+              <Icon name="person" size={20} />
+            </span>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('namePlaceholder')}
+              className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 pl-11 pr-4 py-3.5 text-body-md outline-none transition-all placeholder:text-neutral-400/80 dark:placeholder:text-neutral-600 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="font-label-caps text-on-surface-variant" htmlFor="email">
-            {t('email').toUpperCase()}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="email">
+            {t('email')}
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ten@gmail.com"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-on-surface-variant/75 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
-          />
+          <div className="relative flex items-center">
+            <span className="absolute left-3.5 flex items-center text-neutral-400 dark:text-neutral-500">
+              <Icon name="mail" size={20} />
+            </span>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ten@gmail.com"
+              className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 pl-11 pr-4 py-3.5 text-body-md outline-none transition-all placeholder:text-neutral-400/80 dark:placeholder:text-neutral-600 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="font-label-caps text-on-surface-variant" htmlFor="password">
-            {t('password').toUpperCase()}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="password">
+            {t('password')}
           </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-on-surface-variant/75 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
-          />
-          <p className="text-body-sm text-on-surface-variant">{t('passwordHint')}</p>
+          <div className="relative flex items-center">
+            <span className="absolute left-3.5 flex items-center text-neutral-400 dark:text-neutral-500">
+              <Icon name="lock" size={20} />
+            </span>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 pl-11 pr-4 py-3.5 text-body-md outline-none transition-all placeholder:text-neutral-400/80 dark:placeholder:text-neutral-600 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10"
+            />
+          </div>
+          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-normal">{t('passwordHint')}</p>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="font-label-caps text-on-surface-variant" htmlFor="confirm">
-            {t('passwordConfirm').toUpperCase()}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="confirm">
+            {t('passwordConfirm')}
           </label>
-          <input
-            id="confirm"
-            name="confirm"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="••••••••"
-            className="w-full rounded-lg border-none bg-surface-container-low px-4 py-3 text-body-md outline-none transition-all placeholder:text-on-surface-variant/75 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary"
-          />
+          <div className="relative flex items-center">
+            <span className="absolute left-3.5 flex items-center text-neutral-400 dark:text-neutral-500">
+              <Icon name="lock" size={20} />
+            </span>
+            <input
+              id="confirm"
+              name="confirm"
+              type="password"
+              autoComplete="new-password"
+              required
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 pl-11 pr-4 py-3.5 text-body-md outline-none transition-all placeholder:text-neutral-400/80 dark:placeholder:text-neutral-600 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10"
+            />
+          </div>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-2 text-body-sm text-on-surface-variant">
+        <label className="flex cursor-pointer items-start gap-2.5 text-body-sm text-neutral-600 dark:text-neutral-400 select-none my-1 leading-relaxed">
           <input
             type="checkbox"
             checked={agree}
             onChange={(e) => setAgree(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-outline-variant text-primary focus:ring-2 focus:ring-primary"
+            className="mt-1 h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-primary focus:ring-2 focus:ring-primary"
           />
           <span>
             {t.rich('termsCheckbox', {
               terms: (chunks: ReactNode) => (
-                <Link href="/dieu-khoan-su-dung" className="text-primary hover:underline">
+                <Link href="/dieu-khoan-su-dung" className="font-semibold text-primary hover:underline">
                   {chunks}
                 </Link>
               ),
               privacy: (chunks: ReactNode) => (
-                <Link href="/chinh-sach-bao-mat" className="text-primary hover:underline">
+                <Link href="/chinh-sach-bao-mat" className="font-semibold text-primary hover:underline">
                   {chunks}
                 </Link>
               ),
@@ -194,37 +218,37 @@ function LegacyRegisterForm({ next }: { next: string }) {
         {error && (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-lg bg-error-container px-3 py-2 text-body-sm text-on-error-container"
+            className="flex items-start gap-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/30 p-3.5 text-body-sm text-red-600 dark:text-red-400"
           >
             <Icon name="error_outline" size={20} className="mt-0.5 shrink-0" />
-            <span>{error}</span>
+            <span className="font-medium leading-relaxed">{error}</span>
           </div>
         )}
 
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 w-full rounded-lg bg-primary py-4 font-h3 text-body-md text-on-primary shadow-md transition-all hover:bg-primary-container active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-2 w-full rounded-xl bg-primary py-3.5 font-semibold text-body-md text-on-primary shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 hover:bg-opacity-95"
         >
           {submitting ? t('submittingRegister') : t('submitRegister')}
         </button>
       </form>
 
       <div className="my-6 flex items-center">
-        <div className="h-px flex-grow border-t border-outline-variant" />
-        <span className="mx-4 bg-surface-container-lowest px-2 font-label-caps text-outline">
-          {t('or').toUpperCase()}
+        <div className="h-px flex-grow border-t border-neutral-200 dark:border-neutral-800" />
+        <span className="mx-4 text-[11px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+          {t('or')}
         </span>
-        <div className="h-px flex-grow border-t border-outline-variant" />
+        <div className="h-px flex-grow border-t border-neutral-200 dark:border-neutral-800" />
       </div>
 
-      <GoogleAuthButton mode="register" />
+      <GoogleAuthButton mode="register" next={next} />
 
-      <p className="mt-6 text-center text-on-surface-variant">
+      <p className="mt-6 text-center text-body-sm text-neutral-500 dark:text-neutral-400">
         {t('loginCta')}
         <Link
           href={`/dang-nhap${next ? `?next=${encodeURIComponent(next)}` : ''}`}
-          className="font-semibold text-primary hover:underline"
+          className="font-bold text-primary hover:underline ml-1"
         >
           {t('loginLinkLabel')}
         </Link>

@@ -123,6 +123,45 @@ export class AuthService {
     return { user, tokens };
   }
 
+  async loginOrRegisterOAuth(input: {
+    email: string;
+    name: string;
+    avatarUrl?: string | null;
+  }): Promise<{ user: PublicUser; tokens: AuthTokens }> {
+    const email = input.email.trim().toLowerCase();
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+      select: USER_PUBLIC_SELECT,
+    });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          name: input.name.trim(),
+          avatarUrl: input.avatarUrl || null,
+        },
+        select: USER_PUBLIC_SELECT,
+      });
+    } else {
+      const data: { avatarUrl?: string | null } = {};
+      if (!user.avatarUrl && input.avatarUrl) {
+        data.avatarUrl = input.avatarUrl;
+      }
+      if (Object.keys(data).length > 0) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data,
+          select: USER_PUBLIC_SELECT,
+        });
+      }
+    }
+
+    const tokens = await this.issueTokens(user);
+    return { user, tokens };
+  }
+
+
   async refresh(refreshToken: string): Promise<AuthTokens> {
     const tokenHash = hashToken(refreshToken);
     const row = await this.prisma.refreshToken.findUnique({

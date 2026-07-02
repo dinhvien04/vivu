@@ -7,12 +7,15 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Redirect,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { FastifyRequest } from 'fastify';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -39,6 +42,75 @@ export class AuthController {
     private readonly auth: AuthService,
     private readonly turnstile: TurnstileService,
   ) {}
+
+  @Public()
+  @Get('google')
+  @Redirect('https://accounts.google.com', 302)
+  async googleAuth(@Req() req: FastifyRequest) {
+    const { next, origin } = req.query as any;
+
+    const stateObj = {
+      next: next || '/',
+      origin: origin || 'http://localhost:3000',
+    };
+    const state = Buffer.from(JSON.stringify(stateObj)).toString('base64');
+
+    const clientID = process.env.GOOGLE_CLIENT_ID;
+    const callbackURL = process.env.GOOGLE_CALLBACK_URL;
+
+    if (!clientID || !callbackURL) {
+      throw new Error('Google OAuth configuration is missing in API environment variables');
+    }
+
+    const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `response_type=code` +
+      `&client_id=${encodeURIComponent(clientID)}` +
+      `&redirect_uri=${encodeURIComponent(callbackURL)}` +
+      `&scope=${encodeURIComponent('email profile')}` +
+      `&state=${encodeURIComponent(state)}`;
+
+    return { url: googleUrl };
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @Redirect('http://localhost:3000', 302)
+  async googleAuthRedirect(@Req() req: any) {
+    const profile = req.user;
+
+    let next = '/';
+    let origin = 'http://localhost:3000';
+
+    if (req.query && req.query.state) {
+      try {
+        const decoded = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf-8'));
+        if (decoded.next) next = decoded.next;
+        if (decoded.origin) origin = decoded.origin;
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    const allowedRedirects = (process.env.GOOGLE_ALLOWED_REDIRECTS || '')
+      .split(',')
+      .map((o) => o.trim());
+
+    const isAllowed = allowedRedirects.some((o) => o.toLowerCase() === origin.toLowerCase());
+    const finalOrigin = isAllowed ? origin : (allowedRedirects[0] || 'http://localhost:3000');
+
+    const { tokens } = await this.auth.loginOrRegisterOAuth({
+      email: profile.email,
+      name: profile.name,
+      avatarUrl: profile.avatarUrl,
+    });
+
+    const redirectUrl = `${finalOrigin}/api/auth/google/callback?accessToken=${encodeURIComponent(
+      tokens.accessToken,
+    )}&refreshToken=${encodeURIComponent(tokens.refreshToken)}&next=${encodeURIComponent(next)}`;
+
+    return { url: redirectUrl };
+  }
 
   @Public()
   @Post('register')
