@@ -147,6 +147,11 @@ Clerk is optional for local development. If `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 is empty, the web app keeps the legacy local auth fallback so existing smoke
 tests and dev flows still work.
 
+The visible `/dang-nhap` and `/dang-ky` screens use Clerk's prebuilt forms
+inside a Vivu shell. Locale `vi` loads Clerk `viVN`; locale `en` keeps Clerk's
+default English. Vivu roles are still read from `/api/v1/auth/me` and the
+Postgres `User.role` column, not from Clerk client metadata.
+
 To test Clerk locally:
 
 1. Create a Clerk application and set these values:

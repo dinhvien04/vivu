@@ -120,3 +120,8 @@ Frontend E2E should keep public pages reachable with no Clerk keys. When Clerk
 keys are enabled in a dedicated environment, add signed-out header, protected
 redirect, and post-login `/auth/me` assertions with mocked Clerk/browser state.
 Do not call real Gemini or paid AI APIs from E2E.
+
+Current web smoke coverage includes `/dang-nhap` and `/dang-ky` rendering the
+Vivu auth shell, benefit list, and an auth form without a real Clerk login. It
+also checks the signed-out header actions, `/en/dang-nhap` English copy, and
+mobile 390px no-horizontal-scroll coverage for the auth pages.

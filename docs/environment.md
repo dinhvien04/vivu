@@ -124,5 +124,12 @@ Frontend `apps/web/.env.local`:
 * `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` and
   `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`: default post-auth redirect targets.
 
+The frontend uses Clerk's prebuilt `SignIn`, `SignUp`, and `UserButton`
+components inside Vivu-owned shell components. Vietnamese pages pass Clerk's
+`viVN` localization from `@clerk/localizations`; English pages use Clerk's
+default English copy. Styling is centralized in
+`apps/web/src/lib/clerk-appearance.ts`.
+
 Never commit real Clerk secrets. Roles remain in the `User.role` column and must
 be changed through trusted DB/admin workflows only.
+Never expose `CLERK_SECRET_KEY` with a `NEXT_PUBLIC_` prefix.

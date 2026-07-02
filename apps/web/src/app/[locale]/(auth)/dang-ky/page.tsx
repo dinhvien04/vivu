@@ -1,16 +1,18 @@
 'use client';
 
-import { SignUp } from '@clerk/nextjs';
+import { SignUp, useAuth as useClerkAuth } from '@clerk/nextjs';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
-import { useAuth } from '@/components/auth-provider';
+import { Suspense, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { AuthShell, ClerkAuthLoading } from '@/components/auth-shell';
+import { useAuth as useVivuAuth } from '@/components/auth-provider';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { Icon } from '@/components/icon';
 import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link, useRouter } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthError } from '@/lib/auth-client';
+import { vivuClerkAppearance } from '@/lib/clerk-appearance';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
@@ -25,8 +27,11 @@ export default function RegisterPage() {
 
 function RegisterCardSkeleton() {
   return (
-    <div className="w-full max-w-[440px] rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-[0_24px_60px_-32px_rgba(15,30,55,0.35)] md:p-12">
-      <div className="h-96 animate-pulse rounded-xl bg-surface-container-low" />
+    <div className="grid w-full max-w-6xl overflow-hidden rounded border border-outline-variant/40 bg-surface-container-lowest shadow-[0_24px_70px_-42px_rgba(15,30,55,0.45)] lg:grid-cols-[0.92fr_1.08fr]">
+      <div className="h-72 animate-pulse bg-primary-fixed lg:h-[640px]" />
+      <div className="flex min-h-[460px] items-center justify-center p-6 sm:p-10">
+        <div className="h-96 w-full max-w-[430px] animate-pulse rounded bg-surface-container-low" />
+      </div>
     </div>
   );
 }
@@ -39,33 +44,40 @@ function RegisterForm() {
 
 function ClerkRegisterCard({ next }: { next: string }) {
   const locale = useLocale();
+  const router = useRouter();
+  const { isLoaded: clerkLoaded } = useClerkAuth();
+  const { user, loading } = useVivuAuth();
   const signUpPath = locale === routing.defaultLocale ? '/dang-ky' : `/${locale}/dang-ky`;
   const signInPath = locale === routing.defaultLocale ? '/dang-nhap' : `/${locale}/dang-nhap`;
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace(next || '/');
+      router.refresh();
+    }
+  }, [loading, next, router, user]);
+
   return (
-    <div className="w-full max-w-[440px] rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-4 shadow-[0_24px_60px_-32px_rgba(15,30,55,0.35)] md:p-8">
-      <div className="mb-6 flex flex-col items-center gap-2 text-center">
-        <span className="font-h1 text-h1 font-bold tracking-tight text-primary">Vivu</span>
+    <AuthShell mode="register">
+      <div data-testid="clerk-auth-widget" className="min-h-[420px]">
+        {clerkLoaded ? (
+          <SignUp
+            routing="path"
+            path={signUpPath}
+            signInUrl={`${signInPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
+            appearance={vivuClerkAppearance}
+          />
+        ) : (
+          <ClerkAuthLoading />
+        )}
       </div>
-      <SignUp
-        routing="path"
-        path={signUpPath}
-        signInUrl={`${signInPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
-        appearance={{
-          elements: {
-            rootBox: 'mx-auto w-full',
-            cardBox: 'shadow-none border-0 bg-transparent',
-            card: 'shadow-none border-0 bg-transparent p-0',
-          },
-        }}
-      />
-    </div>
+    </AuthShell>
   );
 }
 
 function LegacyRegisterForm({ next }: { next: string }) {
   const t = useTranslations('auth');
-  const { register } = useAuth();
+  const { register } = useVivuAuth();
   const router = useRouter();
 
   const [name, setName] = useState('');

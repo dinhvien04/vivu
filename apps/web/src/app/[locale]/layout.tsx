@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
+import { viVN } from '@clerk/localizations';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -77,6 +78,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const buildInfo = getBuildInfo();
+  const clerkLocalization = locale === 'vi' ? viVN : undefined;
   const app = (
     <ThemeProvider>
       <NextIntlClientProvider messages={messages} locale={locale}>
@@ -94,7 +96,10 @@ export default async function LocaleLayout({
       </head>
       <body>
         {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
-          <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+          <ClerkProvider
+            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+            localization={clerkLocalization}
+          >
             {app}
           </ClerkProvider>
         ) : (

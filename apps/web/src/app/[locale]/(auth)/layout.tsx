@@ -1,6 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
-import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 
 interface AuthLayoutProps {
@@ -15,33 +14,13 @@ export default async function AuthLayout({ children, params }: AuthLayoutProps) 
   const t = await getTranslations({ locale, namespace: 'auth' });
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-surface-container-low">
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-surface-container-low">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-br from-primary-fixed via-surface-container-low to-tertiary-fixed opacity-60"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(255,255,255,0.7),transparent_45%),radial-gradient(circle_at_85%_85%,rgba(255,255,255,0.5),transparent_45%)]"
+        className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(135deg,rgba(215,227,255,0.7),rgba(248,249,250,0.96)_42%,rgba(218,228,238,0.72))] dark:bg-[linear-gradient(135deg,rgba(0,69,142,0.24),rgba(18,20,21,0.98)_46%,rgba(62,72,80,0.32))]"
       />
 
-      <header className="relative z-10 mx-auto flex w-full max-w-container-max items-center justify-between px-margin-mobile py-6 md:px-margin-desktop">
-        <Link
-          href="/"
-          aria-label={t('shellHomeAria')}
-          className="font-h2 text-h2 font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
-        >
-          Vivu
-        </Link>
-        <Link
-          href="/"
-          className="text-body-md font-semibold text-on-surface-variant transition-colors hover:text-primary"
-        >
-          {t('shellHomeBack')}
-        </Link>
-      </header>
-
-      <main className="relative z-10 flex flex-1 items-center justify-center px-margin-mobile pb-12 pt-4 md:px-margin-desktop">
+      <main className="relative z-10 flex flex-1 items-center justify-center px-margin-mobile py-8 md:px-margin-desktop md:py-12">
         {children}
       </main>
 

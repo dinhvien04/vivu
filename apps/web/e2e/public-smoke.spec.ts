@@ -74,6 +74,47 @@ test.describe('public production smoke', () => {
     await expect(page.locator('body')).toContainText('Consulting');
   });
 
+  test('signed-out header exposes sign-in and sign-up actions', async ({ page }) => {
+    await mockSignedOutAuth(page);
+    const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
+    expect(response?.ok()).toBeTruthy();
+
+    await expect(page.locator('a[href*="dang-nhap"]').first()).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator('a[href*="dang-ky"]').first()).toBeVisible();
+  });
+
+  test('auth pages render the Vivu shell and an auth form', async ({ page }) => {
+    await mockSignedOutAuth(page);
+
+    for (const url of ['/dang-nhap', '/dang-ky']) {
+      const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+      expect(response?.ok()).toBeTruthy();
+      await expect(page.getByTestId('auth-shell')).toBeVisible();
+      await expect(page.getByTestId('auth-benefit')).toHaveCount(3);
+      await expect(page.getByTestId('auth-form-panel')).toBeVisible();
+      await expect(
+        page
+          .getByTestId('auth-form-panel')
+          .locator('form, [data-testid="clerk-auth-widget"], [data-testid="clerk-auth-loading"]')
+          .first(),
+      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator('body')).not.toContainText(/500|Application error/i);
+    }
+  });
+
+  test('English auth shell stays translated', async ({ page }) => {
+    await mockSignedOutAuth(page);
+    const response = await page.goto('/en/dang-nhap', { waitUntil: 'domcontentloaded' });
+    expect(response?.ok()).toBeTruthy();
+    await expect(
+      page.getByRole('heading', { name: 'Welcome back to Vivu', level: 1 }),
+    ).toBeVisible();
+    await expect(page.locator('body')).toContainText('Save AI itineraries');
+    await expect(page.locator('body')).not.toContainText('Chào mừng trở lại Vivu');
+  });
+
   test('/lich-trinh loads the AI trip planner form', async ({ page }) => {
     const response = await page.goto('/lich-trinh', { waitUntil: 'domcontentloaded' });
     expect(response?.ok()).toBeTruthy();
@@ -128,6 +169,8 @@ test.describe('public production smoke', () => {
   test('legal pages and contact page are available and clean from placeholder tags', async ({
     page,
   }) => {
+    test.setTimeout(60_000);
+    await mockSignedOutAuth(page);
     const urls = ['/chinh-sach-bao-mat', '/dieu-khoan-su-dung', '/lien-he'];
     for (const url of urls) {
       const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -262,10 +305,10 @@ test.describe('public production smoke', () => {
   });
 
   test('/dia-diem/suoi-da-vang lightbox is usable on mobile', async ({ page }) => {
+    await mockSignedOutAuth(page);
     await page.setViewportSize({ width: 390, height: 844 });
     const response = await page.goto('/dia-diem/suoi-da-vang', { waitUntil: 'domcontentloaded' });
     expect(response?.ok()).toBeTruthy();
-    await page.waitForLoadState('networkidle');
 
     await openHeroLightbox(page);
     await expect(page.getByTestId('photo-lightbox-close')).toBeVisible();
@@ -287,7 +330,7 @@ test.describe('public production smoke', () => {
     // Set typical mobile viewport
     await page.setViewportSize({ width: 390, height: 844 });
 
-    const testUrls = ['/', '/kham-pha', '/lich-trinh'];
+    const testUrls = ['/', '/kham-pha', '/lich-trinh', '/dang-nhap', '/dang-ky'];
     for (const url of testUrls) {
       await page.goto(url, { waitUntil: 'domcontentloaded' });
 
