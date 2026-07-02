@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import type { AiTextGenerationService } from '../../ai-providers/ai-text-generation.service';
 import type { PrismaService } from '../../prisma/prisma.service';
@@ -75,6 +76,66 @@ describe('TextOnlyPipeline', () => {
       expect.objectContaining({
         textResults: [result],
         detectedPlaceSlug: 'bien-ho',
+      }),
+    );
+  });
+
+  it('returns a local fallback answer when text generation providers fail', async () => {
+    const result = {
+      id: '1',
+      score: 0.9,
+      place_slug: 'bien-ho',
+      location_name: 'Biển Hồ',
+      province: 'Gia Lai',
+      text: 'Biển Hồ là thắng cảnh nổi tiếng ở Pleiku, phù hợp để ngắm cảnh và chụp ảnh.',
+    };
+    const qdrant = {
+      searchTextByMessage: jest.fn().mockResolvedValue([result]),
+    };
+    const aiText = {
+      generateTravelAnswer: jest
+        .fn()
+        .mockRejectedValue(new ServiceUnavailableException('Tài khoản AI đã hết credit.')),
+    };
+    const contextBuilder = {
+      fromTextResults: jest.fn().mockReturnValue('retrieved context'),
+    };
+    const placeMentions = {
+      resolve: jest.fn().mockResolvedValue(null),
+    };
+    const formatter = {
+      format: jest.fn().mockImplementation(async (bundle) => ({
+        success: true,
+        input_type: bundle.inputType,
+        answer: bundle.answer,
+      })),
+    };
+    const prisma = {
+      place: {
+        findUnique: jest.fn(),
+      },
+    };
+    const pipeline = new TextOnlyPipeline(
+      config({ TOP_K_TEXT: '3' }),
+      qdrant as unknown as QdrantRepository,
+      aiText as unknown as AiTextGenerationService,
+      contextBuilder as unknown as ContextBuilderService,
+      placeMentions as unknown as PlaceMentionResolverService,
+      formatter as unknown as ResponseFormatterService,
+      prisma as unknown as PrismaService,
+    );
+
+    const response = await pipeline.run('Gia Lai có chỗ nào đẹp?');
+
+    expect(response).toMatchObject({
+      success: true,
+      input_type: 'text_only',
+      answer: expect.stringContaining('AI tạo sinh đang bận'),
+    });
+    expect(formatter.format).toHaveBeenCalledWith(
+      expect.objectContaining({
+        answer: expect.stringContaining('Biển Hồ'),
+        textResults: [result],
       }),
     );
   });
