@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GeminiService } from '../../gemini/gemini.service';
+import { AiTextGenerationService } from '../../ai-providers/ai-text-generation.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { QdrantRepository } from '../../qdrant/qdrant.repository';
 import type { AiChatResponse } from '../types/ai.types';
@@ -15,7 +15,7 @@ export class TextOnlyPipeline {
   constructor(
     config: ConfigService,
     private readonly qdrant: QdrantRepository,
-    private readonly gemini: GeminiService,
+    private readonly aiText: AiTextGenerationService,
     private readonly contextBuilder: ContextBuilderService,
     private readonly placeMentions: PlaceMentionResolverService,
     private readonly formatter: ResponseFormatterService,
@@ -38,7 +38,7 @@ export class TextOnlyPipeline {
     ]
       .filter((part) => part.trim().length > 0)
       .join('\n\n---\n\n');
-    const answer = await this.gemini.generateTravelAnswer({
+    const answer = await this.aiText.generateTravelAnswer({
       question: message,
       context,
       detectedPlace: mentionedPlace

@@ -645,7 +645,7 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
               {errorStatus === 429 ? (
                 <p className="font-bold">Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình. Vui lòng đăng nhập hoặc thử lại sau.</p>
               ) : errorStatus === 503 ? (
-                <p className="font-bold">Dịch vụ Trí tuệ Nhân tạo (Gemini AI) hiện tại đang bảo trì để nâng cấp hệ thống. Vui lòng sử dụng tính năng gửi tư vấn.</p>
+                <p className="font-bold">Dịch vụ Trí tuệ Nhân tạo hiện tại đang bảo trì hoặc quá tải. Vui lòng sử dụng tính năng gửi tư vấn.</p>
               ) : (
                 <p className="font-bold">{error}</p>
               )}

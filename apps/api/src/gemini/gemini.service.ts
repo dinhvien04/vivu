@@ -20,7 +20,7 @@ export interface GenerateTravelAnswerParams {
   }>;
 }
 
-interface GenerateTextOptions {
+export interface GenerateTextOptions {
   temperature?: number;
   maxOutputTokens?: number;
   responseMimeType?: string;
@@ -54,7 +54,7 @@ export class GeminiService {
   }
 
   async generateTravelAnswer(params: GenerateTravelAnswerParams): Promise<string> {
-    return this.generateText(buildPrompt(params), {
+    return this.generateText(buildTravelAnswerPrompt(params), {
       temperature: 0.2,
       maxOutputTokens: this.maxOutputTokens,
     });
@@ -146,7 +146,7 @@ function positiveInteger(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
-function buildPrompt(params: GenerateTravelAnswerParams): string {
+export function buildTravelAnswerPrompt(params: GenerateTravelAnswerParams): string {
   return [
     'Bạn là trợ lý du lịch của Vivu.',
     'Trả lời bằng tiếng Việt, tự nhiên và dễ hiểu.',

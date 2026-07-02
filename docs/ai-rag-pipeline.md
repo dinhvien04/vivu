@@ -36,8 +36,8 @@ Chatbot AI của Vivu sử dụng mô hình RAG để khắc phục nhược đi
                  - Không tự chế thông tin liên lạc/giá.
                                 │
                                 ▼
-                       [ Google Gemini ]
-                     (gemini-2.5-flash)
+                       [ AI text provider ]
+                 (Conduit if enabled, Gemini fallback)
                                 │
                                 ▼
                     [ Trả kết quả cho Client ]
@@ -57,8 +57,8 @@ Chatbot AI của Vivu sử dụng mô hình RAG để khắc phục nhược đi
     *   Nếu không có ảnh, Qdrant tìm kiếm trên toàn bộ dữ liệu.
 3.  **Tìm kiếm tương đồng (Vector Search)**: Qdrant tìm ra top `TOP_K_TEXT` (mặc định `5`) đoạn văn bản có độ tương đồng cao nhất để làm ngữ cảnh đầu vào (context).
 
-### C. Prompt Engineering & Sinh câu trả lời (Gemini Integration)
-Backend xây dựng prompt gửi cho Gemini theo cấu trúc:
+### C. Prompt Engineering & Sinh câu trả lời (AI text provider)
+Backend xây dựng prompt RAG theo cấu trúc cố định rồi gửi qua lớp `AiTextGenerationService`:
 ```
 [Hệ thống chỉ thị]
 Bạn là trợ lý du lịch Vivu AI chuyên về Gia Lai. Nhiệm vụ của bạn là trả lời câu hỏi của người dùng dựa trên Ngữ Cảnh được cung cấp dưới đây.
@@ -74,6 +74,11 @@ Nguyên tắc bắt buộc:
 {Nội dung tin nhắn người dùng}
 ```
 
+Routing provider hiện tại:
+*   Text-only chat: nếu `CONDUIT_ENABLED=true`, backend thử Conduit trước bằng `CONDUIT_CHAT_MODEL`; nếu Conduit lỗi 401/402/403/429/5xx/timeout thì fallback sang Gemini khi Gemini có cấu hình.
+*   Image-only và image + text: vẫn dùng luồng nhận diện Qdrant và Gemini cho phần sinh câu trả lời vision/text. Conduit chưa được gọi cho luồng ảnh vì chưa xác nhận vision support.
+*   Backend không expose Conduit key ra frontend và không log full prompt hoặc API key.
+
 ---
 
 ## 2. Luồng Lập lịch trình AI (AI Trip Planner Pipeline)
@@ -82,18 +87,19 @@ Hệ thống lập lịch trình được thiết kế nhằm mục đích giớ
 
 1.  **Thu thập dữ liệu đầu vào**: Người dùng chọn vùng muốn đi (Ví dụ: `Pleiku`, `An Khê`), số ngày (1-5 ngày), sở thích (Ví dụ: `Thiên nhiên`, `Ẩm thực`).
 2.  **Lấy danh sách địa danh thực tế (Candidate Places)**: Backend truy vấn PostgreSQL lấy toàn bộ danh sách địa danh khớp với vùng và danh mục sở thích đã chọn. Thông tin gửi đi chỉ gồm `name`, `slug`, `category`, `description` rút gọn để tiết kiệm token.
-3.  **Yêu cầu Gemini sắp xếp lịch trình**:
-    *   Gửi danh sách địa danh thực tế kèm yêu cầu tạo lịch trình vào System Prompt của Gemini.
-    *   Chỉ thị Gemini định dạng câu trả lời bắt buộc là cấu trúc JSON có schema định sẵn.
+3.  **Yêu cầu AI provider sắp xếp lịch trình**:
+    *   Nếu `CONDUIT_ENABLED=true`, backend thử Conduit trước bằng `CONDUIT_TRIP_PLANNER_MODEL`.
+    *   Nếu Conduit lỗi/hết credit/rate limit/timeout, backend fallback sang Gemini khi Gemini có cấu hình.
+    *   Chỉ thị provider định dạng câu trả lời bắt buộc là cấu trúc JSON có schema định sẵn.
 4.  **Kiểm tra và sửa lỗi lịch trình (Sanitization)**:
-    *   API nhận chuỗi JSON từ Gemini, parse thành đối tượng cấu trúc.
-    *   Quét qua từng ngày trong lịch trình, kiểm tra các `place_slug` do Gemini sắp xếp. Nếu phát hiện bất kỳ slug nào không nằm trong danh sách Candidate Places ban đầu (AI tự vẽ ra), hệ thống lập tức loại bỏ địa điểm đó khỏi lịch trình hoặc thay thế bằng địa điểm hợp lệ nhằm đảm bảo tính đúng đắn tối đa trước khi ghi vào database bảng `TripPlan`.
+    *   API nhận chuỗi JSON từ provider, parse thành đối tượng cấu trúc và chấp nhận JSON được bọc markdown hoặc có text bao quanh.
+    *   Quét qua từng ngày trong lịch trình, kiểm tra các `place_slug` do AI sắp xếp. Nếu phát hiện bất kỳ slug nào không nằm trong danh sách Candidate Places ban đầu (AI tự vẽ ra), hệ thống lập tức loại bỏ địa điểm đó khỏi lịch trình hoặc thay thế bằng địa điểm hợp lệ nhằm đảm bảo tính đúng đắn tối đa trước khi ghi vào database bảng `TripPlan`.
 
 ---
 
 ## 3. Các lớp bảo vệ & Giới hạn chi phí (Cost Guardrails)
 
-Chi phí sử dụng các dịch vụ Cloud AI (Gemini, Qdrant) có thể tăng phi mã nếu hệ thống bị tấn công spam bot. Vivu cấu hình các lớp bảo vệ sau:
+Chi phí sử dụng các dịch vụ Cloud AI (Conduit, Gemini, Qdrant) có thể tăng phi mã nếu hệ thống bị tấn công spam bot. Vivu cấu hình các lớp bảo vệ sau:
 
 ### A. Hệ thống Rate Limiting & Quota sử dụng
 *   **Xác thực IP an toàn**: Hệ thống sử dụng địa chỉ IP của người dùng để làm định danh giới hạn. Để bảo mật và tuân thủ quyền riêng tư, IP được kết hợp với một chuỗi khóa bí mật `ABUSE_HASH_SECRET` và mã hóa một chiều (MD5/SHA256) trước khi ghi nhận lượt dùng.
@@ -106,7 +112,7 @@ Chi phí sử dụng các dịch vụ Cloud AI (Gemini, Qdrant) có thể tăng 
 *   **Hoạt động**: Khi người dùng yêu cầu tạo lịch trình, backend băm (hash) các tham số đầu vào bao gồm: Khu vực, số ngày, sở thích, phương tiện di chuyển và ngôn ngữ để tạo thành một Cache Key duy nhất.
 *   **Xử lý**:
     *   Hệ thống kiểm tra xem trong bảng `TripPlan` đã có bản ghi nào trùng khớp Cache Key này được tạo trong vòng 7 ngày qua chưa.
-    *   Nếu có, trả trực tiếp kết quả đã lưu trong DB cho người dùng mà không cần gọi sang Gemini. Việc này giúp giảm chi phí gọi LLM về mức $0 và phản hồi gần như lập tức.
+    *   Nếu có, trả trực tiếp kết quả đã lưu trong DB cho người dùng mà không cần gọi sang Conduit/Gemini. Việc này giúp giảm chi phí gọi LLM về mức $0 và phản hồi gần như lập tức.
 
 ### C. Công tắc khẩn cấp (Emergency Switches)
 Khi phát hiện chi phí tăng đột biến hoặc bị tấn công từ chối dịch vụ (DDoS) nhắm vào endpoint AI, người vận hành có thể tắt tính năng AI từ xa bằng cách cấu hình biến môi trường trên Vercel:

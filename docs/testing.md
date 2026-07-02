@@ -44,9 +44,9 @@ Unit test tập trung kiểm tra logic độc lập của các hàm service, hel
     pnpm --filter @vivu/api test
     ```
 *   **Ví dụ Mocking trong AI Chat Service Test**:
-    Khi test logic xử lý câu trả lời của AI, hệ thống thực hiện mock (giả lập) kết quả trả về từ Gemini API để tránh việc tiêu tốn token thực tế và đảm bảo tốc độ chạy test nhanh:
+    Khi test logic xử lý câu trả lời của AI, hệ thống thực hiện mock (giả lập) kết quả trả về từ Gemini hoặc Conduit để tránh việc tiêu tốn token thực tế và đảm bảo tốc độ chạy test nhanh. Conduit luôn được mock qua service/fetch mock, không dùng key thật trong unit test:
     ```typescript
-    jest.spyOn(geminiService, 'generateText').mockResolvedValue('Đây là câu trả lời giả lập về Biển Hồ');
+    jest.spyOn(aiTextGenerationService, 'generateTravelAnswer').mockResolvedValue('Đây là câu trả lời giả lập về Biển Hồ');
     ```
 
 ---
@@ -88,7 +88,7 @@ Kiểm thử E2E sử dụng Playwright để mô phỏng hành vi của ngườ
 *   **Nguyên tắc viết E2E test**:
     *   Sử dụng thuộc tính `data-testid` trên các thẻ HTML để làm bộ định vị (selectors) thay vì sử dụng CSS class (vì class dễ bị thay đổi khi cập nhật giao diện).
     *   *Ví dụ*: `page.locator('[data-testid="btn-submit-lead"]').click()`.
-    *   **Mock AI APIs**: E2E test không được gọi API sinh lịch trình thật để tránh phát sinh chi phí billing. Playwright được cấu hình chặn request `/api/v1/trip-plans/generate` và trả về kết quả JSON mock cố định.
+    *   **Mock AI APIs**: E2E test không được gọi API sinh lịch trình thật để tránh phát sinh chi phí billing. Playwright được cấu hình chặn request `/api/v1/trip-plans/generate` hoặc route proxy `/api/trip-plans/generate` và trả về kết quả JSON mock cố định. Không gọi Conduit thật trong E2E, không dùng `CONDUIT_API_KEY` thật, và không tạo biến frontend kiểu `NEXT_PUBLIC_CONDUIT_API_KEY`.
     *   **Auth rollback coverage**: E2E smoke phải xác nhận `/dang-nhap` và
         `/dang-ky` render form Vivu nội bộ, signed-out header có hành động đăng
         nhập/đăng ký, và protected pages redirect về login khi chưa có session.

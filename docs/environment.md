@@ -53,6 +53,22 @@ Tài liệu này cung cấp mô tả chi tiết, giá trị mặc định, mục
 *   **`GEMINI_TIMEOUT_MS`**
     *   *Mô tả*: Thời gian chờ tối đa khi gọi API Gemini trước khi tự động ngắt và kích hoạt cơ chế fallback (Mặc định: `30000` - 30 giây).
 
+### D.1. Conduit AI provider (OpenAI-compatible, backend only)
+*   **`CONDUIT_ENABLED`**
+    *   *Mô tả*: Feature flag bật/tắt Conduit như provider text phụ. Giữ `false` cho đến khi backend đã có key và billing ổn định.
+*   **`CONDUIT_API_KEY`**
+    *   *Mô tả*: Secret API key cho Conduit. Chỉ cấu hình trong môi trường backend API, không đưa lên frontend và không tạo biến `NEXT_PUBLIC_CONDUIT_API_KEY`.
+*   **`CONDUIT_BASE_URL`**
+    *   *Mặc định*: `https://conduit.ozdoev.net/api/v1`.
+*   **`CONDUIT_DEFAULT_MODEL`**, **`CONDUIT_TRIP_PLANNER_MODEL`**, **`CONDUIT_CHAT_MODEL`**
+    *   *Mô tả*: Model dùng cho text mặc định, Trip Planner, và AI Chat text-only.
+*   **`CONDUIT_TIMEOUT_MS`**
+    *   *Mặc định*: `30000`.
+
+Conduit chỉ nằm ở backend và là provider phụ/fallback. Trip Planner và AI Chat
+text-only có thể dùng Conduit khi `CONDUIT_ENABLED=true`; Gemini vẫn là provider
+cho image + text/vision cho đến khi Conduit vision được xác nhận và test riêng.
+
 ### E. Qdrant Cloud (Vector Database)
 *   **`QDRANT_URL`**
     *   *Mô tả*: Endpoint kết nối dịch vụ Qdrant Cloud Cluster.

@@ -1,5 +1,5 @@
 import type { ConfigService } from '@nestjs/config';
-import type { GeminiService } from '../../gemini/gemini.service';
+import type { AiTextGenerationService } from '../../ai-providers/ai-text-generation.service';
 import type { PrismaService } from '../../prisma/prisma.service';
 import type { QdrantRepository } from '../../qdrant/qdrant.repository';
 import type { ContextBuilderService } from '../services/context-builder.service';
@@ -20,7 +20,7 @@ describe('TextOnlyPipeline', () => {
     const qdrant = {
       searchTextByMessage: jest.fn().mockResolvedValue([result]),
     };
-    const gemini = {
+    const aiText = {
       generateTravelAnswer: jest.fn().mockResolvedValue('Câu trả lời'),
     };
     const contextBuilder = {
@@ -48,7 +48,7 @@ describe('TextOnlyPipeline', () => {
     const pipeline = new TextOnlyPipeline(
       config({ TOP_K_TEXT: '3' }),
       qdrant as unknown as QdrantRepository,
-      gemini as unknown as GeminiService,
+      aiText as unknown as AiTextGenerationService,
       contextBuilder as unknown as ContextBuilderService,
       placeMentions as unknown as PlaceMentionResolverService,
       formatter as unknown as ResponseFormatterService,
@@ -61,12 +61,12 @@ describe('TextOnlyPipeline', () => {
       limit: 3,
       placeSlug: 'bien-ho',
     });
-    expect(gemini.generateTravelAnswer).toHaveBeenCalledWith({
+    expect(aiText.generateTravelAnswer).toHaveBeenCalledWith({
       question: 'Biển Hồ có gì đẹp?',
       context: expect.stringContaining('retrieved context'),
       detectedPlace: { slug: 'bien-ho', name: 'Biển Hồ' },
     });
-    expect(gemini.generateTravelAnswer).toHaveBeenCalledWith(
+    expect(aiText.generateTravelAnswer).toHaveBeenCalledWith(
       expect.objectContaining({
         context: expect.stringContaining('Biển Hồ là thắng cảnh nổi tiếng.'),
       }),

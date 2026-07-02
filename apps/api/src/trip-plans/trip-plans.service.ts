@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { Prisma } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import type { FastifyRequest } from 'fastify';
-import { GeminiService } from '../gemini/gemini.service';
+import { AiTextGenerationService } from '../ai-providers/ai-text-generation.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import type { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
@@ -33,7 +33,7 @@ type CandidatePlace = Prisma.PlaceGetPayload<{
 export class TripPlansService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly gemini: GeminiService,
+    private readonly aiText: AiTextGenerationService,
     private readonly quota: TripPlannerQuotaService,
   ) {}
 
@@ -59,7 +59,7 @@ export class TripPlansService {
 
     const allowedSlugs = new Set(candidates.map((place) => place.slug));
     const prompt = buildTripPlannerPrompt(dto, candidates);
-    const raw = await this.gemini.generateText(prompt, {
+    const raw = await this.aiText.generateTripPlan(prompt, {
       temperature: 0.15,
       maxOutputTokens: tripPlannerMaxOutputTokens(),
       responseMimeType: 'application/json',

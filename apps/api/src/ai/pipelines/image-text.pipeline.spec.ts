@@ -16,6 +16,11 @@ describe('ImageTextPipeline', () => {
       limit: 5,
       placeSlug: 'bien-ho',
     });
+    expect(deps.gemini.generateTravelAnswer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        detectedPlace: expect.objectContaining({ slug: 'bien-ho', score: 0.9 }),
+      }),
+    );
   });
 
   it('does not query text or Gemini for a low-confidence image match', async () => {
