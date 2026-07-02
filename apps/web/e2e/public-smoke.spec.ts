@@ -94,12 +94,9 @@ test.describe('public production smoke', () => {
       await expect(page.getByTestId('auth-shell')).toBeVisible();
       await expect(page.getByTestId('auth-benefit')).toHaveCount(3);
       await expect(page.getByTestId('auth-form-panel')).toBeVisible();
-      await expect(
-        page
-          .getByTestId('auth-form-panel')
-          .locator('form, [data-testid="clerk-auth-widget"], [data-testid="clerk-auth-loading"]')
-          .first(),
-      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId('auth-form-panel').locator('form').first()).toBeVisible({
+        timeout: 15_000,
+      });
       await expect(page.locator('body')).not.toContainText(/500|Application error/i);
     }
   });

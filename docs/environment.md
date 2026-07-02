@@ -97,41 +97,18 @@ Tài liệu này cung cấp mô tả chi tiết, giá trị mặc định, mục
     *   *Mô tả*: Khóa công khai của Cloudflare Turnstile hiển thị widget bảo mật trên giao diện.
 *   **`NEXT_PUBLIC_SUPPORT_EMAIL`**
     *   *Mô tả*: Địa chỉ email hiển thị tại các trang Liên hệ, Điều khoản dịch vụ.
+
 ---
 
-## 4. Clerk Auth Migration Variables
+## 4. Auth architecture notes
 
-Clerk owns sign-in, sign-up, session cookies, and OAuth. Neon/Postgres is still
-the source of Vivu app users, roles, profile fields, and business data.
+Vivu currently uses first-party authentication managed by the NestJS API.
+`User`, `Role` (`user`, `editor`, `admin`), password hashes, and refresh-token
+rows live in Neon/PostgreSQL. The frontend calls its own Next.js route handlers
+under `/api/auth/*`, and those route handlers proxy to the NestJS auth endpoints.
 
-Backend `apps/api/.env`:
-
-* `CLERK_SECRET_KEY`: server-side Clerk API key. Required when the API must fetch
-  Clerk user profile data for `/auth/me` or webhook sync.
-* `CLERK_PUBLISHABLE_KEY`: public Clerk key mirrored for deployment visibility.
-* `CLERK_JWT_KEY`: optional Clerk JWT public key for networkless token verification.
-* `CLERK_WEBHOOK_SECRET`: Svix signing secret for `POST /api/v1/webhooks/clerk`.
-* `CLERK_ALLOWED_ORIGINS`: comma-separated frontend origins allowed in Clerk
-  session token `azp`, for example `https://vivu-web.vercel.app,http://localhost:3000`.
-
-Frontend `apps/web/.env.local`:
-
-* `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: enables ClerkProvider, Clerk auth UI, and
-  Clerk middleware protection.
-* `CLERK_SECRET_KEY`: required by Clerk middleware in the Next.js runtime.
-* `NEXT_PUBLIC_CLERK_SIGN_IN_URL`: `/dang-nhap`.
-* `NEXT_PUBLIC_CLERK_SIGN_UP_URL`: `/dang-ky`.
-* `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` and
-  `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL`: default post-auth redirect
-  targets. The Vivu auth pages also pass a validated `next` path directly to
-  Clerk so email verification always completes with a navigation.
-
-The frontend uses Clerk's prebuilt `SignIn`, `SignUp`, and `UserButton`
-components inside Vivu-owned shell components. Vietnamese pages pass Clerk's
-`viVN` localization from `@clerk/localizations`; English pages use Clerk's
-default English copy. Styling is centralized in
-`apps/web/src/lib/clerk-appearance.ts`.
-
-Never commit real Clerk secrets. Roles remain in the `User.role` column and must
-be changed through trusted DB/admin workflows only.
-Never expose `CLERK_SECRET_KEY` with a `NEXT_PUBLIC_` prefix.
+There are no required frontend or backend environment variables for an external
+hosted auth user store. Future Google sign-in should add provider credentials
+only when the self-managed OAuth flow is implemented, for example
+`AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`, and should keep Neon/PostgreSQL as
+the source of truth for users and roles.

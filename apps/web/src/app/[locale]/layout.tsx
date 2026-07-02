@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import { ClerkProvider } from '@clerk/nextjs';
-import { viVN } from '@clerk/localizations';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -78,14 +76,6 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
   const buildInfo = getBuildInfo();
-  const clerkLocalization = locale === 'vi' ? viVN : undefined;
-  const app = (
-    <ThemeProvider>
-      <NextIntlClientProvider messages={messages} locale={locale}>
-        <AuthProvider>{children}</AuthProvider>
-      </NextIntlClientProvider>
-    </ThemeProvider>
-  );
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -95,16 +85,11 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_PREFLIGHT_SCRIPT }} />
       </head>
       <body>
-        {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? (
-          <ClerkProvider
-            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-            localization={clerkLocalization}
-          >
-            {app}
-          </ClerkProvider>
-        ) : (
-          app
-        )}
+        <ThemeProvider>
+          <NextIntlClientProvider messages={messages} locale={locale}>
+            <AuthProvider>{children}</AuthProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

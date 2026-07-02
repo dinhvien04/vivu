@@ -2,6 +2,7 @@ import { routing } from '@/i18n/routing';
 
 export function getSafeAuthRedirect(value: string | null, fallback: string): string {
   if (!value?.startsWith('/') || value.startsWith('//')) return fallback;
+  if (/[\u0000-\u001f\u007f\\]/.test(value)) return fallback;
 
   try {
     const base = new URL('https://vivu.local');

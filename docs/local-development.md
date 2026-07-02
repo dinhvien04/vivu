@@ -90,6 +90,9 @@ Cách này phù hợp khi bạn cần xây dựng API mới, thay đổi cấu t
         NEXT_PUBLIC_API_URL=http://localhost:4000
         API_INTERNAL_URL=http://localhost:4000
         ```
+    *   Auth local dùng hệ thống tự quản lý của Vivu: đăng ký/đăng nhập qua
+        `/dang-ky` và `/dang-nhap`, backend phát JWT access token và refresh
+        token HTTP-only. Không cần cấu hình hosted auth provider để chạy local.
 
 3.  **Khởi tạo cơ sở dữ liệu cục bộ**:
     Chạy script thiết lập database để kích hoạt extension PostGIS, đẩy schema Prisma lên database và sinh Prisma Client:
@@ -139,43 +142,10 @@ Khi chạy full local lần đầu tiên, cơ sở dữ liệu của bạn sẽ 
     ```bash
     E2E_BASE_URL=http://localhost:3000 pnpm e2e:web
     ```
----
 
-## 6. Local Clerk Auth Setup
+### Google sign-in TODO
 
-Clerk is optional for local development. If `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-is empty, the web app keeps the legacy local auth fallback so existing smoke
-tests and dev flows still work.
-
-The visible `/dang-nhap` and `/dang-ky` screens use Clerk's prebuilt forms
-inside a Vivu shell. Locale `vi` loads Clerk `viVN`; locale `en` keeps Clerk's
-default English. Vivu roles are still read from `/api/v1/auth/me` and the
-Postgres `User.role` column, not from Clerk client metadata.
-
-To test Clerk locally:
-
-1. Create a Clerk application and set these values:
-   ```env
-   # apps/web/.env.local
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-   CLERK_SECRET_KEY=sk_test_...
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/dang-nhap
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/dang-ky
-   NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
-   NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/tai-khoan
-
-   # apps/api/.env
-   CLERK_SECRET_KEY=sk_test_...
-   CLERK_JWT_KEY=
-   CLERK_WEBHOOK_SECRET=whsec_...
-   CLERK_ALLOWED_ORIGINS=http://localhost:3000
-   ```
-2. Run the migration before testing against an existing DB:
-   ```bash
-   pnpm --filter @vivu/api prisma migrate deploy
-   pnpm --filter @vivu/api prisma:generate
-   ```
-3. Start API and web, sign in through `/dang-nhap`, then confirm
-   `GET /api/v1/auth/me` returns a DB user with `clerkUserId` and `role`.
-4. For webhooks, expose the API with a tunnel and configure Clerk to call:
-   `https://<tunnel>/api/v1/webhooks/clerk`.
+Google sign-in is intentionally not implemented in this rollback. The follow-up
+work should add Google OAuth/OIDC to the existing auth flow, link by email into
+Neon/PostgreSQL, keep existing roles unchanged, and continue issuing Vivu JWT
+and refresh tokens from the NestJS API.

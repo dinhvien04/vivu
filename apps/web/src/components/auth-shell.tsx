@@ -121,28 +121,3 @@ export function AuthShell({ mode, children }: AuthShellProps) {
     </section>
   );
 }
-
-export function ClerkAuthLoading() {
-  const t = useTranslations('auth');
-
-  return (
-    <div
-      data-testid="clerk-auth-loading"
-      role="status"
-      aria-live="polite"
-      className="space-y-4 rounded border border-outline-variant/30 bg-surface-container-lowest p-1"
-    >
-      <span className="sr-only">{t('authShellLoading')}</span>
-      <div className="h-12 animate-pulse rounded bg-surface-container-low" />
-      <div className="space-y-2">
-        <div className="h-3 w-20 animate-pulse rounded bg-surface-container" />
-        <div className="h-12 animate-pulse rounded bg-surface-container-low" />
-      </div>
-      <div className="space-y-2">
-        <div className="h-3 w-24 animate-pulse rounded bg-surface-container" />
-        <div className="h-12 animate-pulse rounded bg-surface-container-low" />
-      </div>
-      <div className="h-12 animate-pulse rounded bg-primary-fixed" />
-    </div>
-  );
-}

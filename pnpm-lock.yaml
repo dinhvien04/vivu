@@ -51,9 +51,6 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1069.0
         version: 3.1069.0
-      '@clerk/backend':
-        specifier: ^3.8.4
-        version: 3.8.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@fastify/multipart':
         specifier: ^10.0.0
         version: 10.0.0
@@ -126,9 +123,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      svix:
-        specifier: ^1.96.1
-        version: 1.96.1
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.23
@@ -205,12 +199,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@clerk/localizations':
-        specifier: ^4.12.0
-        version: 4.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/nextjs':
-        specifier: ^7.5.9
-        version: 7.5.9(next@15.5.18(@playwright/test@1.61.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@vivu/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -625,53 +613,6 @@ packages:
 
   '@borewit/text-codec@0.2.2':
     resolution: {integrity: sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ==}
-
-  '@clerk/backend@3.8.4':
-    resolution: {integrity: sha512-3G+kEu8kalqQokJ/n0IynhBh2i6TtiilRzuAg5UWMburkK658/elrG0Uqsapd5yKhmkNuvizHwOPWwKAMxP2EQ==}
-    engines: {node: '>=20.9.0'}
-
-  '@clerk/localizations@4.12.0':
-    resolution: {integrity: sha512-uuSQeB/HLg4Fkd0lJPBuG3jaW1o/enzh2ZsKaPCiAqZG39x109RkjyU3AP2dreVwXoXL572PYGT0JqKW+6THCA==}
-    engines: {node: '>=20.9.0'}
-
-  '@clerk/nextjs@7.5.9':
-    resolution: {integrity: sha512-5QzCWT4DpEcTK7/GgkSanuclXaWE9KbvmbIgoxwN5eMSOPFgkcrcSvR106OuDoY27Yo9I+z5xWDUdb+DJBMtuA==}
-    engines: {node: '>=20.9.0'}
-    peerDependencies:
-      next: ^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9 || ^15.6.0-0 || ^16.0.10 || ^16.1.0-0
-      react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-      react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-
-  '@clerk/react@6.11.1':
-    resolution: {integrity: sha512-iEWckisZa/V3siCFlvGTNg7Yj+kndRx7HKBZ/QMSd6uEU9kd2tZ8Ymvd4GFPCpClwcki4h7jC750FujN656Jqg==}
-    engines: {node: '>=20.9.0'}
-    peerDependencies:
-      react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-      react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-
-  '@clerk/shared@4.22.0':
-    resolution: {integrity: sha512-GZ56kzUB2UBb8MCF+Eo8WIey+W4RP1tAkyOL+geiHxrQxJlUcgD+xalY2YPJLH8WVFwtOnfIl8KPEo0M0e/DRg==}
-    engines: {node: '>=20.9.0'}
-    peerDependencies:
-      react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-      react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-
-  '@clerk/shared@4.23.0':
-    resolution: {integrity: sha512-v4roxB9AwEVq56luLc9MtQ+RkVR66XZJGAfTbQXD0ArdW+fs1P/FhlKwm6OQfvDFNiCCVZA6GoP648t9dGtfrw==}
-    engines: {node: '>=20.9.0'}
-    peerDependencies:
-      react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-      react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -1630,9 +1571,6 @@ packages:
     resolution: {integrity: sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A==}
     engines: {node: '>=14.0.0'}
 
-  '@stablelib/base64@1.0.1':
-    resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
-
   '@swc/core-darwin-arm64@1.15.33':
     resolution: {integrity: sha512-N+L0uXhuO7FIfzqwgxmzv0zIpV0qEp8wPX3QQs2p4atjMoywup2JTeDlXPw+z9pWJGCae3JjM+tZ6myclI+2gA==}
     engines: {node: '>=10'}
@@ -1722,9 +1660,6 @@ packages:
 
   '@swc/types@0.1.26':
     resolution: {integrity: sha512-lyMwd7WGgG79RS7EERZV3T8wMdmPq3xwyg+1nmAM64kIhx5yl+juO2PYIHb7vTiPgPCj8LYjsNV2T5wiQHUEaw==}
-
-  '@tanstack/query-core@5.101.2':
-    resolution: {integrity: sha512-hH5MLoJhF7KaIGd7q3xTXGXvslI+GYlM1Z/35aSHHWaCJWB7XvTSHYuV3eM7tw+aE0mT/xMro4M4Q9rCGHT0lw==}
 
   '@testcontainers/postgresql@11.14.0':
     resolution: {integrity: sha512-wYbJn8GRTj8qfqzfVubxioYWlHJU/ImIjuzPwyy9C5Qfo6g3GLduPZAj+BifvqTZjgT3gd4gFVLCPhBji7dc1w==}
@@ -3167,9 +3102,6 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
-  fast-sha256@1.3.0:
-    resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
-
   fast-uri@3.1.2:
     resolution: {integrity: sha512-rVjf7ArG3LTk+FS6Yw81V1DLuZl1bRbNrev6Tmd/9RaroeeRRJhAt7jg/6YFxbvAQXUCavSoZhPPj6oOx+5KjQ==}
 
@@ -3827,10 +3759,6 @@ packages:
   jiti@1.21.7:
     resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
     hasBin: true
-
-  js-cookie@3.0.7:
-    resolution: {integrity: sha512-z/wZZgDrkNV1eA0ULjM/F9/50Ya8fbzgKneSpoPsXSGd0KnpdtHfOZWK+GcwLk+EZbS4F9RBhU+K2RgzuDaItw==}
-    engines: {node: '>=20'}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -4804,9 +4732,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  server-only@0.0.1:
-    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
-
   set-cookie-parser@2.7.2:
     resolution: {integrity: sha512-oeM1lpU/UvhTxw+g3cIfxXHyJRc/uidd3yK1P242gzHds0udQBYzs3y8j4gCCW+ZJ7ad0yctld8RYO+bdurlvw==}
 
@@ -4924,9 +4849,6 @@ packages:
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
     engines: {node: '>=10'}
-
-  standardwebhooks@1.0.0:
-    resolution: {integrity: sha512-BbHGOQK9olHPMvQNHWul6MYlrRTAOKn03rOe4A8O3CLWhNf4YHBqq2HJKKC+sfqpxiBY52pNeesD6jIiLDz8jg==}
 
   statuses@2.0.1:
     resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
@@ -5060,9 +4982,6 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  svix@1.96.1:
-    resolution: {integrity: sha512-l+GyPS6gjL0okiXplLazEY2GbBsv1jZ4UIwtjp553YkDDv635xMKbM5sABpIdiWy1BYxgyV8M6tHeTwY0gyXlQ==}
 
   swagger-ui-dist@5.32.6:
     resolution: {integrity: sha512-75ttZNaYCLoFPnozPZcTUU6mS3wKT8l7WLjU5zJSHFeJa23i5vtnze6IiCl4jDMPeQTXVXIgovq4M11NNfQvSA==}
@@ -6025,60 +5944,6 @@ snapshots:
   '@bcoe/v8-coverage@0.2.3': {}
 
   '@borewit/text-codec@0.2.2': {}
-
-  '@clerk/backend@3.8.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@clerk/shared': 4.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      standardwebhooks: 1.0.0
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - react
-      - react-dom
-
-  '@clerk/localizations@4.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@clerk/shared': 4.23.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    transitivePeerDependencies:
-      - react
-      - react-dom
-
-  '@clerk/nextjs@7.5.9(next@15.5.18(@playwright/test@1.61.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@clerk/backend': 3.8.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/react': 6.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/shared': 4.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      next: 15.5.18(@playwright/test@1.61.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      server-only: 0.0.1
-      tslib: 2.8.1
-
-  '@clerk/react@6.11.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@clerk/shared': 4.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      tslib: 2.8.1
-
-  '@clerk/shared@4.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@tanstack/query-core': 5.101.2
-      dequal: 2.0.3
-      glob-to-regexp: 0.4.1
-      js-cookie: 3.0.7
-    optionalDependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@clerk/shared@4.23.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@tanstack/query-core': 5.101.2
-      dequal: 2.0.3
-      glob-to-regexp: 0.4.1
-      js-cookie: 3.0.7
-    optionalDependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   '@colors/colors@1.5.0':
     optional: true
@@ -7098,8 +6963,6 @@ snapshots:
       '@smithy/util-buffer-from': 2.2.0
       tslib: 2.8.1
 
-  '@stablelib/base64@1.0.1': {}
-
   '@swc/core-darwin-arm64@1.15.33':
     optional: true
 
@@ -7163,8 +7026,6 @@ snapshots:
   '@swc/types@0.1.26':
     dependencies:
       '@swc/counter': 0.1.3
-
-  '@tanstack/query-core@5.101.2': {}
 
   '@testcontainers/postgresql@11.14.0':
     dependencies:
@@ -8827,8 +8688,6 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fast-sha256@1.3.0: {}
-
   fast-uri@3.1.2: {}
 
   fast-xml-builder@1.2.0:
@@ -9729,8 +9588,6 @@ snapshots:
       - ts-node
 
   jiti@1.21.7: {}
-
-  js-cookie@3.0.7: {}
 
   js-tokens@4.0.0: {}
 
@@ -10689,8 +10546,6 @@ snapshots:
 
   semver@7.8.4: {}
 
-  server-only@0.0.1: {}
-
   set-cookie-parser@2.7.2: {}
 
   set-function-length@1.2.2:
@@ -10847,11 +10702,6 @@ snapshots:
   stack-utils@2.0.6:
     dependencies:
       escape-string-regexp: 2.0.0
-
-  standardwebhooks@1.0.0:
-    dependencies:
-      '@stablelib/base64': 1.0.1
-      fast-sha256: 1.3.0
 
   statuses@2.0.1: {}
 
@@ -11024,10 +10874,6 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  svix@1.96.1:
-    dependencies:
-      standardwebhooks: 1.0.0
 
   swagger-ui-dist@5.32.6:
     dependencies:

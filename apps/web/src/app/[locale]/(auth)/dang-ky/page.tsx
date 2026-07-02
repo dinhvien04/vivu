@@ -1,22 +1,18 @@
 'use client';
 
-import { SignUp, useAuth as useClerkAuth } from '@clerk/nextjs';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { AuthShell, ClerkAuthLoading } from '@/components/auth-shell';
+import { Suspense, useState, type FormEvent, type ReactNode } from 'react';
+import { AuthShell } from '@/components/auth-shell';
 import { useAuth as useVivuAuth } from '@/components/auth-provider';
 import { GoogleAuthButton } from '@/components/google-auth-button';
 import { Icon } from '@/components/icon';
 import { TurnstileWidget } from '@/components/turnstile-widget';
 import { Link, useRouter } from '@/i18n/navigation';
-import { routing } from '@/i18n/routing';
 import { AuthError } from '@/lib/auth-client';
-import { getLocalizedAuthRedirect, getSafeAuthRedirect } from '@/lib/auth-redirect';
-import { vivuClerkAppearance } from '@/lib/clerk-appearance';
+import { getSafeAuthRedirect } from '@/lib/auth-redirect';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function RegisterPage() {
   return (
@@ -40,39 +36,10 @@ function RegisterCardSkeleton() {
 function RegisterForm() {
   const search = useSearchParams();
   const next = getSafeAuthRedirect(search?.get('next') ?? null, '/tai-khoan');
-  return CLERK_ENABLED ? <ClerkRegisterCard next={next} /> : <LegacyRegisterForm next={next} />;
-}
-
-function ClerkRegisterCard({ next }: { next: string }) {
-  const locale = useLocale();
-  const { isLoaded: clerkLoaded, isSignedIn } = useClerkAuth();
-  const { reloadUser } = useVivuAuth();
-  const signUpPath = locale === routing.defaultLocale ? '/dang-ky' : `/${locale}/dang-ky`;
-  const signInPath = locale === routing.defaultLocale ? '/dang-nhap' : `/${locale}/dang-nhap`;
-  const redirectUrl = getLocalizedAuthRedirect(next, locale);
-
-  useEffect(() => {
-    if (!clerkLoaded || !isSignedIn) return;
-    void reloadUser();
-    window.location.replace(redirectUrl);
-  }, [clerkLoaded, isSignedIn, redirectUrl, reloadUser]);
 
   return (
     <AuthShell mode="register">
-      <div data-testid="clerk-auth-widget" className="min-h-[420px]">
-        {clerkLoaded ? (
-          <SignUp
-            routing="path"
-            path={signUpPath}
-            signInUrl={`${signInPath}${next ? `?next=${encodeURIComponent(next)}` : ''}`}
-            forceRedirectUrl={redirectUrl}
-            fallbackRedirectUrl={redirectUrl}
-            appearance={vivuClerkAppearance}
-          />
-        ) : (
-          <ClerkAuthLoading />
-        )}
-      </div>
+      <LegacyRegisterForm next={next} />
     </AuthShell>
   );
 }
