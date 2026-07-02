@@ -89,6 +89,10 @@ Kiểm thử E2E sử dụng Playwright để mô phỏng hành vi của ngườ
     *   Sử dụng thuộc tính `data-testid` trên các thẻ HTML để làm bộ định vị (selectors) thay vì sử dụng CSS class (vì class dễ bị thay đổi khi cập nhật giao diện).
     *   *Ví dụ*: `page.locator('[data-testid="btn-submit-lead"]').click()`.
     *   **Mock AI APIs**: E2E test không được gọi API sinh lịch trình thật để tránh phát sinh chi phí billing. Playwright được cấu hình chặn request `/api/v1/trip-plans/generate` và trả về kết quả JSON mock cố định.
+    *   **Auth rollback coverage**: E2E smoke phải xác nhận `/dang-nhap` và
+        `/dang-ky` render form Vivu nội bộ, signed-out header có hành động đăng
+        nhập/đăng ký, và protected pages redirect về login khi chưa có session.
+        Không dùng hosted auth widgets trong E2E.
 
 ---
 
@@ -105,23 +109,3 @@ Khi một test case E2E bị lỗi trên CI/CD hoặc local, thực hiện các 
     ```bash
     npx playwright show-trace apps/web/test-results/xxxx/trace.zip
     ```
----
-
-## 7. Clerk Auth Migration Coverage
-
-Unit tests cover the Clerk auth bridge without network calls:
-
-* mocked Clerk token verification and `/auth/me` style upsert;
-* exact-email link that preserves existing `admin`/`editor` DB roles;
-* missing token rejection;
-* Clerk webhook invalid signature, `user.created`, and `user.deleted`.
-
-Frontend E2E should keep public pages reachable with no Clerk keys. When Clerk
-keys are enabled in a dedicated environment, add signed-out header, protected
-redirect, and post-login `/auth/me` assertions with mocked Clerk/browser state.
-Do not call real Gemini or paid AI APIs from E2E.
-
-Current web smoke coverage includes `/dang-nhap` and `/dang-ky` rendering the
-Vivu auth shell, benefit list, and an auth form without a real Clerk login. It
-also checks the signed-out header actions, `/en/dang-nhap` English copy, and
-mobile 390px no-horizontal-scroll coverage for the auth pages.

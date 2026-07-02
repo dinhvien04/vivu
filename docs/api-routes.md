@@ -17,6 +17,25 @@ Tài liệu này cung cấp chi tiết về định dạng URL, phương thức 
     *   `429 Too Many Requests`: Vượt quá giới hạn rate limit/quota.
     *   `500 Internal Server Error`: Lỗi phát sinh từ hệ thống server backend.
 
+### Auth endpoints
+
+Vivu uses first-party JWT auth backed by Neon/PostgreSQL.
+
+*   `POST /auth/register`: create a `User` row with a password hash and default
+    role `user`, then return access/refresh tokens.
+*   `POST /auth/login`: validate email/password against the database and return
+    access/refresh tokens.
+*   `POST /auth/refresh`: rotate the refresh token and return a new access
+    token.
+*   `POST /auth/logout`: revoke the refresh token.
+*   `GET /auth/me`: return the current database user from the Bearer access
+    token.
+*   `PATCH /auth/me`: update the current user's profile fields.
+*   `GET /auth/me/stats`: return account statistics for the current user.
+
+Protected admin/editor routes must use `JwtAuthGuard` plus `RolesGuard`; role
+decisions come from `User.role` in PostgreSQL.
+
 ---
 
 ## 2. API Công khai (Public Endpoints)
@@ -189,41 +208,3 @@ Tài liệu này cung cấp chi tiết về định dạng URL, phương thức 
       "message": "Gửi yêu cầu tư vấn thành công!"
     }
     ```
----
-
-## 5. Auth And Clerk Webhooks
-
-### A. Current User Sync
-
-* **Endpoint**: `GET /auth/me`
-* **Headers**: `Authorization: Bearer <Clerk session token>` or legacy Vivu JWT.
-* **Behavior**:
-  * Clerk token is verified first.
-  * The API maps Clerk `sub` to `User.clerkUserId`.
-  * If this is the first Clerk request to `/auth/me`, the API creates or links a
-    DB `User` and defaults new users to role `user`.
-  * Existing `admin`/`editor` roles in DB are preserved.
-* **Response (200 OK)**:
-  ```json
-  {
-    "id": "clx...",
-    "clerkUserId": "user_...",
-    "email": "user@example.com",
-    "name": "Vivu User",
-    "role": "user",
-    "avatarUrl": null,
-    "bio": null,
-    "location": null,
-    "createdAt": "2026-06-29T00:00:00.000Z"
-  }
-  ```
-
-### B. Clerk Webhook
-
-* **Endpoint**: `POST /webhooks/clerk`
-* **Headers**: `svix-id`, `svix-timestamp`, `svix-signature`.
-* **Events**: `user.created`, `user.updated`, `user.deleted`.
-* **Security**: the API verifies Svix signature with `CLERK_WEBHOOK_SECRET` and
-  never trusts Clerk role metadata for Vivu authorization.
-* **Delete behavior**: `user.deleted` sets `User.deletedAt`; it does not hard
-  delete reviews, collections, favorites, leads, or audit data.

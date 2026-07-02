@@ -1,18 +1,14 @@
 'use client';
 
-import { UserButton } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
-import { vivuClerkUserButtonAppearance } from '@/lib/clerk-appearance';
 import { useAuth } from './auth-provider';
 import { Icon } from './icon';
 
 interface HeaderAccountProps {
   variant?: 'desktop' | 'drawer';
 }
-
-const CLERK_ENABLED = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 /**
  * Right-side account widget in the desktop SiteHeader. Shows:
@@ -152,30 +148,6 @@ export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
             {t('signOut')}
           </button>
         </nav>
-      </div>
-    );
-  }
-
-  if (CLERK_ENABLED) {
-    return (
-      <div className="hidden items-center gap-2 sm:flex">
-        <Link
-          href="/tai-khoan"
-          aria-label={t('accountProfile')}
-          className="inline-flex h-10 w-10 items-center justify-center rounded text-on-surface-variant transition hover:bg-surface-container-low hover:text-primary"
-        >
-          <Icon name="person" size={20} />
-        </Link>
-        {canAccessAdmin && (
-          <Link
-            href="/admin"
-            className="inline-flex min-h-10 items-center gap-2 rounded border border-outline-variant/40 px-3 text-body-sm font-semibold text-on-surface transition hover:border-primary/50 hover:bg-surface-container-low hover:text-primary"
-          >
-            <Icon name="admin_panel_settings" size={18} />
-            {t('accountAdmin')}
-          </Link>
-        )}
-        <UserButton appearance={vivuClerkUserButtonAppearance} />
       </div>
     );
   }

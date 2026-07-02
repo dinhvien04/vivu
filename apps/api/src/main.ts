@@ -12,7 +12,6 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ trustProxy: true }),
-    { rawBody: true },
   );
 
   applySecurityHeaders(app.getHttpAdapter().getInstance());

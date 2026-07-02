@@ -34,6 +34,18 @@ Hệ thống Vivu sử dụng mô hình xác thực kép kết hợp JSON Web To
         *   `Path=/api/v1/auth`: Chỉ gửi cookie lên các endpoint xác thực, tránh lộ token ở các request tĩnh khác.
     *   **Database Hashing**: Ở database, trường refresh token được băm một chiều (bcrypt/sha256). Khi người dùng thực hiện refresh, API băm token gửi lên và đối chiếu với hash trong DB.
 
+### Source of truth for users and roles
+
+Vivu authentication is self-managed by the NestJS API. The Neon/PostgreSQL
+`User` table is the source of truth for account identity, profile data, and the
+`user` / `editor` / `admin` role. Admin and editor access must always be checked
+through the database-backed JWT strategy plus `RolesGuard`; client UI checks are
+only a convenience layer.
+
+Google sign-in, when implemented, should verify the Google profile, then
+upsert or link the account to the existing `User` row by email. It must not
+override an existing role; newly created users default to role `user`.
+
 ---
 
 ## 2. Bảo vệ Biểu mẫu & Phòng chống Lạm dụng (Form Security & Anti-Abuse)
@@ -98,24 +110,3 @@ const securityHeaders = [
     *   Thực hiện upload thử ảnh, đăng nhập thử để đảm bảo hệ thống nhận key mới thành công.
 4.  **Bước 4: Thu hồi khóa cũ**:
     *   Tiến hành vô hiệu hóa (Deactivate) và xóa bỏ các key cũ trên AWS Console và thu hồi JWT secret cũ. Thời gian chuyển đổi phụ thuộc vào token TTL/session policy; nếu secret bị lộ nghiêm trọng, ưu tiên revoke ngay và force logout.
----
-
-## 5. Clerk Authentication Migration Policy
-
-Clerk is the session and identity provider for new sign-in/sign-up flows. The
-NestJS API still authorizes every protected request from the Neon/Postgres
-`User` row:
-
-* A valid Clerk session token proves identity only.
-* The API maps Clerk `sub` to `User.clerkUserId`, then reads `User.role`.
-* New Clerk users are created with DB role `user`.
-* Existing `admin` and `editor` users keep their DB role when linked by exact
-  email match or `clerkUserId`.
-* Frontend role, Clerk metadata, and Clerk Organizations are not trusted for
-  Vivu authorization.
-* Legacy JWT/password auth remains available during migration for rollback.
-* Clerk webhook `user.deleted` soft-disables the DB user via `User.deletedAt`
-  instead of hard deleting business data.
-
-Admin/editor promotion remains a trusted DB operation, e.g. the existing
-`pnpm --filter @vivu/api promote:admin` script or a reviewed admin tool.
