@@ -3,7 +3,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ImgHTMLAttributes } from 'react';
 import { useEffect, useState } from 'react';
-import { Icon } from './icon';
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
@@ -60,7 +59,7 @@ export function LoadableImage({
 
       {!loaded && (
         <span
-          className={`absolute inset-0 z-10 flex items-center justify-center ${
+          className={`absolute inset-0 z-10 block ${
             failed
               ? 'bg-gradient-to-br from-surface-container-low via-surface-container to-primary-fixed/35'
               : 'animate-pulse bg-gradient-to-br from-surface-container-low via-surface-container to-surface-container-high'
@@ -69,9 +68,6 @@ export function LoadableImage({
         >
           <span className="absolute left-5 top-5 h-2.5 w-24 rounded-full bg-white/20 dark:bg-white/10" />
           <span className="absolute bottom-6 left-6 h-3 w-1/2 rounded-full bg-white/20 dark:bg-white/10" />
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-lowest/80 text-primary shadow-sm backdrop-blur-sm">
-            <Icon name={failed ? 'image_not_supported' : 'image'} size={24} />
-          </span>
         </span>
       )}
     </span>
