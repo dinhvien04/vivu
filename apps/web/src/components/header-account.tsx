@@ -64,7 +64,7 @@ export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
     return (
       <div
         className={
-          variant === 'drawer' ? 'flex flex-col gap-2' : 'hidden items-center gap-2 sm:flex'
+          variant === 'drawer' ? 'flex flex-col gap-2' : 'hidden items-center gap-2 xl:flex'
         }
       >
         <Link
