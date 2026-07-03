@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { HomePageLoadingGate } from '@/components/home-page-loading-gate';
 import { Icon } from '@/components/icon';
 import { LoadableImage } from '@/components/loadable-image';
 import { SiteFooter } from '@/components/site-footer';
@@ -88,6 +89,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
   const heroAlt = hero ? placeTitle(hero, locale) : t('home.heroFallbackAlt');
   const heroSummary = hero ? placeSummary(hero, locale) : null;
   const heroHref = hero ? `/dia-diem/${hero.slug}` : '/kham-pha';
+  const visualImageUrls = [heroImage, ...collections.map((collection) => collection.image)].filter(
+    (url): url is string => Boolean(url),
+  );
 
   const PROCESS_STEPS = [
     { icon: 'tune', label: t('home.processStep1') },
@@ -117,75 +121,76 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <SiteHeader />
-      <main className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
-        {/* Hero */}
-        <section className="flex flex-col items-center gap-12 py-section-gap md:flex-row">
-          <div className="flex-1 space-y-6">
-            <h1 className="font-h1 text-h1 text-on-surface">{t('home.heroTitle')}</h1>
-            <p className="max-w-2xl font-sans text-body-lg leading-relaxed text-on-surface-variant">
-              {t('home.heroLead')}
-            </p>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-4">
-              <TrackedLink
-                href="/lich-trinh"
-                eventType="home_trip_planner_cta_clicked"
-                analyticsMetadata={{ surface: 'hero' }}
-                className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-[1.03] hover:bg-primary/90 hover:shadow-hover active:scale-95"
-              >
-                {t('home.heroCta')}
-              </TrackedLink>
-              <Link
-                href="/kham-pha"
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-outline px-8 text-body-md font-semibold text-on-surface transition-all hover:border-primary hover:text-primary active:scale-95"
-              >
-                {t('home.exploreCta')}
-              </Link>
-              <TrackedLink
-                href="/tu-van?source=home"
-                eventType="home_consulting_cta_clicked"
-                analyticsMetadata={{ surface: 'hero' }}
-                className="inline-flex h-12 items-center justify-center gap-1 text-body-md font-semibold text-primary transition-all hover:underline"
-              >
-                <span>{t('home.consultCta')}</span>
-                <Icon name="arrow_forward" className="!text-lg" />
-              </TrackedLink>
+      <HomePageLoadingGate imageUrls={visualImageUrls}>
+        <main className="mx-auto max-w-container-max px-margin-mobile md:px-margin-desktop">
+          {/* Hero */}
+          <section className="flex flex-col items-center gap-12 py-section-gap md:flex-row">
+            <div className="flex-1 space-y-6">
+              <h1 className="font-h1 text-h1 text-on-surface">{t('home.heroTitle')}</h1>
+              <p className="max-w-2xl font-sans text-body-lg leading-relaxed text-on-surface-variant">
+                {t('home.heroLead')}
+              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-4">
+                <TrackedLink
+                  href="/lich-trinh"
+                  eventType="home_trip_planner_cta_clicked"
+                  analyticsMetadata={{ surface: 'hero' }}
+                  className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-[1.03] hover:bg-primary/90 hover:shadow-hover active:scale-95"
+                >
+                  {t('home.heroCta')}
+                </TrackedLink>
+                <Link
+                  href="/kham-pha"
+                  className="inline-flex h-12 items-center justify-center rounded-lg border border-outline px-8 text-body-md font-semibold text-on-surface transition-all hover:border-primary hover:text-primary active:scale-95"
+                >
+                  {t('home.exploreCta')}
+                </Link>
+                <TrackedLink
+                  href="/tu-van?source=home"
+                  eventType="home_consulting_cta_clicked"
+                  analyticsMetadata={{ surface: 'hero' }}
+                  className="inline-flex h-12 items-center justify-center gap-1 text-body-md font-semibold text-primary transition-all hover:underline"
+                >
+                  <span>{t('home.consultCta')}</span>
+                  <Icon name="arrow_forward" className="!text-lg" />
+                </TrackedLink>
+              </div>
             </div>
-          </div>
-          <Link
-            href={heroHref}
-            className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-xl shadow-premium"
-          >
-            {heroImage ? (
-              <LoadableImage
-                src={heroImage}
-                alt={heroAlt}
-                loading="eager"
-                decoding="async"
-                wrapperClassName="absolute inset-0"
-                className="h-full w-full object-cover transition-[opacity,transform] duration-700 group-hover:scale-105"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
-                <Icon name="travel_explore" className="!text-6xl text-primary" />
-              </div>
-            )}
-            {/* Dark gradient overlay for bottom text readability */}
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            {hero && (
-              <div className="absolute bottom-0 inset-x-0 z-20 px-6 pb-6 pt-12 text-white">
-                <p className="text-label-caps uppercase text-primary-fixed font-semibold tracking-wider">
-                  {t('home.heroPick')}
-                </p>
-                <p className="font-h3 text-2xl font-bold mt-1">{placeTitle(hero, locale)}</p>
-                {heroSummary && (
-                  <p className="text-body-md mt-2 line-clamp-2 text-white/90 font-light">
-                    {heroSummary}
+            <Link
+              href={heroHref}
+              className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-xl shadow-premium"
+            >
+              {heroImage ? (
+                <LoadableImage
+                  src={heroImage}
+                  alt={heroAlt}
+                  loading="eager"
+                  decoding="async"
+                  wrapperClassName="absolute inset-0"
+                  className="h-full w-full object-cover transition-[opacity,transform] duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
+                  <Icon name="travel_explore" className="!text-6xl text-primary" />
+                </div>
+              )}
+              {/* Dark gradient overlay for bottom text readability */}
+              <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              {hero && (
+                <div className="absolute bottom-0 inset-x-0 z-20 px-6 pb-6 pt-12 text-white">
+                  <p className="text-label-caps uppercase text-primary-fixed font-semibold tracking-wider">
+                    {t('home.heroPick')}
                   </p>
-                )}
-              </div>
-            )}
-          </Link>
-        </section>
+                  <p className="font-h3 text-2xl font-bold mt-1">{placeTitle(hero, locale)}</p>
+                  {heroSummary && (
+                    <p className="text-body-md mt-2 line-clamp-2 text-white/90 font-light">
+                      {heroSummary}
+                    </p>
+                  )}
+                </div>
+              )}
+            </Link>
+          </section>
 
         {/* Business flow */}
         <section className="rounded-3xl border border-outline-variant/30 bg-surface-container-lowest p-6 shadow-sm md:p-8">
@@ -332,9 +337,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             </div>
           </section>
         )}
-      </main>
-      <AiChatWidget />
-      <SiteFooter />
+        </main>
+        <AiChatWidget />
+        <SiteFooter />
+      </HomePageLoadingGate>
     </>
   );
 }
