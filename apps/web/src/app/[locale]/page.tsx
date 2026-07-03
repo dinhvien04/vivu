@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Icon } from '@/components/icon';
+import { LoadableImage } from '@/components/loadable-image';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { TrackedLink } from '@/components/tracked-link';
@@ -155,19 +155,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
             href={heroHref}
             className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-xl shadow-premium"
           >
-            {/* Dark gradient overlay for bottom text readability */}
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             {heroImage ? (
-              <img
+              <LoadableImage
                 src={heroImage}
                 alt={heroAlt}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="eager"
+                decoding="async"
+                wrapperClassName="absolute inset-0"
+                className="h-full w-full object-cover transition-[opacity,transform] duration-700 group-hover:scale-105"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary-container via-tertiary-container to-secondary-container">
                 <Icon name="travel_explore" className="!text-6xl text-primary" />
               </div>
             )}
+            {/* Dark gradient overlay for bottom text readability */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             {hero && (
               <div className="absolute bottom-0 inset-x-0 z-20 px-6 pb-6 pt-12 text-white">
                 <p className="text-label-caps uppercase text-primary-fixed font-semibold tracking-wider">
@@ -306,9 +309,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
                 <Link key={c.title} href={c.href} className="group cursor-pointer">
                   <div className="mb-4 aspect-[3/4] overflow-hidden rounded-xl bg-surface-container shadow-sm transition-all group-hover:shadow-premium">
                     {c.image ? (
-                      <img
+                      <LoadableImage
                         src={c.image}
                         alt={c.alt}
+                        loading="lazy"
+                        decoding="async"
+                        wrapperClassName="h-full w-full"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (

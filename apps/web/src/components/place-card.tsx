@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import type { Place } from '@vivu/types';
 import { Icon } from './icon';
+import { LoadableImage } from './loadable-image';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { placeSummary, placeTitle } from '@/i18n/place';
@@ -36,12 +36,13 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 outline-none"
     >
       <div className="relative bg-surface-container aspect-[4/3] w-full overflow-hidden">
-        <Image
+        <LoadableImage
           src={heroSrc}
           alt={title}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+          wrapperClassName="absolute inset-0"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-5">
