@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import type { ImgHTMLAttributes } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
@@ -23,10 +23,27 @@ export function LoadableImage({
   onError,
   ...props
 }: LoadableImageProps) {
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const [status, setStatus] = useState<ImageStatus>('loading');
 
   useEffect(() => {
     setStatus('loading');
+
+    const image = imageRef.current;
+    if (!image) return;
+
+    if (image.complete) {
+      setStatus(image.naturalWidth > 0 ? 'loaded' : 'error');
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      if (!image.complete) setStatus('error');
+    }, 8000);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
   }, [src]);
 
   const loaded = status === 'loaded';
@@ -41,6 +58,7 @@ export function LoadableImage({
       {!failed && (
         <img
           {...props}
+          ref={imageRef}
           src={src}
           alt={alt}
           className={`${className} transition-[opacity,transform] duration-500 motion-reduce:transition-none ${

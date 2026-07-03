@@ -6,9 +6,14 @@ import { PlaceCardSkeleton, Skeleton } from './skeleton';
 interface HomePageLoadingGateProps {
   imageUrls: string[];
   children: ReactNode;
+  maxWaitMs?: number;
 }
 
-export function HomePageLoadingGate({ imageUrls, children }: HomePageLoadingGateProps) {
+export function HomePageLoadingGate({
+  imageUrls,
+  children,
+  maxWaitMs = 3500,
+}: HomePageLoadingGateProps) {
   const urls = useMemo(
     () =>
       Array.from(
@@ -23,14 +28,14 @@ export function HomePageLoadingGate({ imageUrls, children }: HomePageLoadingGate
     setReady(urls.length === 0);
     if (urls.length === 0) return;
 
-    Promise.all(urls.map(preloadImage)).finally(() => {
+    Promise.race([Promise.all(urls.map(preloadImage)), delay(maxWaitMs)]).finally(() => {
       if (!cancelled) setReady(true);
     });
 
     return () => {
       cancelled = true;
     };
-  }, [urls]);
+  }, [maxWaitMs, urls]);
 
   if (!ready) return <HomePageSkeleton />;
 
@@ -50,6 +55,12 @@ function preloadImage(url: string): Promise<void> {
     };
     image.onerror = () => resolve();
     image.src = url;
+  });
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
   });
 }
 
