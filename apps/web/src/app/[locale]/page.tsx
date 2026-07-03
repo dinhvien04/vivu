@@ -73,8 +73,8 @@ async function loadHomeData(locale: Locale): Promise<{
   return { hero, collections };
 }
 
-// The page depends on the places API, so it can be prerendered with a 60-second revalidation period.
-export const revalidate = 60;
+// Force dynamic rendering so the page always fetches fresh data from the API on request, avoiding empty pages from build time.
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;

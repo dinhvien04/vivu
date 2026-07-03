@@ -87,6 +87,7 @@ export class GeminiService {
         }
         return text;
       } catch (error) {
+        console.error('[GeminiService] Error during text generation:', error);
         if (!isTransientGeminiError(error) || attempt === MAX_GENERATION_ATTEMPTS) {
           throw new ServiceUnavailableException(
             'Gemini is temporarily unavailable. Please try again.',
