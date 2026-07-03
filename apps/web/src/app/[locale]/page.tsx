@@ -130,18 +130,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
               <p className="max-w-2xl font-sans text-body-lg leading-relaxed text-on-surface-variant">
                 {t('home.heroLead')}
               </p>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-4">
+              <div className="grid grid-cols-1 gap-3 pt-4 sm:grid-cols-2">
                 <TrackedLink
                   href="/lich-trinh"
                   eventType="home_trip_planner_cta_clicked"
                   analyticsMetadata={{ surface: 'hero' }}
-                  className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-[1.03] hover:bg-primary/90 hover:shadow-hover active:scale-95"
+                  className="inline-flex h-12 min-w-0 items-center justify-center rounded-lg bg-primary px-5 text-center text-body-md font-semibold text-on-primary shadow-premium transition-all hover:scale-[1.03] hover:bg-primary/90 hover:shadow-hover active:scale-95"
                 >
                   {t('home.heroCta')}
                 </TrackedLink>
                 <Link
                   href="/kham-pha"
-                  className="inline-flex h-12 items-center justify-center rounded-lg border border-outline px-8 text-body-md font-semibold text-on-surface transition-all hover:border-primary hover:text-primary active:scale-95"
+                  className="inline-flex h-12 min-w-0 items-center justify-center rounded-lg border border-outline px-5 text-center text-body-md font-semibold text-on-surface transition-all hover:border-primary hover:text-primary active:scale-95"
                 >
                   {t('home.exploreCta')}
                 </Link>
@@ -149,9 +149,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
                   href="/tu-van?source=home"
                   eventType="home_consulting_cta_clicked"
                   analyticsMetadata={{ surface: 'hero' }}
-                  className="inline-flex h-12 items-center justify-center gap-1 text-body-md font-semibold text-primary transition-all hover:underline"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-lg text-body-md font-semibold text-primary transition-colors hover:bg-primary-container/40 sm:col-span-2"
                 >
-                  <span>{t('home.consultCta')}</span>
+                  <span className="whitespace-nowrap">{t('home.consultCta')}</span>
                   <Icon name="arrow_forward" className="!text-lg" />
                 </TrackedLink>
               </div>
