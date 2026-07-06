@@ -23,7 +23,7 @@ describe('AiTextGenerationService', () => {
     expect(conduit.generateText).toHaveBeenCalledWith(
       'planner prompt',
       expect.objectContaining({
-        model: 'claude-sonnet-4-6',
+        model: 'anthropic/claude-sonnet-4-6',
         temperature: 0.15,
         maxOutputTokens: 3200,
       }),
@@ -109,7 +109,7 @@ describe('AiTextGenerationService', () => {
 
     expect(conduit.generateText).toHaveBeenCalledWith(
       expect.stringContaining('Biển Hồ có gì đẹp?'),
-      expect.objectContaining({ model: 'gpt-5' }),
+      expect.objectContaining({ model: 'openai/gpt-5-mini' }),
     );
     expect(gemini.generateTravelAnswer).not.toHaveBeenCalled();
   });
@@ -117,8 +117,8 @@ describe('AiTextGenerationService', () => {
 
 function makeService(options: { conduitEnabled?: boolean; geminiConfigured?: boolean } = {}) {
   const conduit = {
-    tripPlannerModel: 'claude-sonnet-4-6',
-    chatModel: 'gpt-5',
+    tripPlannerModel: 'anthropic/claude-sonnet-4-6',
+    chatModel: 'openai/gpt-5-mini',
     isEnabled: jest.fn().mockReturnValue(options.conduitEnabled ?? true),
     generateText: jest.fn(),
   };

@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import * as Sentry from '@sentry/node';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -8,7 +9,18 @@ import { applyRequestLogging } from './common/request-logging';
 import { applySecurityHeaders } from './common/security-headers';
 import fastifyMultipart from '@fastify/multipart';
 
+function initSentry(): void {
+  const dsn = process.env.SENTRY_DSN?.trim();
+  if (!dsn) return;
+  Sentry.init({
+    dsn,
+    environment: process.env.SENTRY_ENVIRONMENT?.trim() || process.env.NODE_ENV || 'development',
+    tracesSampleRate: 0.1,
+  });
+}
+
 async function bootstrap() {
+  initSentry();
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ trustProxy: true }),

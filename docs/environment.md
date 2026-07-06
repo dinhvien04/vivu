@@ -61,7 +61,8 @@ Tài liệu này cung cấp mô tả chi tiết, giá trị mặc định, mục
 *   **`CONDUIT_BASE_URL`**
     *   *Mặc định*: `https://conduit.ozdoev.net/api/v1`.
 *   **`CONDUIT_DEFAULT_MODEL`**, **`CONDUIT_TRIP_PLANNER_MODEL`**, **`CONDUIT_CHAT_MODEL`**
-    *   *Mô tả*: Model dùng cho text mặc định, Trip Planner, và AI Chat text-only.
+    *   *Mô tả*: Model dùng cho text mặc định, Trip Planner, và AI Chat text-only. Dùng model id đầy đủ đúng như Conduit hiển thị, ví dụ `openai/gpt-5-mini`, `anthropic/claude-sonnet-4-6`, hoặc `google/gemini-2-5-flash`.
+    *   *Khuyến nghị*: `CONDUIT_CHAT_MODEL=openai/gpt-5-mini` cho AI Chat text-only; `CONDUIT_TRIP_PLANNER_MODEL=anthropic/claude-sonnet-4-6` cho Trip Planner. Nếu credit/rate limit căng, đổi cả hai sang `google/gemini-2-5-flash`.
 *   **`CONDUIT_TIMEOUT_MS`**
     *   *Mặc định*: `30000`.
 

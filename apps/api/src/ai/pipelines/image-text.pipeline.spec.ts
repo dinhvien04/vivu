@@ -1,5 +1,5 @@
 import type { ConfigService } from '@nestjs/config';
-import type { GeminiService } from '../../gemini/gemini.service';
+import type { AiTextGenerationService } from '../../ai-providers/ai-text-generation.service';
 import type { QdrantRepository } from '../../qdrant/qdrant.repository';
 import type { S3Service } from '../../storage/s3.service';
 import type { ContextBuilderService } from '../services/context-builder.service';
@@ -16,7 +16,7 @@ describe('ImageTextPipeline', () => {
       limit: 5,
       placeSlug: 'bien-ho',
     });
-    expect(deps.gemini.generateTravelAnswer).toHaveBeenCalledWith(
+    expect(deps.textGeneration.generateTravelAnswer).toHaveBeenCalledWith(
       expect.objectContaining({
         detectedPlace: expect.objectContaining({ slug: 'bien-ho', score: 0.9 }),
       }),
@@ -27,7 +27,7 @@ describe('ImageTextPipeline', () => {
     const deps = makeDeps([{ id: '1', score: 0.1, place_slug: 'bien-ho' }]);
     await makePipeline(deps).run('Chỗ này có gì chơi?', image);
     expect(deps.qdrant.searchTextByMessage).not.toHaveBeenCalled();
-    expect(deps.gemini.generateTravelAnswer).not.toHaveBeenCalled();
+    expect(deps.textGeneration.generateTravelAnswer).not.toHaveBeenCalled();
     expect(deps.formatter.format).toHaveBeenCalledWith(
       expect.objectContaining({
         inputType: 'image_text',
@@ -40,7 +40,7 @@ describe('ImageTextPipeline', () => {
     const deps = makeDeps([{ id: '1', score: 0.9, location_name: 'Không rõ slug' }]);
     await makePipeline(deps).run('Chỗ này có gì chơi?', image);
     expect(deps.qdrant.searchTextByMessage).not.toHaveBeenCalled();
-    expect(deps.gemini.generateTravelAnswer).not.toHaveBeenCalled();
+    expect(deps.textGeneration.generateTravelAnswer).not.toHaveBeenCalled();
   });
 });
 
@@ -50,7 +50,7 @@ function makeDeps(imageResults: object[]) {
       searchImagesByImageBase64: jest.fn().mockResolvedValue(imageResults),
       searchTextByMessage: jest.fn().mockResolvedValue([]),
     },
-    gemini: { generateTravelAnswer: jest.fn().mockResolvedValue('answer') },
+    textGeneration: { generateTravelAnswer: jest.fn().mockResolvedValue('answer') },
     s3: { uploadTemporaryImage: jest.fn() },
     context: {
       fromTextResults: jest.fn().mockReturnValue('text context'),
@@ -64,7 +64,7 @@ function makePipeline(deps: ReturnType<typeof makeDeps>) {
   return new ImageTextPipeline(
     config(),
     deps.qdrant as unknown as QdrantRepository,
-    deps.gemini as unknown as GeminiService,
+    deps.textGeneration as unknown as AiTextGenerationService,
     deps.s3 as unknown as S3Service,
     deps.context as unknown as ContextBuilderService,
     deps.formatter as unknown as ResponseFormatterService,

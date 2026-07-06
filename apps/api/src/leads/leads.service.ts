@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LeadSource, LeadStatus, Prisma } from '@prisma/client';
 import type { FastifyRequest } from 'fastify';
@@ -6,25 +12,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import { hashRequestIp, hashUserAgent, positiveInteger } from '../common/request-fingerprint';
 import { TurnstileService } from '../common/turnstile.service';
+import { RATE_LIMITER_STORE, type RateLimiterStore } from '../common/rate-limiter.store';
 import { sanitizeText, sanitizeRequiredText } from '../common/sanitize';
 import type { CreateLeadDto } from './dto/create-lead.dto';
 import type { ListLeadsQueryDto } from './dto/list-leads.query.dto';
-
-interface RateBucket {
-  count: number;
-  resetAt: number;
-}
 
 @Injectable()
 export class LeadsService {
   private readonly hourlyLimit: number;
   private readonly hashSecret: string;
-  private readonly buckets = new Map<string, RateBucket>();
 
   constructor(
     private readonly prisma: PrismaService,
     config: ConfigService,
     private readonly turnstile: TurnstileService,
+    @Inject(RATE_LIMITER_STORE) private readonly rateLimiter: RateLimiterStore,
   ) {
     this.hourlyLimit = positiveInteger(config.get<string>('LEADS_RATE_LIMIT_PER_HOUR'), 20);
     this.hashSecret =
@@ -42,7 +44,7 @@ export class LeadsService {
     await this.turnstile.verify(dto.turnstileToken, request);
 
     const ipHash = hashRequestIp(request, this.hashSecret);
-    this.consumeHourly(ipHash);
+    await this.consumeHourly(ipHash);
 
     const lead = await this.prisma.lead.create({
       data: {
@@ -124,15 +126,13 @@ export class LeadsService {
     return { data: lead };
   }
 
-  private consumeHourly(key: string): void {
-    const now = Date.now();
-    const current = this.buckets.get(key);
-    if (!current || current.resetAt <= now) {
-      this.buckets.set(key, { count: 1, resetAt: now + 3_600_000 });
-      return;
-    }
-    current.count += 1;
-    if (current.count > this.hourlyLimit) {
+  private async consumeHourly(key: string): Promise<void> {
+    const allowed = await this.rateLimiter.incrementAndCheck(
+      `leads:${key}`,
+      this.hourlyLimit,
+      3600,
+    );
+    if (!allowed) {
       throw new HttpException(
         'Bạn đã gửi quá nhiều yêu cầu tư vấn. Vui lòng thử lại sau.',
         HttpStatus.TOO_MANY_REQUESTS,

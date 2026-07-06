@@ -1,19 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiUsageKeyType } from '@prisma/client';
 import type { FastifyRequest } from 'fastify';
 import { createHash } from 'crypto';
+import { RATE_LIMITER_STORE, type RateLimiterStore } from '../../common/rate-limiter.store';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { AiPipelineInput } from '../types/ai.types';
 
 interface QuotaIdentity {
   keyType: AiUsageKeyType;
   keyHash: string;
-}
-
-interface MinuteBucket {
-  count: number;
-  resetAt: number;
 }
 
 export interface AiQuotaResult extends QuotaIdentity {
@@ -28,11 +24,11 @@ export class AiQuotaService {
   private readonly userDailyQuota: number;
   private readonly perMinuteLimit: number;
   private readonly hashSecret: string;
-  private readonly minuteBuckets = new Map<string, MinuteBucket>();
 
   constructor(
     private readonly prisma: PrismaService,
     config: ConfigService,
+    @Inject(RATE_LIMITER_STORE) private readonly rateLimiter: RateLimiterStore,
   ) {
     this.anonDailyQuota = positiveInteger(config.get<string>('AI_DAILY_QUOTA_ANON'), 20);
     this.userDailyQuota = positiveInteger(config.get<string>('AI_DAILY_QUOTA_USER'), 100);
@@ -46,7 +42,7 @@ export class AiQuotaService {
 
   async consume(request: FastifyRequest, input: AiPipelineInput): Promise<AiQuotaResult> {
     const identity = this.buildIdentity(request, input.sessionId);
-    this.consumeMinute(identity);
+    await this.consumeMinute(identity);
 
     const dailyQuota =
       identity.keyType === AiUsageKeyType.user ? this.userDailyQuota : this.anonDailyQuota;
@@ -119,29 +115,14 @@ export class AiQuotaService {
     };
   }
 
-  private consumeMinute(identity: QuotaIdentity): void {
-    const now = Date.now();
-    this.pruneMinuteBuckets(now);
-    const key = `${identity.keyType}:${identity.keyHash}`;
-    const current = this.minuteBuckets.get(key);
-    if (!current || current.resetAt <= now) {
-      this.minuteBuckets.set(key, { count: 1, resetAt: now + 60_000 });
-      return;
-    }
-
-    current.count += 1;
-    if (current.count > this.perMinuteLimit) {
+  private async consumeMinute(identity: QuotaIdentity): Promise<void> {
+    const key = `ai-minute:${identity.keyType}:${identity.keyHash}`;
+    const allowed = await this.rateLimiter.incrementAndCheck(key, this.perMinuteLimit, 60);
+    if (!allowed) {
       throw new HttpException(
         'Bạn đang gửi yêu cầu AI quá nhanh. Vui lòng thử lại sau ít phút.',
         HttpStatus.TOO_MANY_REQUESTS,
       );
-    }
-  }
-
-  private pruneMinuteBuckets(now: number): void {
-    if (this.minuteBuckets.size < 1000) return;
-    for (const [key, bucket] of this.minuteBuckets) {
-      if (bucket.resetAt <= now) this.minuteBuckets.delete(key);
     }
   }
 

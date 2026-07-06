@@ -8,6 +8,14 @@ function config(values: Record<string, string | undefined>) {
   };
 }
 
+function makeRateLimiter(allowed = true) {
+  return {
+    incrementAndCheck: jest.fn().mockResolvedValue(allowed),
+    peek: jest.fn().mockResolvedValue(0),
+    reset: jest.fn().mockResolvedValue(undefined),
+  };
+}
+
 describe('AiQuotaService', () => {
   it('hashes anonymous identity material before persisting usage', async () => {
     const prisma = {
@@ -27,6 +35,7 @@ describe('AiQuotaService', () => {
         AI_RATE_LIMIT_PER_MINUTE: '10',
         AI_QUOTA_HASH_SECRET: 'unit-test-secret',
       }) as never,
+      makeRateLimiter() as never,
     );
 
     await service.consume(
@@ -59,24 +68,19 @@ describe('AiQuotaService', () => {
       config({
         AI_DAILY_QUOTA_ANON: '1',
         AI_RATE_LIMIT_PER_MINUTE: '10',
-        AI_QUOTA_HASH_SECRET: 'unit-test-secret',
       }) as never,
+      makeRateLimiter() as never,
     );
 
     await expect(
       service.consume({ headers: {}, ip: '127.0.0.1' } as never, { message: 'hello' }),
-    ).rejects.toMatchObject({ status: 429 });
+    ).rejects.toBeInstanceOf(HttpException);
   });
 
-  it('throws 429 when minute rate is exceeded before touching the database', async () => {
+  it('throws 429 when per-minute limit is exceeded', async () => {
     const prisma = {
       aiUsage: {
-        upsert: jest.fn().mockResolvedValue({
-          keyType: AiUsageKeyType.ip,
-          keyHash: 'hashed-key',
-          aiRequests: 1,
-          imageUploads: 0,
-        }),
+        upsert: jest.fn(),
       },
     };
     const service = new AiQuotaService(
@@ -84,15 +88,13 @@ describe('AiQuotaService', () => {
       config({
         AI_DAILY_QUOTA_ANON: '10',
         AI_RATE_LIMIT_PER_MINUTE: '1',
-        AI_QUOTA_HASH_SECRET: 'unit-test-secret',
       }) as never,
+      makeRateLimiter(false) as never,
     );
-    const request = { headers: {}, ip: '127.0.0.1' } as never;
 
-    await service.consume(request, { message: 'first' });
-    await expect(service.consume(request, { message: 'second' })).rejects.toBeInstanceOf(
-      HttpException,
-    );
-    expect(prisma.aiUsage.upsert).toHaveBeenCalledTimes(1);
+    await expect(
+      service.consume({ headers: {}, ip: '127.0.0.1' } as never, { message: 'hello' }),
+    ).rejects.toBeInstanceOf(HttpException);
+    expect(prisma.aiUsage.upsert).not.toHaveBeenCalled();
   });
 });

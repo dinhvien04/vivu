@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GeminiService } from '../../gemini/gemini.service';
+import { AiTextGenerationService } from '../../ai-providers/ai-text-generation.service';
 import { QdrantRepository } from '../../qdrant/qdrant.repository';
 import { S3Service } from '../../storage/s3.service';
 import { ContextBuilderService } from '../services/context-builder.service';
@@ -16,7 +16,7 @@ export class ImageTextPipeline {
   constructor(
     config: ConfigService,
     private readonly qdrant: QdrantRepository,
-    private readonly gemini: GeminiService,
+    private readonly textGeneration: AiTextGenerationService,
     private readonly s3: S3Service,
     private readonly contextBuilder: ContextBuilderService,
     private readonly formatter: ResponseFormatterService,
@@ -51,7 +51,7 @@ export class ImageTextPipeline {
     ]
       .filter(Boolean)
       .join('\n\n');
-    const answer = await this.gemini.generateTravelAnswer({
+    const answer = await this.textGeneration.generateTravelAnswer({
       question: message,
       context,
       detectedPlace: top

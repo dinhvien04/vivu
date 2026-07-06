@@ -6,10 +6,11 @@ describe('ReviewsService ownership checks', () => {
     const prisma = {
       review: {
         findUnique: jest.fn().mockResolvedValue({ id: 'review-1', userId: 'user-b' }),
-        update: jest.fn(),
+        update: jest.fn().mockResolvedValue({ id: 'review-1', placeId: 'place-1', userId: 'user-b' }),
       },
     };
-    const service = new ReviewsService(prisma as never);
+    const placeRating = { syncPlaceRating: jest.fn().mockResolvedValue(undefined) };
+    const service = new ReviewsService(prisma as never, placeRating as never);
 
     await expect(service.update('review-1', 'user-a', { rating: 5 })).rejects.toBeInstanceOf(
       ForbiddenException,
@@ -24,7 +25,8 @@ describe('ReviewsService ownership checks', () => {
         delete: jest.fn(),
       },
     };
-    const service = new ReviewsService(prisma as never);
+    const placeRating = { syncPlaceRating: jest.fn().mockResolvedValue(undefined) };
+    const service = new ReviewsService(prisma as never, placeRating as never);
 
     await expect(service.remove('review-1', 'user-a', 'user')).rejects.toBeInstanceOf(
       ForbiddenException,
@@ -35,11 +37,14 @@ describe('ReviewsService ownership checks', () => {
   it('allows admin/editor to delete another user review', async () => {
     const prisma = {
       review: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'review-1', userId: 'user-b' }),
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ id: 'review-1', userId: 'user-b', placeId: 'place-1' }),
         delete: jest.fn().mockResolvedValue(undefined),
       },
     };
-    const service = new ReviewsService(prisma as never);
+    const placeRating = { syncPlaceRating: jest.fn().mockResolvedValue(undefined) };
+    const service = new ReviewsService(prisma as never, placeRating as never);
 
     await expect(service.remove('review-1', 'user-a', 'admin')).resolves.toBeUndefined();
     expect(prisma.review.delete).toHaveBeenCalledWith({ where: { id: 'review-1' } });

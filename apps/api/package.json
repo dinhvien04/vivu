@@ -42,6 +42,7 @@
     "@nestjs/throttler": "^6.3.0",
     "@prisma/client": "^5.22.0",
     "@qdrant/js-client-rest": "^1.18.0",
+    "@sentry/node": "^10.63.0",
     "@vivu/types": "workspace:*",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

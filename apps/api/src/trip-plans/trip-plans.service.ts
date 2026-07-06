@@ -123,22 +123,28 @@ export class TripPlansService {
     };
   }
 
-  async listMine(userId: string) {
-    const rows = await this.prisma.tripPlan.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        input: true,
-        output: true,
-        shareId: true,
-        isPublic: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-    return { data: rows };
+  async listMine(userId: string, page = 1, pageSize = 20) {
+    const skip = (page - 1) * pageSize;
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.tripPlan.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+        select: {
+          id: true,
+          title: true,
+          input: true,
+          output: true,
+          shareId: true,
+          isPublic: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.tripPlan.count({ where: { userId } }),
+    ]);
+    return { data: rows, meta: { page, pageSize, total } };
   }
 
   async getMine(userId: string, id: string) {

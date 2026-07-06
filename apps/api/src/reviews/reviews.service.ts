@@ -1,10 +1,16 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Prisma, Review as PrismaReview, User as PrismaUser } from '@prisma/client';
 import type { Paginated, Review } from '@vivu/types';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ListReviewsQueryDto } from './dto/list-reviews.query.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { PlaceRatingService } from './place-rating.service';
 
 type ReviewWithRelations = PrismaReview & {
   user: Pick<PrismaUser, 'id' | 'name' | 'avatarUrl'>;
@@ -40,12 +46,18 @@ function toApi(r: ReviewWithRelations): Review {
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly placeRating: PlaceRatingService,
+  ) {}
 
-  /** Find a place by id or slug. */
+  /** Find a published place by id or slug. */
   private async resolvePlaceId(idOrSlug: string): Promise<string> {
     const place = await this.prisma.place.findFirst({
-      where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
+      where: {
+        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+        status: 'published',
+      },
       select: { id: true },
     });
     if (!place) throw new NotFoundException('Không tìm thấy địa điểm');
@@ -77,17 +89,25 @@ export class ReviewsService {
 
   async create(idOrSlug: string, userId: string, dto: CreateReviewDto): Promise<Review> {
     const placeId = await this.resolvePlaceId(idOrSlug);
-    const r = await this.prisma.review.create({
-      data: {
-        placeId,
-        userId,
-        rating: dto.rating,
-        content: dto.content,
-        status: 'visible',
-      },
-      include: REVIEW_INCLUDE,
-    });
-    return toApi(r as ReviewWithRelations);
+    try {
+      const r = await this.prisma.review.create({
+        data: {
+          placeId,
+          userId,
+          rating: dto.rating,
+          content: dto.content,
+          status: 'visible',
+        },
+        include: REVIEW_INCLUDE,
+      });
+      await this.placeRating.syncPlaceRating(placeId);
+      return toApi(r as ReviewWithRelations);
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && (error as { code?: string }).code === 'P2002') {
+        throw new ConflictException('Bạn đã đánh giá địa điểm này rồi');
+      }
+      throw error;
+    }
   }
 
   async update(reviewId: string, userId: string, dto: UpdateReviewDto): Promise<Review> {
@@ -107,13 +127,14 @@ export class ReviewsService {
       data,
       include: REVIEW_INCLUDE,
     });
+    await this.placeRating.syncPlaceRating(r.placeId);
     return toApi(r as ReviewWithRelations);
   }
 
   async remove(reviewId: string, userId: string, role: string): Promise<void> {
     const existing = await this.prisma.review.findUnique({
       where: { id: reviewId },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, placeId: true },
     });
     if (!existing) throw new NotFoundException('Không tìm thấy đánh giá');
     const isAdmin = role === 'admin' || role === 'editor';
@@ -121,6 +142,7 @@ export class ReviewsService {
       throw new ForbiddenException('Bạn không có quyền xoá đánh giá này');
     }
     await this.prisma.review.delete({ where: { id: reviewId } });
+    await this.placeRating.syncPlaceRating(existing.placeId);
   }
 
   async listForUser(userId: string, query: ListReviewsQueryDto): Promise<Paginated<Review>> {

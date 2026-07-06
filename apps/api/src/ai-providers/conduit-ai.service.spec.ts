@@ -22,7 +22,7 @@ describe('ConduitAiService', () => {
 
     await expect(
       service.generateText('Tạo lịch trình', {
-        model: 'gpt-5',
+        model: 'openai/gpt-5-mini',
         temperature: 0.1,
         maxOutputTokens: 128,
       }),
@@ -40,7 +40,7 @@ describe('ConduitAiService', () => {
     );
     const init = fetchSpy.mock.calls[0]?.[1] as RequestInit;
     expect(JSON.parse(String(init.body))).toEqual({
-      model: 'gpt-5',
+      model: 'openai/gpt-5-mini',
       messages: [{ role: 'user', content: 'Tạo lịch trình' }],
       temperature: 0.1,
       max_tokens: 128,
@@ -66,9 +66,9 @@ function makeService(values: Record<string, string> = {}): ConduitAiService {
       CONDUIT_ENABLED: 'true',
       CONDUIT_API_KEY: 'test-conduit-key',
       CONDUIT_BASE_URL: 'https://conduit.ozdoev.net/api/v1',
-      CONDUIT_DEFAULT_MODEL: 'gpt-5',
-      CONDUIT_TRIP_PLANNER_MODEL: 'claude-sonnet-4-6',
-      CONDUIT_CHAT_MODEL: 'gpt-5',
+      CONDUIT_DEFAULT_MODEL: 'openai/gpt-5-mini',
+      CONDUIT_TRIP_PLANNER_MODEL: 'anthropic/claude-sonnet-4-6',
+      CONDUIT_CHAT_MODEL: 'openai/gpt-5-mini',
       CONDUIT_TIMEOUT_MS: '30000',
       ...values,
     }),

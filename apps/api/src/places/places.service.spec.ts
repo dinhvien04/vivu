@@ -198,13 +198,12 @@ describe('PlacesService.list', () => {
         findMany: jest.fn().mockResolvedValue([
           {
             ...place,
+            ratingAvg: 0,
+            ratingCount: 0,
             photos: undefined,
           },
         ]),
         count: jest.fn().mockResolvedValue(73),
-      },
-      review: {
-        groupBy: jest.fn().mockResolvedValue([]),
       },
     };
     const s3 = {
@@ -246,6 +245,8 @@ describe('PlacesService.list', () => {
           heroImageS3Key: true,
           qdrantPlaceSlug: true,
           isAiReady: true,
+          ratingAvg: true,
+          ratingCount: true,
           region: true,
           categories: { include: { category: true } },
           createdAt: true,
@@ -253,6 +254,7 @@ describe('PlacesService.list', () => {
         },
       }),
     );
+    expect(result.data[0]?.rating).toEqual({ count: 0, average: 0 });
     expect(result.meta).toEqual({ page: 2, pageSize: 12, total: 73 });
     expect(result.data[0]?.photos).toBeUndefined();
     expect(result.data[0]?.heroImageUrl).toBe('https://signed.example/hero.jpg');
@@ -263,9 +265,6 @@ describe('PlacesService.list', () => {
       place: {
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
-      },
-      review: {
-        groupBy: jest.fn().mockResolvedValue([]),
       },
     };
     const service = new PlacesService(

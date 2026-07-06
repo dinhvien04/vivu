@@ -19,10 +19,12 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { sanitizeRelativePath } from '../common/sanitize-path';
 import { TurnstileService } from '../common/turnstile.service';
 import {
   ChangePasswordDto,
   DeleteAccountDto,
+  ExchangeOAuthDto,
   ForgotPasswordDto,
   LoginDto,
   RefreshDto,
@@ -50,7 +52,7 @@ export class AuthController {
     const { next, origin } = req.query as any;
 
     const stateObj = {
-      next: next || '/',
+      next: sanitizeRelativePath(next),
       origin: origin || 'http://localhost:3000',
     };
     const state = Buffer.from(JSON.stringify(stateObj)).toString('base64');
@@ -85,7 +87,7 @@ export class AuthController {
     if (req.query && req.query.state) {
       try {
         const decoded = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf-8'));
-        if (decoded.next) next = decoded.next;
+        next = sanitizeRelativePath(decoded.next);
         if (decoded.origin) origin = decoded.origin;
       } catch (e) {
         // Fallback
@@ -99,17 +101,29 @@ export class AuthController {
     const isAllowed = allowedRedirects.some((o) => o.toLowerCase() === origin.toLowerCase());
     const finalOrigin = isAllowed ? origin : (allowedRedirects[0] || 'http://localhost:3000');
 
-    const { tokens } = await this.auth.loginOrRegisterOAuth({
-      email: profile.email,
-      name: profile.name,
-      avatarUrl: profile.avatarUrl,
-    });
+    const { tokens } = await this.auth.loginOrRegisterOAuth(
+      {
+        email: profile.email,
+        name: profile.name,
+        avatarUrl: profile.avatarUrl,
+      },
+      req,
+    );
 
-    const redirectUrl = `${finalOrigin}/api/auth/google/callback?accessToken=${encodeURIComponent(
-      tokens.accessToken,
-    )}&refreshToken=${encodeURIComponent(tokens.refreshToken)}&next=${encodeURIComponent(next)}`;
+    const code = await this.auth.createOAuthExchangeCode(tokens);
+    const redirectUrl = `${finalOrigin}/api/auth/google/callback?code=${encodeURIComponent(
+      code,
+    )}&next=${encodeURIComponent(next)}`;
 
     return { url: redirectUrl };
+  }
+
+  @Public()
+  @Post('oauth/exchange')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  exchangeOAuth(@Body() dto: ExchangeOAuthDto) {
+    return this.auth.exchangeOAuthCode(dto.code);
   }
 
   @Public()
@@ -125,16 +139,16 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 900_000, limit: AUTH_RATE_LIMIT_PER_15_MIN } })
-  login(@Body() dto: LoginDto) {
-    return this.auth.login(dto);
+  login(@Body() dto: LoginDto, @Req() request: FastifyRequest) {
+    return this.auth.login(dto, request);
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 60_000, limit: 60 } })
-  refresh(@Body() dto: RefreshDto) {
-    return this.auth.refresh(dto.refreshToken);
+  refresh(@Body() dto: RefreshDto, @Req() request: FastifyRequest) {
+    return this.auth.refresh(dto.refreshToken, request);
   }
 
   @Public()

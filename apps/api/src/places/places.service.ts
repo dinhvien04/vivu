@@ -148,16 +148,19 @@ export class PlacesService {
       where.isAiReady = query.isAiReady;
     }
 
+    if (query.minRating !== undefined) {
+      where.ratingAvg = { gte: query.minRating };
+    }
+
     const orderBy: Prisma.PlaceOrderByWithRelationInput =
       query.sort === 'name' ? { titleVi: 'asc' } : { updatedAt: 'desc' };
 
-    const filtersByRating = query.minRating !== undefined;
-    const [rows, unfilteredTotal] = await Promise.all([
+    const [rows, total] = await Promise.all([
       this.prisma.place.findMany({
         where,
         orderBy,
-        skip: filtersByRating ? undefined : skip,
-        take: filtersByRating ? undefined : pageSize,
+        skip,
+        take: pageSize,
         select: {
           id: true,
           locationKey: true,
@@ -177,33 +180,18 @@ export class PlacesService {
           heroImageS3Key: true,
           qdrantPlaceSlug: true,
           isAiReady: true,
+          ratingAvg: true,
+          ratingCount: true,
           region: true,
           categories: { include: { category: true } },
           createdAt: true,
           updatedAt: true,
         },
       }),
-      filtersByRating ? Promise.resolve(0) : this.prisma.place.count({ where }),
+      this.prisma.place.count({ where }),
     ]);
 
-    const placeIds = rows.map((p) => p.id);
-    const ratingByPlaceId = new Map<string, { count: number; average: number }>();
-    if (placeIds.length > 0) {
-      const grouped = await this.prisma.review.groupBy({
-        by: ['placeId'],
-        where: { placeId: { in: placeIds }, status: 'visible' },
-        _count: { _all: true },
-        _avg: { rating: true },
-      });
-      for (const g of grouped) {
-        ratingByPlaceId.set(g.placeId, {
-          count: g._count._all,
-          average: g._avg.rating ? Math.round(g._avg.rating * 100) / 100 : 0,
-        });
-      }
-    }
-
-    let enriched = await Promise.all(
+    const data = await Promise.all(
       rows.map(async (p) => {
         const out = toApiPlace({
           ...p,
@@ -213,21 +201,16 @@ export class PlacesService {
           photos: [],
         } as PlaceWithRelations);
         out.photos = undefined;
-        out.rating = ratingByPlaceId.get(p.id) ?? { count: 0, average: 0 };
+        out.rating = {
+          count: p.ratingCount,
+          average: p.ratingAvg,
+        };
         return this.withPresignedMedia(out);
       }),
     );
 
-    if (query.minRating !== undefined) {
-      const threshold = query.minRating;
-      enriched = enriched.filter((p) => (p.rating?.average ?? 0) >= threshold);
-    }
-
-    const total = filtersByRating ? enriched.length : unfilteredTotal;
-    const paged = filtersByRating ? enriched.slice(skip, skip + pageSize) : enriched;
-
     return {
-      data: paged,
+      data,
       meta: { page, pageSize, total },
     };
   }

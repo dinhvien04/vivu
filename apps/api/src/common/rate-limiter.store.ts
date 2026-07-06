@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+export const RATE_LIMITER_STORE = Symbol('RATE_LIMITER_STORE');
+
 export interface RateLimiterStore {
   incrementAndCheck(key: string, limit: number, windowSeconds: number): Promise<boolean>;
+  peek(key: string): Promise<number>;
+  reset(key: string): Promise<void>;
 }
 
 @Injectable()
@@ -19,6 +23,17 @@ export class InMemoryRateLimiterStore implements RateLimiterStore {
 
     record.count += 1;
     return record.count <= limit;
+  }
+
+  async peek(key: string): Promise<number> {
+    const now = Math.floor(Date.now() / 1000);
+    const record = this.records.get(key);
+    if (!record || now >= record.resetAt) return 0;
+    return record.count;
+  }
+
+  async reset(key: string): Promise<void> {
+    this.records.delete(key);
   }
 }
 
@@ -67,6 +82,33 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
         `Upstash rate limiting failed: ${err instanceof Error ? err.message : err}. Falling open.`,
       );
       return true;
+    }
+  }
+
+  async peek(key: string): Promise<number> {
+    if (!this.url || !this.token) return 0;
+    try {
+      const response = await fetch(`${this.url}/get/${encodeURIComponent(key)}`, {
+        headers: { Authorization: `Bearer ${this.token}` },
+      });
+      if (!response.ok) return 0;
+      const json = (await response.json()) as { result?: string | null };
+      const value = Number(json.result ?? 0);
+      return Number.isFinite(value) ? value : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  async reset(key: string): Promise<void> {
+    if (!this.url || !this.token) return;
+    try {
+      await fetch(`${this.url}/del/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.token}` },
+      });
+    } catch {
+      // ignore
     }
   }
 }

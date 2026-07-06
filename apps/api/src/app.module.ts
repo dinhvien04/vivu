@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { KvModule } from './common/kv.module';
+import { RateLimiterModule } from './common/rate-limiter.module';
+import { UpstashThrottlerStorage } from './common/upstash-throttler.storage';
 import { AdminPlacesModule } from './admin-places/admin-places.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AdminStatsModule } from './admin-stats/admin-stats.module';
@@ -32,12 +35,17 @@ import { TripPlansModule } from './trip-plans/trip-plans.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60_000,
-        limit: positiveInteger(process.env.GLOBAL_RATE_LIMIT_PER_MINUTE, 120),
-      },
-    ]),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60_000,
+          limit: positiveInteger(process.env.GLOBAL_RATE_LIMIT_PER_MINUTE, 120),
+        },
+      ],
+      storage: new UpstashThrottlerStorage(),
+    }),
+    RateLimiterModule,
+    KvModule,
     AbuseProtectionModule,
     PrismaModule,
     CloudinaryModule,

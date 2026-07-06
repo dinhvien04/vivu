@@ -1,29 +1,31 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataReportStatus, DataReportType, Prisma } from '@prisma/client';
 import type { FastifyRequest } from 'fastify';
 import { hashRequestIp, positiveInteger } from '../common/request-fingerprint';
+import { RATE_LIMITER_STORE, type RateLimiterStore } from '../common/rate-limiter.store';
 import { TurnstileService } from '../common/turnstile.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { sanitizeText, sanitizeRequiredText } from '../common/sanitize';
 import type { CreateDataReportDto } from './dto/create-data-report.dto';
 import type { ListDataReportsQueryDto } from './dto/list-data-reports.query.dto';
 
-interface RateBucket {
-  count: number;
-  resetAt: number;
-}
-
 @Injectable()
 export class DataReportsService {
   private readonly hourlyLimit: number;
   private readonly hashSecret: string;
-  private readonly buckets = new Map<string, RateBucket>();
 
   constructor(
     private readonly prisma: PrismaService,
     config: ConfigService,
     private readonly turnstile: TurnstileService,
+    @Inject(RATE_LIMITER_STORE) private readonly rateLimiter: RateLimiterStore,
   ) {
     this.hourlyLimit = positiveInteger(config.get<string>('DATA_REPORT_RATE_LIMIT_PER_HOUR'), 10);
     this.hashSecret =
@@ -39,7 +41,7 @@ export class DataReportsService {
     }
 
     await this.turnstile.verify(dto.turnstileToken, request);
-    this.consumeHourly(hashRequestIp(request, this.hashSecret));
+    await this.consumeHourly(hashRequestIp(request, this.hashSecret));
 
     const row = await this.prisma.dataReport.create({
       data: {
@@ -83,15 +85,13 @@ export class DataReportsService {
     return { data: row };
   }
 
-  private consumeHourly(key: string): void {
-    const now = Date.now();
-    const current = this.buckets.get(key);
-    if (!current || current.resetAt <= now) {
-      this.buckets.set(key, { count: 1, resetAt: now + 3_600_000 });
-      return;
-    }
-    current.count += 1;
-    if (current.count > this.hourlyLimit) {
+  private async consumeHourly(key: string): Promise<void> {
+    const allowed = await this.rateLimiter.incrementAndCheck(
+      `data-report:${key}`,
+      this.hourlyLimit,
+      3600,
+    );
+    if (!allowed) {
       throw new HttpException(
         'Bạn đã gửi quá nhiều báo lỗi dữ liệu. Vui lòng thử lại sau.',
         HttpStatus.TOO_MANY_REQUESTS,

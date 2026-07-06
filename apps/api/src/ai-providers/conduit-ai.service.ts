@@ -42,7 +42,9 @@ interface ConduitFetchResponse {
 }
 
 const DEFAULT_BASE_URL = 'https://conduit.ozdoev.net/api/v1';
-const DEFAULT_MODEL = 'gpt-5';
+const DEFAULT_MODEL = 'openai/gpt-5-mini';
+const DEFAULT_TRIP_PLANNER_MODEL = 'anthropic/claude-sonnet-4-6';
+const DEFAULT_CHAT_MODEL = 'openai/gpt-5-mini';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_OUTPUT_TOKENS = 1024;
 
@@ -111,8 +113,8 @@ export class ConduitAiService {
     );
     this.defaultModel = config.get<string>('CONDUIT_DEFAULT_MODEL')?.trim() || DEFAULT_MODEL;
     this.tripPlannerModel =
-      config.get<string>('CONDUIT_TRIP_PLANNER_MODEL')?.trim() || this.defaultModel;
-    this.chatModel = config.get<string>('CONDUIT_CHAT_MODEL')?.trim() || this.defaultModel;
+      config.get<string>('CONDUIT_TRIP_PLANNER_MODEL')?.trim() || DEFAULT_TRIP_PLANNER_MODEL;
+    this.chatModel = config.get<string>('CONDUIT_CHAT_MODEL')?.trim() || DEFAULT_CHAT_MODEL;
     this.timeoutMs = positiveInteger(config.get<string>('CONDUIT_TIMEOUT_MS'), DEFAULT_TIMEOUT_MS);
   }
 

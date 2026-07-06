@@ -78,6 +78,7 @@ Routing provider hiện tại:
 *   Text-only chat: nếu `CONDUIT_ENABLED=true`, backend thử Conduit trước bằng `CONDUIT_CHAT_MODEL`; nếu Conduit lỗi 401/402/403/429/5xx/timeout thì fallback sang Gemini khi Gemini có cấu hình.
 *   Image-only và image + text: vẫn dùng luồng nhận diện Qdrant và Gemini cho phần sinh câu trả lời vision/text. Conduit chưa được gọi cho luồng ảnh vì chưa xác nhận vision support.
 *   Backend không expose Conduit key ra frontend và không log full prompt hoặc API key.
+*   Với Conduit, dùng model id đầy đủ có namespace. Khuyến nghị production: `CONDUIT_CHAT_MODEL=openai/gpt-5-mini` cho chat text-only, `CONDUIT_TRIP_PLANNER_MODEL=anthropic/claude-sonnet-4-6` cho lập lịch trình; nếu cần tiết kiệm/giảm rate limit, dùng `google/gemini-2-5-flash`.
 
 ---
 

@@ -107,7 +107,14 @@ export class UpdateProfileDto {
 }
 
 export class DeleteAccountDto {
+  @IsOptional()
   @IsString()
   @MaxLength(128)
-  password!: string;
+  password?: string;
+}
+
+export class ExchangeOAuthDto {
+  @IsString()
+  @MaxLength(128)
+  code!: string;
 }

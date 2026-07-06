@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Query,
   Param,
   Post,
   Req,
@@ -17,6 +18,7 @@ import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
+import { ListTripPlansQueryDto } from './dto/list-trip-plans.query.dto';
 import { TripPlansService } from './trip-plans.service';
 
 const TRIP_PLANNER_RATE_LIMIT_PER_MINUTE = positiveInteger(
@@ -51,8 +53,8 @@ export class TripPlansController {
   @Get()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  listMine(@CurrentUser() user: AuthenticatedUser) {
-    return this.tripPlans.listMine(user.id);
+  listMine(@CurrentUser() user: AuthenticatedUser, @Query() query: ListTripPlansQueryDto) {
+    return this.tripPlans.listMine(user.id, query.page ?? 1, query.pageSize ?? 20);
   }
 
   @Get('shared/:shareId')

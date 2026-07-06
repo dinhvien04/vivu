@@ -82,7 +82,10 @@ export class QaService {
 
   private async resolvePlaceId(idOrSlug: string): Promise<string> {
     const place = await this.prisma.place.findFirst({
-      where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
+      where: {
+        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+        status: 'published',
+      },
       select: { id: true },
     });
     if (!place) throw new NotFoundException('Không tìm thấy địa điểm');

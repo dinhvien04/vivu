@@ -7,6 +7,7 @@ import type {
 } from '@prisma/client';
 import type { Place } from '@vivu/types';
 import { PrismaService } from '../prisma/prisma.service';
+import { S3Service } from '../storage/s3.service';
 
 type PlaceWithRelations = PrismaPlace & {
   region: PrismaRegion;
@@ -58,9 +59,16 @@ function toApiPlace(p: PlaceWithRelations): Place {
   };
 }
 
+function isS3Url(value: string): boolean {
+  return value.startsWith('s3://');
+}
+
 @Injectable()
 export class FavoritesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly s3: S3Service,
+  ) {}
 
   async add(userId: string, placeId: string): Promise<{ favorited: true }> {
     const place = await this.prisma.place.findUnique({
@@ -118,6 +126,34 @@ export class FavoritesService {
         },
       },
     });
-    return rows.filter((r) => r.place.status === 'published').map((r) => toApiPlace(r.place));
+    const places = rows
+      .filter((r) => r.place.status === 'published')
+      .map((r) => toApiPlace(r.place));
+    return Promise.all(places.map((place) => this.withPresignedMedia(place)));
+  }
+
+  private async withPresignedMedia(place: Place): Promise<Place> {
+    const next: Place = {
+      ...place,
+      photos: place.photos ? [...place.photos] : place.photos,
+    };
+
+    if (!next.heroImageUrl && next.heroImageS3Key) {
+      next.heroImageUrl = await this.s3.getPresignedGetUrl(next.heroImageS3Key);
+    }
+
+    if (next.photos) {
+      next.photos = await Promise.all(
+        next.photos.map(async (photo) => {
+          if (!photo.s3Key || !isS3Url(photo.url)) return photo;
+          return {
+            ...photo,
+            url: await this.s3.getPresignedGetUrl(photo.s3Key),
+          };
+        }),
+      );
+    }
+
+    return next;
   }
 }
