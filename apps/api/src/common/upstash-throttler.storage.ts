@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ThrottlerStorage } from '@nestjs/throttler';
+import { fetchJson } from './fetch-json';
 
 interface ThrottlerStorageRecord {
   totalHits: number;
@@ -38,7 +39,7 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
         local ttlLeft = redis.call('ttl', KEYS[1])
         return {current, ttlLeft}
       `;
-      const response = await fetch(`${this.url}/eval`, {
+      const response = await fetchJson(`${this.url}/eval`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,

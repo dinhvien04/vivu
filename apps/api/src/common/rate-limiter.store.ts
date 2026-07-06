@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { fetchJson } from './fetch-json';
 
 export const RATE_LIMITER_STORE = Symbol('RATE_LIMITER_STORE');
 
@@ -58,7 +59,7 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
         return current <= tonumber(ARGV[1]) and 1 or 0
       `;
 
-      const response = await fetch(`${this.url}/eval`, {
+      const response = await fetchJson(`${this.url}/eval`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,
@@ -88,7 +89,7 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
   async peek(key: string): Promise<number> {
     if (!this.url || !this.token) return 0;
     try {
-      const response = await fetch(`${this.url}/get/${encodeURIComponent(key)}`, {
+      const response = await fetchJson(`${this.url}/get/${encodeURIComponent(key)}`, {
         headers: { Authorization: `Bearer ${this.token}` },
       });
       if (!response.ok) return 0;

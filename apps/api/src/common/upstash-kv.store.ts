@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { fetchJson } from './fetch-json';
 
 export interface KvStore {
   setJson(key: string, value: unknown, ttlSeconds: number): Promise<void>;
@@ -41,7 +42,7 @@ export class UpstashKvStore implements KvStore {
   async setJson(key: string, value: unknown, ttlSeconds: number): Promise<void> {
     if (!this.url || !this.token) return;
     try {
-      const response = await fetch(`${this.url}/set/${encodeURIComponent(key)}`, {
+      const response = await fetchJson(`${this.url}/set/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,
@@ -65,7 +66,7 @@ export class UpstashKvStore implements KvStore {
   async getJson<T>(key: string): Promise<T | null> {
     if (!this.url || !this.token) return null;
     try {
-      const response = await fetch(`${this.url}/get/${encodeURIComponent(key)}`, {
+      const response = await fetchJson(`${this.url}/get/${encodeURIComponent(key)}`, {
         headers: { Authorization: `Bearer ${this.token}` },
       });
       if (!response.ok) return null;
