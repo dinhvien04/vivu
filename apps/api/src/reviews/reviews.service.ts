@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ListReviewsQueryDto } from './dto/list-reviews.query.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { sanitizeRequiredText } from '../common/sanitize';
 import { PlaceRatingService } from './place-rating.service';
 
 type ReviewWithRelations = PrismaReview & {
@@ -95,7 +96,7 @@ export class ReviewsService {
           placeId,
           userId,
           rating: dto.rating,
-          content: dto.content,
+          content: sanitizeRequiredText(dto.content),
           status: 'visible',
         },
         include: REVIEW_INCLUDE,
@@ -103,7 +104,11 @@ export class ReviewsService {
       await this.placeRating.syncPlaceRating(placeId);
       return toApi(r as ReviewWithRelations);
     } catch (error) {
-      if (error instanceof Error && 'code' in error && (error as { code?: string }).code === 'P2002') {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        (error as { code?: string }).code === 'P2002'
+      ) {
         throw new ConflictException('Bạn đã đánh giá địa điểm này rồi');
       }
       throw error;
@@ -121,7 +126,7 @@ export class ReviewsService {
     }
     const data: Prisma.ReviewUpdateInput = {};
     if (dto.rating !== undefined) data.rating = dto.rating;
-    if (dto.content !== undefined) data.content = dto.content;
+    if (dto.content !== undefined) data.content = sanitizeRequiredText(dto.content);
     const r = await this.prisma.review.update({
       where: { id: reviewId },
       data,

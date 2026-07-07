@@ -13,9 +13,7 @@ export class PlaceRatingService {
     });
     const ratingCount = agg._count._all;
     const ratingAvg =
-      ratingCount > 0 && agg._avg.rating
-        ? Math.round(agg._avg.rating * 100) / 100
-        : 0;
+      ratingCount > 0 && agg._avg.rating ? Math.round(agg._avg.rating * 100) / 100 : 0;
     await this.prisma.place.update({
       where: { id: placeId },
       data: { ratingCount, ratingAvg },

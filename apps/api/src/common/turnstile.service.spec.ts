@@ -71,6 +71,10 @@ describe('TurnstileService', () => {
       config({ TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'secret' }),
     );
     const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: jest.fn().mockResolvedValue({ success: true }),
       text: jest.fn().mockResolvedValue(JSON.stringify({ success: true })),
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -81,6 +85,7 @@ describe('TurnstileService', () => {
       expect.objectContaining({
         method: 'POST',
         body: expect.any(URLSearchParams),
+        signal: expect.any(AbortSignal),
       }),
     );
   });
@@ -90,6 +95,12 @@ describe('TurnstileService', () => {
       config({ TURNSTILE_ENABLED: 'true', TURNSTILE_SECRET_KEY: 'secret' }),
     );
     globalThis.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: jest
+        .fn()
+        .mockResolvedValue({ success: false, 'error-codes': ['invalid-input-response'] }),
       text: jest
         .fn()
         .mockResolvedValue(

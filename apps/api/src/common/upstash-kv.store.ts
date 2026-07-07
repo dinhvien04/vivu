@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { fetchJson } from './fetch-json';
 
 export interface KvStore {
   setJson(key: string, value: unknown, ttlSeconds: number): Promise<void>;
@@ -41,7 +42,7 @@ export class UpstashKvStore implements KvStore {
   async setJson(key: string, value: unknown, ttlSeconds: number): Promise<void> {
     if (!this.url || !this.token) return;
     try {
-      const response = await fetch(`${this.url}/set/${encodeURIComponent(key)}`, {
+      const response = await fetchJson(`${this.url}/set/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,
@@ -51,31 +52,29 @@ export class UpstashKvStore implements KvStore {
           value: JSON.stringify(value),
           ex: ttlSeconds,
         }),
+        timeoutMs: 5_000,
       });
       if (!response.ok) {
         throw new Error(`Upstash SET failed: ${response.status}`);
       }
     } catch (err) {
-      this.logger.error(
-        `Upstash KV set failed: ${err instanceof Error ? err.message : err}`,
-      );
+      this.logger.error(`Upstash KV set failed: ${err instanceof Error ? err.message : err}`);
     }
   }
 
   async getJson<T>(key: string): Promise<T | null> {
     if (!this.url || !this.token) return null;
     try {
-      const response = await fetch(`${this.url}/get/${encodeURIComponent(key)}`, {
+      const response = await fetchJson(`${this.url}/get/${encodeURIComponent(key)}`, {
         headers: { Authorization: `Bearer ${this.token}` },
+        timeoutMs: 5_000,
       });
       if (!response.ok) return null;
       const json = (await response.json()) as { result?: string | null };
       if (!json.result) return null;
       return JSON.parse(json.result) as T;
     } catch (err) {
-      this.logger.error(
-        `Upstash KV get failed: ${err instanceof Error ? err.message : err}`,
-      );
+      this.logger.error(`Upstash KV get failed: ${err instanceof Error ? err.message : err}`);
       return null;
     }
   }
@@ -83,14 +82,13 @@ export class UpstashKvStore implements KvStore {
   async delete(key: string): Promise<void> {
     if (!this.url || !this.token) return;
     try {
-      await fetch(`${this.url}/del/${encodeURIComponent(key)}`, {
+      await fetchJson(`${this.url}/del/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.token}` },
+        timeoutMs: 5_000,
       });
     } catch (err) {
-      this.logger.error(
-        `Upstash KV delete failed: ${err instanceof Error ? err.message : err}`,
-      );
+      this.logger.error(`Upstash KV delete failed: ${err instanceof Error ? err.message : err}`);
     }
   }
 }

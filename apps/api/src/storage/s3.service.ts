@@ -15,6 +15,8 @@ export class S3Service {
   private readonly presignedUrlCache = new Map<string, { url: string; expiresAt: number }>();
   private readonly pendingPresignedUrls = new Map<string, Promise<string>>();
 
+  private readonly pruneTimer?: ReturnType<typeof setInterval>;
+
   constructor(config: ConfigService) {
     const region = config.get<string>('AWS_REGION') ?? 'ap-southeast-1';
     const accessKeyId = config.get<string>('AWS_ACCESS_KEY_ID');
@@ -35,6 +37,13 @@ export class S3Service {
       region,
       credentials: accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined,
     });
+
+    if (this.cacheTtlMs > 0 && this.maxCacheEntries > 0) {
+      this.pruneTimer = setInterval(() => {
+        this.prunePresignedUrlCache(Date.now());
+      }, 60_000);
+      this.pruneTimer.unref?.();
+    }
   }
 
   assertConfigured(): void {
@@ -50,8 +59,10 @@ export class S3Service {
     const cached = this.presignedUrlCache.get(key);
     if (cached && cached.expiresAt > now) return cached.url;
 
-    const pending = this.pendingPresignedUrls.get(key);
-    if (pending) return pending;
+    if (this.pendingPresignedUrls.size < this.maxCacheEntries) {
+      const pending = this.pendingPresignedUrls.get(key);
+      if (pending) return pending;
+    }
 
     const signing = getSignedUrl(
       this.client,
@@ -69,7 +80,9 @@ export class S3Service {
         this.pendingPresignedUrls.delete(key);
       });
 
-    this.pendingPresignedUrls.set(key, signing);
+    if (this.pendingPresignedUrls.size < this.maxCacheEntries) {
+      this.pendingPresignedUrls.set(key, signing);
+    }
     return signing;
   }
 

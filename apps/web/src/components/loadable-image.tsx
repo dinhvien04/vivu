@@ -6,8 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 
 type ImageStatus = 'loading' | 'loaded' | 'error';
 
-interface LoadableImageProps
-  extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'alt' | 'className' | 'src'> {
+interface LoadableImageProps extends Omit<
+  ImgHTMLAttributes<HTMLImageElement>,
+  'alt' | 'className' | 'src'
+> {
   src: string;
   alt: string;
   className?: string;

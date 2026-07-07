@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { InMemoryKvStore, KV_STORE, UpstashKvStore } from './upstash-kv.store';
+import { assertUpstashRedisInProduction, hasUpstashRedisConfig } from './upstash-env';
 
 @Global()
 @Module({
@@ -9,9 +10,8 @@ import { InMemoryKvStore, KV_STORE, UpstashKvStore } from './upstash-kv.store';
     {
       provide: KV_STORE,
       useFactory: (upstash: UpstashKvStore, memory: InMemoryKvStore) => {
-        const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-        const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-        return url && token ? upstash : memory;
+        assertUpstashRedisInProduction();
+        return hasUpstashRedisConfig() ? upstash : memory;
       },
       inject: [UpstashKvStore, InMemoryKvStore],
     },

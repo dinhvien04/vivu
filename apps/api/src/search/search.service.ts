@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PUBLIC_PROVINCE } from '../common/public-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchIndexService } from './search-index.service';
 
@@ -62,7 +63,7 @@ export class SearchService {
         "heroImageUrl"
       FROM "Place"
       WHERE "status"::text = 'published'
-        AND LOWER("province") = LOWER('Gia Lai')
+        AND LOWER("province") = LOWER(${PUBLIC_PROVINCE})
         AND ("heroImageUrl" IS NOT NULL OR "heroImageS3Key" IS NOT NULL)
         AND (
           "titleVi" ILIKE ${pattern}

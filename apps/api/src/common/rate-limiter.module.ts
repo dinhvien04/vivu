@@ -1,9 +1,11 @@
 import { Global, Module } from '@nestjs/common';
 import {
+  createRateLimiterStore,
   InMemoryRateLimiterStore,
   RATE_LIMITER_STORE,
   UpstashRedisRateLimiterStore,
 } from './rate-limiter.store';
+import { assertUpstashRedisInProduction } from './upstash-env';
 
 @Global()
 @Module({
@@ -13,9 +15,8 @@ import {
     {
       provide: RATE_LIMITER_STORE,
       useFactory: (upstash: UpstashRedisRateLimiterStore, memory: InMemoryRateLimiterStore) => {
-        const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-        const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-        return url && token ? upstash : memory;
+        assertUpstashRedisInProduction();
+        return createRateLimiterStore(upstash, memory);
       },
       inject: [UpstashRedisRateLimiterStore, InMemoryRateLimiterStore],
     },

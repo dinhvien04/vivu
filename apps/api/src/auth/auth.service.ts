@@ -12,8 +12,10 @@ import { createHash, randomBytes } from 'crypto';
 import type { FastifyRequest } from 'fastify';
 import { EmailService } from '../common/email.service';
 import { RATE_LIMITER_STORE, type RateLimiterStore } from '../common/rate-limiter.store';
+import { sanitizeRequiredText, sanitizeText } from '../common/sanitize';
 import { KV_STORE, type KvStore } from '../common/upstash-kv.store';
 import { PrismaService } from '../prisma/prisma.service';
+import { resolveJwtAccessSecret } from './jwt-secret';
 
 const ACCESS_TTL = '15m';
 const REFRESH_TTL_DAYS = 7;
@@ -66,11 +68,7 @@ export class AuthService {
     @Inject(KV_STORE) private readonly kv: KvStore,
     config: ConfigService,
   ) {
-    const secret = config.get<string>('JWT_ACCESS_SECRET');
-    if (!secret) {
-      throw new Error('JWT_ACCESS_SECRET is not set. Add it to apps/api/.env');
-    }
-    this.accessSecret = secret;
+    this.accessSecret = resolveJwtAccessSecret(config);
     this.production = config.get<string>('NODE_ENV') === 'production';
     this.loginMaxFailures = positiveInteger(config.get<string>('AUTH_LOGIN_MAX_FAILURES'), 5);
     this.loginLockoutWindowMs = positiveInteger(
@@ -96,7 +94,7 @@ export class AuthService {
     }
     const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
     const user = await this.prisma.user.create({
-      data: { email, name: input.name.trim(), passwordHash },
+      data: { email, name: sanitizeRequiredText(input.name), passwordHash },
       select: USER_PUBLIC_SELECT,
     });
     const tokens = await this.issueTokens(user);
@@ -345,9 +343,9 @@ export class AuthService {
       location?: string | null;
       avatarUrl?: string | null;
     } = {};
-    if (input.name !== undefined) data.name = input.name.trim();
-    if (input.bio !== undefined) data.bio = input.bio.trim() || null;
-    if (input.location !== undefined) data.location = input.location.trim() || null;
+    if (input.name !== undefined) data.name = sanitizeRequiredText(input.name);
+    if (input.bio !== undefined) data.bio = sanitizeText(input.bio);
+    if (input.location !== undefined) data.location = sanitizeText(input.location);
     if (input.avatarUrl !== undefined) data.avatarUrl = input.avatarUrl.trim() || null;
     const user = await this.prisma.user.update({
       where: { id: userId },
@@ -444,7 +442,6 @@ export class AuthService {
       .update(email)
       .digest('hex');
   }
-
 }
 
 function getRequestIp(request?: FastifyRequest): string | null {

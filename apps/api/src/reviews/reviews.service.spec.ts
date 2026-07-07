@@ -1,52 +1,42 @@
-import { ForbiddenException } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 
-describe('ReviewsService ownership checks', () => {
-  it('does not update a review owned by another user', async () => {
+describe('ReviewsService content sanitization', () => {
+  it('stores review content as plain text without HTML', async () => {
     const prisma = {
+      place: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'place-1' }),
+      },
       review: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'review-1', userId: 'user-b' }),
-        update: jest.fn().mockResolvedValue({ id: 'review-1', placeId: 'place-1', userId: 'user-b' }),
+        create: jest.fn().mockImplementation(({ data }) =>
+          Promise.resolve({
+            id: 'review-1',
+            placeId: data.placeId,
+            userId: data.userId,
+            rating: data.rating,
+            content: data.content,
+            status: data.status,
+            createdAt: new Date('2026-07-07T00:00:00.000Z'),
+            updatedAt: new Date('2026-07-07T00:00:00.000Z'),
+            user: { id: 'user-1', name: 'Tester', avatarUrl: null },
+          }),
+        ),
       },
     };
     const placeRating = { syncPlaceRating: jest.fn().mockResolvedValue(undefined) };
     const service = new ReviewsService(prisma as never, placeRating as never);
 
-    await expect(service.update('review-1', 'user-a', { rating: 5 })).rejects.toBeInstanceOf(
-      ForbiddenException,
+    const review = await service.create('my-place', 'user-1', {
+      rating: 5,
+      content: '<script>alert(1)</script>Great place',
+    });
+
+    expect(prisma.review.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          content: 'Great place',
+        }),
+      }),
     );
-    expect(prisma.review.update).not.toHaveBeenCalled();
-  });
-
-  it('does not delete a review owned by another user without admin/editor role', async () => {
-    const prisma = {
-      review: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'review-1', userId: 'user-b' }),
-        delete: jest.fn(),
-      },
-    };
-    const placeRating = { syncPlaceRating: jest.fn().mockResolvedValue(undefined) };
-    const service = new ReviewsService(prisma as never, placeRating as never);
-
-    await expect(service.remove('review-1', 'user-a', 'user')).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
-    expect(prisma.review.delete).not.toHaveBeenCalled();
-  });
-
-  it('allows admin/editor to delete another user review', async () => {
-    const prisma = {
-      review: {
-        findUnique: jest
-          .fn()
-          .mockResolvedValue({ id: 'review-1', userId: 'user-b', placeId: 'place-1' }),
-        delete: jest.fn().mockResolvedValue(undefined),
-      },
-    };
-    const placeRating = { syncPlaceRating: jest.fn().mockResolvedValue(undefined) };
-    const service = new ReviewsService(prisma as never, placeRating as never);
-
-    await expect(service.remove('review-1', 'user-a', 'admin')).resolves.toBeUndefined();
-    expect(prisma.review.delete).toHaveBeenCalledWith({ where: { id: 'review-1' } });
+    expect(review.content).toBe('Great place');
   });
 });

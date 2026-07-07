@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { fetchJson } from './fetch-json';
 
 @Injectable()
 export class EmailService {
@@ -36,7 +37,7 @@ export class EmailService {
       return;
     }
 
-    const response = await fetch('https://api.resend.com/emails', {
+    const response = await fetchJson('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.resendApiKey}`,

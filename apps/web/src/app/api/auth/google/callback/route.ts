@@ -26,7 +26,10 @@ export async function GET(req: NextRequest) {
 
   const tokens = body as { accessToken?: string; refreshToken?: string };
   if (!tokens.refreshToken) {
-    return NextResponse.json({ message: 'Missing refresh token from OAuth exchange' }, { status: 502 });
+    return NextResponse.json(
+      { message: 'Missing refresh token from OAuth exchange' },
+      { status: 502 },
+    );
   }
 
   await setRefreshCookie(tokens.refreshToken);
