@@ -17,7 +17,14 @@ export class FetchTimeoutError extends Error {
   }
 }
 
-export interface FetchJsonOptions extends RequestInit {
+export type FetchJsonHeaders = Record<string, string>;
+
+/** Explicit fetch options — avoids incomplete `RequestInit` without DOM lib on Vercel/Nest builds. */
+export interface FetchJsonOptions {
+  method?: string;
+  headers?: FetchJsonHeaders;
+  body?: string | URLSearchParams | null;
+  signal?: AbortSignal;
   timeoutMs?: number;
 }
 
