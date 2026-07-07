@@ -7,19 +7,21 @@ Tài liệu này cung cấp hướng dẫn từng bước để thiết lập, c
 ## 1. Yêu cầu tiên quyết (System Prerequisites)
 
 Đảm bảo máy tính của bạn đã được cài đặt đầy đủ các phần mềm sau:
-*   **Node.js**: Phiên bản **20.x LTS** trở lên. Bạn có thể kiểm tra bằng lệnh `node -v`. Khuyên dùng công cụ `nvm` để quản lý phiên bản Node.
-*   **pnpm**: Phiên bản **9.x** trở lên. Cài đặt toàn cục bằng lệnh:
-    ```bash
-    npm install -g pnpm@9
-    ```
-*   **Docker Desktop**: Bắt buộc để khởi chạy database PostgreSQL (tích hợp PostGIS) và Meilisearch cục bộ. Đảm bảo Docker Daemon đang hoạt động.
-*   **Git**: Để clone repo và theo dõi lịch sử commit.
+
+- **Node.js**: Phiên bản **20.x LTS** trở lên. Bạn có thể kiểm tra bằng lệnh `node -v`. Khuyên dùng công cụ `nvm` để quản lý phiên bản Node.
+- **pnpm**: Phiên bản **9.x** trở lên. Cài đặt toàn cục bằng lệnh:
+  ```bash
+  npm install -g pnpm@9
+  ```
+- **Docker Desktop**: Bắt buộc để khởi chạy database PostgreSQL (tích hợp PostGIS) và Meilisearch cục bộ. Đảm bảo Docker Daemon đang hoạt động.
+- **Git**: Để clone repo và theo dõi lịch sử commit.
 
 ---
 
 ## 2. Các bước cài đặt cơ bản (Step-by-Step Setup)
 
 ### Bước 1: Clone repo và tải dependencies
+
 ```bash
 git clone https://github.com/dinhvien04/vivu.git
 cd vivu
@@ -27,17 +29,23 @@ pnpm install
 ```
 
 ### Bước 2: Thiết lập môi trường Docker
+
 Khởi động cơ sở dữ liệu PostgreSQL (có PostGIS) và dịch vụ Meilisearch thông qua Docker Compose ở chế độ nền (detached mode):
+
 ```bash
 docker compose up -d db meilisearch
 ```
+
 Kiểm tra trạng thái các container đang chạy:
+
 ```bash
 docker ps
 ```
+
 Bạn sẽ thấy 2 container hoạt động tại các cổng:
-*   PostgreSQL: `localhost:5432`
-*   Meilisearch: `localhost:7700`
+
+- PostgreSQL: `localhost:5432`
+- Meilisearch: `localhost:7700`
 
 ---
 
@@ -46,6 +54,7 @@ Bạn sẽ thấy 2 container hoạt động tại các cổng:
 Tùy vào mục tiêu công việc, bạn hãy chọn một trong hai cách chạy sau:
 
 ### Cách 1: Chỉ chạy Frontend Web (Gọi API Production)
+
 Cách này phù hợp khi bạn cần tinh chỉnh CSS, cập nhật giao diện, SEO, viết component hoặc dịch đa ngôn ngữ mà không cần quan tâm đến backend database local.
 
 1.  Tạo file `apps/web/.env.local`:
@@ -65,37 +74,39 @@ Cách này phù hợp khi bạn cần tinh chỉnh CSS, cập nhật giao diện
 ---
 
 ### Cách 2: Chạy Full Local (Frontend + Backend + DB)
+
 Cách này phù hợp khi bạn cần xây dựng API mới, thay đổi cấu trúc bảng database, viết thêm script đồng bộ dữ liệu hoặc kiểm thử toàn trình hệ thống.
 
 1.  **Thiết lập file cấu hình môi trường**:
-    *   **Trên Windows (PowerShell)**:
-        ```powershell
-        Copy-Item apps/api/.env.example apps/api/.env
-        Copy-Item apps/web/.env.example apps/web/.env.local
-        ```
-    *   **Trên Unix / macOS (Terminal)**:
-        ```bash
-        cp apps/api/.env.example apps/api/.env
-        cp apps/web/.env.example apps/web/.env.local
-        ```
+    - **Trên Windows (PowerShell)**:
+      ```powershell
+      Copy-Item apps/api/.env.example apps/api/.env
+      Copy-Item apps/web/.env.example apps/web/.env.local
+      ```
+    - **Trên Unix / macOS (Terminal)**:
+      ```bash
+      cp apps/api/.env.example apps/api/.env
+      cp apps/web/.env.example apps/web/.env.local
+      ```
 
 2.  **Chỉnh sửa biến môi trường cục bộ**:
-    *   Mở file `apps/api/.env` và đảm bảo thông tin kết nối database trỏ về localhost:
-        ```env
-        DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vivu?schema=public"
-        DIRECT_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vivu?schema=public"
-        ```
-    *   Mở file `apps/web/.env.local` và trỏ API về server local:
-        ```env
-        NEXT_PUBLIC_API_URL=http://localhost:4000
-        API_INTERNAL_URL=http://localhost:4000
-        ```
-    *   Auth local dùng hệ thống tự quản lý của Vivu: đăng ký/đăng nhập qua
-        `/dang-ky` và `/dang-nhap`, backend phát JWT access token và refresh
-        token HTTP-only. Không cần cấu hình hosted auth provider để chạy local.
+    - Mở file `apps/api/.env` và đảm bảo thông tin kết nối database trỏ về localhost:
+      ```env
+      DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vivu?schema=public"
+      DIRECT_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vivu?schema=public"
+      ```
+    - Mở file `apps/web/.env.local` và trỏ API về server local:
+      ```env
+      NEXT_PUBLIC_API_URL=http://localhost:4000
+      API_INTERNAL_URL=http://localhost:4000
+      ```
+    - Auth local dùng hệ thống tự quản lý của Vivu: đăng ký/đăng nhập qua
+      `/dang-ky` và `/dang-nhap`, backend phát JWT access token và refresh
+      token HTTP-only. Không cần cấu hình hosted auth provider để chạy local.
 
 3.  **Khởi tạo cơ sở dữ liệu cục bộ**:
     Chạy script thiết lập database để kích hoạt extension PostGIS, đẩy schema Prisma lên database và sinh Prisma Client:
+
     ```bash
     pnpm --filter @vivu/api db:setup
     pnpm --filter @vivu/api prisma:generate
@@ -113,35 +124,36 @@ Cách này phù hợp khi bạn cần xây dựng API mới, thay đổi cấu t
 
 Khi chạy full local lần đầu tiên, cơ sở dữ liệu của bạn sẽ trống. Hãy chạy các script sau để nạp dữ liệu:
 
-*   **Đồng bộ danh sách địa danh & ảnh từ S3**:
-    Script này sẽ quét thư mục trên S3 bucket, tạo các bản ghi địa danh tương ứng trong PostgreSQL:
-    ```bash
-    pnpm --filter @vivu/api sync:locations
-    ```
-*   **Đồng bộ tọa độ bản đồ**:
-    Cập nhật tọa độ thực tế của địa danh từ file JSON cấu hình cục bộ vào database:
-    ```bash
-    pnpm --filter @vivu/api sync:coordinates
-    ```
-*   **Tái thiết lập chỉ mục Meilisearch**:
-    Đẩy toàn bộ địa điểm từ DB local sang Meilisearch local để hỗ trợ tính năng gợi ý tìm kiếm:
-    ```bash
-    pnpm --filter @vivu/api reindex:meili
-    ```
+- **Đồng bộ danh sách địa danh & ảnh từ S3**:
+  Script này sẽ quét thư mục trên S3 bucket, tạo các bản ghi địa danh tương ứng trong PostgreSQL:
+  ```bash
+  pnpm --filter @vivu/api sync:locations
+  ```
+- **Đồng bộ tọa độ bản đồ**:
+  Cập nhật tọa độ thực tế của địa danh từ file JSON cấu hình cục bộ vào database:
+  ```bash
+  pnpm --filter @vivu/api sync:coordinates
+  ```
+- **Tái thiết lập chỉ mục Meilisearch**:
+  Đẩy toàn bộ địa điểm từ DB local sang Meilisearch local để hỗ trợ tính năng gợi ý tìm kiếm:
+  ```bash
+  pnpm --filter @vivu/api reindex:meili
+  ```
 
 ---
 
 ## 5. Chạy Kiểm thử cục bộ (Local Testing)
 
 Đảm bảo chất lượng mã nguồn trước khi tạo Pull Request:
-*   **Linter & Code Formatting**: `pnpm lint`
-*   **Type Checking**: `pnpm typecheck`
-*   **Backend Unit Tests**: `pnpm --filter @vivu/api test`
-*   **Backend Integration Tests**: `pnpm --filter @vivu/api test:int` (Yêu cầu Docker database đang chạy).
-*   **Frontend E2E Playwright Tests**:
-    ```bash
-    E2E_BASE_URL=http://localhost:3000 pnpm e2e:web
-    ```
+
+- **Linter & Code Formatting**: `pnpm lint`
+- **Type Checking**: `pnpm typecheck`
+- **Backend Unit Tests**: `pnpm --filter @vivu/api test`
+- **Backend Integration Tests**: `pnpm --filter @vivu/api test:int` (Yêu cầu Docker database đang chạy).
+- **Frontend E2E Playwright Tests**:
+  ```bash
+  E2E_BASE_URL=http://localhost:3000 pnpm e2e:web
+  ```
 
 ### Google sign-in TODO
 

@@ -151,7 +151,9 @@ export function ReviewsSection({
             <Icon name="rate_review" className="!text-3xl" />
           </div>
           <h3 className="mt-4 font-bold text-lg text-on-surface">{t('emptyTitle')}</h3>
-          <p className="mt-2 text-body-md text-on-surface-variant max-w-sm mx-auto">{t('emptyLead')}</p>
+          <p className="mt-2 text-body-md text-on-surface-variant max-w-sm mx-auto">
+            {t('emptyLead')}
+          </p>
         </div>
       ) : (
         <ul className="space-y-4">
@@ -173,7 +175,9 @@ export function ReviewsSection({
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
-                        <span className="font-semibold text-sm">{r.user.name.charAt(0).toUpperCase()}</span>
+                        <span className="font-semibold text-sm">
+                          {r.user.name.charAt(0).toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <div>

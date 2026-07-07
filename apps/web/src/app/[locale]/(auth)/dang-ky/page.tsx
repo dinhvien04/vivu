@@ -98,7 +98,10 @@ function LegacyRegisterForm({ next }: { next: string }) {
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col gap-1.5">
-          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="name">
+          <label
+            className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+            htmlFor="name"
+          >
             {t('displayName')}
           </label>
           <div className="relative flex items-center">
@@ -119,7 +122,10 @@ function LegacyRegisterForm({ next }: { next: string }) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="email">
+          <label
+            className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+            htmlFor="email"
+          >
             {t('email')}
           </label>
           <div className="relative flex items-center">
@@ -141,7 +147,10 @@ function LegacyRegisterForm({ next }: { next: string }) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="password">
+          <label
+            className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+            htmlFor="password"
+          >
             {t('password')}
           </label>
           <div className="relative flex items-center">
@@ -161,11 +170,16 @@ function LegacyRegisterForm({ next }: { next: string }) {
               className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 pl-11 pr-4 py-3.5 text-body-md outline-none transition-all placeholder:text-neutral-400/80 dark:placeholder:text-neutral-600 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10"
             />
           </div>
-          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-normal">{t('passwordHint')}</p>
+          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-normal">
+            {t('passwordHint')}
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="confirm">
+          <label
+            className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+            htmlFor="confirm"
+          >
             {t('passwordConfirm')}
           </label>
           <div className="relative flex items-center">
@@ -196,12 +210,18 @@ function LegacyRegisterForm({ next }: { next: string }) {
           <span>
             {t.rich('termsCheckbox', {
               terms: (chunks: ReactNode) => (
-                <Link href="/dieu-khoan-su-dung" className="font-semibold text-primary hover:underline">
+                <Link
+                  href="/dieu-khoan-su-dung"
+                  className="font-semibold text-primary hover:underline"
+                >
                   {chunks}
                 </Link>
               ),
               privacy: (chunks: ReactNode) => (
-                <Link href="/chinh-sach-bao-mat" className="font-semibold text-primary hover:underline">
+                <Link
+                  href="/chinh-sach-bao-mat"
+                  className="font-semibold text-primary hover:underline"
+                >
                   {chunks}
                 </Link>
               ),

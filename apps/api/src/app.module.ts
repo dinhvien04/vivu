@@ -4,7 +4,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { KvModule } from './common/kv.module';
 import { RateLimiterModule } from './common/rate-limiter.module';
-import { UpstashThrottlerStorage } from './common/upstash-throttler.storage';
+import {
+  assertThrottlerStorageReady,
+  UpstashThrottlerStorage,
+} from './common/upstash-throttler.storage';
 import { AdminPlacesModule } from './admin-places/admin-places.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { AdminStatsModule } from './admin-stats/admin-stats.module';
@@ -31,6 +34,8 @@ import { GeminiModule } from './gemini/gemini.module';
 import { QdrantModule } from './qdrant/qdrant.module';
 import { StorageModule } from './storage/storage.module';
 import { TripPlansModule } from './trip-plans/trip-plans.module';
+
+assertThrottlerStorageReady();
 
 @Module({
   imports: [

@@ -57,9 +57,7 @@ export class UpstashKvStore implements KvStore {
         throw new Error(`Upstash SET failed: ${response.status}`);
       }
     } catch (err) {
-      this.logger.error(
-        `Upstash KV set failed: ${err instanceof Error ? err.message : err}`,
-      );
+      this.logger.error(`Upstash KV set failed: ${err instanceof Error ? err.message : err}`);
     }
   }
 
@@ -74,9 +72,7 @@ export class UpstashKvStore implements KvStore {
       if (!json.result) return null;
       return JSON.parse(json.result) as T;
     } catch (err) {
-      this.logger.error(
-        `Upstash KV get failed: ${err instanceof Error ? err.message : err}`,
-      );
+      this.logger.error(`Upstash KV get failed: ${err instanceof Error ? err.message : err}`);
       return null;
     }
   }
@@ -89,9 +85,7 @@ export class UpstashKvStore implements KvStore {
         headers: { Authorization: `Bearer ${this.token}` },
       });
     } catch (err) {
-      this.logger.error(
-        `Upstash KV delete failed: ${err instanceof Error ? err.message : err}`,
-      );
+      this.logger.error(`Upstash KV delete failed: ${err instanceof Error ? err.message : err}`);
     }
   }
 }

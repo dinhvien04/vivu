@@ -6,6 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import type { FastifyRequest } from 'fastify';
@@ -14,15 +15,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import type { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
 import { parseTripPlanOutput, TRIP_PLAN_RESPONSE_JSON_SCHEMA } from './trip-plan-json';
+import { PUBLIC_PROVINCE } from '../common/public-scope';
 import { TripPlannerQuotaService } from './trip-planner-quota.service';
-import type {
-  TripPlanDay,
-  TripPlanItem,
-  TripPlanOutput,
-  TripTimeOfDay,
-} from './trip-plan.types';
-
-const PUBLIC_PROVINCE = 'Gia Lai';
+import type { TripPlanDay, TripPlanItem, TripPlanOutput, TripTimeOfDay } from './trip-plan.types';
 
 const AREA_KEYWORDS: Record<string, string[]> = {
   pleiku: ['pleiku', 'biển hồ', 'bien ho', 'nhà lao pleiku'],
@@ -44,12 +39,21 @@ type CandidatePlace = Prisma.PlaceGetPayload<{
 @Injectable()
 export class TripPlansService {
   private readonly logger = new Logger(TripPlansService.name);
+  private readonly maxCandidates: number;
+  private readonly maxOutputTokens: number;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiText: AiTextGenerationService,
     private readonly quota: TripPlannerQuotaService,
-  ) { }
+    config: ConfigService,
+  ) {
+    this.maxCandidates = positiveInteger(config.get<string>('TRIP_PLANNER_MAX_CANDIDATES'), 40);
+    this.maxOutputTokens = positiveInteger(
+      config.get<string>('TRIP_PLANNER_MAX_OUTPUT_TOKENS'),
+      3200,
+    );
+  }
 
   async generate(
     dto: GenerateTripPlanDto,
@@ -79,7 +83,7 @@ export class TripPlansService {
         prompt,
         {
           temperature: 0.15,
-          maxOutputTokens: tripPlannerMaxOutputTokens(),
+          maxOutputTokens: this.maxOutputTokens,
           responseMimeType: 'application/json',
           responseJsonSchema: TRIP_PLAN_RESPONSE_JSON_SCHEMA,
         },
@@ -282,15 +286,10 @@ export class TripPlansService {
       ];
     }
 
-    const maxCandidates = (() => {
-      const parsed = Number(process.env.TRIP_PLANNER_MAX_CANDIDATES);
-      return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 40;
-    })();
-
     return this.prisma.place.findMany({
       where,
       orderBy: [{ isAiReady: 'desc' }, { updatedAt: 'desc' }],
-      take: maxCandidates,
+      take: this.maxCandidates,
       include: {
         region: true,
         categories: { include: { category: true } },
@@ -299,13 +298,22 @@ export class TripPlansService {
   }
 
   private async createUniqueShareId(): Promise<string> {
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const shareId = randomBytes(12).toString('base64url');
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const shareId =
+        attempt < 5 ? randomBytes(12).toString('base64url') : randomBytes(18).toString('base64url');
       const existing = await this.prisma.tripPlan.findUnique({ where: { shareId } });
       if (!existing) return shareId;
     }
-    return `${randomBytes(18).toString('base64url')}`;
+    throw new HttpException(
+      'Không thể tạo mã chia sẻ lịch trình. Vui lòng thử lại.',
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
   }
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
 function buildTripPlannerPrompt(dto: GenerateTripPlanDto, places: CandidatePlace[]): string {
@@ -336,11 +344,6 @@ function buildTripPlannerPrompt(dto: GenerateTripPlanDto, places: CandidatePlace
   ].join('\n');
 }
 
-function tripPlannerMaxOutputTokens(): number {
-  const parsed = Number(process.env.TRIP_PLANNER_MAX_OUTPUT_TOKENS);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 3200;
-}
-
 function isRecoverableAiGenerationError(error: unknown): error is HttpException {
   if (!(error instanceof HttpException)) return false;
   return [
@@ -363,10 +366,11 @@ function buildLocalFallbackPlan(
     const items: TripPlanItem[] = Array.from({ length: itemsPerDay }, (_, itemIndex) => {
       const place = places[(dayIndex * itemsPerDay + itemIndex) % places.length]!;
       const placeName =
-        (english ? place.titleEn ?? place.titleVi : place.titleVi ?? place.titleEn) ?? place.slug;
+        (english ? (place.titleEn ?? place.titleVi) : (place.titleVi ?? place.titleEn)) ??
+        place.slug;
       const summary = english
-        ? place.summaryEn ?? place.summaryVi
-        : place.summaryVi ?? place.summaryEn;
+        ? (place.summaryEn ?? place.summaryVi)
+        : (place.summaryVi ?? place.summaryEn);
 
       return {
         timeOfDay: timeSlots[itemIndex] ?? 'morning',
@@ -425,13 +429,13 @@ function buildLocalFallbackPlan(
 
 function collectPlaceIds(output: TripPlanOutput, places: CandidatePlace[]): string[] {
   const idBySlug = new Map(places.map((place) => [place.slug, place.id]));
-  const ids: string[] = [];
+  const ids = new Set<string>();
   for (const day of output.days) {
     for (const item of day.items) {
       if (!item.placeSlug) continue;
       const id = idBySlug.get(item.placeSlug);
-      if (id && !ids.includes(id)) ids.push(id);
+      if (id) ids.add(id);
     }
   }
-  return ids;
+  return [...ids];
 }

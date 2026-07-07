@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ThrottlerStorage } from '@nestjs/throttler';
 import { fetchJson } from './fetch-json';
+import {
+  hasUpstashRedisConfig,
+  isProductionEnv,
+  isTestEnv,
+  shouldFailClosedOnRedisErrors,
+} from './upstash-env';
 
 interface ThrottlerStorageRecord {
   totalHits: number;
@@ -15,7 +21,6 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
   private readonly url = process.env.UPSTASH_REDIS_REST_URL?.trim();
   private readonly token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
   private readonly fallback = new Map<string, { totalHits: number; expiresAt: number }>();
-
   async increment(
     key: string,
     ttl: number,
@@ -25,8 +30,10 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
   ): Promise<ThrottlerStorageRecord> {
     const storageKey = `throttle:${throttlerName}:${key}`;
     const ttlSeconds = Math.max(1, Math.ceil(ttl / 1000));
+    const failClosed = shouldFailClosedOnRedisErrors();
+    const useMemory = !hasUpstashRedisConfig() && !failClosed;
 
-    if (!this.url || !this.token) {
+    if (useMemory) {
       return this.incrementInMemory(storageKey, ttl, limit, blockDuration);
     }
 
@@ -66,8 +73,18 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
       };
     } catch (err) {
       this.logger.error(
-        `Upstash throttler failed: ${err instanceof Error ? err.message : err}. Falling back to memory.`,
+        `Upstash throttler failed: ${err instanceof Error ? err.message : err}. ${
+          failClosed ? 'Blocking request.' : 'Falling back to memory.'
+        }`,
       );
+      if (failClosed) {
+        return {
+          totalHits: limit + 1,
+          timeToExpire: ttl,
+          isBlocked: true,
+          timeToBlockExpire: blockDuration,
+        };
+      }
       return this.incrementInMemory(storageKey, ttl, limit, blockDuration);
     }
   }
@@ -93,4 +110,13 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
       timeToBlockExpire: isBlocked ? blockDuration : 0,
     };
   }
+}
+
+export function assertThrottlerStorageReady(): void {
+  if (hasUpstashRedisConfig() || !isProductionEnv() || isTestEnv()) {
+    return;
+  }
+  throw new Error(
+    'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production for request throttling.',
+  );
 }

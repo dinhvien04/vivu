@@ -54,13 +54,19 @@ export function PlaceCard({ place, locale, compact = false }: PlaceCardProps) {
             <span className="inline-flex items-center gap-1 text-body-sm font-bold text-on-surface">
               <Icon name="star" className="!text-base text-amber-500 animate-pulse" />
               {place.rating.average.toFixed(1)}
-              <span className="font-normal text-on-surface-variant text-xs">({place.rating.count})</span>
+              <span className="font-normal text-on-surface-variant text-xs">
+                ({place.rating.count})
+              </span>
             </span>
           )}
         </div>
-        <h3 className="font-bold text-lg text-on-surface line-clamp-1 group-hover:text-primary transition-colors duration-200">{title}</h3>
+        <h3 className="font-bold text-lg text-on-surface line-clamp-1 group-hover:text-primary transition-colors duration-200">
+          {title}
+        </h3>
         {summary && (
-          <p className="line-clamp-2 text-body-sm text-on-surface-variant leading-relaxed">{summary}</p>
+          <p className="line-clamp-2 text-body-sm text-on-surface-variant leading-relaxed">
+            {summary}
+          </p>
         )}
         <div className="mt-auto pt-3 flex flex-wrap gap-1.5">
           {badges.map((badge) => (

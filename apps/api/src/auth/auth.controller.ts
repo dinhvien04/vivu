@@ -9,17 +9,17 @@ import {
   Post,
   Redirect,
   Req,
-  Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyRequest } from 'fastify';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
-import { sanitizeRelativePath } from '../common/sanitize-path';
+import { OAuthStateService } from './oauth-state.service';
 import { TurnstileService } from '../common/turnstile.service';
 import {
   ChangePasswordDto,
@@ -43,19 +43,15 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly turnstile: TurnstileService,
+    private readonly oauthState: OAuthStateService,
   ) {}
 
   @Public()
   @Get('google')
   @Redirect('https://accounts.google.com', 302)
   async googleAuth(@Req() req: FastifyRequest) {
-    const { next, origin } = req.query as any;
-
-    const stateObj = {
-      next: sanitizeRelativePath(next),
-      origin: origin || 'http://localhost:3000',
-    };
-    const state = Buffer.from(JSON.stringify(stateObj)).toString('base64');
+    const { next, origin } = req.query as { next?: string; origin?: string };
+    const state = await this.oauthState.createState(next, origin);
 
     const clientID = process.env.GOOGLE_CLIENT_ID;
     const callbackURL = process.env.GOOGLE_CALLBACK_URL;
@@ -64,7 +60,8 @@ export class AuthController {
       throw new Error('Google OAuth configuration is missing in API environment variables');
     }
 
-    const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+    const googleUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
       `response_type=code` +
       `&client_id=${encodeURIComponent(clientID)}` +
       `&redirect_uri=${encodeURIComponent(callbackURL)}` +
@@ -80,26 +77,13 @@ export class AuthController {
   @Redirect('http://localhost:3000', 302)
   async googleAuthRedirect(@Req() req: any) {
     const profile = req.user;
-
-    let next = '/';
-    let origin = 'http://localhost:3000';
-
-    if (req.query && req.query.state) {
-      try {
-        const decoded = JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf-8'));
-        next = sanitizeRelativePath(decoded.next);
-        if (decoded.origin) origin = decoded.origin;
-      } catch (e) {
-        // Fallback
-      }
+    if (!profile?.email) {
+      throw new UnauthorizedException('Không thể xác thực tài khoản Google');
     }
 
-    const allowedRedirects = (process.env.GOOGLE_ALLOWED_REDIRECTS || '')
-      .split(',')
-      .map((o) => o.trim());
-
-    const isAllowed = allowedRedirects.some((o) => o.toLowerCase() === origin.toLowerCase());
-    const finalOrigin = isAllowed ? origin : (allowedRedirects[0] || 'http://localhost:3000');
+    const verified = await this.oauthState.verifyAndConsumeState(req.query?.state);
+    const next = verified.next;
+    const finalOrigin = verified.origin;
 
     const { tokens } = await this.auth.loginOrRegisterOAuth(
       {

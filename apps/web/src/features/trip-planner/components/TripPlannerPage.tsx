@@ -643,9 +643,15 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
           {error && (
             <div className="rounded-xl border border-error/30 bg-error-container px-4 py-3.5 text-body-sm text-on-error-container space-y-2.5">
               {errorStatus === 429 ? (
-                <p className="font-bold">Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình. Vui lòng đăng nhập hoặc thử lại sau.</p>
+                <p className="font-bold">
+                  Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình. Vui lòng đăng nhập hoặc
+                  thử lại sau.
+                </p>
               ) : errorStatus === 503 ? (
-                <p className="font-bold">Dịch vụ Trí tuệ Nhân tạo hiện tại đang bảo trì hoặc quá tải. Vui lòng sử dụng tính năng gửi tư vấn.</p>
+                <p className="font-bold">
+                  Dịch vụ Trí tuệ Nhân tạo hiện tại đang bảo trì hoặc quá tải. Vui lòng sử dụng tính
+                  năng gửi tư vấn.
+                </p>
               ) : (
                 <p className="font-bold">{error}</p>
               )}
@@ -710,7 +716,10 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
           <div className="space-y-6">
             <div className="space-y-4">
               {[0, 1, 2].map((item) => (
-                <div key={item} className="rounded-2xl border border-outline-variant/30 p-5 bg-surface-container-lowest shadow-card">
+                <div
+                  key={item}
+                  className="rounded-2xl border border-outline-variant/30 p-5 bg-surface-container-lowest shadow-card"
+                >
                   <div className="h-5 w-1/3 animate-pulse rounded bg-surface-container" />
                   <div className="mt-4 space-y-3">
                     <div className="h-4 w-full animate-pulse rounded bg-surface-container" />
@@ -722,7 +731,9 @@ export function TripPlannerPage({ initialPlace }: TripPlannerPageProps) {
             <div className="flex flex-col items-center justify-center py-4 gap-2">
               <Icon name="auto_awesome" className="text-primary animate-spin !text-3xl" />
               <p className="text-center font-semibold text-body-md text-primary animate-pulse">
-                {locale === 'en' ? 'Vivu is finding the best destinations for you...' : 'Vivu đang chọn địa danh phù hợp...'}
+                {locale === 'en'
+                  ? 'Vivu is finding the best destinations for you...'
+                  : 'Vivu đang chọn địa danh phù hợp...'}
               </p>
             </div>
           </div>

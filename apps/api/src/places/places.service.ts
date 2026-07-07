@@ -6,6 +6,7 @@ import type {
   Region as PrismaRegion,
 } from '@prisma/client';
 import type { Paginated, Place, PlaceImage } from '@vivu/types';
+import { PUBLIC_PROVINCE } from '../common/public-scope';
 import { PrismaService } from '../prisma/prisma.service';
 import { S3Service } from '../storage/s3.service';
 import { ListPlacesQueryDto } from './dto/list-places.query.dto';
@@ -17,8 +18,6 @@ type PlaceWithRelations = PrismaPlace & {
     category: { id: string; slug: string; nameVi: string; nameEn: string; icon: string | null };
   }[];
 };
-
-const PUBLIC_PROVINCE = 'Gia Lai';
 
 function toApiPlace(p: PlaceWithRelations): Place {
   return {
@@ -345,6 +344,7 @@ export class PlacesService {
     const radiusMeters = radiusKm * 1000;
     const safeLimit = Math.min(Math.max(limit, 1), 50);
 
+    // Prisma.sql parameterizes interpolated values — never use string concatenation here.
     const excludeFilter =
       excludeSlug !== undefined ? Prisma.sql`AND "slug" <> ${excludeSlug}` : Prisma.sql``;
 

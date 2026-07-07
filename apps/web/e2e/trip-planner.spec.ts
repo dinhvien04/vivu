@@ -85,13 +85,15 @@ test('trip planner renders a mocked generated itinerary without calling real AI 
 test('trip planner renders friendly notice for 429 status code', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 204 }));
   await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401, body: '{}' }));
-  await page.route('**/api/analytics/events', (route) => route.fulfill({ status: 200, body: '{}' }));
+  await page.route('**/api/analytics/events', (route) =>
+    route.fulfill({ status: 200, body: '{}' }),
+  );
   await page.route('**/api/trip-plans/generate', (route) =>
     route.fulfill({
       status: 429,
       contentType: 'application/json',
       body: JSON.stringify({ message: 'Rate limit exceeded' }),
-    })
+    }),
   );
 
   await page.goto('/lich-trinh', { waitUntil: 'domcontentloaded' });
@@ -101,19 +103,23 @@ test('trip planner renders friendly notice for 429 status code', async ({ page }
   });
   await generateButton.click();
 
-  await expect(page.getByText('Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình.')).toBeVisible();
+  await expect(
+    page.getByText('Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình.'),
+  ).toBeVisible();
 });
 
 test('trip planner renders friendly notice for 503 status code', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 204 }));
   await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401, body: '{}' }));
-  await page.route('**/api/analytics/events', (route) => route.fulfill({ status: 200, body: '{}' }));
+  await page.route('**/api/analytics/events', (route) =>
+    route.fulfill({ status: 200, body: '{}' }),
+  );
   await page.route('**/api/trip-plans/generate', (route) =>
     route.fulfill({
       status: 503,
       contentType: 'application/json',
       body: JSON.stringify({ message: 'Service Unavailable' }),
-    })
+    }),
   );
 
   await page.goto('/lich-trinh', { waitUntil: 'domcontentloaded' });
@@ -123,5 +129,7 @@ test('trip planner renders friendly notice for 503 status code', async ({ page }
   });
   await generateButton.click();
 
-  await expect(page.getByText('Dịch vụ Trí tuệ Nhân tạo hiện tại đang bảo trì hoặc quá tải')).toBeVisible();
+  await expect(
+    page.getByText('Dịch vụ Trí tuệ Nhân tạo hiện tại đang bảo trì hoặc quá tải'),
+  ).toBeVisible();
 });

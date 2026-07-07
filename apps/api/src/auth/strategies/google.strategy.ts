@@ -11,7 +11,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const callbackURL = config.get<string>('GOOGLE_CALLBACK_URL');
 
     if (!clientID || !clientSecret || !callbackURL) {
-      throw new Error('Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL) are required');
+      throw new Error(
+        'Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL) are required',
+      );
     }
 
     super({
@@ -32,7 +34,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<any> {
     const { name, emails, photos } = profile;
     const email = emails?.[0]?.value;
-    
+
     // Construct user name from components or fall back to displayName
     let displayName = profile.displayName;
     if (name) {

@@ -1,5 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { fetchJson } from './fetch-json';
+import {
+  hasUpstashRedisConfig,
+  isProductionEnv,
+  isTestEnv,
+  shouldFailClosedOnRedisErrors,
+} from './upstash-env';
 
 export const RATE_LIMITER_STORE = Symbol('RATE_LIMITER_STORE');
 
@@ -43,14 +49,13 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
   private readonly logger = new Logger(UpstashRedisRateLimiterStore.name);
   private readonly url = process.env.UPSTASH_REDIS_REST_URL?.trim();
   private readonly token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-
   async incrementAndCheck(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+    const failClosed = shouldFailClosedOnRedisErrors();
     if (!this.url || !this.token) {
-      return true; // Fallback to allowing request if not configured
+      return failClosed ? false : true;
     }
 
     try {
-      // Atomic increment and expire using Lua script via Upstash REST API
       const luaScript = `
         local current = redis.call('incr', KEYS[1])
         if current == 1 then
@@ -80,9 +85,11 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
       return resJson.result === 1;
     } catch (err) {
       this.logger.error(
-        `Upstash rate limiting failed: ${err instanceof Error ? err.message : err}. Falling open.`,
+        `Upstash rate limiting failed: ${err instanceof Error ? err.message : err}. ${
+          failClosed ? 'Blocking request.' : 'Allowing request in non-production.'
+        }`,
       );
-      return true;
+      return !failClosed;
     }
   }
 
@@ -97,7 +104,7 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
       const value = Number(json.result ?? 0);
       return Number.isFinite(value) ? value : 0;
     } catch {
-      return 0;
+      return shouldFailClosedOnRedisErrors() ? Number.MAX_SAFE_INTEGER : 0;
     }
   }
 
@@ -112,4 +119,19 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
       // ignore
     }
   }
+}
+
+export function createRateLimiterStore(
+  upstash: UpstashRedisRateLimiterStore,
+  memory: InMemoryRateLimiterStore,
+): RateLimiterStore {
+  if (hasUpstashRedisConfig()) {
+    return upstash;
+  }
+  if (isProductionEnv() && !isTestEnv()) {
+    throw new Error(
+      'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production for rate limiting.',
+    );
+  }
+  return memory;
 }

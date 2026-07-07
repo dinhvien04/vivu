@@ -2,6 +2,12 @@ import { ForbiddenException, NotFoundException, ServiceUnavailableException } fr
 import type { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
 import { TripPlansService } from './trip-plans.service';
 
+function makeConfig(values: Record<string, string> = {}): { get: jest.Mock } {
+  return {
+    get: jest.fn((key: string) => values[key]),
+  };
+}
+
 function makeService(prisma: unknown, aiText: unknown = {}, quota: unknown = {}) {
   return new TripPlansService(
     prisma as never,
@@ -10,6 +16,7 @@ function makeService(prisma: unknown, aiText: unknown = {}, quota: unknown = {})
       consume: jest.fn().mockResolvedValue(undefined),
       ...(quota as object),
     } as never,
+    makeConfig() as never,
   );
 }
 
@@ -95,17 +102,17 @@ describe('TripPlansService generation', () => {
     };
     const prisma = prismaForGenerate();
 
-    await expect(makeService(prisma, aiText).generate(validDto(), {} as never)).resolves.toMatchObject(
-      {
-        data: {
-          id: 'plan-1',
-          output: {
-            days: [{ day: 1, items: [{ placeSlug: 'bien-ho' }] }],
-            missingDataNote: expect.stringContaining('AI'),
-          },
+    await expect(
+      makeService(prisma, aiText).generate(validDto(), {} as never),
+    ).resolves.toMatchObject({
+      data: {
+        id: 'plan-1',
+        output: {
+          days: [{ day: 1, items: [{ placeSlug: 'bien-ho' }] }],
+          missingDataNote: expect.stringContaining('AI'),
         },
       },
-    );
+    });
 
     expect(prisma.tripPlan.create).toHaveBeenCalled();
   });

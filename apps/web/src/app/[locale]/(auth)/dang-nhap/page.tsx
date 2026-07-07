@@ -80,7 +80,10 @@ function LegacyLoginForm({ next }: { next: string }) {
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col gap-1.5">
-          <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="email">
+          <label
+            className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+            htmlFor="email"
+          >
             {t('email')}
           </label>
           <div className="relative flex items-center">
@@ -103,7 +106,10 @@ function LegacyLoginForm({ next }: { next: string }) {
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400" htmlFor="password">
+            <label
+              className="text-[12px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+              htmlFor="password"
+            >
               {t('password')}
             </label>
             <Link

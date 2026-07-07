@@ -2,6 +2,7 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MeiliSearch, type Index } from 'meilisearch';
 import type { Place as PrismaPlace } from '@prisma/client';
+import { PUBLIC_PROVINCE } from '../common/public-scope';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface IndexedPlace {
@@ -195,7 +196,7 @@ export class SearchIndexService implements OnApplicationBootstrap {
     const places = await this.prisma.place.findMany({
       where: {
         status: 'published',
-        province: { equals: 'Gia Lai', mode: 'insensitive' },
+        province: { equals: PUBLIC_PROVINCE, mode: 'insensitive' },
       },
       include: { region: true },
     });
