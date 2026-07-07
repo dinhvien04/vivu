@@ -1,11 +1,21 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": ["NODE_ENV", "VERCEL_ENV"],
+  "globalPassThroughEnv": ["*"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "API_INTERNAL_URL",
+        "INCLUDE_DYNAMIC_SITEMAP",
+        "CSP_CONNECT_SRC_EXTRA",
+        "CSP_IMG_SRC_EXTRA",
+        "NEXT_IMAGE_REMOTE_HOSTS",
+        "NEXT_PUBLIC_SITE_URL",
+        "VERCEL_PROJECT_PRODUCTION_URL"
+      ]
     },
     "dev": {
       "cache": false,
