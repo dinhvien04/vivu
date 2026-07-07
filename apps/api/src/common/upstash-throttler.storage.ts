@@ -57,6 +57,7 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
           keys: [storageKey],
           args: [String(limit), String(ttlSeconds)],
         }),
+        timeoutMs: 5_000,
       });
       if (!response.ok) {
         throw new Error(`Upstash throttler HTTP ${response.status}`);

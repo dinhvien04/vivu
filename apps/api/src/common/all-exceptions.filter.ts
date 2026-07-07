@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { pathnameOnly } from './safe-request-url';
 
 const GENERIC_SERVER_MESSAGE = 'Đã xảy ra lỗi. Vui lòng thử lại sau.';
 
@@ -31,7 +32,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (status >= 500) {
       this.logger.error(
         JSON.stringify({
-          path: request.url,
+          path: pathnameOnly(request.url),
           method: request.method,
           status,
           message: this.describeForLogs(exception),

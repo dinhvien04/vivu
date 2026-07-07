@@ -2,7 +2,7 @@
 
 ## Source of truth
 
-`schema.prisma` and the versioned SQL files under `migrations/` are the canonical schema. Use Prisma Migrate for production and team environments.
+`schema.prisma` and the versioned SQL files under `migrations/` are the canonical schema. This repo already contains versioned migrations under `prisma/migrations/` — use Prisma Migrate for production and team environments.
 
 `schema.sql` is a generated, idempotent bootstrap script for empty databases (for example Neon SQL Editor). Regenerate it after schema changes:
 

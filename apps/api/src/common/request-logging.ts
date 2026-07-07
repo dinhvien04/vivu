@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { pathnameOnly } from './safe-request-url';
 
 const logger = new Logger('Http');
 const START_TIME = Symbol('vivuRequestStartTime');
@@ -40,8 +41,4 @@ export function applyRequestLogging(app: FastifyInstance): void {
     );
     done();
   });
-}
-
-function pathnameOnly(url: string): string {
-  return url.split('?')[0] || '/';
 }

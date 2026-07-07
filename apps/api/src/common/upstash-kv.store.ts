@@ -52,6 +52,7 @@ export class UpstashKvStore implements KvStore {
           value: JSON.stringify(value),
           ex: ttlSeconds,
         }),
+        timeoutMs: 5_000,
       });
       if (!response.ok) {
         throw new Error(`Upstash SET failed: ${response.status}`);
@@ -66,6 +67,7 @@ export class UpstashKvStore implements KvStore {
     try {
       const response = await fetchJson(`${this.url}/get/${encodeURIComponent(key)}`, {
         headers: { Authorization: `Bearer ${this.token}` },
+        timeoutMs: 5_000,
       });
       if (!response.ok) return null;
       const json = (await response.json()) as { result?: string | null };
@@ -80,9 +82,10 @@ export class UpstashKvStore implements KvStore {
   async delete(key: string): Promise<void> {
     if (!this.url || !this.token) return;
     try {
-      await fetch(`${this.url}/del/${encodeURIComponent(key)}`, {
+      await fetchJson(`${this.url}/del/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.token}` },
+        timeoutMs: 5_000,
       });
     } catch (err) {
       this.logger.error(`Upstash KV delete failed: ${err instanceof Error ? err.message : err}`);

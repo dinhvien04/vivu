@@ -4,7 +4,9 @@ import { AiUsageKeyType } from '@prisma/client';
 import type { FastifyRequest } from 'fastify';
 import { createHash } from 'crypto';
 import { RATE_LIMITER_STORE, type RateLimiterStore } from '../../common/rate-limiter.store';
+import { hashRequestIp, hashUserAgent } from '../../common/request-fingerprint';
 import { PrismaService } from '../../prisma/prisma.service';
+import type { AuthenticatedUser } from '../../auth/strategies/jwt.strategy';
 import type { AiPipelineInput } from '../types/ai.types';
 
 interface QuotaIdentity {
@@ -41,7 +43,7 @@ export class AiQuotaService {
   }
 
   async consume(request: FastifyRequest, input: AiPipelineInput): Promise<AiQuotaResult> {
-    const identity = this.buildIdentity(request, input.sessionId);
+    const identity = this.buildIdentity(request);
     await this.consumeMinute(identity);
 
     const dailyQuota =
@@ -92,7 +94,7 @@ export class AiQuotaService {
     };
   }
 
-  buildIdentity(request: FastifyRequest, sessionId?: string): QuotaIdentity {
+  buildIdentity(request: FastifyRequest): QuotaIdentity {
     const userId = getAuthenticatedUserId(request);
     if (userId) {
       return {
@@ -101,17 +103,13 @@ export class AiQuotaService {
       };
     }
 
-    const ip = getClientIp(request);
-    if (sessionId) {
-      return {
-        keyType: AiUsageKeyType.ip_session,
-        keyHash: this.hashKey(`ip_session:${ip}:${sessionId}`),
-      };
-    }
+    const ipHash = hashRequestIp(request, this.hashSecret);
+    const uaHash = hashUserAgent(request, this.hashSecret);
+    const anonMaterial = uaHash ? `anon:${ipHash}:${uaHash}` : `anon:${ipHash}`;
 
     return {
       keyType: AiUsageKeyType.ip,
-      keyHash: this.hashKey(`ip:${ip}`),
+      keyHash: this.hashKey(anonMaterial),
     };
   }
 
@@ -132,15 +130,9 @@ export class AiQuotaService {
 }
 
 function getAuthenticatedUserId(request: FastifyRequest): string | undefined {
-  const maybeUser = (request as FastifyRequest & { user?: { id?: unknown; sub?: unknown } }).user;
-  const value = maybeUser?.id ?? maybeUser?.sub;
+  const maybeUser = (request as FastifyRequest & { user?: AuthenticatedUser }).user;
+  const value = maybeUser?.id;
   return typeof value === 'string' && value.trim() ? value : undefined;
-}
-
-function getClientIp(request: FastifyRequest): string {
-  const forwarded = request.headers['x-forwarded-for'];
-  const firstForwarded = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-  return firstForwarded?.split(',')[0]?.trim() || request.ip || 'unknown';
 }
 
 function utcDateOnly(value: Date): Date {

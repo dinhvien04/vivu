@@ -35,7 +35,16 @@ describe('AllExceptionsFilter', () => {
     process.env.NODE_ENV = 'production';
     const filter = new AllExceptionsFilter();
     const reply = { status: jest.fn().mockReturnThis(), send: jest.fn() };
-    filter.catch(new Error('secret prisma table leak'), makeHost(reply));
+    const logSpy = jest.spyOn(filter['logger'], 'error').mockImplementation(() => undefined);
+    filter.catch(new Error('secret prisma table leak'), {
+      switchToHttp: () => ({
+        getResponse: () => reply,
+        getRequest: () => ({
+          url: '/api/v1/auth/google/callback?code=abc&state=xyz',
+          method: 'GET',
+        }),
+      }),
+    } as never);
 
     expect(reply.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(reply.send).toHaveBeenCalledWith({
@@ -43,6 +52,9 @@ describe('AllExceptionsFilter', () => {
       message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
       error: 'Internal Server Error',
     });
+    expect(logSpy.mock.calls[0]?.[0]).toContain('"/api/v1/auth/google/callback"');
+    expect(logSpy.mock.calls[0]?.[0]).not.toContain('code=abc');
+    logSpy.mockRestore();
   });
 
   it('maps Prisma known errors to a generic client message in production', () => {

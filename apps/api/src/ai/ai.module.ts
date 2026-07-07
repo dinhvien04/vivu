@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { AiProvidersModule } from '../ai-providers/ai-providers.module';
 import { GeminiModule } from '../gemini/gemini.module';
 import { QdrantModule } from '../qdrant/qdrant.module';
@@ -16,7 +17,7 @@ import { PlaceMentionResolverService } from './services/place-mention-resolver.s
 import { ResponseFormatterService } from './services/response-formatter.service';
 
 @Module({
-  imports: [QdrantModule, GeminiModule, AiProvidersModule, StorageModule],
+  imports: [AuthModule, QdrantModule, GeminiModule, AiProvidersModule, StorageModule],
   controllers: [AiChatController],
   providers: [
     AiChatService,

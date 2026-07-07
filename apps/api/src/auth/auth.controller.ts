@@ -9,13 +9,16 @@ import {
   Post,
   Redirect,
   Req,
+  ServiceUnavailableException,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { FastifyRequest } from 'fastify';
+import { isGoogleOAuthConfigured } from './google-oauth.config';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GoogleOAuthEnabledGuard } from './guards/google-oauth-enabled.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -50,6 +53,13 @@ export class AuthController {
   @Get('google')
   @Redirect('https://accounts.google.com', 302)
   async googleAuth(@Req() req: FastifyRequest) {
+    const oauth = isGoogleOAuthConfigured();
+    if (!oauth) {
+      throw new ServiceUnavailableException(
+        'Google OAuth chưa được cấu hình trên server. Liên hệ quản trị viên.',
+      );
+    }
+
     const { next, origin } = req.query as { next?: string; origin?: string };
     const state = await this.oauthState.createState(next, origin);
 
@@ -57,7 +67,9 @@ export class AuthController {
     const callbackURL = process.env.GOOGLE_CALLBACK_URL;
 
     if (!clientID || !callbackURL) {
-      throw new Error('Google OAuth configuration is missing in API environment variables');
+      throw new ServiceUnavailableException(
+        'Google OAuth chưa được cấu hình trên server. Liên hệ quản trị viên.',
+      );
     }
 
     const googleUrl =
@@ -73,7 +85,7 @@ export class AuthController {
 
   @Public()
   @Get('google/callback')
-  @UseGuards(GoogleAuthGuard)
+  @UseGuards(GoogleOAuthEnabledGuard, GoogleAuthGuard)
   @Redirect('http://localhost:3000', 302)
   async googleAuthRedirect(@Req() req: any) {
     const profile = req.user;

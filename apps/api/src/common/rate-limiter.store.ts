@@ -75,6 +75,7 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
           keys: [key],
           args: [String(limit), String(windowSeconds)],
         }),
+        timeoutMs: 5_000,
       });
 
       if (!response.ok) {
@@ -98,6 +99,7 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
     try {
       const response = await fetchJson(`${this.url}/get/${encodeURIComponent(key)}`, {
         headers: { Authorization: `Bearer ${this.token}` },
+        timeoutMs: 5_000,
       });
       if (!response.ok) return 0;
       const json = (await response.json()) as { result?: string | null };
@@ -111,9 +113,10 @@ export class UpstashRedisRateLimiterStore implements RateLimiterStore {
   async reset(key: string): Promise<void> {
     if (!this.url || !this.token) return;
     try {
-      await fetch(`${this.url}/del/${encodeURIComponent(key)}`, {
+      await fetchJson(`${this.url}/del/${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.token}` },
+        timeoutMs: 5_000,
       });
     } catch {
       // ignore
