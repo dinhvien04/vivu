@@ -85,6 +85,7 @@ export class DataReportsService {
 
   private consumeHourly(key: string): void {
     const now = Date.now();
+    this.pruneHourlyBuckets(now);
     const current = this.buckets.get(key);
     if (!current || current.resetAt <= now) {
       this.buckets.set(key, { count: 1, resetAt: now + 3_600_000 });
@@ -96,6 +97,13 @@ export class DataReportsService {
         'Bạn đã gửi quá nhiều báo lỗi dữ liệu. Vui lòng thử lại sau.',
         HttpStatus.TOO_MANY_REQUESTS,
       );
+    }
+  }
+
+  private pruneHourlyBuckets(now: number): void {
+    if (this.buckets.size < 1000) return;
+    for (const [key, bucket] of this.buckets) {
+      if (bucket.resetAt <= now) this.buckets.delete(key);
     }
   }
 }

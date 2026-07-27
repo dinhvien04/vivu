@@ -61,7 +61,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
     if (user.deletedAt) {
-      throw new UnauthorizedException('TÃ i khoáº£n Ä‘Ã£ bá»‹ vÃ´ hiá»‡u hÃ³a');
+      throw new UnauthorizedException('Tài khoản đã bị vô hiệu hóa');
     }
     return {
       id: user.id,

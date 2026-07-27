@@ -236,7 +236,7 @@ export class AuthService {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
     if (!user.passwordHash) {
-      throw new UnauthorizedException('TÃ i khoáº£n nÃ y Ä‘ang dÃ¹ng Clerk Ä‘á»ƒ Ä‘Äƒng nháº­p');
+      throw new UnauthorizedException('Tài khoản này đang dùng Clerk để đăng nhập');
     }
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!ok) {
@@ -294,7 +294,7 @@ export class AuthService {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
     if (!user.passwordHash) {
-      throw new UnauthorizedException('TÃ i khoáº£n nÃ y Ä‘ang dÃ¹ng Clerk Ä‘á»ƒ Ä‘Äƒng nháº­p');
+      throw new UnauthorizedException('Tài khoản này đang dùng Clerk để đăng nhập');
     }
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
