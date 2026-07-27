@@ -46,17 +46,22 @@ export class UpstashThrottlerStorage implements ThrottlerStorage {
         local ttlLeft = redis.call('ttl', KEYS[1])
         return {current, ttlLeft}
       `;
-      const response = await fetchJson(`${this.url}/eval`, {
+      const response = await fetchJson(this.url!, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          script: luaScript,
-          keys: [storageKey],
-          args: [String(limit), String(ttlSeconds)],
-        }),
+        // Upstash REST accepts a complete Redis command as a JSON array.
+        // EVAL syntax: EVAL script numkeys key [key ...] arg [arg ...].
+        body: JSON.stringify([
+          'EVAL',
+          luaScript,
+          1,
+          storageKey,
+          String(limit),
+          String(ttlSeconds),
+        ]),
         timeoutMs: 5_000,
       });
       if (!response.ok) {
