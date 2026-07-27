@@ -1,4 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
@@ -12,6 +13,7 @@ export class AnalyticsController {
   constructor(private readonly analytics: AnalyticsService) {}
 
   @Post('events')
+  @Throttle({ default: { ttl: 60_000, limit: 120 } })
   @UseGuards(OptionalJwtAuthGuard)
   track(@Body() dto: CreateAnalyticsEventDto, @CurrentUser() user?: AuthenticatedUser) {
     return this.analytics.track(dto, user);

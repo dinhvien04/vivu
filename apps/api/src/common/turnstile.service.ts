@@ -1,15 +1,17 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { FastifyRequest } from 'fastify';
+import { FetchTimeoutError, fetchJson } from './fetch-json';
 import { getClientIp } from './request-fingerprint';
 
 interface TurnstileVerifyResponse {
   success?: boolean;
   'error-codes'?: string[];
-}
-
-interface FetchTextResponse {
-  text(): Promise<string>;
 }
 
 @Injectable()
@@ -41,12 +43,22 @@ export class TurnstileService {
 
     let payload: TurnstileVerifyResponse;
     try {
-      const response = (await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        body,
-      })) as unknown as FetchTextResponse;
-      payload = JSON.parse(await response.text()) as TurnstileVerifyResponse;
+      const response = await fetchJson(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        {
+          method: 'POST',
+          body,
+          timeoutMs: 5_000,
+        },
+      );
+      payload = (await response.json()) as TurnstileVerifyResponse;
     } catch (error) {
+      if (error instanceof FetchTimeoutError) {
+        this.logger.warn(JSON.stringify({ event: 'turnstile_timeout' }));
+        throw new ServiceUnavailableException(
+          'Không thể xác minh chống spam lúc này. Vui lòng thử lại sau.',
+        );
+      }
       this.logger.warn(
         JSON.stringify({
           event: 'turnstile_verify_failed',

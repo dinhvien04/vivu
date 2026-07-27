@@ -1,4 +1,5 @@
 import type { FastifyRequest } from 'fastify';
+import { makeRateLimiter } from '../common/test-rate-limiter';
 import { TurnstileService } from '../common/turnstile.service';
 import { LeadsService } from './leads.service';
 
@@ -26,7 +27,12 @@ describe('LeadsService', () => {
       }),
     };
     const turnstile = new TurnstileService(config as never);
-    const service = new LeadsService(prisma as never, config as never, turnstile);
+    const service = new LeadsService(
+      prisma as never,
+      config as never,
+      turnstile,
+      makeRateLimiter() as never,
+    );
 
     await expect(
       service.create(
@@ -46,7 +52,12 @@ describe('LeadsService', () => {
       get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)),
     };
     const turnstile = { verify: jest.fn() };
-    const service = new LeadsService(prisma as never, config as never, turnstile as never);
+    const service = new LeadsService(
+      prisma as never,
+      config as never,
+      turnstile as never,
+      makeRateLimiter() as never,
+    );
 
     await expect(
       service.create(
@@ -72,7 +83,12 @@ describe('LeadsService', () => {
       get: jest.fn((key: string) => (key === 'AI_QUOTA_HASH_SECRET' ? 'secret' : undefined)),
     };
     const turnstile = { verify: jest.fn().mockResolvedValue(undefined) };
-    const service = new LeadsService(prisma as never, config as never, turnstile as never);
+    const service = new LeadsService(
+      prisma as never,
+      config as never,
+      turnstile as never,
+      makeRateLimiter() as never,
+    );
 
     await expect(
       service.create(

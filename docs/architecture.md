@@ -42,19 +42,21 @@ Hệ thống được tổ chức dưới dạng monorepo quản lý bằng `pnp
 ```
 
 ### Chi tiết vai trò các thành phần hạ tầng:
-*   **Next.js (Web)**: Đảm nhận phần hiển thị giao diện, tối ưu hóa SEO (Server-Side Rendering cho trang địa danh chi tiết), và thực hiện đa ngôn ngữ hóa thông qua `next-intl`. Next.js Route Handlers cũng đóng vai trò same-origin proxy để che giấu endpoint API thật của backend khỏi browser và đính kèm JWT session cookie một cách an toàn.
-*   **NestJS (API)**: Xây dựng trên nền tảng Fastify (cho hiệu năng cao hơn Express), quản lý xác thực bằng JWT, kiểm soát lưu lượng (rate limiting), điều phối các luồng nghiệp vụ kinh doanh và kết nối tới các dịch vụ Cloud bên thứ ba.
-*   **Neon Database (PostgreSQL)**: Cơ sở dữ liệu quan hệ, tích hợp extension không gian địa lý **PostGIS** để tính toán khoảng cách địa lý thực tế giữa các tọa độ địa danh phục vụ cho tính năng tìm địa điểm lân cận (`places/nearby`).
-*   **Meilisearch**: Công cụ tìm kiếm dạng full-text search siêu nhanh với độ trễ cực thấp, cung cấp gợi ý từ khóa tìm kiếm (typo tolerance) ngay khi người dùng gõ ký tự đầu tiên.
-*   **AWS S3**: Hệ thống lưu trữ đối tượng dạng private bucket, giữ toàn bộ ảnh gốc và các ảnh chất lượng cao của địa điểm du lịch.
-*   **Qdrant Cloud**: Vector database đám mây. Sử dụng dịch vụ **Cloud Inference** của Qdrant để sinh embeddings (chuyển đổi văn bản/hình ảnh thành vector số) mà backend không cần tự chạy hoặc tải các thư viện local như Torch, HuggingFace Transformers, BGE-M3 hay SigLIP.
-*   **Google Gemini**: Mô hình ngôn ngữ lớn (LLM) `gemini-2.5-flash` nhận nhiệm vụ tổng hợp thông tin từ context được cung cấp để trả lời câu hỏi và tự động lên lịch trình du lịch cá nhân hóa.
+
+- **Next.js (Web)**: Đảm nhận phần hiển thị giao diện, tối ưu hóa SEO (Server-Side Rendering cho trang địa danh chi tiết), và thực hiện đa ngôn ngữ hóa thông qua `next-intl`. Next.js Route Handlers cũng đóng vai trò same-origin proxy để che giấu endpoint API thật của backend khỏi browser và đính kèm JWT session cookie một cách an toàn.
+- **NestJS (API)**: Xây dựng trên nền tảng Fastify (cho hiệu năng cao hơn Express), quản lý xác thực bằng JWT, kiểm soát lưu lượng (rate limiting), điều phối các luồng nghiệp vụ kinh doanh và kết nối tới các dịch vụ Cloud bên thứ ba.
+- **Neon Database (PostgreSQL)**: Cơ sở dữ liệu quan hệ, tích hợp extension không gian địa lý **PostGIS** để tính toán khoảng cách địa lý thực tế giữa các tọa độ địa danh phục vụ cho tính năng tìm địa điểm lân cận (`places/nearby`).
+- **Meilisearch**: Công cụ tìm kiếm dạng full-text search siêu nhanh với độ trễ cực thấp, cung cấp gợi ý từ khóa tìm kiếm (typo tolerance) ngay khi người dùng gõ ký tự đầu tiên.
+- **AWS S3**: Hệ thống lưu trữ đối tượng dạng private bucket, giữ toàn bộ ảnh gốc và các ảnh chất lượng cao của địa điểm du lịch.
+- **Qdrant Cloud**: Vector database đám mây. Sử dụng dịch vụ **Cloud Inference** của Qdrant để sinh embeddings (chuyển đổi văn bản/hình ảnh thành vector số) mà backend không cần tự chạy hoặc tải các thư viện local như Torch, HuggingFace Transformers, BGE-M3 hay SigLIP.
+- **Google Gemini**: Mô hình ngôn ngữ lớn (LLM) `gemini-2.5-flash` nhận nhiệm vụ tổng hợp thông tin từ context được cung cấp để trả lời câu hỏi và tự động lên lịch trình du lịch cá nhân hóa.
 
 ---
 
 ## 2. Chi tiết các luồng xử lý yêu cầu (Sequence Requests Flows)
 
 ### A. Luồng tải trang chi tiết địa danh (`GET /dia-diem/[slug]`)
+
 ```
 Browser                     Next.js SSR                    NestJS API                    PostgreSQL
    │                             │                             │                             │
@@ -81,6 +83,7 @@ Browser                     Next.js SSR                    NestJS API           
 ---
 
 ### B. Luồng Tìm kiếm lai (Hybrid Search & Fallback Flow)
+
 ```
 Browser                        NestJS API                     Meilisearch                    PostgreSQL
    │                               │                              │                              │
@@ -100,6 +103,7 @@ Browser                        NestJS API                     Meilisearch       
 ---
 
 ### E. Luồng xử lý AI Chat (RAG Reranking & Text/Vision Pipeline)
+
 Hệ thống AI Chat được thiết kế với cơ chế bảo vệ phân cấp nghiêm ngặt nhằm tránh việc lạm dụng API và sinh ra thông tin không chính xác.
 
 ```
@@ -124,14 +128,14 @@ Browser                       NestJS API                 Qdrant Cloud           
 1.  **Nén ảnh ở client**: Nếu có hình ảnh đi kèm, trình duyệt sử dụng thư viện xử lý canvas của Client để nén kích thước ảnh xuống dưới 700 KB trước khi chuyển thành `FormData` và gửi đi.
 2.  **Phân tích đầu vào**: NestJS API chặn request, kiểm tra loại file và giới hạn kích thước đầu vào.
 3.  **Tạo Embeddings & Query Vector**:
-    *   *Với Text*: API gọi Qdrant Cloud Inference để sinh vector tương ứng của câu hỏi, thực hiện tìm kiếm vector tương đồng trên collection `text_collection_cloud`.
-    *   *Với Image*: API gọi Qdrant Cloud Inference sử dụng model vision (`qdrant/clip-vit-b-32-vision`) để tính toán độ tương đồng ảnh. Nếu tìm thấy ảnh địa danh khớp với độ tin cậy lớn hơn `IMAGE_MATCH_THRESHOLD` (0.25), API sẽ gán `place_slug` tương ứng của địa danh đó.
+    - _Với Text_: API gọi Qdrant Cloud Inference để sinh vector tương ứng của câu hỏi, thực hiện tìm kiếm vector tương đồng trên collection `text_collection_cloud`.
+    - _Với Image_: API gọi Qdrant Cloud Inference sử dụng model vision (`qdrant/clip-vit-b-32-vision`) để tính toán độ tương đồng ảnh. Nếu tìm thấy ảnh địa danh khớp với độ tin cậy lớn hơn `IMAGE_MATCH_THRESHOLD` (0.25), API sẽ gán `place_slug` tương ứng của địa danh đó.
 4.  **RAG Reranking & Context Filtering**: Nếu là truy vấn kết hợp (Image + Text), hệ thống sẽ dùng `place_slug` tìm được để làm filter thu hẹp không gian tìm kiếm, chỉ lấy các đoạn context thuộc về địa danh đó trong Qdrant.
 5.  **Chỉ thị nghiêm ngặt cho Gemini**: API tổng hợp prompt với định hướng bắt buộc:
-    *   Chỉ trả lời dựa trên context được cung cấp từ Qdrant.
-    *   Nếu context không đủ thông tin, bắt buộc nói: *"Tôi không có đủ thông tin chi tiết về nội dung này..."*.
-    *   Tuyệt đối không tự bịa đặt giá vé, giờ mở cửa hoặc số điện thoại liên hệ.
-    *   Trả lời bằng tiếng Việt.
+    - Chỉ trả lời dựa trên context được cung cấp từ Qdrant.
+    - Nếu context không đủ thông tin, bắt buộc nói: _"Tôi không có đủ thông tin chi tiết về nội dung này..."_.
+    - Tuyệt đối không tự bịa đặt giá vé, giờ mở cửa hoặc số điện thoại liên hệ.
+    - Trả lời bằng tiếng Việt.
 6.  **Trả kết quả**: Phản hồi từ Gemini được gửi về cho Next.js để hiển thị trực tiếp cho người dùng.
 
 ---
@@ -139,7 +143,8 @@ Browser                       NestJS API                 Qdrant Cloud           
 ## 3. Bản đồ triển khai (Deployment Architecture)
 
 Hạ tầng production được cấu hình hoàn toàn trên các dịch vụ đám mây Serverless và Managed Services:
-*   **Web & API Hosting**: Triển khai trên **Vercel** dưới dạng Serverless Functions (NestJS chạy Fastify tương thích với Vercel API routes thông qua custom entrypoint).
-*   **Neon DB**: Triển khai cơ sở dữ liệu PostgreSQL Serverless tại khu vực `ap-southeast-1` (Singapore) để tối thiểu hóa độ trễ kết nối đến Vercel. Database sử dụng cơ chế tự động tạm dừng (auto-suspend) cho môi trường test để tối ưu chi phí và tự động co giãn cấu hình (autoscaling) trên production.
-*   **Search Engine**: Meilisearch được triển khai độc lập trên VPS được cấu hình bảo mật firewall chặt chẽ, chỉ cho phép địa chỉ IP của backend kết nối đến cổng API Master Key.
-*   **Dịch vụ AI**: Qdrant Cloud và Google AI Studio (Gemini) cung cấp API endpoint bảo mật bằng key lưu trong Vercel Environment Variables.
+
+- **Web & API Hosting**: Triển khai trên **Vercel** dưới dạng Serverless Functions (NestJS chạy Fastify tương thích với Vercel API routes thông qua custom entrypoint).
+- **Neon DB**: Triển khai cơ sở dữ liệu PostgreSQL Serverless tại khu vực `ap-southeast-1` (Singapore) để tối thiểu hóa độ trễ kết nối đến Vercel. Database sử dụng cơ chế tự động tạm dừng (auto-suspend) cho môi trường test để tối ưu chi phí và tự động co giãn cấu hình (autoscaling) trên production.
+- **Search Engine**: Meilisearch được triển khai độc lập trên VPS được cấu hình bảo mật firewall chặt chẽ, chỉ cho phép địa chỉ IP của backend kết nối đến cổng API Master Key.
+- **Dịch vụ AI**: Qdrant Cloud và Google AI Studio (Gemini) cung cấp API endpoint bảo mật bằng key lưu trong Vercel Environment Variables.

@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   Answer as PrismaAnswer,
   Prisma,
@@ -6,6 +11,7 @@ import type {
   User as PrismaUser,
 } from '@prisma/client';
 import type { Answer, Paginated, Question } from '@vivu/types';
+import { sanitizeRequiredText } from '../common/sanitize';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
@@ -82,7 +88,10 @@ export class QaService {
 
   private async resolvePlaceId(idOrSlug: string): Promise<string> {
     const place = await this.prisma.place.findFirst({
-      where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
+      where: {
+        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+        status: 'published',
+      },
       select: { id: true },
     });
     if (!place) throw new NotFoundException('Không tìm thấy địa điểm');
@@ -140,8 +149,9 @@ export class QaService {
     dto: CreateQuestionDto,
   ): Promise<Question> {
     const placeId = await this.resolvePlaceId(idOrSlug);
+    const content = requirePlainTextContent(dto.content, 'Nội dung câu hỏi không hợp lệ.');
     const created = await this.prisma.question.create({
-      data: { placeId, userId, content: dto.content },
+      data: { placeId, userId, content },
       include: QUESTION_DETAIL_INCLUDE,
     });
     return toApiQuestionDetail(created as QuestionDetailRow);
@@ -166,8 +176,9 @@ export class QaService {
       select: { id: true },
     });
     if (!question) throw new NotFoundException('Không tìm thấy câu hỏi');
+    const content = requirePlainTextContent(dto.content, 'Nội dung câu trả lời không hợp lệ.');
     const created = await this.prisma.answer.create({
-      data: { questionId, userId, content: dto.content },
+      data: { questionId, userId, content },
       include: { user: { select: AUTHOR_SELECT } },
     });
     return toApiAnswer(created as AnswerWithUser);
@@ -185,4 +196,12 @@ export class QaService {
     }
     await this.prisma.answer.delete({ where: { id } });
   }
+}
+
+function requirePlainTextContent(value: string, message: string): string {
+  const content = sanitizeRequiredText(value);
+  if (!content) {
+    throw new BadRequestException(message);
+  }
+  return content;
 }

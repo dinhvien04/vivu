@@ -1,4 +1,5 @@
 import type { FastifyRequest } from 'fastify';
+import { makeRateLimiter } from '../common/test-rate-limiter';
 import { TurnstileService } from '../common/turnstile.service';
 import { DataReportsService } from './data-reports.service';
 
@@ -29,7 +30,12 @@ describe('DataReportsService', () => {
       TURNSTILE_SECRET_KEY: 'turnstile-secret',
     });
     const turnstile = new TurnstileService(cfg as never);
-    const service = new DataReportsService(prisma as never, cfg as never, turnstile);
+    const service = new DataReportsService(
+      prisma as never,
+      cfg as never,
+      turnstile,
+      makeRateLimiter() as never,
+    );
 
     await expect(
       service.create(
@@ -47,7 +53,12 @@ describe('DataReportsService', () => {
   it('does not persist honeypot reports', async () => {
     const prisma = { dataReport: { create: jest.fn() } };
     const turnstile = { verify: jest.fn() };
-    const service = new DataReportsService(prisma as never, config() as never, turnstile as never);
+    const service = new DataReportsService(
+      prisma as never,
+      config() as never,
+      turnstile as never,
+      makeRateLimiter() as never,
+    );
 
     await expect(
       service.create(
@@ -71,7 +82,12 @@ describe('DataReportsService', () => {
       },
     };
     const turnstile = { verify: jest.fn().mockResolvedValue(undefined) };
-    const service = new DataReportsService(prisma as never, config() as never, turnstile as never);
+    const service = new DataReportsService(
+      prisma as never,
+      config() as never,
+      turnstile as never,
+      makeRateLimiter() as never,
+    );
 
     await expect(
       service.create(
@@ -108,6 +124,7 @@ describe('DataReportsService', () => {
       prisma as never,
       config({ DATA_REPORT_RATE_LIMIT_PER_HOUR: '1' }) as never,
       turnstile as never,
+      makeRateLimiter({ limit: 1 }) as never,
     );
     const dto = {
       placeSlug: 'bien-ho',

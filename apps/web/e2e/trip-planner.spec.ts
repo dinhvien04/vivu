@@ -8,7 +8,7 @@ const mockedPlan = {
     isPublic: false,
     output: {
       title: 'Lịch trình Gia Lai mock',
-      summary: 'Kịch bản e2e không gọi Gemini thật.',
+      summary: 'Kịch bản e2e không gọi AI provider thật.',
       days: [
         {
           day: 1,
@@ -34,7 +34,7 @@ const mockedPlan = {
   },
 };
 
-test('trip planner renders a mocked generated itinerary without calling Gemini', async ({
+test('trip planner renders a mocked generated itinerary without calling real AI providers', async ({
   page,
 }) => {
   await page.route('**/api/auth/refresh', (route) =>
@@ -79,19 +79,21 @@ test('trip planner renders a mocked generated itinerary without calling Gemini',
   await expect.poll(() => generateCalled).toBe(true);
   await expect(page.getByRole('heading', { name: 'Lịch trình Gia Lai mock' })).toBeVisible();
   await expect(page.getByText('Kỳ Co')).toBeVisible();
-  await expect(page.getByText('Kịch bản e2e không gọi Gemini thật.')).toBeVisible();
+  await expect(page.getByText('Kịch bản e2e không gọi AI provider thật.')).toBeVisible();
 });
 
 test('trip planner renders friendly notice for 429 status code', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 204 }));
   await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401, body: '{}' }));
-  await page.route('**/api/analytics/events', (route) => route.fulfill({ status: 200, body: '{}' }));
+  await page.route('**/api/analytics/events', (route) =>
+    route.fulfill({ status: 200, body: '{}' }),
+  );
   await page.route('**/api/trip-plans/generate', (route) =>
     route.fulfill({
       status: 429,
       contentType: 'application/json',
       body: JSON.stringify({ message: 'Rate limit exceeded' }),
-    })
+    }),
   );
 
   await page.goto('/lich-trinh', { waitUntil: 'domcontentloaded' });
@@ -101,19 +103,23 @@ test('trip planner renders friendly notice for 429 status code', async ({ page }
   });
   await generateButton.click();
 
-  await expect(page.getByText('Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình.')).toBeVisible();
+  await expect(
+    page.getByText('Hệ thống đang quá tải hoặc bạn đã hết lượt tạo lịch trình.'),
+  ).toBeVisible();
 });
 
 test('trip planner renders friendly notice for 503 status code', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 204 }));
   await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401, body: '{}' }));
-  await page.route('**/api/analytics/events', (route) => route.fulfill({ status: 200, body: '{}' }));
+  await page.route('**/api/analytics/events', (route) =>
+    route.fulfill({ status: 200, body: '{}' }),
+  );
   await page.route('**/api/trip-plans/generate', (route) =>
     route.fulfill({
       status: 503,
       contentType: 'application/json',
       body: JSON.stringify({ message: 'Service Unavailable' }),
-    })
+    }),
   );
 
   await page.goto('/lich-trinh', { waitUntil: 'domcontentloaded' });
@@ -123,6 +129,7 @@ test('trip planner renders friendly notice for 503 status code', async ({ page }
   });
   await generateButton.click();
 
-  await expect(page.getByText('Dịch vụ Trí tuệ Nhân tạo (Gemini AI) hiện tại đang bảo trì')).toBeVisible();
+  await expect(
+    page.getByText('Dịch vụ Trí tuệ Nhân tạo hiện tại đang bảo trì hoặc quá tải'),
+  ).toBeVisible();
 });
-

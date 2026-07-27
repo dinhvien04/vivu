@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PUBLIC_PROVINCE } from '../../common/public-scope';
 import { PrismaService } from '../../prisma/prisma.service';
 
 interface ResolvedPlaceMention {
@@ -15,7 +16,7 @@ export class PlaceMentionResolverService {
     const places = await this.prisma.place.findMany({
       where: {
         status: 'published',
-        province: { equals: 'Gia Lai', mode: 'insensitive' },
+        province: { equals: PUBLIC_PROVINCE, mode: 'insensitive' },
       },
       select: {
         slug: true,

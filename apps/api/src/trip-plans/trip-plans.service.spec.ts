@@ -1,9 +1,122 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import type { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
 import { TripPlansService } from './trip-plans.service';
 
-function makeService(prisma: unknown) {
-  return new TripPlansService(prisma as never, {} as never, {} as never);
+function makeConfig(values: Record<string, string> = {}): { get: jest.Mock } {
+  return {
+    get: jest.fn((key: string) => values[key]),
+  };
 }
+
+function makeService(prisma: unknown, aiText: unknown = {}, quota: unknown = {}) {
+  return new TripPlansService(
+    prisma as never,
+    aiText as never,
+    {
+      consume: jest.fn().mockResolvedValue(undefined),
+      ...(quota as object),
+    } as never,
+    makeConfig() as never,
+  );
+}
+
+describe('TripPlansService generation', () => {
+  it('generates a plan through the text provider and stores sanitized output', async () => {
+    const aiText = {
+      generateTripPlan: jest
+        .fn()
+        .mockImplementation(
+          async (_prompt: string, _options: unknown, transform: (raw: string) => unknown) =>
+            transform(
+              JSON.stringify({
+                title: 'One day in Gia Lai',
+                summary: 'A short Vivu plan',
+                days: [
+                  {
+                    day: 1,
+                    theme: 'Lake',
+                    items: [
+                      {
+                        timeOfDay: 'morning',
+                        placeName: 'Bien Ho',
+                        placeSlug: 'bien-ho',
+                        reason: 'Scenic',
+                        suggestedDuration: '2h',
+                        travelNote: 'Go early',
+                        tips: ['Bring water'],
+                      },
+                    ],
+                    foodSuggestions: [],
+                    notes: [],
+                  },
+                ],
+                generalTips: [],
+                missingDataNote: null,
+              }),
+            ),
+        ),
+    };
+    const prisma = prismaForGenerate();
+
+    await expect(
+      makeService(prisma, aiText).generate(validDto(), {} as never),
+    ).resolves.toMatchObject({
+      data: {
+        id: 'plan-1',
+        title: 'One day in Gia Lai',
+        output: {
+          title: 'One day in Gia Lai',
+          days: [{ items: [{ placeSlug: 'bien-ho' }] }],
+        },
+      },
+    });
+
+    expect(aiText.generateTripPlan).toHaveBeenCalledWith(
+      expect.stringContaining('VIVU_PLACES'),
+      expect.objectContaining({
+        temperature: 0.15,
+        maxOutputTokens: expect.any(Number),
+        responseMimeType: 'application/json',
+        responseJsonSchema: expect.objectContaining({
+          type: 'object',
+          required: expect.arrayContaining(['title', 'summary', 'days']),
+        }),
+      }),
+      expect.any(Function),
+    );
+    expect(prisma.tripPlan.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: 'One day in Gia Lai',
+          places: { create: [{ placeId: 'place-1', position: 0 }] },
+        }),
+      }),
+    );
+  });
+
+  it('stores a local fallback plan when AI providers are unavailable', async () => {
+    const aiText = {
+      generateTripPlan: jest
+        .fn()
+        .mockRejectedValue(new ServiceUnavailableException('Tài khoản AI đã hết credit.')),
+    };
+    const prisma = prismaForGenerate();
+
+    await expect(
+      makeService(prisma, aiText).generate(validDto(), {} as never),
+    ).resolves.toMatchObject({
+      data: {
+        id: 'plan-1',
+        output: {
+          days: [{ day: 1, items: [{ placeSlug: 'bien-ho' }] }],
+          missingDataNote: expect.stringContaining('AI'),
+        },
+      },
+    });
+
+    expect(prisma.tripPlan.create).toHaveBeenCalled();
+  });
+});
 
 describe('TripPlansService sharing', () => {
   it('returns only public-safe fields for shared itineraries', async () => {
@@ -136,3 +249,47 @@ describe('TripPlansService sharing', () => {
     expect(prisma.tripPlan.update).not.toHaveBeenCalled();
   });
 });
+
+function validDto(): GenerateTripPlanDto {
+  return {
+    area: 'all',
+    days: 1,
+    peopleCount: 2,
+    transport: 'xe_may',
+    interests: ['nature'],
+    budget: 'medium',
+    note: '',
+    locale: 'vi',
+  };
+}
+
+function prismaForGenerate() {
+  return {
+    place: {
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'place-1',
+          slug: 'bien-ho',
+          titleVi: 'Bien Ho',
+          titleEn: null,
+          summaryVi: 'Lake in Gia Lai',
+          summaryEn: null,
+          address: null,
+          lat: null,
+          lng: null,
+          categories: [],
+          isAiReady: true,
+          region: null,
+        },
+      ]),
+    },
+    tripPlan: {
+      create: jest.fn().mockResolvedValue({
+        id: 'plan-1',
+        title: 'One day in Gia Lai',
+        shareId: null,
+        isPublic: false,
+      }),
+    },
+  };
+}

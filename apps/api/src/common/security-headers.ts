@@ -1,18 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 
-const SECURITY_HEADERS: Record<string, string> = {
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'X-DNS-Prefetch-Control': 'off',
+/** Headers not set by @fastify/helmet or that we want to enforce explicitly. */
+const SUPPLEMENTAL_HEADERS: Record<string, string> = {
   'X-Permitted-Cross-Domain-Policies': 'none',
-  'Strict-Transport-Security': 'max-age=15552000; includeSubDomains',
-  'Permissions-Policy': 'camera=(), microphone=(), payment=(), usb=()',
+  'X-DNS-Prefetch-Control': 'off',
 };
 
 export function applySecurityHeaders(app: FastifyInstance): void {
   app.addHook('onSend', (_request, reply, payload, done) => {
-    for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    for (const [name, value] of Object.entries(SUPPLEMENTAL_HEADERS)) {
       if (!reply.getHeader(name)) {
         reply.header(name, value);
       }

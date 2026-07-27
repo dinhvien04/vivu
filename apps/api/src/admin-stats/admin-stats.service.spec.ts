@@ -8,11 +8,11 @@ function build(parts: {
   totalLeads?: number;
   aiRequestsToday?: number;
   tripPlansToday?: number;
-  leads?: Array<{ status: string }>;
+  leadsByStatus?: Array<{ status: string; _count: { _all: number } }>;
   newDataReports?: number;
   resolvedDataReports7d?: number;
-  placeViews?: Array<{ placeSlug: string | null }>;
-  leadPlaces?: Array<{ interestedPlaceSlug: string | null }>;
+  placeViews?: Array<{ placeSlug: string; _count: { _all: number } }>;
+  leadPlaces?: Array<{ interestedPlaceSlug: string; _count: { _all: number } }>;
   searchEvents?: Array<{ metadata: unknown }>;
   feedbackEvents?: Array<{ metadata: unknown }>;
   missingContextEvents?: number;
@@ -27,9 +27,9 @@ function build(parts: {
     .fn()
     .mockResolvedValueOnce(parts.totalTripPlans ?? 0)
     .mockResolvedValueOnce(parts.tripPlansToday ?? 0);
+  const analyticsEventGroupBy = jest.fn().mockResolvedValue(parts.placeViews ?? []);
   const analyticsEventFindMany = jest
     .fn()
-    .mockResolvedValueOnce(parts.placeViews ?? [])
     .mockResolvedValueOnce(parts.searchEvents ?? [])
     .mockResolvedValueOnce(parts.feedbackEvents ?? []);
   const analyticsEventCount = jest.fn().mockResolvedValue(parts.missingContextEvents ?? 0);
@@ -48,9 +48,9 @@ function build(parts: {
     },
     lead: {
       count: jest.fn().mockResolvedValue(parts.totalLeads ?? 0),
-      findMany: jest
+      groupBy: jest
         .fn()
-        .mockResolvedValueOnce(parts.leads ?? [])
+        .mockResolvedValueOnce(parts.leadsByStatus ?? [])
         .mockResolvedValueOnce(parts.leadPlaces ?? []),
     },
     dataReport: {
@@ -65,6 +65,7 @@ function build(parts: {
       }),
     },
     analyticsEvent: {
+      groupBy: analyticsEventGroupBy,
       findMany: analyticsEventFindMany,
       count: analyticsEventCount,
     },
@@ -183,18 +184,17 @@ describe('AdminStatsService.snapshot', () => {
 
   it('aggregates lead statuses, top place views and search queries', async () => {
     const { service } = build({
-      leads: [{ status: 'new' }, { status: 'new' }, { status: 'planning' }],
+      leadsByStatus: [
+        { status: 'new', _count: { _all: 2 } },
+        { status: 'planning', _count: { _all: 1 } },
+      ],
       leadPlaces: [
-        { interestedPlaceSlug: 'ky-co' },
-        { interestedPlaceSlug: 'ky-co' },
-        { interestedPlaceSlug: 'bien-ho' },
-        { interestedPlaceSlug: null },
+        { interestedPlaceSlug: 'ky-co', _count: { _all: 2 } },
+        { interestedPlaceSlug: 'bien-ho', _count: { _all: 1 } },
       ],
       placeViews: [
-        { placeSlug: 'bien-ho' },
-        { placeSlug: 'bien-ho' },
-        { placeSlug: 'ky-co' },
-        { placeSlug: null },
+        { placeSlug: 'bien-ho', _count: { _all: 2 } },
+        { placeSlug: 'ky-co', _count: { _all: 1 } },
       ],
       searchEvents: [
         { metadata: { q: 'bien ho' } },

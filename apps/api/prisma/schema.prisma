@@ -196,6 +196,8 @@ model Place {
   heroImageS3Key  String?
   qdrantPlaceSlug String?
   isAiReady       Boolean     @default(false)
+  ratingAvg       Float       @default(0)
+  ratingCount     Int         @default(0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -212,6 +214,7 @@ model Place {
   @@index([province, status])
   @@index([isAiReady])
   @@index([status, updatedAt])
+  @@index([status, ratingAvg])
 }
 
 model Photo {
@@ -258,6 +261,7 @@ model Review {
   user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes ReviewLike[]
 
+  @@unique([placeId, userId])
   @@index([placeId, createdAt])
 }
 

@@ -7,6 +7,7 @@ import type {
 } from '@prisma/client';
 import type { Paginated, Review } from '@vivu/types';
 import { PrismaService } from '../prisma/prisma.service';
+import { PlaceRatingService } from '../reviews/place-rating.service';
 import { ListReviewsQueryDto } from '../reviews/dto/list-reviews.query.dto';
 
 type ReviewWithRelations = PrismaReview & {
@@ -35,7 +36,10 @@ function toApi(r: ReviewWithRelations): Review {
 
 @Injectable()
 export class AdminReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly placeRating: PlaceRatingService,
+  ) {}
 
   async list(query: ListReviewsQueryDto): Promise<Paginated<Review>> {
     const page = query.page ?? 1;
@@ -68,6 +72,7 @@ export class AdminReviewsService {
         data: { status },
         include: INCLUDE,
       });
+      await this.placeRating.syncPlaceRating(r.placeId);
       return toApi(r as ReviewWithRelations);
     } catch (e) {
       if (e instanceof Error && 'code' in e && (e as { code?: string }).code === 'P2025') {
@@ -79,7 +84,13 @@ export class AdminReviewsService {
 
   async remove(reviewId: string): Promise<void> {
     try {
+      const existing = await this.prisma.review.findUnique({
+        where: { id: reviewId },
+        select: { placeId: true },
+      });
+      if (!existing) throw new NotFoundException('Không tìm thấy đánh giá');
       await this.prisma.review.delete({ where: { id: reviewId } });
+      await this.placeRating.syncPlaceRating(existing.placeId);
     } catch (e) {
       if (e instanceof Error && 'code' in e && (e as { code?: string }).code === 'P2025') {
         throw new NotFoundException('Không tìm thấy đánh giá');

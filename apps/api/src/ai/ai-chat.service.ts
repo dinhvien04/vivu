@@ -178,10 +178,8 @@ function normalizeText(value?: string): string | undefined {
 }
 
 function isFileTooLargeError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    ('code' in error
-      ? String((error as Error & { code?: string }).code).includes('FILE_TOO_LARGE')
-      : /file.*large|limit/i.test(error.message))
-  );
+  if (!(error instanceof Error)) return false;
+  const code = (error as Error & { code?: string }).code;
+  if (code && String(code).includes('FILE_TOO_LARGE')) return true;
+  return /file too large|files? exceed(?:s|ed)? (?:the )?limit/i.test(error.message);
 }

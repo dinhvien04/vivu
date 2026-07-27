@@ -53,11 +53,11 @@ export class AdminStatsService {
       recentReviewers,
       recentQuestioners,
       recentAnswerers,
-      leadsByStatus,
+      leadsByStatusRaw,
+      topLeadPlacesRaw,
+      topPlacesViewedRaw,
       newDataReports,
       resolvedDataReports7d,
-      topPlacesViewedRaw,
-      recentLeadPlacesRaw,
       recentSearchEvents,
       recentAiFeedback,
       missingContextEvents,
@@ -86,25 +86,28 @@ export class AdminStatsService {
         select: { userId: true },
         distinct: ['userId'],
       }),
-      this.prisma.lead.findMany({
-        select: { status: true, interestedPlaceSlug: true },
-        take: 10_000,
+      this.prisma.lead.groupBy({
+        by: ['status'],
+        _count: { _all: true },
+        orderBy: { status: 'asc' },
+      }),
+      this.prisma.lead.groupBy({
+        by: ['interestedPlaceSlug'],
+        where: { interestedPlaceSlug: { not: null } },
+        _count: { _all: true },
+        orderBy: { _count: { interestedPlaceSlug: 'desc' } },
+        take: 5,
+      }),
+      this.prisma.analyticsEvent.groupBy({
+        by: ['placeSlug'],
+        where: { type: 'place_view', placeSlug: { not: null } },
+        _count: { _all: true },
+        orderBy: { _count: { placeSlug: 'desc' } },
+        take: 5,
       }),
       this.prisma.dataReport.count({ where: { status: 'new' } }),
       this.prisma.dataReport.count({
         where: { status: 'resolved', updatedAt: { gte: since7d } },
-      }),
-      this.prisma.analyticsEvent.findMany({
-        where: { type: 'place_view', placeSlug: { not: null } },
-        orderBy: { createdAt: 'desc' },
-        take: 2_000,
-        select: { placeSlug: true },
-      }),
-      this.prisma.lead.findMany({
-        where: { interestedPlaceSlug: { not: null } },
-        orderBy: { createdAt: 'desc' },
-        take: 1_000,
-        select: { interestedPlaceSlug: true },
       }),
       this.prisma.analyticsEvent.findMany({
         where: { type: 'search_performed' },
@@ -134,7 +137,10 @@ export class AdminStatsService {
     for (const q of recentQuestioners) unique.add(q.userId);
     for (const a of recentAnswerers) unique.add(a.userId);
 
-    const leadStatusCounts = countLeadStatuses(leadsByStatus);
+    const leadStatusCounts = leadsByStatusRaw.map((row) => ({
+      status: row.status,
+      count: countAll(row._count),
+    }));
 
     return {
       totalPlaces,
@@ -151,54 +157,34 @@ export class AdminStatsService {
       aiFeedbackIssues: countFeedbackIssues(recentAiFeedback),
       missingContextEvents,
       leadsByStatus: leadStatusCounts,
-      topPlacesViewed: countPlaceViews(
-        topPlacesViewedRaw.filter((row): row is { placeSlug: string } => Boolean(row.placeSlug)),
-      ).slice(0, 5),
-      topLeadPlaces: countLeadPlaces(
-        recentLeadPlacesRaw.filter((row): row is { interestedPlaceSlug: string } =>
-          Boolean(row.interestedPlaceSlug),
-        ),
-      ).slice(0, 5),
+      topPlacesViewed: topPlacesViewedRaw
+        .filter((row) => Boolean(row.placeSlug))
+        .map((row) => ({
+          placeSlug: row.placeSlug as string,
+          count: countAll(row._count),
+        })),
+      topLeadPlaces: topLeadPlacesRaw
+        .filter((row) => Boolean(row.interestedPlaceSlug))
+        .map((row) => ({
+          placeSlug: row.interestedPlaceSlug as string,
+          count: countAll(row._count),
+        })),
       topSearchQueries: extractSearchQueries(recentSearchEvents),
       computedAt: new Date().toISOString(),
     };
   }
 }
 
-function countLeadStatuses(
-  rows: Array<{ status: string }>,
-): Array<{ status: string; count: number }> {
-  const counts = new Map<string, number>();
-  for (const row of rows) {
-    counts.set(row.status, (counts.get(row.status) ?? 0) + 1);
-  }
-  return [...counts.entries()]
-    .map(([status, count]) => ({ status, count }))
-    .sort((a, b) => b.count - a.count);
-}
-
-function countPlaceViews(
-  rows: Array<{ placeSlug: string }>,
-): Array<{ placeSlug: string; count: number }> {
-  const counts = new Map<string, number>();
-  for (const row of rows) {
-    counts.set(row.placeSlug, (counts.get(row.placeSlug) ?? 0) + 1);
-  }
-  return [...counts.entries()]
-    .map(([placeSlug, count]) => ({ placeSlug, count }))
-    .sort((a, b) => b.count - a.count);
-}
-
-function countLeadPlaces(
-  rows: Array<{ interestedPlaceSlug: string }>,
-): Array<{ placeSlug: string; count: number }> {
-  const counts = new Map<string, number>();
-  for (const row of rows) {
-    counts.set(row.interestedPlaceSlug, (counts.get(row.interestedPlaceSlug) ?? 0) + 1);
-  }
-  return [...counts.entries()]
-    .map(([placeSlug, count]) => ({ placeSlug, count }))
-    .sort((a, b) => b.count - a.count);
+function countAll(
+  value:
+    | true
+    | {
+        _all?: number;
+      }
+    | undefined,
+): number {
+  if (!value || value === true) return 0;
+  return value._all ?? 0;
 }
 
 function countFeedbackIssues(rows: Array<{ metadata: Prisma.JsonValue | null }>): number {

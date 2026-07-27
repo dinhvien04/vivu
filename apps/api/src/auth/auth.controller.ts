@@ -7,19 +7,27 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Redirect,
   Req,
+  ServiceUnavailableException,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { FastifyRequest } from 'fastify';
+import { isGoogleOAuthConfigured } from './google-oauth.config';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GoogleOAuthEnabledGuard } from './guards/google-oauth-enabled.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { OAuthStateService } from './oauth-state.service';
 import { TurnstileService } from '../common/turnstile.service';
 import {
   ChangePasswordDto,
   DeleteAccountDto,
+  ExchangeOAuthDto,
   ForgotPasswordDto,
   LoginDto,
   RefreshDto,
@@ -38,7 +46,81 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly turnstile: TurnstileService,
+    private readonly oauthState: OAuthStateService,
   ) {}
+
+  @Public()
+  @Get('google')
+  @Redirect('https://accounts.google.com', 302)
+  async googleAuth(@Req() req: FastifyRequest) {
+    const oauth = isGoogleOAuthConfigured();
+    if (!oauth) {
+      throw new ServiceUnavailableException(
+        'Google OAuth chưa được cấu hình trên server. Liên hệ quản trị viên.',
+      );
+    }
+
+    const { next, origin } = req.query as { next?: string; origin?: string };
+    const state = await this.oauthState.createState(next, origin);
+
+    const clientID = process.env.GOOGLE_CLIENT_ID;
+    const callbackURL = process.env.GOOGLE_CALLBACK_URL;
+
+    if (!clientID || !callbackURL) {
+      throw new ServiceUnavailableException(
+        'Google OAuth chưa được cấu hình trên server. Liên hệ quản trị viên.',
+      );
+    }
+
+    const googleUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `response_type=code` +
+      `&client_id=${encodeURIComponent(clientID)}` +
+      `&redirect_uri=${encodeURIComponent(callbackURL)}` +
+      `&scope=${encodeURIComponent('email profile')}` +
+      `&state=${encodeURIComponent(state)}`;
+
+    return { url: googleUrl };
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleOAuthEnabledGuard, GoogleAuthGuard)
+  @Redirect('http://localhost:3000', 302)
+  async googleAuthRedirect(@Req() req: any) {
+    const profile = req.user;
+    if (!profile?.email) {
+      throw new UnauthorizedException('Không thể xác thực tài khoản Google');
+    }
+
+    const verified = await this.oauthState.verifyAndConsumeState(req.query?.state);
+    const next = verified.next;
+    const finalOrigin = verified.origin;
+
+    const { tokens } = await this.auth.loginOrRegisterOAuth(
+      {
+        email: profile.email,
+        name: profile.name,
+        avatarUrl: profile.avatarUrl,
+      },
+      req,
+    );
+
+    const code = await this.auth.createOAuthExchangeCode(tokens);
+    const redirectUrl = `${finalOrigin}/api/auth/google/callback?code=${encodeURIComponent(
+      code,
+    )}&next=${encodeURIComponent(next)}`;
+
+    return { url: redirectUrl };
+  }
+
+  @Public()
+  @Post('oauth/exchange')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  exchangeOAuth(@Body() dto: ExchangeOAuthDto) {
+    return this.auth.exchangeOAuthCode(dto.code);
+  }
 
   @Public()
   @Post('register')
@@ -53,16 +135,16 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 900_000, limit: AUTH_RATE_LIMIT_PER_15_MIN } })
-  login(@Body() dto: LoginDto) {
-    return this.auth.login(dto);
+  login(@Body() dto: LoginDto, @Req() request: FastifyRequest) {
+    return this.auth.login(dto, request);
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 60_000, limit: 60 } })
-  refresh(@Body() dto: RefreshDto) {
-    return this.auth.refresh(dto.refreshToken);
+  refresh(@Body() dto: RefreshDto, @Req() request: FastifyRequest) {
+    return this.auth.refresh(dto.refreshToken, request);
   }
 
   @Public()

@@ -64,9 +64,7 @@ export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
     return (
       <div
         className={
-          variant === 'drawer'
-            ? 'flex flex-col gap-2'
-            : 'hidden items-center gap-2 sm:flex'
+          variant === 'drawer' ? 'flex flex-col gap-2' : 'hidden items-center gap-2 xl:flex'
         }
       >
         <Link
@@ -95,6 +93,7 @@ export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
   }
 
   const initial = user.name.trim().charAt(0).toUpperCase() || 'V';
+  const canAccessAdmin = user.role === 'admin' || user.role === 'editor';
 
   if (variant === 'drawer') {
     const itemClass =
@@ -129,7 +128,7 @@ export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
             <Icon name="settings" size={20} className="text-outline" />
             {t('accountSettings')}
           </Link>
-          {(user.role === 'admin' || user.role === 'editor') && (
+          {canAccessAdmin && (
             <Link href="/admin" className={itemClass}>
               <Icon name="admin_panel_settings" size={20} className="text-outline" />
               {t('accountAdmin')}
@@ -220,7 +219,7 @@ export function HeaderAccount({ variant = 'desktop' }: HeaderAccountProps) {
                 {t('accountSettings')}
               </Link>
             </li>
-            {(user.role === 'admin' || user.role === 'editor') && (
+            {canAccessAdmin && (
               <li>
                 <Link
                   href="/admin"

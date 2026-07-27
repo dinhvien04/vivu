@@ -64,8 +64,8 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-surface/90 shadow-sm backdrop-blur-md">
-        <nav className="mx-auto flex h-20 max-w-container-max items-center gap-4 px-margin-mobile py-unit md:px-margin-desktop">
-          <div className="flex min-w-0 flex-1 items-center gap-6 xl:gap-10">
+        <nav className="mx-auto flex h-20 max-w-container-max items-center gap-3 px-margin-mobile py-unit md:px-margin-desktop">
+          <div className="flex min-w-0 flex-1 items-center gap-4 xl:gap-6">
             <Link href="/" className="flex shrink-0 items-center" aria-label="Vivu">
               <Image
                 src="/vivu-logo.png"
@@ -76,7 +76,7 @@ export function SiteHeader() {
                 className="h-10 w-auto object-contain"
               />
             </Link>
-            <ul className="hidden min-w-0 flex-1 items-center gap-3 text-body-sm lg:flex xl:gap-5 xl:text-body-md">
+            <ul className="hidden min-w-0 flex-1 items-center gap-3 text-body-sm xl:flex 2xl:gap-4">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
                 const isConsulting = item.labelKey === 'consulting';
@@ -102,9 +102,9 @@ export function SiteHeader() {
             </ul>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-3 xl:gap-4">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2 xl:gap-3">
             {/* Desktop search input */}
-            <div className="hidden w-56 xl:block 2xl:w-64">
+            <div className="hidden w-56 2xl:block">
               <SearchHero compact placeholder={t('common.searchPlaceholder')} />
             </div>
 
@@ -113,7 +113,7 @@ export function SiteHeader() {
               type="button"
               aria-label={t('common.search')}
               onClick={() => setSearchOpen((s) => !s)}
-              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container xl:hidden"
+              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container 2xl:hidden"
             >
               <Icon name="search" />
             </button>
@@ -132,7 +132,7 @@ export function SiteHeader() {
               aria-expanded={drawerOpen}
               aria-controls="mobile-drawer"
               onClick={() => setDrawerOpen(true)}
-              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container lg:hidden"
+              className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container xl:hidden"
             >
               <Icon name="menu" />
             </button>
@@ -141,7 +141,7 @@ export function SiteHeader() {
 
         {/* Mobile search row — slides down when active */}
         {searchOpen && (
-          <div className="border-t border-outline-variant/30 px-margin-mobile py-3 xl:hidden">
+          <div className="border-t border-outline-variant/30 px-margin-mobile py-3 2xl:hidden">
             <SearchHero compact placeholder={t('common.searchPlaceholder')} />
           </div>
         )}
@@ -150,7 +150,7 @@ export function SiteHeader() {
       {/* Mobile drawer overlay */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm xl:hidden"
           onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
@@ -159,7 +159,7 @@ export function SiteHeader() {
       {/* Mobile drawer panel */}
       <aside
         id="mobile-drawer"
-        className={`fixed right-0 top-0 z-[70] h-full w-72 max-w-[85%] transform bg-surface shadow-2xl transition-transform duration-300 ease-out lg:hidden ${
+        className={`fixed right-0 top-0 z-[70] h-full w-72 max-w-[85%] transform bg-surface shadow-2xl transition-transform duration-300 ease-out xl:hidden ${
           drawerOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-hidden={!drawerOpen}

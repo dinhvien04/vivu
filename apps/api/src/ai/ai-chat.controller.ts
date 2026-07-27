@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   ServiceUnavailableException,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +15,7 @@ import type { FastifyRequest } from 'fastify';
 import { GeminiService } from '../gemini/gemini.service';
 import { QdrantRepository } from '../qdrant/qdrant.repository';
 import { QdrantService } from '../qdrant/qdrant.service';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { AiChatService } from './ai-chat.service';
 import { AiChatDto, AiDebugImageUrlDto, AiDebugTextDto } from './dto/ai-chat.dto';
 
@@ -40,6 +42,7 @@ export class AiChatController {
   }
 
   @Post('chat')
+  @UseGuards(OptionalJwtAuthGuard)
   @Throttle({ default: { ttl: 60_000, limit: AI_CHAT_RATE_LIMIT_PER_MINUTE } })
   @ApiConsumes('application/json', 'multipart/form-data')
   @ApiOperation({ summary: 'Chat với trợ lý AI du lịch bằng text, ảnh hoặc cả hai' })

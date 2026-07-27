@@ -1,16 +1,23 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import type { FastifyRequest } from 'fastify';
-import { GeminiService } from '../gemini/gemini.service';
+import { AiTextGenerationService } from '../ai-providers/ai-text-generation.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import type { GenerateTripPlanDto } from './dto/generate-trip-plan.dto';
-import { parseTripPlanOutput } from './trip-plan-json';
+import { parseTripPlanOutput, TRIP_PLAN_RESPONSE_JSON_SCHEMA } from './trip-plan-json';
+import { PUBLIC_PROVINCE } from '../common/public-scope';
 import { TripPlannerQuotaService } from './trip-planner-quota.service';
-import type { TripPlanOutput } from './trip-plan.types';
-
-const PUBLIC_PROVINCE = 'Gia Lai';
+import type { TripPlanDay, TripPlanItem, TripPlanOutput, TripTimeOfDay } from './trip-plan.types';
 
 const AREA_KEYWORDS: Record<string, string[]> = {
   pleiku: ['pleiku', 'biển hồ', 'bien ho', 'nhà lao pleiku'],
@@ -31,11 +38,22 @@ type CandidatePlace = Prisma.PlaceGetPayload<{
 
 @Injectable()
 export class TripPlansService {
+  private readonly logger = new Logger(TripPlansService.name);
+  private readonly maxCandidates: number;
+  private readonly maxOutputTokens: number;
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly gemini: GeminiService,
+    private readonly aiText: AiTextGenerationService,
     private readonly quota: TripPlannerQuotaService,
-  ) {}
+    config: ConfigService,
+  ) {
+    this.maxCandidates = positiveInteger(config.get<string>('TRIP_PLANNER_MAX_CANDIDATES'), 40);
+    this.maxOutputTokens = positiveInteger(
+      config.get<string>('TRIP_PLANNER_MAX_OUTPUT_TOKENS'),
+      3200,
+    );
+  }
 
   async generate(
     dto: GenerateTripPlanDto,
@@ -59,12 +77,30 @@ export class TripPlansService {
 
     const allowedSlugs = new Set(candidates.map((place) => place.slug));
     const prompt = buildTripPlannerPrompt(dto, candidates);
-    const raw = await this.gemini.generateText(prompt, {
-      temperature: 0.15,
-      maxOutputTokens: tripPlannerMaxOutputTokens(),
-      responseMimeType: 'application/json',
-    });
-    const output = parseTripPlanOutput(raw, allowedSlugs);
+    let output: TripPlanOutput;
+    try {
+      output = await this.aiText.generateTripPlan(
+        prompt,
+        {
+          temperature: 0.15,
+          maxOutputTokens: this.maxOutputTokens,
+          responseMimeType: 'application/json',
+          responseJsonSchema: TRIP_PLAN_RESPONSE_JSON_SCHEMA,
+        },
+        (raw) => parseTripPlanOutput(raw, allowedSlugs),
+      );
+    } catch (error) {
+      if (!isRecoverableAiGenerationError(error)) throw error;
+      this.logger.warn(
+        JSON.stringify({
+          event: 'trip_planner_local_fallback',
+          status: error.getStatus(),
+          candidateCount: candidates.length,
+          requestedDays: dto.days,
+        }),
+      );
+      output = buildLocalFallbackPlan(dto, candidates);
+    }
     const placeIds = collectPlaceIds(output, candidates);
 
     const plan = await this.prisma.tripPlan.create({
@@ -91,22 +127,28 @@ export class TripPlansService {
     };
   }
 
-  async listMine(userId: string) {
-    const rows = await this.prisma.tripPlan.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        title: true,
-        input: true,
-        output: true,
-        shareId: true,
-        isPublic: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-    return { data: rows };
+  async listMine(userId: string, page = 1, pageSize = 20) {
+    const skip = (page - 1) * pageSize;
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.tripPlan.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+        select: {
+          id: true,
+          title: true,
+          input: true,
+          output: true,
+          shareId: true,
+          isPublic: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.tripPlan.count({ where: { userId } }),
+    ]);
+    return { data: rows, meta: { page, pageSize, total } };
   }
 
   async getMine(userId: string, id: string) {
@@ -244,15 +286,10 @@ export class TripPlansService {
       ];
     }
 
-    const maxCandidates = (() => {
-      const parsed = Number(process.env.TRIP_PLANNER_MAX_CANDIDATES);
-      return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 40;
-    })();
-
     return this.prisma.place.findMany({
       where,
       orderBy: [{ isAiReady: 'desc' }, { updatedAt: 'desc' }],
-      take: maxCandidates,
+      take: this.maxCandidates,
       include: {
         region: true,
         categories: { include: { category: true } },
@@ -261,13 +298,22 @@ export class TripPlansService {
   }
 
   private async createUniqueShareId(): Promise<string> {
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const shareId = randomBytes(12).toString('base64url');
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const shareId =
+        attempt < 5 ? randomBytes(12).toString('base64url') : randomBytes(18).toString('base64url');
       const existing = await this.prisma.tripPlan.findUnique({ where: { shareId } });
       if (!existing) return shareId;
     }
-    return `${randomBytes(18).toString('base64url')}`;
+    throw new HttpException(
+      'Không thể tạo mã chia sẻ lịch trình. Vui lòng thử lại.',
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
   }
+}
+
+function positiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 }
 
 function buildTripPlannerPrompt(dto: GenerateTripPlanDto, places: CandidatePlace[]): string {
@@ -298,20 +344,98 @@ function buildTripPlannerPrompt(dto: GenerateTripPlanDto, places: CandidatePlace
   ].join('\n');
 }
 
-function tripPlannerMaxOutputTokens(): number {
-  const parsed = Number(process.env.TRIP_PLANNER_MAX_OUTPUT_TOKENS);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 3200;
+function isRecoverableAiGenerationError(error: unknown): error is HttpException {
+  if (!(error instanceof HttpException)) return false;
+  return [
+    HttpStatus.BAD_GATEWAY,
+    HttpStatus.SERVICE_UNAVAILABLE,
+    HttpStatus.TOO_MANY_REQUESTS,
+  ].includes(error.getStatus());
+}
+
+function buildLocalFallbackPlan(
+  dto: GenerateTripPlanDto,
+  places: CandidatePlace[],
+): TripPlanOutput {
+  const english = dto.locale === 'en';
+  const itemsPerDay = Math.max(1, Math.min(3, Math.floor(places.length / dto.days) || 1));
+  const timeSlots: TripTimeOfDay[] = ['morning', 'afternoon', 'evening'];
+  const interestLabel = dto.interests.filter(Boolean).slice(0, 3).join(', ');
+
+  const days: TripPlanDay[] = Array.from({ length: dto.days }, (_, dayIndex) => {
+    const items: TripPlanItem[] = Array.from({ length: itemsPerDay }, (_, itemIndex) => {
+      const place = places[(dayIndex * itemsPerDay + itemIndex) % places.length]!;
+      const placeName =
+        (english ? (place.titleEn ?? place.titleVi) : (place.titleVi ?? place.titleEn)) ??
+        place.slug;
+      const summary = english
+        ? (place.summaryEn ?? place.summaryVi)
+        : (place.summaryVi ?? place.summaryEn);
+
+      return {
+        timeOfDay: timeSlots[itemIndex] ?? 'morning',
+        placeName,
+        placeSlug: place.slug,
+        reason:
+          summary ??
+          (english
+            ? 'Selected from the verified destinations currently available in Vivu.'
+            : 'Được chọn từ dữ liệu địa danh hiện có và đã được kiểm duyệt trên Vivu.'),
+        suggestedDuration: english ? 'About 1-2 hours' : 'Khoảng 1-2 giờ',
+        travelNote: place.address
+          ? english
+            ? `Reference address: ${place.address}`
+            : `Địa chỉ tham khảo: ${place.address}`
+          : english
+            ? 'Check the route and weather before departure.'
+            : 'Kiểm tra cung đường và thời tiết trước khi khởi hành.',
+        tips: [],
+      };
+    });
+
+    return {
+      day: dayIndex + 1,
+      theme: english
+        ? `Explore Gia Lai${interestLabel ? `: ${interestLabel}` : ''}`
+        : `Khám phá Gia Lai${interestLabel ? `: ${interestLabel}` : ''}`,
+      items,
+      foodSuggestions: [],
+      notes: [
+        english
+          ? 'The order can be adjusted based on your starting point and current weather.'
+          : 'Có thể điều chỉnh thứ tự theo điểm xuất phát và thời tiết thực tế.',
+      ],
+    };
+  });
+
+  return {
+    title: english
+      ? `${dto.days}-day Vivu itinerary in Gia Lai`
+      : `Lịch trình ${dto.days} ngày khám phá Gia Lai cùng Vivu`,
+    summary: english
+      ? 'A reliable fallback itinerary built from destinations available in Vivu.'
+      : 'Lịch trình dự phòng được xây dựng từ dữ liệu địa danh hiện có trên Vivu.',
+    days,
+    generalTips: [
+      english
+        ? 'Check opening hours, weather, and travel conditions before departure.'
+        : 'Kiểm tra giờ mở cửa, thời tiết và điều kiện di chuyển trước khi khởi hành.',
+    ],
+    missingDataNote: english
+      ? 'The AI provider was temporarily unavailable, so Vivu used verified destination data.'
+      : 'Nhà cung cấp AI tạm thời không khả dụng nên Vivu đã dùng dữ liệu địa danh được kiểm duyệt.',
+  };
 }
 
 function collectPlaceIds(output: TripPlanOutput, places: CandidatePlace[]): string[] {
   const idBySlug = new Map(places.map((place) => [place.slug, place.id]));
-  const ids: string[] = [];
+  const ids = new Set<string>();
   for (const day of output.days) {
     for (const item of day.items) {
       if (!item.placeSlug) continue;
       const id = idBySlug.get(item.placeSlug);
-      if (id && !ids.includes(id)) ids.push(id);
+      if (id) ids.add(id);
     }
   }
-  return ids;
+  return [...ids];
 }

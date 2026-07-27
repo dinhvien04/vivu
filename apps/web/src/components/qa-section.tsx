@@ -110,7 +110,9 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
             className="w-full resize-y rounded-xl border border-outline-variant bg-surface px-3 py-2.5 text-body-md focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-label-caps text-on-surface-variant font-medium">{content.trim().length}/1000</p>
+            <p className="text-label-caps text-on-surface-variant font-medium">
+              {content.trim().length}/1000
+            </p>
             <button
               type="submit"
               disabled={submitting}
@@ -147,7 +149,9 @@ export function QaSection({ placeSlug, initialQuestions, initialTotal }: Props) 
                   <span>•</span>
                   <span>{formatRelative(q.createdAt)}</span>
                 </div>
-                <p className="font-sans text-body-md text-on-surface line-clamp-2 leading-relaxed">{q.content}</p>
+                <p className="font-sans text-body-md text-on-surface line-clamp-2 leading-relaxed">
+                  {q.content}
+                </p>
                 <p className="mt-2 inline-flex items-center gap-1 text-label-md text-secondary font-bold">
                   <Icon name="comment" className="!text-base" />
                   {t('answersCount', { count: q.answersCount })}
